@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MAC 109 · Build Your First Programs! — Weeks 1–2 Practical</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:ital,wght@0,400;0,600;0,800;1,400&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FFF9F2; --ink:#2d2436; --soft:#6b5f7a;
+    --purple:#7c3aed; --purple-d:#5b21b6; --coral:#ff6b6b; --sun:#ffb703;
+    --teal:#06b6a4; --sky:#3b82f6; --pink:#ec4899; --lime:#84cc16;
+    --card:#ffffff; --line:#efe4d8;
+    --disp:'Baloo 2','Nunito',system-ui,sans-serif;
+    --body:'Nunito',system-ui,sans-serif;
+    --mono:'JetBrains Mono','SF Mono','Menlo',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:18px;line-height:1.65}
+  ::selection{background:#ffe29a}
+
+  /* scroll progress */
+  #scrollbar{position:fixed;top:0;left:0;height:6px;width:0;z-index:60;background:linear-gradient(90deg,var(--purple),var(--pink),var(--sun));border-radius:0 4px 4px 0;transition:width .1s}
+
+  /* ============ HERO ============ */
+  #hero{background:linear-gradient(135deg,#7c3aed 0%,#a855f7 45%,#ec4899 100%);color:#fff;padding:64px 24px 84px;position:relative;overflow:hidden}
+  #hero .float{position:absolute;font-family:var(--mono);font-weight:700;opacity:.16;user-select:none;animation:bob 6s ease-in-out infinite}
+  @keyframes bob{0%,100%{transform:translateY(0) rotate(var(--r,0deg))}50%{transform:translateY(-16px) rotate(var(--r,0deg))}}
+  @media (prefers-reduced-motion:reduce){.float{animation:none}}
+  #hero .in{max-width:1100px;margin:0 auto;position:relative}
+  #hero .badge{display:inline-block;background:rgba(255,255,255,.2);border:2px solid rgba(255,255,255,.5);border-radius:999px;padding:6px 18px;font-weight:800;font-size:15px;letter-spacing:.04em;margin-bottom:18px}
+  #hero h1{font-family:var(--disp);font-weight:800;font-size:clamp(38px,6vw,64px);line-height:1.08;margin-bottom:14px;text-shadow:0 3px 0 rgba(0,0,0,.12)}
+  #hero p.tag{font-size:clamp(18px,2.4vw,23px);max-width:36em;opacity:.95}
+  #hero .meta{display:flex;gap:14px;flex-wrap:wrap;margin-top:26px}
+  #hero .chip{background:#fff;color:var(--purple-d);border-radius:14px;padding:10px 18px;font-weight:800;font-size:15.5px;box-shadow:0 6px 0 rgba(0,0,0,.15)}
+  #hero .chip span{font-size:20px;margin-right:6px}
+
+  /* ============ LAYOUT ============ */
+  #wrap{max-width:1180px;margin:-42px auto 0;display:grid;grid-template-columns:270px 1fr;gap:28px;padding:0 24px 100px;position:relative}
+  @media(max-width:980px){#wrap{grid-template-columns:1fr}#quest{position:static;max-height:none}}
+
+  /* quest map */
+  #quest{position:sticky;top:22px;align-self:start;max-height:calc(100vh - 44px);overflow:auto;background:var(--card);border:3px solid var(--ink);border-radius:22px;padding:18px;box-shadow:8px 8px 0 rgba(45,36,54,.15)}
+  #quest h3{font-family:var(--disp);font-size:20px;margin-bottom:4px}
+  #quest .sub{font-size:13.5px;color:var(--soft);margin-bottom:12px}
+  #questBar{height:14px;background:#f1e8dc;border:2px solid var(--ink);border-radius:99px;overflow:hidden;margin-bottom:6px}
+  #questFill{height:100%;width:0;background:linear-gradient(90deg,var(--teal),var(--lime));transition:width .4s}
+  #questPct{font-weight:800;font-size:13px;color:var(--teal);margin-bottom:12px;display:block}
+  .qitem{display:flex;align-items:center;gap:10px;padding:7px 6px;border-radius:12px;text-decoration:none;color:var(--ink);font-weight:600;font-size:14.5px}
+  .qitem:hover{background:#f6efe6}
+  .qitem .dot{flex:0 0 auto;width:26px;height:26px;border-radius:50%;border:2.5px solid var(--ink);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;background:#fff}
+  .qitem.done .dot{background:var(--lime);border-color:var(--lime)}
+  .qitem.done{color:#5c8a12;text-decoration:line-through;text-decoration-thickness:2px}
+
+  main{min-width:0}
+
+  /* ============ LEVEL SECTIONS ============ */
+  section.level{background:var(--card);border:3px solid var(--ink);border-radius:26px;padding:30px 32px;margin-bottom:34px;box-shadow:10px 10px 0 var(--shadow,rgba(124,58,237,.18));scroll-margin-top:24px}
+  @media(max-width:640px){section.level{padding:22px 18px}}
+  .lvhead{display:flex;align-items:center;gap:16px;margin-bottom:14px;flex-wrap:wrap}
+  .lvnum{flex:0 0 auto;width:58px;height:58px;border-radius:18px;background:var(--c,var(--purple));color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--disp);font-weight:800;font-size:24px;box-shadow:4px 4px 0 rgba(45,36,54,.25);transform:rotate(-4deg)}
+  .lvhead h2{font-family:var(--disp);font-weight:800;font-size:clamp(24px,3.4vw,32px);line-height:1.1}
+  .lvhead .emoji{font-size:32px}
+  .lead{color:var(--soft);font-size:18px;max-width:60em;margin-bottom:14px}
+  .lead b{color:var(--ink)}
+
+  .bubble{border-radius:18px;padding:16px 20px;margin:16px 0;font-size:16.5px;border:2.5px solid}
+  .bubble.tip{background:#fff7e0;border-color:var(--sun);color:#7a5b00}
+  .bubble.win{background:#e9fbf0;border-color:var(--teal);color:#0c6b5d;font-weight:600}
+  .bubble.win b{font-size:18px}
+  .bubble b{color:inherit}
+
+  ol.steps{margin:10px 0 10px 6px;counter-reset:st;list-style:none}
+  ol.steps li{position:relative;padding:8px 0 8px 44px;counter-increment:st;font-size:17.5px}
+  ol.steps li::before{content:counter(st);position:absolute;left:0;top:6px;width:30px;height:30px;border-radius:50%;background:var(--c,var(--purple));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px}
+  ul.dots{margin:10px 0 10px 24px}
+  ul.dots li{margin-bottom:8px;font-size:17px}
+
+  .kbd{font-family:var(--mono);background:#2d2436;color:#fff;border-radius:8px;padding:3px 10px;font-size:14.5px;white-space:nowrap;box-shadow:0 3px 0 #000}
+  code.inline{font-family:var(--mono);background:#f3ebff;color:var(--purple-d);padding:2px 8px;border-radius:8px;font-size:.88em;font-weight:700}
+
+  /* mark-complete button */
+  .donebtn{display:inline-flex;align-items:center;gap:8px;background:var(--lime);color:#2c4404;border:3px solid var(--ink);border-radius:16px;padding:10px 22px;font-family:var(--disp);font-weight:800;font-size:17px;cursor:pointer;box-shadow:4px 4px 0 rgba(45,36,54,.25);margin-top:14px}
+  .donebtn:hover{transform:translate(-1px,-1px);box-shadow:5px 5px 0 rgba(45,36,54,.25)}
+  .donebtn.on{background:#d9f99d}
+  .donebtn.on::after{content:" ✓ done!"}
+
+  /* ============ FIGURES / SCREENSHOTS ============ */
+  figure{margin:18px 0}
+  figcaption{font-size:14.5px;color:var(--soft);margin-top:9px}
+  figcaption b{color:var(--purple)}
+  .shot{border:3px solid var(--ink);border-radius:16px;overflow:hidden;box-shadow:7px 7px 0 rgba(45,36,54,.2)}
+  .mac .tbar{background:linear-gradient(#f5f2ee,#e8e3dd);padding:9px 13px;display:flex;align-items:center;gap:7px;border-bottom:2px solid #d5cec6}
+  .mac .tbar i{width:13px;height:13px;border-radius:50%}
+  .mac .tbar .r{background:#ff5f57}.mac .tbar .y{background:#febc2e}.mac .tbar .g{background:#28c840}
+  .mac .tbar span{margin:0 auto;color:#7a736b;font-size:13px;font-weight:600}
+  .dark{background:#1e1e1e;font-family:var(--mono);font-size:14px;line-height:1.75;color:#d4d4d4}
+  .darkpad{padding:14px 18px;overflow-x:auto}
+  .k{color:#569cd6}.t{color:#4ec9b0}.s{color:#ce9178}.c{color:#6a9955}.m{color:#dcdcaa}.p{color:#d4d4d4}
+  .cl{display:flex;white-space:pre}
+  .cl .ln{width:34px;color:#5a5a5a;text-align:right;padding-right:16px;flex:0 0 auto;user-select:none}
+  .ok-out{color:#4ec9b0}
+  .usr{color:#ffd866;font-weight:700}
+  .grn{color:#28c840}
+
+  /* vscode mock */
+  .vsc .vmain{display:grid;grid-template-columns:46px 210px 1fr;min-height:230px;background:#1e1e1e}
+  @media(max-width:700px){.vsc .vmain{grid-template-columns:46px 1fr}.vsc .explorer{display:none}}
+  .vsc .actbar{background:#333;display:flex;flex-direction:column;align-items:center;padding-top:12px;gap:18px}
+  .vsc .actbar .ico{width:24px;height:24px;border-radius:5px;background:#6f6f6f;opacity:.8}
+  .vsc .actbar .ico.on{background:#fff;opacity:1;box-shadow:-4px 0 0 -1px #7c3aed}
+  .vsc .explorer{background:#252526;border-right:1px solid #111;padding:12px 0;font-size:13px;color:#bbb;font-family:var(--body)}
+  .vsc .explorer .hd{font-size:11px;letter-spacing:.1em;color:#8a8a8a;padding:0 14px 8px;font-weight:800}
+  .vsc .explorer .it{padding:4px 14px;white-space:nowrap}
+  .vsc .explorer .it.sel{background:#37373d;color:#fff}
+  .vsc .explorer .it.dim{color:#7c7c7c}
+  .vsc .tabrow{background:#252526;display:flex;border-bottom:1px solid #111}
+  .vsc .tab{background:#1e1e1e;color:#fff;font-size:13px;padding:8px 18px;border-top:2px solid #7c3aed;font-family:var(--body)}
+  .vsc .sbar{background:#7c3aed;color:#fff;font-size:12px;padding:4px 14px;display:flex;gap:16px;font-family:var(--body)}
+  .vsc .sbar .grow{flex:1}
+  .vsc .runrow{background:#252526;display:flex;justify-content:flex-end;align-items:center;gap:10px;padding:6px 14px;border-bottom:1px solid #111;color:#ccc;font-size:13px;font-family:var(--body)}
+  .vsc .runbtnmock{background:#2ea043;color:#fff;border-radius:6px;padding:3px 12px;font-weight:800}
+  .vsc .panelhd{background:#1b1b1b;color:#9a9a9a;font-size:11.5px;letter-spacing:.08em;padding:7px 16px;font-family:var(--body);border-top:1px solid #111}
+  .vsc .panelhd b{color:#fff;border-bottom:2px solid #7c3aed;padding-bottom:5px;margin-right:16px}
+
+  /* command palette mock */
+  .palette{background:#252526;padding:26px 20px 34px;display:flex;justify-content:center}
+  .palbox{width:min(560px,100%);background:#303031;border:1px solid #4a4a4a;border-radius:8px;box-shadow:0 14px 40px rgba(0,0,0,.5);overflow:hidden;font-family:var(--body)}
+  .palbox .pin{background:#3c3c3c;color:#eee;padding:9px 13px;font-size:14px;font-family:var(--mono)}
+  .palbox .prow{padding:8px 13px;color:#ccc;font-size:13.5px;display:flex;justify-content:space-between}
+  .palbox .prow.sel{background:#04395e;color:#fff}
+  .palbox .prow small{color:#8a8a8a}
+
+  /* code copy blocks */
+  .copyblock{position:relative;background:#1e1e1e;border:3px solid var(--ink);border-radius:16px;margin:14px 0;box-shadow:7px 7px 0 rgba(45,36,54,.2)}
+  .copyblock .cbbar{background:#2d2d30;color:#bbb;font-size:13px;padding:8px 14px;border-radius:13px 13px 0 0;font-weight:700;font-family:var(--body)}
+  .copyblock pre{padding:14px 52px 16px 16px;overflow-x:auto;color:#e8e8e8;line-height:1.7;font-family:var(--mono);font-size:14.5px}
+  .copybtn{position:absolute;top:44px;right:12px;background:var(--sun);color:#5c4300;border:2.5px solid var(--ink);border-radius:10px;padding:6px 14px;font-size:13px;font-weight:800;cursor:pointer;font-family:var(--body)}
+  .copybtn:hover{transform:translateY(-1px)}
+  .copybtn.ok{background:var(--lime);color:#2c4404}
+
+  /* why accordions */
+  details.why{background:#f6f0ff;border:2.5px solid #d9c6ff;border-radius:16px;margin:10px 0;overflow:hidden}
+  details.why summary{cursor:pointer;padding:13px 18px;color:var(--purple-d);font-weight:800;font-size:16.5px;list-style:none;font-family:var(--disp)}
+  details.why summary::before{content:"🤔 "}
+  details.why[open] summary::before{content:"💡 "}
+  details.why .body{padding:0 20px 14px;font-size:16.5px}
+  details.why .body p{margin-bottom:10px}
+
+  /* celebration */
+  #party{position:fixed;inset:0;pointer-events:none;z-index:100;overflow:hidden}
+  .confetto{position:absolute;top:-30px;font-size:26px;animation:fall linear forwards}
+  @keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+  #trophy{position:fixed;left:50%;top:38%;transform:translate(-50%,-50%) scale(.6);background:#fff;border:4px solid var(--ink);border-radius:26px;padding:30px 40px;text-align:center;z-index:101;box-shadow:12px 12px 0 rgba(45,36,54,.25);display:none}
+  #trophy.show{display:block;animation:pop .45s cubic-bezier(.2,1.6,.4,1) forwards}
+  @keyframes pop{to{transform:translate(-50%,-50%) scale(1)}}
+  #trophy .big{font-size:64px}
+  #trophy h3{font-family:var(--disp);font-size:28px;margin:6px 0}
+  #trophy p{color:var(--soft);font-size:16px}
+  #trophy button{margin-top:14px;background:var(--purple);color:#fff;border:3px solid var(--ink);border-radius:14px;padding:9px 24px;font-family:var(--disp);font-weight:800;font-size:16px;cursor:pointer}
+
+  footer{max-width:1180px;margin:0 auto;padding:0 24px 60px;color:var(--soft);font-size:15px}
+
+  @media print{
+    #scrollbar,#quest,.copybtn,.donebtn,#party,#trophy{display:none!important}
+    body{background:#fff}
+    #hero{background:#7c3aed!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    #wrap{grid-template-columns:1fr;margin-top:0}
+    section.level{box-shadow:none;break-inside:avoid-page}
+    .shot,.copyblock{box-shadow:none}
+    details.why{border-color:#bbb}
+  }
+</style>
+</head>
+<body>
+<div id="scrollbar"></div>
+<div id="party"></div>
+<div id="trophy"><div class="big">🏆</div><h3>YOU DID IT!</h3><p>All 10 levels complete — two real programs,<br>built and published. Welcome to programming!</p><button onclick="document.getElementById('trophy').classList.remove('show')">Let's go! 🚀</button></div>
+
+<!-- ================= HERO ================= -->
+<header id="hero">
+  <span class="float" style="left:6%;top:18%;font-size:44px;--r:-12deg">{ }</span>
+  <span class="float" style="right:10%;top:12%;font-size:38px;--r:9deg;animation-delay:1s">C#</span>
+  <span class="float" style="right:22%;bottom:14%;font-size:52px;--r:-7deg;animation-delay:2s">;</span>
+  <span class="float" style="left:20%;bottom:10%;font-size:34px;--r:14deg;animation-delay:.5s">▶</span>
+  <span class="float" style="left:45%;top:6%;font-size:30px;--r:-5deg;animation-delay:1.5s">//</span>
+  <div class="in">
+    <span class="badge">MAC 109 · WEEKS 1–2 PRACTICAL · MAC + VS CODE</span>
+    <h1>Build your first two<br>real programs today 🚀</h1>
+    <p class="tag">Ten small levels. Zero scary terminal commands — everything happens with clicks inside <b>VS Code</b>. By the end, your Mac runs programs <i>you</i> wrote, published on your own GitHub.</p>
+    <div class="meta">
+      <span class="chip"><span>🎯</span>Builds both Lab 1 deliverables</span>
+      <span class="chip"><span>⏱️</span>~60–90 minutes</span>
+      <span class="chip"><span>🖱️</span>Click-only workflow</span>
+      <span class="chip"><span>📅</span>Lab 1 due Fri, Oct 9</span>
+    </div>
+  </div>
+</header>
+
+<div id="wrap">
+<!-- ================= QUEST MAP ================= -->
+<nav id="quest">
+  <h3>🗺️ Quest map</h3>
+  <p class="sub">Tick off levels as you go — finish all 10 for a surprise.</p>
+  <div id="questBar"><div id="questFill"></div></div>
+  <span id="questPct">0% complete</span>
+  <a class="qitem" href="#L1" data-q="L1"><span class="dot">1</span>Install the .NET SDK</a>
+  <a class="qitem" href="#L2" data-q="L2"><span class="dot">2</span>Give VS Code its C# brain</a>
+  <a class="qitem" href="#L3" data-q="L3"><span class="dot">3</span>Create Lab01 — no typing!</a>
+  <a class="qitem" href="#L4" data-q="L4"><span class="dot">4</span>Meet your project</a>
+  <a class="qitem" href="#L5" data-q="L5"><span class="dot">5</span>Press play ▶</a>
+  <a class="qitem" href="#L6" data-q="L6"><span class="dot">6</span>Write the real program</a>
+  <a class="qitem" href="#L7" data-q="L7"><span class="dot">7</span>Talk to your program</a>
+  <a class="qitem" href="#L8" data-q="L8"><span class="dot">8</span>Build the calculator</a>
+  <a class="qitem" href="#L9" data-q="L9"><span class="dot">9</span>Try to break it 😈</a>
+  <a class="qitem" href="#L10" data-q="L10"><span class="dot">10</span>Publish to GitHub</a>
+</nav>
+
+<main>
+
+<!-- ============ LEVEL 1 ============ -->
+<section class="level" id="L1" style="--c:#7c3aed;--shadow:rgba(124,58,237,.18)">
+  <div class="lvhead"><div class="lvnum">1</div><h2>Install the .NET SDK</h2><span class="emoji">🧰</span></div>
+  <p class="lead">The <b>SDK</b> is the engine that turns your C# into a running program. VS Code is the steering wheel — this is the motor. One-time install, normal Mac style: download, double-click, done.</p>
+  <ol class="steps">
+    <li>In Safari or Chrome, go to <code class="inline">dotnet.microsoft.com/download</code>.</li>
+    <li>Click the big <b>Download .NET SDK</b> button. Choose <b>Arm64</b> (that's for Apple Silicon — any M1, M2, M3, M4 Mac). Only very old Intel Macs need x64.</li>
+    <li>Open the downloaded <code class="inline">.pkg</code> and click Continue until it says installed. All defaults are perfect.</li>
+  </ol>
+  <details class="why"><summary>Why do I need this if I already have VS Code?</summary><div class="body">
+    <p>Kitchen analogy: <b>VS Code is the countertop</b> — a lovely place to work — but <b>the SDK is the oven</b> 🔥. Without it, nothing cooks. The SDK contains the C# <b>compiler</b> (the grammar-checker-translator from the Week 1 deck) and the <b>runtime</b> that executes your program. VS Code just presses its buttons for you.</p>
+  </div></details>
+  <button class="donebtn" data-lv="L1">Mark level complete</button>
+</section>
+
+<!-- ============ LEVEL 2 ============ -->
+<section class="level" id="L2" style="--c:#3b82f6;--shadow:rgba(59,130,246,.18)">
+  <div class="lvhead"><div class="lvnum">2</div><h2>Give VS Code its C# brain</h2><span class="emoji">🧠</span></div>
+  <p class="lead">Fresh VS Code doesn't speak C#. The free <b>C# Dev Kit</b> extension (by Microsoft) teaches it everything: rainbow syntax colors, autocomplete, error squiggles, a Solution Explorer, and — most importantly for us — the <b>▶ Run button</b>.</p>
+  <ol class="steps">
+    <li>Open VS Code. Click the <b>Extensions</b> icon in the left bar (four squares, one flying away) — or press <span class="kbd">⇧ ⌘ X</span>.</li>
+    <li>In the search box, type <b>C# Dev Kit</b>.</li>
+    <li>Click <b>Install</b> on the top result, published by <b>Microsoft</b>. It automatically brings its friend, the base "C#" extension.</li>
+    <li>When it finishes, you'll see a new <b>Solution Explorer</b> icon appear — that's your sign it worked.</li>
+  </ol>
+  <figure><div class="shot mac">
+    <div class="tbar"><i class="r"></i><i class="y"></i><i class="g"></i><span>Visual Studio Code — Extensions</span></div>
+    <div style="background:#252526;font-family:var(--body)">
+      <div style="background:#3c3c3c;color:#ddd;font-size:13.5px;padding:8px 12px">🔍 c# dev kit</div>
+      <div style="display:flex;gap:12px;align-items:center;padding:12px 16px;border-bottom:1px solid #1b1b1b">
+        <div style="width:46px;height:46px;border-radius:8px;background:linear-gradient(135deg,#68217a,#a855f7);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-family:var(--mono)">C#</div>
+        <div style="flex:1"><b style="color:#fff;font-size:15px">C# Dev Kit</b><p style="color:#9d9d9d;font-size:12.5px">Official C# extension from Microsoft · ⭐⭐⭐⭐⭐ · 30M+ installs</p></div>
+        <span style="background:#0e639c;color:#fff;border-radius:4px;padding:5px 16px;font-size:13px;font-weight:700">Install</span>
+      </div>
+    </div>
+  </div><figcaption><b>Figure 1.</b> Install the one that says <b>Microsoft</b>. (Figures in this guide are faithful recreations of the real screens — colors may vary slightly on your Mac.)</figcaption></figure>
+  <div class="bubble win">✅ <b>Checkpoint:</b> Extensions ▸ Installed now lists "C# Dev Kit". High five — setup is done <i>forever</i>. Everything from here is the fun part.</div>
+  <button class="donebtn" data-lv="L2">Mark level complete</button>
+</section>
+
+<!-- ============ LEVEL 3 ============ -->
+<section class="level" id="L3" style="--c:#ec4899;--shadow:rgba(236,72,153,.18)">
+  <div class="lvhead"><div class="lvnum">3</div><h2>Create Lab01 — without typing a single command</h2><span class="emoji">✨</span></div>
+  <p class="lead">Meet the <b>Command Palette</b> — VS Code's magic search box that can do <i>anything</i>. We'll use it to have the SDK build a complete, ready-to-run project for us.</p>
+  <ol class="steps">
+    <li>Press <span class="kbd">⇧ ⌘ P</span> (Shift + Command + P). A search box drops from the top.</li>
+    <li>Type <b>new project</b> and choose <b>“.NET: New Project…”</b>.</li>
+    <li>From the template list, pick <b>Console App</b>.</li>
+    <li>Name it exactly <code class="inline">Lab01_HelloWorld</code> and press Return.</li>
+    <li>For the location, click <b>Choose folder</b> ▸ go to <b>Documents</b> ▸ click <b>New Folder</b> ▸ name it <code class="inline">MAC109</code> ▸ Select. (All your labs will live here — never in Downloads! 📁)</li>
+    <li>Press Return to confirm, and when VS Code asks, click <b>Open</b> to open the new project window. If a blue box asks "Do you trust the authors?", click <b>Yes, I trust</b> — the author is you!</li>
+  </ol>
+  <figure><div class="shot mac">
+    <div class="tbar"><i class="r"></i><i class="y"></i><i class="g"></i><span>Visual Studio Code</span></div>
+    <div class="palette">
+      <div class="palbox">
+        <div class="pin">&gt; new project</div>
+        <div class="prow sel"><span>.NET: New Project…</span><small>C# Dev Kit</small></div>
+        <div class="prow"><span>.NET: Open Solution</span><small>C# Dev Kit</small></div>
+        <div class="prow"><span>File: New Untitled Text File</span><small>⌘N</small></div>
+      </div>
+    </div>
+  </div><figcaption><b>Figure 2.</b> The Command Palette (⇧⌘P). Type a few letters, pick the highlighted entry, Return. You'll use this box for the rest of your programming life.</figcaption></figure>
+  <details class="why"><summary>What just happened behind the curtain?</summary><div class="body">
+    <p>The C# Dev Kit asked the SDK to scaffold a <b>Console App</b> — the same thing Visual Studio's File ▸ New ▸ Project does on the Windows lab machines. A console app is a program that talks through text: it prints lines, and it can read what you type. Every concept in Weeks 1–6 lives in console apps; windows and buttons arrive in Week 7.</p>
+  </div></details>
+  <button class="donebtn" data-lv="L3">Mark level complete</button>
+</section>
+
+<!-- ============ LEVEL 4 ============ -->
+<section class="level" id="L4" style="--c:#06b6a4;--shadow:rgba(6,182,164,.18)">
+  <div class="lvhead"><div class="lvnum">4</div><h2>Meet your project</h2><span class="emoji">🔎</span></div>
+  <p class="lead">Look at the <b>Explorer</b> on the left (top icon in the activity bar). The SDK generated a small family of files — here's who's who:</p>
+  <figure><div class="shot mac vsc">
+    <div class="tbar"><i class="r"></i><i class="y"></i><i class="g"></i><span>Program.cs — Lab01_HelloWorld</span></div>
+    <div class="vmain">
+      <div class="actbar"><div class="ico on"></div><div class="ico"></div><div class="ico"></div><div class="ico"></div></div>
+      <div class="explorer">
+        <div class="hd">EXPLORER · LAB01_HELLOWORLD</div>
+        <div class="it dim">▸ bin</div>
+        <div class="it dim">▸ obj</div>
+        <div class="it">Lab01_HelloWorld.csproj</div>
+        <div class="it sel">Program.cs</div>
+      </div>
+      <div>
+        <div class="tabrow"><div class="tab">Program.cs</div></div>
+        <div class="dark darkpad">
+<span class="cl"><span class="ln">1</span><span class="c">// See https://aka.ms/new-console-template for more information</span></span>
+<span class="cl"><span class="ln">2</span><span class="t">Console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(</span><span class="s">"Hello, World!"</span><span class="p">);</span></span>
+        </div>
+      </div>
+    </div>
+    <div class="sbar"><span>main*</span><span class="grow"></span><span>Ln 2, Col 1</span><span>C#</span></div>
+  </div><figcaption><b>Figure 3.</b> Your first project, open in VS Code. Click <b>Program.cs</b> to see the starter code.</figcaption></figure>
+  <ul class="dots">
+    <li><b>Program.cs</b> 💜 — your code. The only file you'll ever edit today.</li>
+    <li><b>Lab01_HelloWorld.csproj</b> — the project's settings card (like the Project in Visual Studio). Look, don't touch.</li>
+    <li><b>bin</b> &amp; <b>obj</b> — robot-made folders where compiled results land. Ignore them completely.</li>
+  </ul>
+  <details class="why"><summary>Hold on — where are <code>class Program</code> and <code>Main()</code> from the lecture?!</summary><div class="body">
+    <p>Excellent eye! 👀 Modern C# uses <b>top-level statements</b>: for simple programs, the compiler secretly writes the <code class="inline">class Program { static void Main() { … } }</code> wrapper around your code so you don't have to. Both styles are 100% real C#. The classic long form from the Week 1 deck is what truly happens underneath — and we'll write it ourselves when classes arrive in Week 9. For now: less boilerplate, more fun.</p>
+  </div></details>
+  <button class="donebtn" data-lv="L4">Mark level complete</button>
+</section>
+
+<!-- ============ LEVEL 5 ============ -->
+<section class="level" id="L5" style="--c:#ffb703;--shadow:rgba(255,183,3,.22)">
+  <div class="lvhead"><div class="lvnum">5</div><h2>Press play ▶ — your first execution</h2><span class="emoji">🎬</span></div>
+  <p class="lead">Time to run it. No commands — just the play button.</p>
+  <ol class="steps">
+    <li>Make sure <b>Program.cs</b> is open.</li>
+    <li>Click the <b>▶ Run</b> button at the top-right of the editor (or press <span class="kbd">F5</span> — on a Mac keyboard that's <span class="kbd">fn F5</span>).</li>
+    <li>If VS Code asks which debugger, choose <b>C#</b>, then <b>C#: Lab01_HelloWorld</b>. It only asks the first time.</li>
+    <li>A panel opens at the bottom of VS Code — that's your program's stage. Watch it!</li>
+  </ol>
+  <figure><div class="shot mac vsc">
+    <div class="tbar"><i class="r"></i><i class="y"></i><i class="g"></i><span>Lab01_HelloWorld — running</span></div>
+    <div class="runrow">▶ <span class="runbtnmock">Run</span> <span>🐞 Debug</span></div>
+    <div class="panelhd"><b>TERMINAL</b> PROBLEMS &nbsp; OUTPUT &nbsp; DEBUG CONSOLE</div>
+    <div class="dark darkpad"><span class="grn">●</span> Building…
+<span class="ok-out">Hello, World!</span>
+
+Program exited with code 0.</div>
+    <div class="sbar"><span>main*</span><span class="grow"></span><span>C#</span></div>
+  </div><figcaption><b>Figure 4.</b> The bottom panel opens by itself and shows your program's output. "Exited with code 0" is programmer-speak for <i>everything went great</i>.</figcaption></figure>
+  <details class="why"><summary>What actually happened when I pressed ▶? (Week 1 flashback)</summary><div class="body">
+    <p>The whole pipeline from the lecture, in one second: your <b>C# source</b> → the <b>compiler</b> checked every character and translated it to <b>IL</b> → the <b>.NET runtime (JIT)</b> converted IL to machine code for your Mac's chip → the <b>CPU</b> executed it and the text appeared. 🧪 <b>Experiment:</b> delete the semicolon on line 2 and press ▶ again — the compiler refuses and underlines the exact spot in red. That's a <b>syntax error</b> being caught <i>before</i> anything runs. Fix it and feel powerful.</p>
+  </div></details>
+  <div class="bubble win">✅ <b>Checkpoint:</b> you saw <b>Hello, World!</b> appear. You just compiled and executed a real program. That's not a small thing — celebrate for 10 seconds. 🎉</div>
+  <button class="donebtn" data-lv="L5">Mark level complete</button>
+</section>
+
+<!-- ============ LEVEL 6 ============ -->
+<section class="level" id="L6" style="--c:#7c3aed;--shadow:rgba(124,58,237,.18)">
+  <div class="lvhead"><div class="lvnum">6</div><h2>Write the REAL Lab01 program</h2><span class="emoji">✍️</span></div>
+  <p class="lead">Deliverable #1 needs a banner, a question, your user's name, and a personal goodbye. Select everything in <b>Program.cs</b> (<span class="kbd">⌘ A</span>), delete it, and type — or paste — this:</p>
+  <div class="copyblock"><div class="cbbar">Program.cs — Lab01_HelloWorld</div><button class="copybtn">Copy</button><pre>// Lab01_HelloWorld — MAC 109
+// Author: YOUR NAME — Fall 2026
+
+Console.WriteLine("==============================");
+Console.WriteLine("   Welcome to MAC 109!");
+Console.WriteLine("   Intro to Visual C#");
+Console.WriteLine("==============================");
+
+Console.Write("What is your name? ");
+string name = Console.ReadLine();
+
+Console.WriteLine("Nice to meet you, " + name + "!");
+Console.WriteLine("See you in class on Friday. Goodbye!");</pre></div>
+  <p class="lead" style="margin-top:10px">Save with <span class="kbd">⌘ S</span> — the little dot on the file tab turns into an ✕ when saved. Now, what does each piece do?</p>
+  <details class="why" open><summary>The <code>//</code> lines — comments</summary><div class="body"><p>Anything after <code class="inline">//</code> is a note for humans; the compiler skips it entirely. Every file you submit starts with your name and the lab number — it's also where you disclose any AI help, per the course policy. 🤖</p></div></details>
+  <details class="why"><summary>The four <code>WriteLine</code>s — the banner</summary><div class="body"><p>Each <code class="inline">Console.WriteLine("…")</code> prints its text and <b>ends the line</b>, so the four calls stack into a banner. Read one aloud right-to-left: "take this string → hand it to the WriteLine method → which lives inside the Console class." The dot means <i>look inside</i>. 🎁</p></div></details>
+  <details class="why"><summary><code>Console.Write</code> — the one WITHOUT "Line"</summary><div class="body"><p><code class="inline">Write</code> prints but does <b>not</b> end the line — so the cursor waits right after "What is your name? " and your user answers on the same line. This tiny difference is literally Exercise B2 in your Lab 1 page. 😉</p></div></details>
+  <details class="why"><summary><code>string name = Console.ReadLine();</code> — your first variable!</summary><div class="body"><p>Three things happen, right to left: <b>(1)</b> <code class="inline">ReadLine()</code> <i>pauses</i> the program and waits for typing + Return. <b>(2)</b> Whatever was typed comes back as a <b>string</b> (text). <b>(3)</b> <code class="inline">string name =</code> creates a labeled box 📦 in memory called <code class="inline">name</code> and stores the text inside. Variables — boxes with labels — are ALL of Week 2's lecture.</p></div></details>
+  <details class="why"><summary>The <code>+</code> in the goodbye line — text glue</summary><div class="body"><p>With strings, <code class="inline">+</code> doesn't do math — it <b>glues text</b> (concatenation): <code class="inline">"Nice to meet you, " + name + "!"</code> fuses into one sentence with the real name in the middle. Same symbol, different job depending on the data type. Remember this — it becomes a plot twist in the calculator. 🌀</p></div></details>
+  <div class="bubble tip">💡 <b>Feel the IntelliSense:</b> type <code class="inline">Console.</code> and pause — a menu of everything inside Console pops up. Arrow down to WriteLine, press <span class="kbd">Tab</span>. Pros never type full names; they let the editor finish. It also means fewer spelling bugs!</div>
+  <button class="donebtn" data-lv="L6">Mark level complete</button>
+</section>
+
+<!-- ============ LEVEL 7 ============ -->
+<section class="level" id="L7" style="--c:#3b82f6;--shadow:rgba(59,130,246,.18)">
+  <div class="lvhead"><div class="lvnum">7</div><h2>Talk to your program</h2><span class="emoji">💬</span></div>
+  <p class="lead">Press <b>▶ Run</b> again. This time your program stops and <i>waits for you</i>. Click inside the bottom panel, type your name, press Return:</p>
+  <figure><div class="shot mac">
+    <div class="tbar"><i class="r"></i><i class="y"></i><i class="g"></i><span>TERMINAL panel — Lab01_HelloWorld</span></div>
+    <div class="dark darkpad">==============================
+   Welcome to MAC 109!
+   Intro to Visual C#
+==============================
+What is your name? <span class="usr">Maria</span>
+<span class="ok-out">Nice to meet you, Maria!
+See you in class on Friday. Goodbye!</span></div>
+  </div><figcaption><b>Figure 5.</b> The program pauses at <code style="font-family:var(--mono)">ReadLine</code>, hears "Maria", and answers back. Your code just had its first conversation with a human. 🥹</figcaption></figure>
+  <div class="bubble win">🏅 <b>DELIVERABLE #1 — DONE!</b> Banner ✓ question ✓ name read ✓ personal goodbye ✓. This exact behavior is what the Lab 1 rubric checks.</div>
+  <button class="donebtn" data-lv="L7">Mark level complete</button>
+</section>
+
+<!-- ============ LEVEL 8 ============ -->
+<section class="level" id="L8" style="--c:#ec4899;--shadow:rgba(236,72,153,.18)">
+  <div class="lvhead"><div class="lvnum">8</div><h2>Build the calculator</h2><span class="emoji">🧮</span></div>
+  <p class="lead">Second project, same magic: <span class="kbd">⇧ ⌘ P</span> → <b>.NET: New Project…</b> → <b>Console App</b> → name it <code class="inline">Lab02_Calculator</code> → same <b>MAC109</b> folder → Open. Then replace Program.cs with:</p>
+  <div class="copyblock"><div class="cbbar">Program.cs — Lab02_Calculator</div><button class="copybtn">Copy</button><pre>// Lab02_Calculator — MAC 109
+// Author: YOUR NAME — Fall 2026
+
+Console.WriteLine("=== MAC 109 Calculator ===");
+
+Console.Write("First number: ");
+double a = Convert.ToDouble(Console.ReadLine());
+
+Console.Write("Second number: ");
+double b = Convert.ToDouble(Console.ReadLine());
+
+Console.WriteLine(a + " + " + b + " = " + (a + b));
+Console.WriteLine(a + " - " + b + " = " + (a - b));
+Console.WriteLine(a + " * " + b + " = " + (a * b));
+Console.WriteLine(a + " / " + b + " = " + (a / b));</pre></div>
+  <h2 style="font-size:22px;margin:18px 0 4px;font-family:var(--disp)">Three new ideas 💥</h2>
+  <details class="why" open><summary><code>double</code> — a box for decimal numbers</summary><div class="body"><p><code class="inline">string</code> boxes hold text; <code class="inline">double</code> boxes hold numbers that can have decimals (3, 3.5, −41.07). Math needs number boxes. <code class="inline">double a</code> and <code class="inline">double b</code> give us two. 📦📦</p></div></details>
+  <details class="why"><summary><code>Convert.ToDouble(...)</code> — the crucial transformation</summary><div class="body"><p>Everything a keyboard produces is <b>text</b>. Type 5, and <code class="inline">ReadLine()</code> hands you the <i>string</i> "5" — and here's the trap: <code class="inline">"5" + "3"</code> glues into <b>"53"</b>! 😱 <code class="inline">Convert.ToDouble</code> transforms text-"5" into number-5.0 so real math can happen. Read the line inside-out: read the text → convert to double → store in box <code class="inline">a</code>. (This is quiz question 3 in Lab 1 — now you own it.)</p></div></details>
+  <details class="why"><summary>Why the parentheses in <code>(a + b)</code>?</summary><div class="body"><p>That line mixes both jobs of <code class="inline">+</code>: gluing text AND adding numbers. The parentheses force <code class="inline">(a + b)</code> to be computed as <b>math first</b>; the answer then gets glued into the sentence. 🧪 <b>Try the sabotage:</b> delete those parentheses, run with 12 and 4, and you'll get <code class="inline">12 + 4 = 124</code> — everything glued left-to-right as text! Put them back. Breaking things on purpose is genuinely how programmers learn.</p></div></details>
+  <details class="why"><summary>Why don't −, ×, ÷ need the same trick?</summary><div class="body"><p>Because <code class="inline">-</code>, <code class="inline">*</code>, <code class="inline">/</code> mean <i>nothing</i> for text — C# has no choice but to treat them as math. Only <code class="inline">+</code> lives a double life.</p></div></details>
+  <button class="donebtn" data-lv="L8">Mark level complete</button>
+</section>
+
+<!-- ============ LEVEL 9 ============ -->
+<section class="level" id="L9" style="--c:#06b6a4;--shadow:rgba(6,182,164,.18)">
+  <div class="lvhead"><div class="lvnum">9</div><h2>Try to break it 😈</h2><span class="emoji">🔨</span></div>
+  <p class="lead">Press <b>▶ Run</b>, feed it 12 and 4, and enjoy the happy path:</p>
+  <figure><div class="shot mac">
+    <div class="tbar"><i class="r"></i><i class="y"></i><i class="g"></i><span>TERMINAL panel — Lab02_Calculator</span></div>
+    <div class="dark darkpad">=== MAC 109 Calculator ===
+First number: <span class="usr">12</span>
+Second number: <span class="usr">4</span>
+<span class="ok-out">12 + 4 = 16
+12 - 4 = 8
+12 * 4 = 48
+12 / 4 = 3</span></div>
+  </div><figcaption><b>Figure 6.</b> All four operations, neatly labeled — exactly what the rubric wants.</figcaption></figure>
+  <p class="lead">Now run it three more times, professional-tester style, and watch what happens:</p>
+  <ul class="dots">
+    <li>🔢 <b>Decimals:</b> 7.5 and 2.5 — doubles handle them like champions.</li>
+    <li>🕳️ <b>Divide by zero:</b> 10 and 0 — plot twist: no crash! Doubles answer <code class="inline">∞</code> (Infinity). We'll guard against this properly with <code class="inline">if</code> statements in Week 3.</li>
+    <li>🍌 <b>A word:</b> type <i>banana</i> as the first number — CRASH! <code class="inline">System.FormatException</code>. Read the red message: it names the exact problem. Surviving bad input is Week 12's superpower (try/catch); for now, crashing honestly is fine.</li>
+  </ul>
+  <div class="bubble win">🏅 <b>DELIVERABLE #2 — DONE!</b> Bonus style points: add a comment noting the two limits you discovered. That's what real engineers do.</div>
+  <button class="donebtn" data-lv="L9">Mark level complete</button>
+</section>
+
+<!-- ============ LEVEL 10 ============ -->
+<section class="level" id="L10" style="--c:#ffb703;--shadow:rgba(255,183,3,.22)">
+  <div class="lvhead"><div class="lvnum">10</div><h2>Publish to GitHub — with buttons only</h2><span class="emoji">🚀</span></div>
+  <p class="lead">Your GitHub repo IS your submission. VS Code can create it, upload it, everything — no commands. First, open the whole course folder so both labs travel together: <b>File ▸ Open Folder…</b> ▸ choose <b>Documents ▸ MAC109</b> ▸ Open.</p>
+  <ol class="steps">
+    <li>Click the <b>Source Control</b> icon in the left bar (three connected dots) — or <span class="kbd">⌃ ⇧ G</span>.</li>
+    <li>Click <b>Initialize Repository</b>.</li>
+    <li>In the Message box, type a real description: <code class="inline">Lab 1: HelloWorld and Calculator</code> — then click the big <b>✓ Commit</b> button. If asked "stage all changes?", click <b>Yes</b>.</li>
+    <li>Click <b>Publish Branch</b>. VS Code asks you to sign in to GitHub — click <b>Allow</b> and finish in the browser (one time only).</li>
+    <li>Choose <b>Publish to a PUBLIC repository</b> and name it <code class="inline">MAC109-labs</code>.</li>
+    <li>Done! Click the popup's <b>Open on GitHub</b> — both project folders are online. Copy that page's URL: it's what you paste into Lab 1 and Brightspace. 🔗</li>
+  </ol>
+  <figure><div class="shot mac">
+    <div class="tbar"><i class="r"></i><i class="y"></i><i class="g"></i><span>Visual Studio Code — Source Control</span></div>
+    <div style="background:#252526;padding:14px 16px;font-family:var(--body)">
+      <div style="background:#3c3c3c;border-radius:6px;color:#eee;font-size:13px;padding:8px 10px">Lab 1: HelloWorld and Calculator</div>
+      <div style="background:#0e639c;color:#fff;text-align:center;border-radius:6px;padding:8px;margin-top:10px;font-weight:800;font-size:14px">✓ Commit</div>
+      <div style="background:#2ea043;color:#fff;text-align:center;border-radius:6px;padding:8px;margin-top:8px;font-weight:800;font-size:14px">☁ Publish Branch</div>
+      <div style="color:#9a9a9a;font-size:12px;margin-top:12px">Changes (14) · Lab01_HelloWorld/Program.cs · Lab02_Calculator/Program.cs · …</div>
+    </div>
+  </div><figcaption><b>Figure 7.</b> The Source Control view: message → Commit → Publish Branch. Three clicks and you're a published developer.</figcaption></figure>
+  <details class="why"><summary>What do "commit" and "publish" actually mean?</summary><div class="body"><p><b>Commit</b> = take a labeled snapshot 📸 of your code at this moment ("Lab 1 finished"). <b>Publish</b> = upload the snapshots to GitHub, where the world (and your professor) can see them. Later in the course you'll commit after every work session — a time machine for your code.</p></div></details>
+  <div class="bubble tip">📬 <b>Final move:</b> open <b>lab1.html</b>, complete the interactive exercises, generate your submission code, save the PDF — and submit the repo link + code + PDF on Brightspace before class on <b>Friday, Oct 9</b>. See you there!</div>
+  <button class="donebtn" data-lv="L10">Mark level complete</button>
+</section>
+
+</main>
+</div>
+
+<footer>MAC 109 · Introduction to Visual C# Programming · LaGuardia Community College (CUNY) · Prof. K. Kassou — Weeks 1–2 practical, Mac + VS Code, click-only edition. On the Windows lab machines, the same programs are built in Visual Studio (see the Week 1 deck); the C# is identical.</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  /* scroll progress */
+  var bar=document.getElementById('scrollbar');
+  function onScroll(){
+    var h=document.documentElement;
+    var p=h.scrollTop/(h.scrollHeight-h.clientHeight);
+    bar.style.width=(p*100)+'%';
+  }
+  document.addEventListener('scroll',onScroll,{passive:true});
+  onScroll();
+
+  /* copy buttons */
+  document.querySelectorAll('.copyblock').forEach(function(block){
+    var btn=block.querySelector('.copybtn');
+    var pre=block.querySelector('pre');
+    btn.addEventListener('click',function(){
+      function done(ok){
+        btn.textContent=ok?'Copied! ✓':'Select & copy';
+        btn.classList.toggle('ok',ok);
+        setTimeout(function(){btn.textContent='Copy';btn.classList.remove('ok');},1800);
+      }
+      if(navigator.clipboard&&navigator.clipboard.writeText){
+        navigator.clipboard.writeText(pre.textContent).then(function(){done(true);},function(){done(false);});
+      }else{
+        var r=document.createRange();r.selectNodeContents(pre);
+        var s=window.getSelection();s.removeAllRanges();s.addRange(r);
+        done(false);
+      }
+    });
+  });
+
+  /* quest tracking */
+  var total=10,doneSet={};
+  function refresh(){
+    var n=Object.keys(doneSet).length;
+    document.getElementById('questFill').style.width=(n/total*100)+'%';
+    document.getElementById('questPct').textContent=Math.round(n/total*100)+'% complete'+(n===total?' 🎉':'');
+    if(n===total)celebrate();
+  }
+  var partied=false;
+  document.querySelectorAll('.donebtn').forEach(function(b){
+    b.addEventListener('click',function(){
+      var lv=b.dataset.lv;
+      if(doneSet[lv]){delete doneSet[lv];b.classList.remove('on');b.textContent='Mark level complete';}
+      else{doneSet[lv]=1;b.classList.add('on');b.textContent='Level complete';miniBurst(b);}
+      var q=document.querySelector('.qitem[data-q="'+lv+'"]');
+      if(q)q.classList.toggle('done',!!doneSet[lv]);
+      refresh();
+    });
+  });
+
+  /* confetti */
+  var party=document.getElementById('party');
+  var EMO=['🎉','⭐','💜','🚀','✨','🧡','🎊','💚'];
+  function drop(x,delay,dur){
+    var c=document.createElement('span');
+    c.className='confetto';
+    c.textContent=EMO[Math.floor(Math.random()*EMO.length)];
+    c.style.left=x+'%';
+    c.style.animationDuration=dur+'s';
+    c.style.animationDelay=delay+'s';
+    party.appendChild(c);
+    setTimeout(function(){party.removeChild(c);},(dur+delay)*1000+200);
+  }
+  function miniBurst(el){
+    if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+    var r=el.getBoundingClientRect();
+    var x=(r.left+r.width/2)/window.innerWidth*100;
+    for(var i=0;i<8;i++)drop(x+(Math.random()*8-4),Math.random()*.2,1.6+Math.random());
+  }
+  function celebrate(){
+    if(partied)return;partied=true;
+    document.getElementById('trophy').classList.add('show');
+    if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+    for(var i=0;i<70;i++)drop(Math.random()*100,Math.random()*1.6,2.2+Math.random()*1.6);
+  }
+})();
+</script>
+</body>
+</html>
