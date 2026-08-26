@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MAC 109 · Week 1 — Introduction to Visual C# &amp; the .NET Ecosystem</title>
+<style>
+  :root{
+    --chrome:#1e1e1e; --panel:#252526; --card:#2d2d30; --border:#3e3e42;
+    --tab:#2d2d30; --tab-active:#1e1e1e; --statusbar:#007acc;
+    --text:#d4d4d4; --muted:#9d9d9d; --white:#f3f3f3;
+    --kw:#569cd6; --type:#4ec9b0; --str:#ce9178; --comment:#6a9955;
+    --method:#dcdcaa; --num:#b5cea8; --accent:#c586c0;
+    --good:#4ec9b0; --bad:#f48771; --warn:#dcdcaa;
+    --sans:'Segoe UI',system-ui,-apple-system,sans-serif;
+    --mono:'Cascadia Code','Consolas','Menlo',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:#141414;color:var(--text);font-family:var(--sans);font-size:16px;overflow:hidden}
+  button{font-family:var(--sans)}
+
+  /* ---------- IDE frame ---------- */
+  #ide{display:flex;flex-direction:column;height:100vh}
+  #titlebar{background:var(--chrome);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;padding:6px 14px;font-size:13px;color:var(--muted);flex:0 0 auto}
+  #titlebar .logo{width:18px;height:18px;background:linear-gradient(135deg,#8a2be2,#68217a);clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);flex:0 0 auto}
+  #titlebar .menu span{margin-right:14px;cursor:default}
+  #titlebar .file{margin-left:auto;font-family:var(--mono);color:#7a7a7a}
+  #tabstrip{background:var(--panel);display:flex;overflow-x:auto;flex:0 0 auto;border-bottom:1px solid var(--border);scrollbar-width:thin}
+  .tab{background:var(--tab);color:var(--muted);border-right:1px solid var(--border);padding:7px 14px;font-size:12.5px;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:7px;border-top:2px solid transparent}
+  .tab .dot{width:7px;height:7px;border-radius:50%;background:#555}
+  .tab.active{background:var(--tab-active);color:var(--white);border-top-color:var(--statusbar)}
+  .tab.active .dot{background:var(--statusbar)}
+  .tab.done .dot{background:var(--good)}
+  .tab:focus-visible{outline:2px solid var(--statusbar);outline-offset:-2px}
+
+  #stage{flex:1 1 auto;overflow:hidden;position:relative;background:var(--tab-active)}
+  .slide{position:absolute;inset:0;overflow-y:auto;padding:34px 46px 90px;display:none;animation:slidein .35s ease}
+  .slide.active{display:block}
+  @keyframes slidein{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){.slide{animation:none}*{transition:none!important}}
+
+  #statusbarEl{background:var(--statusbar);color:#fff;font-size:12.5px;display:flex;align-items:center;gap:18px;padding:5px 14px;flex:0 0 auto}
+  #statusbarEl .grow{flex:1}
+  #statusbarEl button{background:transparent;border:1px solid rgba(255,255,255,.55);color:#fff;padding:2px 14px;border-radius:3px;cursor:pointer;font-size:12.5px}
+  #statusbarEl button:hover{background:rgba(255,255,255,.15)}
+  #statusbarEl button:disabled{opacity:.4;cursor:default}
+  #progressWrap{width:160px;height:5px;background:rgba(255,255,255,.25);border-radius:3px;overflow:hidden}
+  #progressBar{height:100%;background:#fff;width:0;transition:width .3s}
+
+  /* ---------- shared content ---------- */
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--statusbar);margin-bottom:10px}
+  h1{font-size:clamp(30px,4.5vw,46px);font-weight:600;color:var(--white);line-height:1.15;margin-bottom:14px}
+  h2{font-size:clamp(24px,3vw,32px);font-weight:600;color:var(--white);margin-bottom:6px}
+  h3{font-size:18px;color:var(--white);font-weight:600}
+  .sub{color:var(--muted);max-width:70ch;font-size:16.5px;line-height:1.55;margin-bottom:24px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  @media(max-width:900px){.grid2,.grid3{grid-template-columns:1fr}.slide{padding:24px 20px 90px}}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:20px}
+  .card p{color:var(--muted);line-height:1.55;font-size:14.5px;margin-top:8px}
+  .pill{display:inline-block;font-family:var(--mono);font-size:11.5px;background:#0e639c;color:#fff;border-radius:20px;padding:3px 11px;margin-bottom:10px}
+  .kbd{font-family:var(--mono);background:#3c3c3c;border:1px solid #555;border-bottom-width:2px;border-radius:4px;padding:1px 7px;font-size:12.5px;color:var(--white)}
+  code.inline{font-family:var(--mono);background:#3c3c3c;padding:1px 6px;border-radius:4px;font-size:.9em;color:var(--warn)}
+
+  /* code blocks */
+  .codewin{background:#1a1a1a;border:1px solid var(--border);border-radius:8px;overflow:hidden}
+  .codewin .bar{background:var(--card);padding:7px 13px;font-family:var(--mono);font-size:12px;color:var(--muted);display:flex;gap:7px;align-items:center;border-bottom:1px solid var(--border)}
+  .codewin .bar i{width:10px;height:10px;border-radius:50%;display:inline-block}
+  .codewin pre{padding:14px 0;font-family:var(--mono);font-size:14px;line-height:1.65;overflow-x:auto}
+  .cl{display:flex;padding:0 16px;white-space:pre}
+  .cl .ln{width:34px;color:#5a5a5a;text-align:right;padding-right:16px;flex:0 0 auto;user-select:none}
+  .k{color:var(--kw)}.t{color:var(--type)}.s{color:var(--str)}.c{color:var(--comment)}.m{color:var(--method)}.n{color:var(--num)}.p{color:#d4d4d4}
+
+  /* clickable code explainer */
+  .cl.explain{cursor:pointer;border-left:3px solid transparent}
+  .cl.explain:hover{background:#2a2d2e}
+  .cl.explain.sel{background:#264f78;border-left-color:var(--statusbar)}
+  #lineInfo{background:var(--card);border:1px solid var(--border);border-left:4px solid var(--statusbar);border-radius:8px;padding:16px 18px;min-height:120px}
+  #lineInfo h3{font-family:var(--mono);font-size:14px;color:var(--warn);margin-bottom:8px}
+  #lineInfo p{color:var(--text);line-height:1.6;font-size:14.5px}
+
+  /* flip cards */
+  .flip{perspective:900px;cursor:pointer;min-height:190px}
+  .flip .inner{position:relative;width:100%;height:100%;min-height:190px;transition:transform .5s;transform-style:preserve-3d}
+  .flip.flipped .inner{transform:rotateY(180deg)}
+  .face{position:absolute;inset:0;backface-visibility:hidden;border-radius:8px;border:1px solid var(--border);padding:20px;display:flex;flex-direction:column;justify-content:center}
+  .face.front{background:var(--card)}
+  .face.front .big{font-family:var(--mono);font-size:26px;color:var(--white)}
+  .face.front small{color:var(--statusbar);margin-top:10px;font-size:12.5px}
+  .face.back{background:#0e2a3f;transform:rotateY(180deg)}
+  .face.back p{color:var(--text);font-size:14px;line-height:1.55}
+
+  /* pipeline */
+  .pipe{display:flex;align-items:stretch;gap:0;flex-wrap:wrap;margin:22px 0}
+  .pnode{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px 16px;text-align:center;flex:1;min-width:130px}
+  .pnode b{color:var(--white);display:block;font-size:14.5px}
+  .pnode span{color:var(--muted);font-size:12px}
+  .parrow{display:flex;align-items:center;color:var(--statusbar);font-size:22px;padding:0 8px}
+  .pnode.hot{border-color:var(--statusbar);box-shadow:0 0 0 1px var(--statusbar)}
+
+  /* IDE tour */
+  #tourMock{background:#1a1a1a;border:1px solid var(--border);border-radius:8px;overflow:hidden;font-size:11px;user-select:none}
+  #tourMock .tm-title{background:#3c3c3c;color:#ccc;padding:4px 10px;font-size:10.5px}
+  #tourGrid{display:grid;grid-template-columns:52px 1fr 210px;grid-template-rows:26px 1fr 110px;height:390px}
+  .tm{border:1px solid #333;display:flex;align-items:flex-start;justify-content:flex-start;padding:6px;position:relative;color:#8f8f8f;cursor:pointer;transition:background .15s}
+  .tm:hover{background:#26292c}
+  .tm.sel{background:#264f78;color:#fff}
+  .tm .hotspot{position:absolute;top:6px;right:6px;width:20px;height:20px;border-radius:50%;background:var(--statusbar);color:#fff;font-size:11px;display:flex;align-items:center;justify-content:center;font-weight:700;animation:pulse 1.8s infinite}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(0,122,204,.6)}50%{box-shadow:0 0 0 7px rgba(0,122,204,0)}}
+  #tm-menu{grid-column:1/4}
+  #tm-toolbox{grid-row:2/4}
+  #tm-editor{}
+  #tm-solution{grid-row:2/3}
+  #tm-output{grid-column:2/3}
+  #tm-props{grid-row:3/4;grid-column:3/4}
+  #tourInfo{background:var(--card);border:1px solid var(--border);border-left:4px solid var(--statusbar);border-radius:8px;padding:16px 18px;margin-top:14px;min-height:96px}
+  #tourInfo h3{margin-bottom:6px}
+  #tourInfo p{color:var(--text);font-size:14.5px;line-height:1.55}
+
+  /* spot the bug */
+  .bugline{cursor:pointer;border-left:3px solid transparent}
+  .bugline:hover{background:#2a2d2e}
+  .bugline.found{background:#3c1e1e;border-left-color:var(--bad)}
+  .bugline.wrongpick{background:#203a20;border-left-color:var(--good)}
+  .buglabel{margin-left:14px;font-family:var(--sans);font-size:12px;border-radius:4px;padding:1px 8px}
+  .buglabel.err{background:var(--bad);color:#1a1a1a}
+  .buglabel.ok{background:var(--good);color:#1a1a1a}
+
+  /* quiz */
+  .q{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:18px 20px;margin-bottom:16px}
+  .q h3{margin-bottom:12px;font-size:16px}
+  .q .opt{display:block;width:100%;text-align:left;background:#1a1a1a;color:var(--text);border:1px solid var(--border);border-radius:6px;padding:10px 14px;margin-bottom:8px;cursor:pointer;font-size:14.5px}
+  .q .opt:hover:not(:disabled){border-color:var(--statusbar)}
+  .q .opt.right{border-color:var(--good);background:#12312b;color:#c8f5ea}
+  .q .opt.wrong{border-color:var(--bad);background:#3c1e1e;color:#ffd9d0}
+  .q .why{margin-top:10px;font-size:13.5px;color:var(--muted);display:none;line-height:1.55}
+  .q .why.show{display:block}
+  #quizScore{font-family:var(--mono);color:var(--warn);font-size:15px;margin-top:6px}
+
+  /* ---------- GUI builder ---------- */
+  #builder{display:grid;grid-template-columns:170px 1fr 250px;gap:14px;align-items:start}
+  @media(max-width:1000px){#builder{grid-template-columns:1fr}}
+  .bpanel{background:var(--card);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+  .bpanel .bhead{background:#333;color:var(--white);font-size:12.5px;padding:7px 12px;font-weight:600;letter-spacing:.02em}
+  .toolitem{display:flex;align-items:center;gap:9px;padding:9px 12px;font-size:13.5px;cursor:pointer;border-bottom:1px solid #333;color:var(--text)}
+  .toolitem:hover{background:#37373d}
+  .toolitem .ico{font-family:var(--mono);font-size:11px;background:#0e639c;color:#fff;border-radius:4px;padding:2px 6px}
+  #formHost{background:#3f3f46;padding:22px;display:flex;justify-content:center}
+  #designForm{width:340px;height:260px;background:#f0f0f0;border:1px solid #999;border-radius:6px;box-shadow:0 8px 22px rgba(0,0,0,.45);position:relative;overflow:hidden}
+  #designForm .wtitle{background:linear-gradient(#fefefe,#e8e8e8);border-bottom:1px solid #ccc;color:#222;font-size:12px;padding:5px 10px;display:flex;justify-content:space-between;font-family:var(--sans)}
+  #designForm .wtitle .btns{color:#666;font-family:var(--mono);letter-spacing:2px}
+  #canvas{position:absolute;inset:26px 0 0 0}
+  .ctl{position:absolute;cursor:grab;user-select:none;font-family:var(--sans)}
+  .ctl:active{cursor:grabbing}
+  .ctl.selctl{outline:2px dashed var(--statusbar);outline-offset:2px}
+  .ctl.Button{background:linear-gradient(#fdfdfd,#e1e1e1);border:1px solid #adadad;border-radius:3px;color:#222;font-size:12.5px;padding:5px 14px}
+  .ctl.Label{color:#222;font-size:12.5px;padding:2px 4px}
+  .ctl.TextBox{background:#fff;border:1px solid #7a7a7a;color:#444;font-size:12.5px;padding:4px 8px;min-width:110px}
+  #props .prow{padding:9px 12px;border-bottom:1px solid #333;font-size:13px}
+  #props label{display:block;color:var(--muted);font-size:11.5px;margin-bottom:4px;font-family:var(--mono)}
+  #props input{width:100%;background:#1a1a1a;border:1px solid var(--border);color:var(--white);border-radius:4px;padding:6px 8px;font-size:13px;font-family:var(--mono)}
+  #props input:focus{outline:1px solid var(--statusbar)}
+  #props .hint{color:var(--muted);font-size:12.5px;padding:12px;line-height:1.5}
+  .brun{display:flex;gap:10px;margin:14px 0}
+  .brun button{border:none;border-radius:5px;padding:8px 18px;font-size:13.5px;cursor:pointer;font-weight:600}
+  #runBtn{background:#2ea043;color:#fff}
+  #runBtn:hover{background:#3fb950}
+  #resetBtn{background:#3c3c3c;color:var(--white)}
+  #genCodeWin pre{max-height:300px}
+
+  /* run modal */
+  #runOverlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:50}
+  #runOverlay.show{display:flex}
+  #runForm{width:360px;background:#f0f0f0;border-radius:6px;box-shadow:0 18px 50px rgba(0,0,0,.6);overflow:hidden}
+  #runForm .wtitle{background:linear-gradient(#fefefe,#e8e8e8);border-bottom:1px solid #ccc;color:#222;font-size:12px;padding:6px 10px;display:flex;justify-content:space-between}
+  #runForm .close{cursor:pointer;font-family:var(--mono);color:#333}
+  #runCanvas{position:relative;height:270px}
+  #msgbox{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:60}
+  #msgbox.show{display:flex}
+  #msgbox .mb{background:#f0f0f0;border-radius:6px;min-width:250px;box-shadow:0 16px 44px rgba(0,0,0,.55);overflow:hidden}
+  #msgbox .mb .wtitle{background:linear-gradient(#fefefe,#e8e8e8);border-bottom:1px solid #ccc;color:#222;font-size:12px;padding:6px 10px}
+  #msgbox .mb .body{padding:20px 22px;color:#222;font-size:13.5px}
+  #msgbox .mb .foot{padding:0 14px 14px;text-align:right}
+  #msgbox .mb button{background:linear-gradient(#fdfdfd,#e1e1e1);border:1px solid #adadad;border-radius:3px;padding:4px 22px;font-size:12.5px;cursor:pointer}
+
+  .checklist li{list-style:none;padding:9px 0 9px 32px;position:relative;color:var(--text);font-size:15px;border-bottom:1px dashed #333;line-height:1.5}
+  .checklist li::before{content:"✓";position:absolute;left:4px;color:var(--good);font-weight:700}
+  .objlist li{list-style:none;padding:8px 0 8px 30px;position:relative;color:var(--text);font-size:15.5px;line-height:1.5}
+  .objlist li::before{content:"▸";position:absolute;left:6px;color:var(--statusbar)}
+  .hero-code{margin-top:34px;max-width:560px}
+  .startrow{display:flex;gap:40px;flex-wrap:wrap;margin-top:8px}
+  .note{background:#332b00;border:1px solid #6b5900;border-radius:8px;padding:12px 16px;color:#e6d590;font-size:13.5px;line-height:1.5;margin-top:16px}
+</style>
+</head>
+<body>
+<div id="ide">
+  <div id="titlebar">
+    <div class="logo" aria-hidden="true"></div>
+    <div class="menu"><span>File</span><span>Edit</span><span>View</span><span>Build</span><span>Debug</span><span>Help</span></div>
+    <div class="file">MAC109 › Week01 › Lecture.sln — Prof. K. Kassou</div>
+  </div>
+  <nav id="tabstrip" aria-label="Slides"></nav>
+  <main id="stage"></main>
+  <div id="statusbarEl">
+    <button id="prevBtn" aria-label="Previous slide">◀ Back</button>
+    <button id="nextBtn" aria-label="Next slide">Next ▶</button>
+    <div id="progressWrap" aria-hidden="true"><div id="progressBar"></div></div>
+    <span id="lncol">Ln 1, Col 1</span>
+    <div class="grow"></div>
+    <span>C# 12 · .NET 8</span>
+    <span>Use ← → keys to navigate</span>
+  </div>
+</div>
+
+<!-- run-mode modal -->
+<div id="runOverlay" role="dialog" aria-label="Running application">
+  <div id="runForm">
+    <div class="wtitle"><span id="runFormTitle">Form1</span><span class="close" id="closeRun" title="Stop debugging">✕</span></div>
+    <div id="runCanvas"></div>
+  </div>
+</div>
+<div id="msgbox">
+  <div class="mb">
+    <div class="wtitle">Message</div>
+    <div class="body" id="msgText"></div>
+    <div class="foot"><button id="msgOk">OK</button></div>
+  </div>
+</div>
+
+<template id="slides">
+
+<!-- 1 ▸ Title -->
+<section data-tab="Start" data-file="Start Page">
+  <p class="eyebrow">LaGuardia Community College · MEC Department · MAC 109</p>
+  <h1>Introduction to Visual C#<br>&amp; the .NET Ecosystem</h1>
+  <p class="sub">Week 1 — Your first steps as a software developer: the tools professionals use, how a program really runs, and your first working code.</p>
+  <div class="startrow">
+    <div>
+      <p class="pill">Today you will</p>
+      <ul class="objlist">
+        <li>Define <b>C#</b>, <b>.NET</b>, and <b>IDE</b> in your own words</li>
+        <li>Navigate the Visual Studio interface with confidence</li>
+        <li>Explain compilation — what happens when you press ▶ Run</li>
+        <li>Read every line of a real C# program</li>
+        <li>Build your first GUI — today, not in Week 7</li>
+      </ul>
+    </div>
+    <div class="codewin hero-code">
+      <div class="bar"><i style="background:#f57"></i><i style="background:#fb5"></i><i style="background:#5c5"></i> Program.cs</div>
+      <pre>
+<span class="cl"><span class="ln">1</span><span class="t">Console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(</span><span class="s">"Welcome to MAC 109!"</span><span class="p">);</span></span></pre>
+    </div>
+  </div>
+  <p class="note">💡 <b>How to use this deck:</b> click the tabs above (like Visual Studio document tabs), use the ← → arrow keys, or the Back / Next buttons in the blue status bar. Anything with a pulsing dot or a card is interactive — click it.</p>
+</section>
+
+<!-- 2 ▸ Definitions -->
+<section data-tab="Definitions" data-file="Definitions.cs">
+  <p class="eyebrow">01 · Clear definitions</p>
+  <h2>Three words you'll use all semester</h2>
+  <p class="sub">Click each card to flip it. Try to guess the definition <em>before</em> you flip — that's how memory works.</p>
+  <div class="grid3">
+    <div class="flip" tabindex="0" role="button" aria-label="Flip definition card: C#">
+      <div class="inner">
+        <div class="face front"><span class="big">C#</span><small>"C-Sharp" — the language ▸ click to flip</small></div>
+        <div class="face back"><p><b>C#</b> is a modern, <b>object-oriented programming language</b> created by Microsoft. It's the set of rules and vocabulary we use to write instructions a computer can follow. It powers desktop apps, websites, games (Unity!), and mobile apps.</p></div>
+      </div>
+    </div>
+    <div class="flip" tabindex="0" role="button" aria-label="Flip definition card: .NET">
+      <div class="inner">
+        <div class="face front"><span class="big">.NET</span><small>"dot-net" — the platform ▸ click to flip</small></div>
+        <div class="face back"><p><b>.NET</b> is the <b>platform</b> your C# code runs on: a huge library of ready-made code (printing, math, files, windows…) plus the engine that executes your program. C# is the language; .NET is the world it lives in.</p></div>
+      </div>
+    </div>
+    <div class="flip" tabindex="0" role="button" aria-label="Flip definition card: IDE">
+      <div class="inner">
+        <div class="face front"><span class="big">IDE</span><small>Integrated Development Environment ▸ click</small></div>
+        <div class="face back"><p>An <b>IDE</b> is an all-in-one workshop for programmers: a smart editor, a compiler, a debugger, and a visual designer in one app. Ours is <b>Visual Studio</b> — the same tool used by professional .NET developers.</p></div>
+      </div>
+    </div>
+  </div>
+  <div class="grid2" style="margin-top:18px">
+    <div class="card"><span class="pill">Analogy</span><h3>Language vs. platform</h3><p>Think of <b>C#</b> as the English language and <b>.NET</b> as a fully-stocked library plus a translator. You write the sentences; .NET supplies thousands of pre-written "books" (like <code class="inline">Console</code>) and makes the computer understand you.</p></div>
+    <div class="card"><span class="pill">Why C#?</span><h3>One language, many doors</h3><p>C# skills transfer directly to later MEC courses: game development in Unity (MAC 280) and data structures concepts (MAC 286) — and to jobs in enterprise software, one of NYC's biggest tech employers.</p></div>
+  </div>
+</section>
+
+<!-- 3 ▸ Compilation -->
+<section data-tab="Compilation" data-file="HowItRuns.cs">
+  <p class="eyebrow">02 · How your code actually runs</p>
+  <h2>Compilation: from your words to the CPU</h2>
+  <p class="sub">A computer's processor only understands <b>machine code</b> — pure numbers. Something must translate your C#. Click each stage of the pipeline to see what happens there.</p>
+  <div class="pipe" id="pipeline">
+    <div class="pnode" data-i="0"><b>Your C# code</b><span>Program.cs</span></div>
+    <div class="parrow">→</div>
+    <div class="pnode" data-i="1"><b>Compiler</b><span>checks + translates</span></div>
+    <div class="parrow">→</div>
+    <div class="pnode" data-i="2"><b>IL code</b><span>Intermediate Language</span></div>
+    <div class="parrow">→</div>
+    <div class="pnode" data-i="3"><b>.NET runtime (JIT)</b><span>final translation</span></div>
+    <div class="parrow">→</div>
+    <div class="pnode" data-i="4"><b>CPU executes</b><span>your app runs 🚀</span></div>
+  </div>
+  <div id="lineInfo"><h3 id="pipeTitle">Click a stage ↑</h3><p id="pipeText">Each box is one step of the journey your code takes every time you press ▶ Start in Visual Studio.</p></div>
+  <div class="grid2" style="margin-top:18px">
+    <div class="card"><span class="pill">Compiled (C#)</span><h3>Translate the whole book first</h3><p>The compiler translates your <b>entire program before it runs</b>. Benefit: it catches spelling and grammar mistakes (<b>syntax errors</b>) up front, and the result runs fast.</p></div>
+    <div class="card"><span class="pill">Interpreted (e.g., classic Python)</span><h3>Translate line-by-line, live</h3><p>An interpreter translates <b>while the program runs</b>, one line at a time. Flexible, but errors can hide until that exact line executes. C# takes the compiled road.</p></div>
+  </div>
+</section>
+
+<!-- 4 ▸ IDE tour -->
+<section data-tab="IDE Tour" data-file="VisualStudio.tour">
+  <p class="eyebrow">03 · Know your workshop</p>
+  <h2>Visual Studio: a guided tour</h2>
+  <p class="sub">This is a map of the Visual Studio window. Click each numbered hotspot to learn what that area does. You'll use all five in Lab 1.</p>
+  <div id="tourMock">
+    <div class="tm-title">Form1.cs — MyFirstApp — Microsoft Visual Studio</div>
+    <div id="tourGrid">
+      <div class="tm" id="tm-menu" data-t="Menu &amp; Toolbar" data-d="The command center. File ▸ New ▸ Project starts everything; Build compiles your code; the green ▶ Start button compiles AND runs. Memorize F5 = Start Debugging.">Menu bar &amp; toolbar<span class="hotspot">1</span></div>
+      <div class="tm" id="tm-toolbox" data-t="Toolbox" data-d="A shelf of ready-made GUI parts — Buttons, Labels, TextBoxes and more. In Windows Forms projects you drag controls from here onto your form. You'll simulate exactly this on the Practice tab!">Toolbox<span class="hotspot">2</span></div>
+      <div class="tm" id="tm-editor" data-t="Code Editor / Designer" data-d="The main work area. It shows either your C# code (with colors — syntax highlighting — and IntelliSense autocomplete) or the visual Form Designer where you arrange your GUI.">Editor / Designer<span class="hotspot">3</span></div>
+      <div class="tm" id="tm-solution" data-t="Solution Explorer" data-d="The file cabinet of your work. It shows your Solution and the Projects and files inside it. Double-click any file to open it in the editor.">Solution Explorer<span class="hotspot">4</span></div>
+      <div class="tm" id="tm-output" data-t="Output / Error List" data-d="Where Visual Studio talks back to you. Build messages appear here — and if your code has errors, the Error List names each one with the exact line number. Read it top-to-bottom; fix the FIRST error first.">Output &amp; Error List<span class="hotspot">5</span></div>
+      <div class="tm" id="tm-props" data-t="Properties Window" data-d="Shows the settings of whatever is selected — a Button's Text, a form's title, colors, sizes. Change a property here and the designer updates instantly. No code needed.">Properties<span class="hotspot">6</span></div>
+    </div>
+  </div>
+  <div id="tourInfo"><h3 id="tourTitle">Click a hotspot ↑</h3><p id="tourText">Six areas, six jobs. Knowing where to look is half of learning an IDE.</p></div>
+</section>
+
+<!-- 5 ▸ Solutions & Projects -->
+<section data-tab="Solutions" data-file="Solution.sln">
+  <p class="eyebrow">04 · Organizing your work</p>
+  <h2>Solutions &amp; Projects</h2>
+  <p class="sub">Visual Studio never works with loose files. Everything lives in a structure — and the vocabulary matters because your labs will say "create a new <b>project</b>."</p>
+  <div class="grid2">
+    <div class="codewin">
+      <div class="bar">Solution Explorer</div>
+      <pre>
+<span class="cl"><span class="ln"> </span><span class="p">🗂  </span><span class="t">Solution 'MAC109Labs'</span><span class="c">   ← the binder</span></span>
+<span class="cl"><span class="ln"> </span><span class="p">  📁 </span><span class="m">Lab01_HelloWorld</span><span class="c">      ← a project</span></span>
+<span class="cl"><span class="ln"> </span><span class="p">      C# </span><span class="p">Program.cs</span><span class="c">        ← your code</span></span>
+<span class="cl"><span class="ln"> </span><span class="p">  📁 </span><span class="m">Lab02_Calculator</span><span class="c">      ← another project</span></span>
+<span class="cl"><span class="ln"> </span><span class="p">      C# </span><span class="p">Program.cs</span></span></pre>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:14px"><span class="pill">Solution (.sln)</span><h3>The binder</h3><p>A container that groups related projects. One solution can hold your whole semester of labs.</p></div>
+      <div class="card"><span class="pill">Project (.csproj)</span><h3>One program</h3><p>Everything needed to build <b>one app</b>: code files, settings, and the output type (Console App or Windows Forms App). Each lab = one project.</p></div>
+    </div>
+  </div>
+  <p class="note">📌 <b>Lab 1 first steps:</b> File ▸ New ▸ Project ▸ <b>Console App</b> ▸ name it <code class="inline">Lab01_HelloWorld</code> ▸ choose a folder you'll remember (not Downloads!) ▸ Create.</p>
+</section>
+
+<!-- 6 ▸ First program -->
+<section data-tab="First Code" data-file="Program.cs">
+  <p class="eyebrow">05 · Code explanation — read every line</p>
+  <h2>Your first C# program, line by line</h2>
+  <p class="sub"><b>Click any line of code</b> to see exactly what it does. By the end, no line in this file should feel like magic.</p>
+  <div class="grid2">
+    <div class="codewin">
+      <div class="bar"><i style="background:#f57"></i><i style="background:#fb5"></i><i style="background:#5c5"></i> Program.cs — click a line</div>
+      <pre id="explCode"></pre>
+    </div>
+    <div id="lineInfo2" class="card" style="border-left:4px solid var(--statusbar);min-height:180px">
+      <h3 id="explTitle" style="font-family:var(--mono);color:var(--warn);font-size:14px">← Pick a line</h3>
+      <p id="explText" style="margin-top:8px;line-height:1.6;font-size:14.5px">Every C# program is built from pieces like these. Click line 1 to start.</p>
+    </div>
+  </div>
+  <div class="card" style="margin-top:16px"><span class="pill">Output</span>
+    <pre style="font-family:var(--mono);font-size:14px;color:var(--good);margin-top:6px">Hello, LaGuardia!
+What is your name? _</pre>
+  </div>
+</section>
+
+<!-- 7 ▸ Syntax rules + bug hunt -->
+<section data-tab="Syntax" data-file="SyntaxRules.cs">
+  <p class="eyebrow">06 · Syntax fundamentals</p>
+  <h2>The four rules of C# grammar</h2>
+  <div class="grid2" style="margin-bottom:20px">
+    <div class="card"><span class="pill">Rule 1</span><h3>Statements end with <code class="inline">;</code></h3><p>The semicolon is C#'s period. Forgetting it is the #1 beginner error — the compiler will point at the line for you.</p></div>
+    <div class="card"><span class="pill">Rule 2</span><h3>C# is case-sensitive</h3><p><code class="inline">Console</code> works; <code class="inline">console</code> does not exist. Capital letters matter, always.</p></div>
+    <div class="card"><span class="pill">Rule 3</span><h3>Braces <code class="inline">{ }</code> group code</h3><p>Every opening <code class="inline">{</code> needs a closing <code class="inline">}</code>. Visual Studio highlights matching pairs for you.</p></div>
+    <div class="card"><span class="pill">Rule 4</span><h3>Strings live in <code class="inline">" "</code></h3><p>Text data must be wrapped in double quotes. Comments start with <code class="inline">//</code> and are ignored by the compiler.</p></div>
+  </div>
+  <h3 style="margin-bottom:8px">🐞 Bug hunt — find the 3 errors</h3>
+  <p class="sub" style="margin-bottom:12px">This code will not compile. Click the lines you think contain an error. <span id="bugScore" style="font-family:var(--mono);color:var(--warn)">Found: 0 / 3</span></p>
+  <div class="codewin">
+    <div class="bar">Broken.cs — 3 errors hiding</div>
+    <pre id="bugCode"></pre>
+  </div>
+</section>
+
+<!-- 8 ▸ Quiz -->
+<section data-tab="Quiz" data-file="KnowledgeCheck.cs">
+  <p class="eyebrow">07 · Knowledge check</p>
+  <h2>Prove it to yourself</h2>
+  <p class="sub">Answer honestly — wrong answers teach more than lucky guesses. Explanations appear after each choice.</p>
+  <div id="quizHost"></div>
+  <p id="quizScore">Score: 0 / 4</p>
+</section>
+
+<!-- 9 ▸ GUI concept -->
+<section data-tab="GUI Intro" data-file="Form1.Designer.cs">
+  <p class="eyebrow">08 · Developing a GUI — the concepts</p>
+  <h2>What is a GUI, really?</h2>
+  <p class="sub">A <b>G</b>raphical <b>U</b>ser <b>I</b>nterface is a program you operate with windows, buttons, and text boxes instead of typed commands. Three ideas make every GUI work:</p>
+  <div class="grid3">
+    <div class="card"><span class="pill">Idea 1 · Controls</span><h3>Building blocks</h3><p>A <b>control</b> is a reusable visual component: <code class="inline">Button</code>, <code class="inline">Label</code>, <code class="inline">TextBox</code>. Each is an <b>object</b> created from a class — your first taste of object-oriented programming.</p></div>
+    <div class="card"><span class="pill">Idea 2 · Properties</span><h3>Settings of an object</h3><p>Every control has <b>properties</b> that describe it: its <code class="inline">Text</code>, its position, its color. Change the property → the control changes. <code class="inline">btnGreet.Text = "Say Hello";</code></p></div>
+    <div class="card"><span class="pill">Idea 3 · Events</span><h3>Code that waits</h3><p>GUI programs are <b>event-driven</b>: they wait for something to happen — a <code class="inline">Click</code>, a key press — then run the <b>event handler</b> method you wrote. No click, no code.</p></div>
+  </div>
+  <div class="codewin" style="margin-top:18px">
+    <div class="bar">The anatomy of an event handler</div>
+    <pre>
+<span class="cl"><span class="ln">1</span><span class="c">// "When btnGreet is clicked, run this method"</span></span>
+<span class="cl"><span class="ln">2</span><span class="k">private void</span> <span class="m">btnGreet_Click</span><span class="p">(</span><span class="k">object</span><span class="p"> sender, </span><span class="t">EventArgs</span><span class="p"> e)</span></span>
+<span class="cl"><span class="ln">3</span><span class="p">{</span></span>
+<span class="cl"><span class="ln">4</span><span class="p">    </span><span class="t">MessageBox</span><span class="p">.</span><span class="m">Show</span><span class="p">(</span><span class="s">"Hello, "</span><span class="p"> + txtName.Text + </span><span class="s">"!"</span><span class="p">);</span></span>
+<span class="cl"><span class="ln">5</span><span class="p">}</span></span></pre>
+  </div>
+  <p class="note">🔎 Read line 4 aloud: "Show a message box containing <i>Hello,</i> plus whatever is typed in the txtName text box." You can already read GUI code. Next tab: you build one.</p>
+</section>
+
+<!-- 10 ▸ GUI practice -->
+<section data-tab="★ Practice" data-file="Form1.cs [Design]">
+  <p class="eyebrow">09 · Practice — build a GUI right now</p>
+  <h2>Mini Forms Designer</h2>
+  <p class="sub">This works like the real Visual Studio designer. <b>1)</b> Click a control in the Toolbox to add it to the form. <b>2)</b> Drag controls to arrange them. <b>3)</b> Select one and edit its <code class="inline">Text</code> in Properties. <b>4)</b> Watch the C# code write itself. <b>5)</b> Press ▶ Start — your Button really works.</p>
+  <div id="builder">
+    <div class="bpanel">
+      <div class="bhead">Toolbox</div>
+      <div class="toolitem" data-add="Button"><span class="ico">btn</span> Button</div>
+      <div class="toolitem" data-add="Label"><span class="ico">lbl</span> Label</div>
+      <div class="toolitem" data-add="TextBox"><span class="ico">txt</span> TextBox</div>
+      <div style="padding:11px 12px;color:var(--muted);font-size:12px;line-height:1.5">Click to add.<br>Then drag on the form.</div>
+    </div>
+    <div>
+      <div class="bpanel">
+        <div class="bhead">Form1.cs [Design]</div>
+        <div id="formHost">
+          <div id="designForm">
+            <div class="wtitle"><span id="designTitle">My First App</span><span class="btns">— ▢ ✕</span></div>
+            <div id="canvas"></div>
+          </div>
+        </div>
+      </div>
+      <div class="brun">
+        <button id="runBtn">▶ Start</button>
+        <button id="resetBtn">↺ Reset form</button>
+      </div>
+      <div class="codewin" id="genCodeWin">
+        <div class="bar">Form1.Designer.cs — generated automatically, just like real Visual Studio</div>
+        <pre id="genCode"></pre>
+      </div>
+    </div>
+    <div class="bpanel" id="props">
+      <div class="bhead">Properties</div>
+      <div id="propBody"><div class="hint">Select a control on the form to edit its properties — exactly like window #6 in the IDE tour.</div></div>
+    </div>
+  </div>
+  <p class="note">🎯 <b>Challenge:</b> recreate the "Greeter" — one Label ("What is your name?"), one TextBox, one Button ("Say Hello"). Run it, type your name, click the button. When the message box greets you, you have officially built an event-driven GUI in Week 1.</p>
+</section>
+
+<!-- 11 ▸ Wrap up -->
+<section data-tab="Wrap-Up" data-file="Lab01.md">
+  <p class="eyebrow">10 · Before you leave</p>
+  <h2>Week 1 — what you can now do</h2>
+  <div class="grid2">
+    <div>
+      <ul class="checklist">
+        <li>Define <b>C#</b> (the language), <b>.NET</b> (the platform), and <b>IDE</b> (the workshop).</li>
+        <li>Explain <b>compilation</b>: C# → compiler → IL → JIT → CPU, and why compiled beats interpreted for catching errors early.</li>
+        <li>Name the six key areas of <b>Visual Studio</b> and what each is for.</li>
+        <li>Read a console program line by line: <code class="inline">using</code>, <code class="inline">Main</code>, <code class="inline">Console.WriteLine</code>, <code class="inline">Console.ReadLine</code>.</li>
+        <li>Describe GUI programming with three words: <b>controls, properties, events</b>.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <span class="pill">Lab 1 · due before next class</span>
+      <h3>Hello, C# — IDE setup &amp; first program</h3>
+      <p style="margin-top:10px">1. Install <b>Visual Studio Community</b> with the <b>.NET desktop development</b> workload (or use an MEC lab machine).<br><br>
+      2. Create a Console App named <code class="inline">Lab01_HelloWorld</code>.<br><br>
+      3. Make it print a welcome line, ask for the user's name with <code class="inline">Console.ReadLine()</code>, and greet them back.<br><br>
+      4. Push your project to <b>GitHub</b> and submit the link on <b>Brightspace</b>.</p>
+      <p style="margin-top:12px;color:var(--warn)">Stuck installing? Come to office hours — setup problems are normal and fixable in minutes.</p>
+    </div>
+  </div>
+  <p class="note">📅 <b>Next week:</b> Variables, data types &amp; arithmetic — your programs start doing math. Quiz 1 covers today's definitions.</p>
+</section>
+
+</template>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------- build slides & tabs ---------- */
+  var tpl=document.getElementById('slides');
+  var stage=document.getElementById('stage');
+  var strip=document.getElementById('tabstrip');
+  var secs=tpl.content.querySelectorAll('section');
+  var slides=[],tabs=[],visited={};
+  secs.forEach(function(sec,i){
+    var s=sec.cloneNode(true);
+    s.classList.add('slide');
+    stage.appendChild(s);
+    slides.push(s);
+    var t=document.createElement('button');
+    t.className='tab';
+    t.innerHTML='<span class="dot"></span>'+sec.dataset.tab;
+    t.addEventListener('click',function(){go(i);});
+    strip.appendChild(t);
+    tabs.push(t);
+  });
+  var cur=0;
+  var prevBtn=document.getElementById('prevBtn'),nextBtn=document.getElementById('nextBtn');
+  function go(i){
+    if(i<0||i>=slides.length)return;
+    slides[cur].classList.remove('active');
+    tabs[cur].classList.remove('active');
+    if(visited[cur])tabs[cur].classList.add('done');
+    visited[cur]=true;
+    cur=i;
+    slides[cur].classList.add('active');
+    tabs[cur].classList.add('active');
+    tabs[cur].scrollIntoView({inline:'nearest',block:'nearest'});
+    slides[cur].scrollTop=0;
+    prevBtn.disabled=(cur===0);
+    nextBtn.disabled=(cur===slides.length-1);
+    document.getElementById('progressBar').style.width=((cur)/(slides.length-1)*100)+'%';
+    document.getElementById('lncol').textContent='Slide '+(cur+1)+' of '+slides.length+' · '+secs[cur].dataset.file;
+  }
+  prevBtn.addEventListener('click',function(){go(cur-1);});
+  nextBtn.addEventListener('click',function(){go(cur+1);});
+  document.addEventListener('keydown',function(e){
+    if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;
+    if(e.key==='ArrowRight')go(cur+1);
+    if(e.key==='ArrowLeft')go(cur-1);
+  });
+
+  /* ---------- flip cards ---------- */
+  stage.querySelectorAll('.flip').forEach(function(f){
+    function tog(){f.classList.toggle('flipped');}
+    f.addEventListener('click',tog);
+    f.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();tog();}});
+  });
+
+  /* ---------- compilation pipeline ---------- */
+  var pipeInfo=[
+    ['Program.cs — your source code','What you type in the editor: human-readable C#. The computer cannot run this directly — it\u2019s for people (and the compiler) to read.'],
+    ['The C# compiler (csc)','When you press ▶ Start or Build, the compiler reads your ENTIRE file. First it checks grammar — every missing semicolon or misspelled word becomes a syntax error with a line number. Only if everything is legal does it translate your code.'],
+    ['IL — Intermediate Language','The compiler\u2019s output: a compact, universal instruction set that isn\u2019t tied to any one computer. This is why the same C# program can run on different machines.'],
+    ['The .NET runtime & JIT compiler','When your app launches, the runtime\u2019s Just-In-Time compiler translates IL into the exact machine code your specific CPU speaks — right before it\u2019s needed. It also manages memory for you.'],
+    ['The CPU runs your app','Pure machine instructions execute. Your window opens, your text prints — the whole pipeline typically takes under a second.']
+  ];
+  var pipeNodes=stage.querySelectorAll('#pipeline .pnode');
+  pipeNodes.forEach(function(n){
+    n.addEventListener('click',function(){
+      pipeNodes.forEach(function(x){x.classList.remove('hot');});
+      n.classList.add('hot');
+      var d=pipeInfo[+n.dataset.i];
+      document.getElementById('pipeTitle').textContent=d[0];
+      document.getElementById('pipeText').textContent=d[1];
+    });
+  });
+
+  /* ---------- IDE tour ---------- */
+  stage.querySelectorAll('#tourGrid .tm').forEach(function(z){
+    z.addEventListener('click',function(){
+      stage.querySelectorAll('#tourGrid .tm').forEach(function(x){x.classList.remove('sel');});
+      z.classList.add('sel');
+      document.getElementById('tourTitle').textContent=z.dataset.t.replace('&amp;','&');
+      document.getElementById('tourText').textContent=z.dataset.d;
+    });
+  });
+
+  /* ---------- line-by-line explainer ---------- */
+  var lines=[
+    {h:'<span class="k">using</span> <span class="t">System</span><span class="p">;</span>',
+     t:'using System;',
+     d:'A "using directive." It tells the compiler: "I\u2019ll be borrowing tools from the System library" — that\u2019s where Console lives. Like listing a textbook on your syllabus before citing it.'},
+    {h:'',t:'',d:'A blank line. The compiler ignores it completely — it exists only to make the code easier for humans to read. Whitespace is free; use it.'},
+    {h:'<span class="k">class</span> <span class="t">Program</span>',
+     t:'class Program',
+     d:'A class is a container for code — the fundamental building block of object-oriented programming. Every C# program has at least one. Ours is named Program (names are capitalized by convention).'},
+    {h:'<span class="p">{</span>',t:'{',d:'The opening brace begins the body of the class. Everything until its matching } belongs to Program.'},
+    {h:'<span class="p">    </span><span class="k">static void</span> <span class="m">Main</span><span class="p">()</span>',
+     t:'static void Main()',
+     d:'Main is THE entry point — the first method the .NET runtime calls when your app starts. No Main, no program. "void" means it returns no value; "static" means it belongs to the class itself (full details in Week 5 — for now, this line is the standard recipe).'},
+    {h:'<span class="p">    {</span>',t:'{',d:'Opens the body of Main. The statements inside run top-to-bottom, in order — that\u2019s called sequential execution.'},
+    {h:'<span class="p">        </span><span class="t">Console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(</span><span class="s">"Hello, LaGuardia!"</span><span class="p">);</span>',
+     t:'Console.WriteLine("Hello, LaGuardia!");',
+     d:'The famous one. Console is a class representing the text window; WriteLine is its method that prints text and moves to a new line. The quoted text is a string argument — the data we hand to the method. The dot means "look inside." Read it right-to-left: print this string, using WriteLine, from Console.'},
+    {h:'<span class="p">        </span><span class="t">Console</span><span class="p">.</span><span class="m">Write</span><span class="p">(</span><span class="s">"What is your name? "</span><span class="p">);</span>',
+     t:'Console.Write("What is your name? ");',
+     d:'Write vs WriteLine: Write prints WITHOUT moving to the next line, so the user types their answer right after the question. Small difference, big effect on how output looks.'},
+    {h:'<span class="p">        </span><span class="t">Console</span><span class="p">.</span><span class="m">ReadLine</span><span class="p">();</span>',
+     t:'Console.ReadLine();',
+     d:'The opposite direction: ReadLine PAUSES the program and waits for the user to type something and press Enter. Input, not output. In Lab 1 you\u2019ll capture what they type into a variable — that\u2019s Week 2\u2019s topic.'},
+    {h:'<span class="p">    }</span>',t:'}',d:'Closes Main. When execution reaches this brace, Main is finished — and the program ends.'},
+    {h:'<span class="p">}</span>',t:'}',d:'Closes the Program class. Count them: every { has found its }. Visual Studio matches the pairs for you when your cursor touches one.'}
+  ];
+  var explPre=document.getElementById('explCode');
+  lines.forEach(function(L,i){
+    var div=document.createElement('span');
+    div.className='cl explain';
+    div.innerHTML='<span class="ln">'+(i+1)+'</span>'+(L.h||'<span class="p"> </span>');
+    div.addEventListener('click',function(){
+      explPre.querySelectorAll('.cl').forEach(function(x){x.classList.remove('sel');});
+      div.classList.add('sel');
+      document.getElementById('explTitle').textContent='Line '+(i+1)+(L.t?' · '+L.t:'');
+      document.getElementById('explText').textContent=L.d;
+    });
+    explPre.appendChild(div);
+  });
+
+  /* ---------- bug hunt ---------- */
+  var bugLines=[
+    {h:'<span class="k">using</span> <span class="t">System</span><span class="p">;</span>',bug:false,why:'Correct — the using directive ends with its semicolon.'},
+    {h:'<span class="k">class</span> <span class="t">Greeter</span>',bug:false,why:'Correct — class declarations don\u2019t take a semicolon before the brace.'},
+    {h:'<span class="p">{</span>',bug:false,why:'Correct — an honest opening brace.'},
+    {h:'<span class="p">    </span><span class="k">static void</span> <span class="m">Main</span><span class="p">()</span>',bug:false,why:'Correct — a proper Main entry point.'},
+    {h:'<span class="p">    {</span>',bug:false,why:'Correct.'},
+    {h:'<span class="p">        </span><span class="t">console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(</span><span class="s">"Hi there!"</span><span class="p">);</span>',bug:true,why:'Error 1: lowercase "console" — C# is case-sensitive; the class is Console.'},
+    {h:'<span class="p">        </span><span class="t">Console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(</span><span class="s">"Welcome to MAC 109"</span><span class="p">)</span>',bug:true,why:'Error 2: the statement is missing its semicolon at the end.'},
+    {h:'<span class="p">        </span><span class="t">Console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(</span><span class="p">Bye for now!</span><span class="p">);</span>',bug:true,why:'Error 3: the text isn\u2019t wrapped in double quotes, so the compiler thinks it\u2019s code, not a string.'},
+    {h:'<span class="p">    }</span>',bug:false,why:'Correct.'},
+    {h:'<span class="p">}</span>',bug:false,why:'Correct — braces are balanced; the bugs were all inside.'}
+  ];
+  var bugPre=document.getElementById('bugCode');var found=0;
+  bugLines.forEach(function(L,i){
+    var div=document.createElement('span');
+    div.className='cl bugline';
+    div.innerHTML='<span class="ln">'+(i+1)+'</span>'+L.h;
+    div.addEventListener('click',function(){
+      if(div.dataset.done)return;
+      div.dataset.done='1';
+      var tag=document.createElement('span');
+      if(L.bug){
+        div.classList.add('found');found++;
+        document.getElementById('bugScore').textContent='Found: '+found+' / 3'+(found===3?'  🎉 You debug like a pro!':'');
+        tag.className='buglabel err';tag.textContent='✗ '+L.why;
+      }else{
+        div.classList.add('wrongpick');
+        tag.className='buglabel ok';tag.textContent='✓ '+L.why;
+      }
+      div.appendChild(tag);
+    });
+    bugPre.appendChild(div);
+  });
+
+  /* ---------- quiz ---------- */
+  var quiz=[
+    {q:'Which statement best describes the relationship between C# and .NET?',
+     opts:['They are two names for the same thing','C# is the language you write; .NET is the platform and library your code runs on','.NET is the language; C# is the editor','C# only works on Apple computers'],
+     a:1,why:'C# is the vocabulary and grammar; .NET supplies the runtime engine and thousands of pre-built classes like Console and MessageBox.'},
+    {q:'You press ▶ Start and Visual Studio reports "; expected — line 7." What happened?',
+     opts:['The program ran and then crashed on line 7','The compiler found a syntax error BEFORE running anything','.NET is not installed','The CPU rejected your machine code'],
+     a:1,why:'Compilation happens first. Because C# is compiled, grammar mistakes are caught up front — nothing runs until the whole file is legal.'},
+    {q:'Which line correctly prints text to the screen?',
+     opts:['console.writeline("Hi");','Console.WriteLine(Hi);','Console.WriteLine("Hi");','Console.WriteLine("Hi")'],
+     a:2,why:'It needs the capital-C Console (case matters), quotes around the string, and a semicolon at the end. Each other option breaks exactly one rule.'},
+    {q:'In GUI programming, code inside btnGreet_Click runs…',
+     opts:['Automatically when the program starts','Once per second','Only when the user clicks the btnGreet button','Never — it\u2019s just a comment'],
+     a:2,why:'GUI apps are event-driven: handlers wait for their event. No click, no execution. That\u2019s the core difference from top-to-bottom console programs.'}
+  ];
+  var host=document.getElementById('quizHost');var score=0,answered=0;
+  quiz.forEach(function(Q,qi){
+    var box=document.createElement('div');box.className='q';
+    var h=document.createElement('h3');h.textContent=(qi+1)+'. '+Q.q;box.appendChild(h);
+    var why=document.createElement('p');why.className='why';why.textContent=Q.why;
+    Q.opts.forEach(function(o,oi){
+      var b=document.createElement('button');b.className='opt';b.textContent=o;
+      b.addEventListener('click',function(){
+        if(box.dataset.done)return;box.dataset.done='1';answered++;
+        box.querySelectorAll('.opt').forEach(function(x,xi){
+          x.disabled=true;
+          if(xi===Q.a)x.classList.add('right');
+        });
+        if(oi===Q.a){score++;}else{b.classList.add('wrong');}
+        why.classList.add('show');
+        document.getElementById('quizScore').textContent='Score: '+score+' / '+quiz.length+(answered===quiz.length?(score===quiz.length?'  🏆 Perfect!':'  — review the explanations above, then move on.'):'');
+      });
+      box.appendChild(b);
+    });
+    box.appendChild(why);host.appendChild(box);
+  });
+
+  /* ================= GUI BUILDER ================= */
+  var canvas=document.getElementById('canvas');
+  var propBody=document.getElementById('propBody');
+  var genCode=document.getElementById('genCode');
+  var controls=[];var counts={Button:0,Label:0,TextBox:0};var selected=null;var nextY=14;
+
+  var defaults={Button:'button',Label:'label',TextBox:''};
+  var prefix={Button:'btn',Label:'lbl',TextBox:'txt'};
+
+  function addControl(type){
+    counts[type]++;
+    var c={type:type,name:prefix[type]+type+counts[type],
+           text:type==='TextBox'?'':defaults[type]+counts[type],
+           x:24+((controls.length%3)*10),y:nextY,el:null};
+    nextY=Math.min(nextY+42,190);
+    var el=document.createElement('div');
+    el.className='ctl '+type;el.tabIndex=0;
+    el.style.left=c.x+'px';el.style.top=c.y+'px';
+    c.el=el;controls.push(c);
+    canvas.appendChild(el);
+    paint(c);select(c);
+    attachDrag(c);
+    el.addEventListener('mousedown',function(){select(c);});
+    el.addEventListener('touchstart',function(){select(c);},{passive:true});
+  }
+  function paint(c){
+    c.el.textContent=c.type==='TextBox'?(c.text||''):c.text;
+    if(c.type==='TextBox'&&!c.text)c.el.innerHTML='&nbsp;';
+  }
+  function select(c){
+    selected=c;
+    controls.forEach(function(x){x.el.classList.toggle('selctl',x===c);});
+    renderProps();
+  }
+  function renderProps(){
+    if(!selected){propBody.innerHTML='<div class="hint">Select a control on the form to edit its properties.</div>';return;}
+    propBody.innerHTML=
+      '<div class="prow"><label>(Name)</label><input id="pName" value="'+esc(selected.name)+'"></div>'+
+      '<div class="prow"><label>Text</label><input id="pText" value="'+esc(selected.text)+'"></div>'+
+      '<div class="prow" style="color:var(--muted);font-size:12px;line-height:1.5">Type: <b style="color:var(--type)">'+selected.type+'</b><br>Location: ('+Math.round(selected.x)+', '+Math.round(selected.y)+')</div>'+
+      '<div class="prow"><button id="pDel" style="width:100%;background:#5a1d1d;color:#ffb4a5;border:1px solid #7a2a2a;border-radius:5px;padding:7px;cursor:pointer;font-size:12.5px">Delete control</button></div>';
+    document.getElementById('pText').addEventListener('input',function(e){selected.text=e.target.value;paint(selected);regen();});
+    document.getElementById('pName').addEventListener('input',function(e){selected.name=e.target.value.replace(/[^A-Za-z0-9_]/g,'')||selected.name;regen();});
+    document.getElementById('pDel').addEventListener('click',function(){
+      canvas.removeChild(selected.el);
+      controls=controls.filter(function(x){return x!==selected;});
+      selected=null;renderProps();regen();
+    });
+  }
+  function esc(s){return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
+
+  function attachDrag(c){
+    var sx,sy,ox,oy,drag=false;
+    function down(e){
+      drag=true;
+      var p=e.touches?e.touches[0]:e;
+      sx=p.clientX;sy=p.clientY;ox=c.x;oy=c.y;
+      e.preventDefault();
+    }
+    function move(e){
+      if(!drag)return;
+      var p=e.touches?e.touches[0]:e;
+      c.x=Math.max(0,Math.min(canvas.clientWidth-40,ox+(p.clientX-sx)));
+      c.y=Math.max(0,Math.min(canvas.clientHeight-26,oy+(p.clientY-sy)));
+      c.el.style.left=c.x+'px';c.el.style.top=c.y+'px';
+    }
+    function up(){if(drag){drag=false;regen();if(selected===c)renderProps();}}
+    c.el.addEventListener('mousedown',down);
+    c.el.addEventListener('touchstart',down,{passive:false});
+    document.addEventListener('mousemove',move);
+    document.addEventListener('touchmove',move,{passive:false});
+    document.addEventListener('mouseup',up);
+    document.addEventListener('touchend',up);
+  }
+
+  function line(html){return '<span class="cl">'+html+'</span>';}
+  function regen(){
+    var out=[];
+    out.push(line('<span class="c">// Auto-generated by the Designer — one object per control</span>'));
+    controls.forEach(function(c){
+      out.push(line('<span class="k">private</span> <span class="t">'+c.type+'</span> <span class="p">'+c.name+' = </span><span class="k">new</span> <span class="t">'+c.type+'</span><span class="p">();</span>'));
+    });
+    if(controls.length){
+      out.push(line('<span class="p"> </span>'));
+      controls.forEach(function(c){
+        out.push(line('<span class="p">'+c.name+'.Text = </span><span class="s">"'+esc(c.text)+'"</span><span class="p">;</span>'));
+        out.push(line('<span class="p">'+c.name+'.Location = </span><span class="k">new</span> <span class="t">Point</span><span class="p">('+Math.round(c.x)+', '+Math.round(c.y)+');</span>'));
+      });
+      var btn=firstButton();
+      if(btn){
+        out.push(line('<span class="p"> </span>'));
+        out.push(line('<span class="c">// Wire the Click event to its handler</span>'));
+        out.push(line('<span class="p">'+btn.name+'.Click += </span><span class="m">'+btn.name+'_Click</span><span class="p">;</span>'));
+        out.push(line('<span class="p"> </span>'));
+        out.push(line('<span class="k">private void</span> <span class="m">'+btn.name+'_Click</span><span class="p">(</span><span class="k">object</span><span class="p"> sender, </span><span class="t">EventArgs</span><span class="p"> e)</span>'));
+        out.push(line('<span class="p">{</span>'));
+        var txt=firstTextBox();
+        if(txt){
+          out.push(line('<span class="p">    </span><span class="t">MessageBox</span><span class="p">.</span><span class="m">Show</span><span class="p">(</span><span class="s">"Hello, "</span><span class="p"> + '+txt.name+'.Text + </span><span class="s">"!"</span><span class="p">);</span>'));
+        }else{
+          out.push(line('<span class="p">    </span><span class="t">MessageBox</span><span class="p">.</span><span class="m">Show</span><span class="p">(</span><span class="s">"You clicked '+esc(btn.text)+'!"</span><span class="p">);</span>'));
+        }
+        out.push(line('<span class="p">}</span>'));
+      }
+    }else{
+      out.push(line('<span class="c">// (empty form — add controls from the Toolbox)</span>'));
+    }
+    genCode.innerHTML=out.join('');
+  }
+  function firstButton(){for(var i=0;i<controls.length;i++)if(controls[i].type==='Button')return controls[i];return null;}
+  function firstTextBox(){for(var i=0;i<controls.length;i++)if(controls[i].type==='TextBox')return controls[i];return null;}
+
+  stage.querySelectorAll('.toolitem').forEach(function(t){
+    t.addEventListener('click',function(){addControl(t.dataset.add);regen();});
+  });
+  document.getElementById('resetBtn').addEventListener('click',function(){
+    controls.forEach(function(c){canvas.removeChild(c.el);});
+    controls=[];counts={Button:0,Label:0,TextBox:0};selected=null;nextY=14;
+    renderProps();regen();
+  });
+
+  /* ---- run mode ---- */
+  var overlay=document.getElementById('runOverlay');
+  var runCanvas=document.getElementById('runCanvas');
+  var msgbox=document.getElementById('msgbox');
+  document.getElementById('runBtn').addEventListener('click',function(){
+    runCanvas.innerHTML='';
+    var inputs={};
+    controls.forEach(function(c){
+      var el;
+      if(c.type==='TextBox'){
+        el=document.createElement('input');
+        el.className='ctl TextBox';el.value=c.text;
+        el.style.cursor='text';inputs[c.name]=el;
+      }else{
+        el=document.createElement('div');
+        el.className='ctl '+c.type;el.textContent=c.text;
+        el.style.cursor=c.type==='Button'?'pointer':'default';
+      }
+      el.style.left=c.x+'px';el.style.top=c.y+'px';el.style.position='absolute';
+      if(c.type==='Button'){
+        el.addEventListener('click',function(){
+          var txt=firstTextBox();
+          var msg=txt&&inputs[txt.name]?('Hello, '+(inputs[txt.name].value||'friend')+'!'):('You clicked '+c.text+'!');
+          document.getElementById('msgText').textContent=msg;
+          msgbox.classList.add('show');
+        });
+      }
+      runCanvas.appendChild(el);
+    });
+    document.getElementById('runFormTitle').textContent=document.getElementById('designTitle').textContent;
+    overlay.classList.add('show');
+  });
+  document.getElementById('closeRun').addEventListener('click',function(){overlay.classList.remove('show');});
+  document.getElementById('msgOk').addEventListener('click',function(){msgbox.classList.remove('show');});
+
+  /* ---------- boot ---------- */
+  regen();
+  slides[0].classList.add('active');
+  tabs[0].classList.add('active');
+  prevBtn.disabled=true;
+  document.getElementById('lncol').textContent='Slide 1 of '+slides.length+' · '+secs[0].dataset.file;
+})();
+</script>
+</body>
+</html>
