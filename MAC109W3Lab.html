@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MAC 109 · Build Your First GUI — In-Class Practical · Visual Studio</title>
+<style>
+:root{
+  --paper:#EFF3FA; --ink:#201A2E; --muted:#5a5470;
+  --vs:#5C2D91; --vs-deep:#3B1E5E; --win:#0078D4; --go:#107C10; --warn:#C50F1F;
+  --card:#ffffff; --edge:#d9dcec;
+  --ide:#1E1E1E; --ide2:#252526; --ide3:#333337; --ide-t:#D4D4D4; --ide-dim:#8a8a92;
+  --code-k:#569CD6; --code-s:#CE9178; --code-c:#6A9955; --code-t:#4EC9B0; --code-m:#DCDCAA; --code-n:#B5CEA8;
+  --radius:10px;
+  font-size:16px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:"Segoe UI", "Segoe UI Variable Text", system-ui, -apple-system, sans-serif;
+  line-height:1.6;
+}
+code,pre,kbd{font-family:"Cascadia Code","Cascadia Mono",Consolas,"SF Mono",Menlo,monospace}
+a{color:var(--win)}
+img{max-width:100%}
+h1,h2,h3{line-height:1.2}
+
+/* ---------- floating glyph backdrop ---------- */
+.glyphs{position:fixed; inset:0; overflow:hidden; pointer-events:none; z-index:0}
+.glyphs span{position:absolute; font-weight:800; color:var(--vs); opacity:.06; user-select:none}
+@media (prefers-reduced-motion:no-preference){
+  .glyphs span{animation:drift 26s linear infinite}
+  @keyframes drift{from{transform:translateY(105vh) rotate(-8deg)}to{transform:translateY(-15vh) rotate(8deg)}}
+}
+
+/* ---------- hero ---------- */
+.hero{position:relative; z-index:1; background:linear-gradient(150deg,var(--vs-deep) 0%,var(--vs) 55%,#7A3FB8 100%); color:#fff; padding:3.2rem 1.2rem 2.6rem}
+.hero .wrap{max-width:860px;margin:0 auto}
+.kicker{display:inline-block; background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.28); border-radius:999px; padding:.28rem .9rem; font-size:.8rem; letter-spacing:.04em; font-weight:600}
+.hero h1{font-size:clamp(1.9rem,4.5vw,3rem); font-weight:800; margin:.9rem 0 .6rem}
+.hero p.lead{font-size:1.08rem; max-width:46rem; color:#EDE6F7; margin:0 0 1.2rem}
+.hero .chips{display:flex; flex-wrap:wrap; gap:.55rem}
+.hero .chip{background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.25); border-radius:8px; padding:.4rem .75rem; font-size:.85rem}
+
+/* ---------- layout ---------- */
+main{position:relative; z-index:1; max-width:860px; margin:0 auto; padding:1.4rem 1.2rem 4rem}
+
+/* ---------- quest map (taskbar) ---------- */
+.map{background:var(--card); border:1px solid var(--edge); border-radius:var(--radius); padding:1.1rem 1.2rem 1.3rem; margin-top:-2.2rem; box-shadow:0 10px 30px rgba(59,30,94,.14)}
+.map h2{margin:.1rem 0 .2rem; font-size:1.15rem}
+.map p{margin:.1rem 0 .8rem; color:var(--muted); font-size:.92rem}
+.bar{height:12px; background:#e5e2f2; border-radius:999px; overflow:hidden; margin-bottom:.35rem}
+.bar i{display:block; height:100%; width:0%; background:linear-gradient(90deg,var(--win),var(--vs)); border-radius:999px; transition:width .45s ease}
+.pct{font-size:.8rem; color:var(--muted); margin-bottom:.7rem}
+.taskbar{display:flex; flex-wrap:wrap; gap:.45rem}
+.task{display:flex; align-items:center; gap:.45rem; text-decoration:none; color:var(--ink); background:#f2f1fa; border:1px solid var(--edge); border-radius:8px; padding:.38rem .62rem; font-size:.83rem; font-weight:600; transition:transform .12s ease, background .2s}
+.task:hover{transform:translateY(-2px); background:#e9e6f6}
+.task .n{display:grid; place-items:center; width:1.35rem; height:1.35rem; border-radius:6px; background:var(--vs); color:#fff; font-size:.75rem; flex:none}
+.task.done{background:#e7f4e8; border-color:#bfe0c2}
+.task.done .n{background:var(--go)}
+.task.done .n::before{content:"✓"}
+.task:not(.done) .n::before{content:attr(data-n)}
+
+/* ---------- level windows ---------- */
+.level{background:var(--card); border:1px solid var(--edge); border-radius:var(--radius); margin:1.7rem 0; box-shadow:0 6px 22px rgba(32,26,46,.08); overflow:hidden; scroll-margin-top:1rem}
+.titlebar{display:flex; align-items:center; gap:.7rem; padding:.55rem .9rem; background:linear-gradient(90deg,var(--vs-deep),var(--vs)); color:#fff}
+.level.done .titlebar{background:linear-gradient(90deg,#0c5d0c,var(--go))}
+.titlebar .lvl{display:grid; place-items:center; min-width:1.7rem; height:1.7rem; border-radius:7px; background:rgba(255,255,255,.18); font-weight:800; font-size:.9rem}
+.titlebar h2{flex:1; margin:0; font-size:1.06rem; font-weight:700}
+.titlebar .emo{font-size:1.15rem}
+.tbtns{display:flex; gap:.45rem; font-size:.8rem; opacity:.85; letter-spacing:.1em}
+.body{padding:1.15rem 1.25rem 1.35rem}
+.body>p:first-child{margin-top:.2rem}
+.level ol{padding-left:1.25rem; margin:.7rem 0}
+.level ol li{margin:.45rem 0}
+.level ul{padding-left:1.2rem}
+.level ul li{margin:.4rem 0}
+kbd{background:#eceaf6; border:1px solid #cfcbe6; border-bottom-width:2px; border-radius:6px; padding:.08rem .42rem; font-size:.85em}
+.small{font-size:.87rem; color:var(--muted)}
+
+/* checkpoint + medal + tip */
+.check{border-left:4px solid var(--go); background:#f0f8f0; border-radius:0 8px 8px 0; padding:.7rem .9rem; margin:1rem 0}
+.medal{border:1.5px solid #e6c34a; background:#fdf7e3; border-radius:8px; padding:.75rem .95rem; margin:1rem 0; font-size:.95rem}
+.tip{border-left:4px solid var(--win); background:#eef6fd; border-radius:0 8px 8px 0; padding:.7rem .9rem; margin:1rem 0; font-size:.93rem}
+.danger{border-left:4px solid var(--warn); background:#fdefef; border-radius:0 8px 8px 0; padding:.7rem .9rem; margin:1rem 0; font-size:.93rem}
+
+/* explainer accordions */
+details{border:1px solid var(--edge); border-radius:8px; margin:.8rem 0; background:#faf9fd; overflow:hidden}
+details summary{cursor:pointer; padding:.65rem .9rem; font-weight:700; font-size:.95rem; list-style:none; position:relative; padding-right:2.2rem}
+details summary::after{content:"+"; position:absolute; right:.9rem; top:.5rem; font-size:1.15rem; color:var(--vs); transition:transform .2s}
+details[open] summary::after{transform:rotate(45deg)}
+details .dbody{padding:0 .95rem .85rem; font-size:.95rem}
+details summary::-webkit-details-marker{display:none}
+
+/* mark complete */
+.markwrap{margin-top:1.2rem; display:flex; justify-content:flex-end}
+.mark{appearance:none; border:1.5px solid var(--vs); background:#fff; color:var(--vs); font:inherit; font-weight:700; font-size:.92rem; border-radius:8px; padding:.5rem 1.05rem; cursor:pointer; transition:all .15s}
+.mark:hover{background:#f4effb}
+.level.done .mark{background:var(--go); border-color:var(--go); color:#fff}
+.mark:focus-visible,.task:focus-visible,.copy:focus-visible{outline:3px solid var(--win); outline-offset:2px}
+
+/* ---------- code blocks ---------- */
+.codewrap{position:relative; margin:.9rem 0}
+.codehead{display:flex; align-items:center; justify-content:space-between; background:var(--ide3); color:#cfcfd6; border-radius:8px 8px 0 0; padding:.4rem .8rem; font-size:.8rem}
+.copy{appearance:none; border:1px solid #55555e; background:#2a2a30; color:#e8e8ee; border-radius:6px; padding:.18rem .65rem; font:inherit; font-size:.78rem; cursor:pointer}
+.copy:hover{background:#3a3a44}
+pre.code{margin:0; background:var(--ide); color:var(--ide-t); border-radius:0 0 8px 8px; padding:.9rem 1rem; overflow-x:auto; font-size:.86rem; line-height:1.55}
+.k{color:var(--code-k)} .s{color:var(--code-s)} .c{color:var(--code-c)} .t{color:var(--code-t)} .m{color:var(--code-m)} .n{color:var(--code-n)}
+
+/* ---------- IDE figure mockups ---------- */
+.fig{margin:1rem 0}
+.fig figcaption{font-size:.85rem; color:var(--muted); margin-top:.45rem}
+.ide{background:var(--ide); border-radius:10px; overflow:hidden; border:1px solid #101012; font-size:.8rem; color:var(--ide-t); box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.ide .cap{background:var(--ide3); padding:.42rem .8rem; display:flex; align-items:center; gap:.6rem; color:#d8d8de}
+.ide .cap .dots{letter-spacing:.15em; opacity:.7; font-size:.75rem; margin-left:auto}
+.ide .row{display:flex; min-height:150px}
+.ide .pane{padding:.6rem .7rem}
+.ide .side{background:var(--ide2); flex:0 0 27%; border-right:1px solid #111; min-width:0}
+.ide .main{flex:1; min-width:0}
+.ide .side h4,.ide .main h4{margin:.1rem 0 .4rem; font-size:.72rem; font-weight:600; color:var(--ide-dim); letter-spacing:.06em}
+.ide .item{padding:.14rem .3rem; border-radius:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.ide .item.sel{background:#094771; color:#fff}
+.ide .status{background:var(--vs-deep); color:#efe7fa; padding:.3rem .8rem; font-size:.72rem; display:flex; gap:1rem}
+.ide .status.run{background:#8B3A00}
+.ide pre{margin:0; font-size:.8rem; line-height:1.55; overflow-x:auto}
+
+/* running WinForms window mockup */
+.winapp{background:#F3F3F3; color:#111; border:1px solid #b9b9c2; border-radius:8px; overflow:hidden; max-width:430px; margin:.4rem auto; box-shadow:0 14px 30px rgba(32,26,46,.22); font-size:.88rem}
+.winapp .wtitle{display:flex; align-items:center; background:#fff; border-bottom:1px solid #e2e2e8; padding:.4rem .7rem; gap:.5rem}
+.winapp .wtitle .t{flex:1; font-size:.82rem}
+.winapp .wtitle .wb{color:#444; letter-spacing:.35em; font-size:.8rem}
+.winapp .wbody{padding:1rem .95rem 1.15rem; display:flex; flex-direction:column; gap:.65rem}
+.wf-label{font-size:.92rem}
+.wf-text{background:#fff; border:1px solid #7a7a7a; border-radius:2px; padding:.3rem .5rem; font-size:.9rem; color:#333}
+.wf-btn{display:inline-block; background:#E1E1E1; border:1px solid #ADADAD; padding:.32rem .95rem; font-size:.88rem; border-radius:2px; width:max-content}
+.wf-btn.primary{background:#0078D4; border-color:#005A9E; color:#fff}
+.wf-result{font-weight:700; font-size:1.02rem; color:#0B5394}
+.msgbox{background:#fff; border:1px solid #9aa; border-radius:6px; max-width:300px; margin:.6rem auto 0; box-shadow:0 10px 24px rgba(0,0,0,.28); overflow:hidden}
+.msgbox .mt{background:#fff; border-bottom:1px solid #eee; font-size:.78rem; padding:.3rem .6rem; display:flex}
+.msgbox .mt span:last-child{margin-left:auto; color:#555}
+.msgbox .mb{padding:.8rem .8rem .2rem; font-size:.9rem}
+.msgbox .mf{padding:.5rem .6rem .6rem; display:flex; justify-content:flex-end; background:#F0F0F0; margin-top:.6rem}
+
+/* start-window template cards */
+.tcards{display:grid; gap:.5rem; padding:.2rem 0}
+.tcard{border:1px solid #3c3c44; border-radius:6px; padding:.5rem .65rem; background:#2b2b31}
+.tcard.sel{border-color:var(--win); background:#0e2a3f}
+.tcard b{display:block; font-size:.82rem; color:#fff}
+.tcard span{font-size:.72rem; color:var(--ide-dim)}
+.tags{margin-top:.25rem; display:flex; gap:.35rem}
+.tags i{font-style:normal; font-size:.66rem; border:1px solid #4a4a55; border-radius:4px; padding:.05rem .4rem; color:#c9c9d2}
+
+/* properties grid mockup */
+.propgrid{display:grid; grid-template-columns:1fr 1.2fr; font-size:.78rem}
+.propgrid div{padding:.22rem .5rem; border-bottom:1px solid #2c2c31; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.propgrid .pv{color:#9CDCFE}
+.propgrid .hl{background:#094771; color:#fff}
+
+/* ---------- completion overlay ---------- */
+.overlay{position:fixed; inset:0; background:rgba(24,16,40,.82); display:none; place-items:center; z-index:50; padding:1rem}
+.overlay.show{display:grid}
+.trophycard{background:var(--card); border-radius:16px; max-width:480px; width:100%; text-align:center; padding:2.2rem 1.6rem; box-shadow:0 30px 80px rgba(0,0,0,.45); border-top:8px solid var(--vs)}
+.trophycard .big{font-size:3.6rem}
+.trophycard h3{font-size:1.6rem; margin:.5rem 0 .4rem}
+.trophycard p{color:var(--muted); margin:.2rem 0 1.2rem}
+.trophycard button{appearance:none; border:none; background:var(--vs); color:#fff; font:inherit; font-weight:700; border-radius:9px; padding:.65rem 1.5rem; cursor:pointer}
+.trophycard button:hover{background:var(--vs-deep)}
+
+footer{position:relative; z-index:1; text-align:center; color:var(--muted); font-size:.83rem; padding:1.5rem 1.2rem 2.5rem; max-width:860px; margin:0 auto}
+@media (max-width:560px){
+  .ide .row{flex-direction:column}
+  .ide .side{flex:none; border-right:none; border-bottom:1px solid #111}
+}
+</style>
+</head>
+<body>
+
+<div class="glyphs" aria-hidden="true">
+  <span style="left:6%; font-size:3.2rem; animation-delay:-3s">▢</span>
+  <span style="left:22%; font-size:2.4rem; animation-delay:-11s">🖱️</span>
+  <span style="left:41%; font-size:3rem; animation-delay:-7s">{ }</span>
+  <span style="left:60%; font-size:2.6rem; animation-delay:-16s">▶</span>
+  <span style="left:76%; font-size:3rem; animation-delay:-1s">C#</span>
+  <span style="left:90%; font-size:2.2rem; animation-delay:-20s">;</span>
+</div>
+
+<div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="ovTitle">
+  <div class="trophycard">
+    <div class="big">🏆</div>
+    <h3 id="ovTitle">WINDOW ACHIEVED!</h3>
+    <p>All 10 levels complete — two real <b>graphical</b> programs, designed, wired, and pushed to GitHub. Console apps talk; your apps now have a <i>face</i>.</p>
+    <button id="ovClose">Ship it! 🚀</button>
+  </div>
+</div>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="kicker">MAC 109 · In-class practical · Windows lab + Visual Studio 2022</span>
+    <h1>Today your program gets a face 🪟</h1>
+    <p class="lead">Ten small levels, right here in the classroom. You'll <b>drag and drop</b> your way to a real window with buttons and text boxes — then wire it up with the exact same C# you wrote in Lab 1. No terminal. Barely any typing. Maximum wow.</p>
+    <div class="chips">
+      <span class="chip">🏫 In-class · lab machines</span>
+      <span class="chip">🎯 Builds both GUI deliverables</span>
+      <span class="chip">⏱️ ~75–90 minutes</span>
+      <span class="chip">🖱️ Drag-drop-click workflow</span>
+      <span class="chip">☁️ Push before you leave!</span>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<section class="map" id="map">
+  <h2>🗺️ Quest map</h2>
+  <p>Tick off levels as you go — your progress is saved on this browser. Finish all 10 for a surprise.</p>
+  <div class="bar"><i id="barfill"></i></div>
+  <div class="pct" id="pct">0% complete</div>
+  <nav class="taskbar" aria-label="Levels">
+    <a class="task" href="#L1" data-l="1"><span class="n" data-n="1"></span>Launch Visual Studio</a>
+    <a class="task" href="#L2" data-l="2"><span class="n" data-n="2"></span>Meet the cockpit</a>
+    <a class="task" href="#L3" data-l="3"><span class="n" data-n="3"></span>A window with zero code</a>
+    <a class="task" href="#L4" data-l="4"><span class="n" data-n="4"></span>Drag your first controls</a>
+    <a class="task" href="#L5" data-l="5"><span class="n" data-n="5"></span>Double-click = event</a>
+    <a class="task" href="#L6" data-l="6"><span class="n" data-n="6"></span>Make it talk 💬</a>
+    <a class="task" href="#L7" data-l="7"><span class="n" data-n="7"></span>Level-up the greeter</a>
+    <a class="task" href="#L8" data-l="8"><span class="n" data-n="8"></span>The calculator gets buttons</a>
+    <a class="task" href="#L9" data-l="9"><span class="n" data-n="9"></span>Try to break it 😈</a>
+    <a class="task" href="#L10" data-l="10"><span class="n" data-n="10"></span>Push or it never happened</a>
+  </nav>
+</section>
+
+<!-- ============ LEVEL 1 ============ -->
+<article class="level" id="L1" data-level="1">
+  <div class="titlebar"><span class="lvl">1</span><h2>Launch Visual Studio &amp; create the project</h2><span class="emo">🚀</span><span class="tbtns">— ▢ ✕</span></div>
+  <div class="body">
+    <p>At home on your Mac you used <b>VS Code</b>. The classroom machines run its big sibling, <b>Visual Studio 2022</b> — the full professional IDE, and the reason this course is called <i>Visual</i> C#. Everything is pre-installed. Let's make a project.</p>
+    <ol>
+      <li>Log into the lab machine, press the <kbd>⊞ Windows</kbd> key, type <b>Visual Studio</b>, and open <b>Visual Studio 2022</b> (the purple ∞ icon — <i>not</i> the blue VS Code one).</li>
+      <li>On the start window, click <b>Create a new project</b>.</li>
+      <li>In the search box at the top, type <b>winforms</b>.</li>
+      <li>Choose <b>Windows Forms App</b> — the one tagged <b>C#</b>. ⚠️ Skip the look-alikes: not <i>Visual Basic</i>, and not the one that says <i>(.NET Framework)</i>. Click <b>Next</b>.</li>
+      <li>Project name: <code>Lab03_FirstGUI</code> &nbsp;·&nbsp; Solution name: <code>MAC109_GuiLabs</code> &nbsp;·&nbsp; Location: <b>Documents ▸ MAC109</b> (create the folder if it's not there). Click <b>Next</b>, keep the suggested .NET version, click <b>Create</b>.</li>
+    </ol>
+
+    <figure class="fig">
+      <div class="ide">
+        <div class="cap">Visual Studio 2022 — Create a new project<span class="dots">— ▢ ✕</span></div>
+        <div class="row">
+          <div class="pane main">
+            <h4>🔍 winforms</h4>
+            <div class="tcards">
+              <div class="tcard sel"><b>Windows Forms App</b><span>A project for creating a .NET Windows Forms (WinForms) app.</span><div class="tags"><i>C#</i><i>Windows</i><i>Desktop</i></div></div>
+              <div class="tcard"><b>Windows Forms App (.NET Framework)</b><span>Older framework — not for us.</span><div class="tags"><i>C#</i><i>Windows</i></div></div>
+              <div class="tcard"><b>Windows Forms App</b><span>Same idea, wrong language.</span><div class="tags"><i>Visual Basic</i><i>Windows</i></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="status"><span>Pick the C# one · Next</span></div>
+      </div>
+      <figcaption><b>Figure 1.</b> The template picker. First card, tagged <b>C#</b>. (Figures in this guide are faithful recreations of the real screens — the lab machines may vary slightly.)</figcaption>
+    </figure>
+
+    <div class="danger">🧠 <b>Lab-machine reality check:</b> these computers can be wiped between classes. Anything that only lives in <b>Documents</b> can vanish. That's why Level 10 — pushing to GitHub — is not optional today. You've been warned (lovingly).</div>
+
+    <details><summary>What's the difference between Visual Studio and VS Code?</summary><div class="dbody"><b>VS Code</b> is a lightweight editor that learns C# through extensions — great on any machine, including your Mac. <b>Visual Studio</b> is the full workshop: it ships with the compiler, the debugger, and — the star of today — the <b>Forms Designer</b>, a canvas where you <i>draw</i> your program's window. The C# language is 100% identical in both. Same engine, fancier steering wheel.</div></details>
+
+    <div class="markwrap"><button class="mark" type="button">Mark level complete</button></div>
+  </div>
+</article>
+
+<!-- ============ LEVEL 2 ============ -->
+<article class="level" id="L2" data-level="2">
+  <div class="titlebar"><span class="lvl">2</span><h2>Meet the cockpit</h2><span class="emo">🛩️</span><span class="tbtns">— ▢ ✕</span></div>
+  <div class="body">
+    <p>Visual Studio opens with your project, and in the middle sits something new: a blank grey window called <b>Form1</b>. That's not a picture — that's your program, being designed live. Find these four panels before touching anything:</p>
+
+    <figure class="fig">
+      <div class="ide">
+        <div class="cap">Lab03_FirstGUI — Microsoft Visual Studio<span class="dots">— ▢ ✕</span></div>
+        <div class="row">
+          <div class="pane side">
+            <h4>TOOLBOX</h4>
+            <div class="item">▸ All Windows Forms</div>
+            <div class="item sel">&nbsp;&nbsp;Button</div>
+            <div class="item">&nbsp;&nbsp;CheckBox</div>
+            <div class="item">&nbsp;&nbsp;Label</div>
+            <div class="item">&nbsp;&nbsp;PictureBox</div>
+            <div class="item">&nbsp;&nbsp;TextBox</div>
+          </div>
+          <div class="pane main">
+            <h4>Form1.cs [Design]</h4>
+            <div class="winapp" style="max-width:250px; margin:.3rem 0">
+              <div class="wtitle"><span class="t">Form1</span><span class="wb">— ▢ ✕</span></div>
+              <div class="wbody" style="min-height:80px"></div>
+            </div>
+          </div>
+          <div class="pane side" style="border-left:1px solid #111; border-right:none">
+            <h4>SOLUTION EXPLORER</h4>
+            <div class="item">▾ Solution 'MAC109_GuiLabs'</div>
+            <div class="item">&nbsp;▾ Lab03_FirstGUI</div>
+            <div class="item sel">&nbsp;&nbsp;▸ Form1.cs</div>
+            <div class="item">&nbsp;&nbsp;&nbsp; Program.cs</div>
+            <h4 style="margin-top:.7rem">PROPERTIES</h4>
+            <div class="propgrid">
+              <div>Text</div><div class="pv">Form1</div>
+              <div>Size</div><div class="pv">800, 450</div>
+            </div>
+          </div>
+        </div>
+        <div class="status"><span>Ready</span><span>↑ 0 ↓ 0</span></div>
+      </div>
+      <figcaption><b>Figure 2.</b> The cockpit: Toolbox (left), Designer canvas (center), Solution Explorer + Properties (right). Missing a panel? The <b>View</b> menu brings any of them back.</figcaption>
+    </figure>
+
+    <ul>
+      <li><b>Designer canvas</b> 💜 (center) — Form1, the window you are building. Today's main stage.</li>
+      <li><b>Toolbox</b> (left) — a parts shelf full of <b>controls</b>: buttons, labels, text boxes… you'll drag these onto the form.</li>
+      <li><b>Properties window</b> (bottom-right) — every knob and dial of whatever is selected: its text, color, size, name.</li>
+      <li><b>Solution Explorer</b> (top-right) — your files. <code>Form1.cs</code> holds your code; <code>Program.cs</code> just starts the app. Look, don't touch.</li>
+    </ul>
+
+    <details><summary>Wait — a "Form"? I thought we made windows?</summary><div class="dbody">Same thing, older name. In Windows Forms, every window is a <b>Form</b>, and every form is an <b>object</b> built from a <b>class</b> (peek at the code later: <code>class Form1 : Form</code> — your class, inheriting a mountain of ready-made window powers). You've been using objects since <code>Console.WriteLine</code>; today you'll finally <i>see</i> one. Classes get their full lecture in Week 9 — today, enjoy the magic.</div></details>
+
+    <div class="markwrap"><button class="mark" type="button">Mark level complete</button></div>
+  </div>
+</article>
+
+<!-- ============ LEVEL 3 ============ -->
+<article class="level" id="L3" data-level="3">
+  <div class="titlebar"><span class="lvl">3</span><h2>A living window — with zero code</h2><span class="emo">🪟</span><span class="tbtns">— ▢ ✕</span></div>
+  <div class="body">
+    <p>Let's customize the window using only the <b>Properties</b> panel, then run it.</p>
+    <ol>
+      <li>Click once on the form's grey surface to select it. The Properties window now says <b>Form1</b> at the top.</li>
+      <li>Find the <b>Text</b> property (they're alphabetical). Change <code>Form1</code> to <code>My First GUI — YOUR NAME</code> and press <kbd>Enter</kbd>. Watch the title bar update instantly. 🤯</li>
+      <li>Set <b>StartPosition</b> to <code>CenterScreen</code> — pick it from the dropdown.</li>
+      <li>Click <b>BackColor</b> ▸ open the dropdown ▸ <b>Web</b> tab ▸ choose any color that makes you happy.</li>
+      <li>Grab the form's bottom-right handle and resize it to roughly <b>500 × 350</b> (watch the Size property update as you drag).</li>
+      <li>Now press <kbd>F5</kbd> — or click the green <b>▶ Lab03_FirstGUI</b> button in the top toolbar.</li>
+    </ol>
+    <p>A real window appears, centered, in your color, with your name in the title bar. Move it. Resize it. Minimize it. Maximize it. Close it with the ✕ when you're done admiring (closing it also stops the program — the toolbar returns to normal).</p>
+
+    <div class="check">✅ <b>Checkpoint:</b> you just ran a window that <i>you</i> configured — and you wrote <b>zero</b> lines of code. Minimize, maximize, resizing, the ✕ button… all inherited for free. Ten seconds of celebration, then onward.</div>
+
+    <details><summary>If I typed nothing… who wrote the code?</summary><div class="dbody">Visual Studio did — live, as you clicked. In Solution Explorer, expand the ▸ next to <code>Form1.cs</code> and open <code>Form1.Designer.cs</code>: there's a C# line for every property you just changed (<code>this.Text = "My First GUI — …";</code>). The Designer is a <b>C# code generator with a paintbrush</b>. Rule of the semester: read that file whenever you're curious, but never edit it by hand — your changes get overwritten by the next drag.</div></details>
+
+    <div class="markwrap"><button class="mark" type="button">Mark level complete</button></div>
+  </div>
+</article>
+
+<!-- ============ LEVEL 4 ============ -->
+<article class="level" id="L4" data-level="4">
+  <div class="titlebar"><span class="lvl">4</span><h2>Drag your first controls</h2><span class="emo">🎛️</span><span class="tbtns">— ▢ ✕</span></div>
+  <div class="body">
+    <p>Time to furnish the window. From the <b>Toolbox</b> (hover the left edge if it's collapsed, then click the 📌 pin to keep it open), drag these three onto the form, roughly stacked:</p>
+    <ol>
+      <li>A <b>Label</b> near the top — the question your user will read.</li>
+      <li>A <b>TextBox</b> under it — where they'll type. Drag its side handle to make it comfortably wide.</li>
+      <li>A <b>Button</b> under that — the thing they'll click.</li>
+    </ol>
+    <p>Notice the pink-and-blue <b>snap lines</b> that appear while dragging — Visual Studio helping you align like a designer. Now give each control a proper identity. Select each one and set <b>two</b> properties:</p>
+    <ul>
+      <li>Label → <b>(Name)</b>: <code>lblQuestion</code> · <b>Text</b>: <code>What is your name?</code></li>
+      <li>TextBox → <b>(Name)</b>: <code>txtName</code> · (Text stays empty)</li>
+      <li>Button → <b>(Name)</b>: <code>btnGreet</code> · <b>Text</b>: <code>Greet me!</code></li>
+    </ul>
+    <div class="tip">💅 <b>Style pass:</b> drag a box around all three controls to select them together, then set <b>Font</b> to Segoe UI, <b>12pt</b> in one shot. Readable apps get better grades from users <i>and</i> professors.</div>
+
+    <details><summary>Why the weird names? What's wrong with button1?</summary><div class="dbody">Visual Studio's default names — <code>button1</code>, <code>textBox3</code> — tell you nothing. In code written months later, <code>btnGreet</code> instantly says <i>I'm a button and I greet</i>. The prefixes are a professional convention you'll use all semester: <code>lbl</code> = Label, <code>txt</code> = TextBox, <code>btn</code> = Button. <b>(Name)</b> is the variable name your C# uses to talk to the control; <b>Text</b> is just what humans see on screen. Two different jobs — mixing them up is this week's #1 bug.</div></details>
+
+    <div class="markwrap"><button class="mark" type="button">Mark level complete</button></div>
+  </div>
+</article>
+
+<!-- ============ LEVEL 5 ============ -->
+<article class="level" id="L5" data-level="5">
+  <div class="titlebar"><span class="lvl">5</span><h2>Double-click = event</h2><span class="emo">⚡</span><span class="tbtns">— ▢ ✕</span></div>
+  <div class="body">
+    <p>Here comes the biggest idea of the day. In the designer, <b>double-click</b> the <code>btnGreet</code> button. Visual Studio flips from the canvas to <b>Form1.cs</b> — the code view — and has already written this for you:</p>
+
+    <div class="codewrap">
+      <div class="codehead"><span>Form1.cs — Lab03_FirstGUI</span></div>
+      <pre class="code"><span class="k">private</span> <span class="k">void</span> <span class="m">btnGreet_Click</span>(<span class="k">object</span> sender, <span class="t">EventArgs</span> e)
+{
+    <span class="c">// your code will go here</span>
+}</pre>
+    </div>
+
+    <p>That's an <b>event handler</b>: a method with a contract — <i>“whenever <code>btnGreet</code> is clicked, run whatever is inside these braces.”</i> Right now it's empty, so clicks do nothing. Not for long.</p>
+
+    <details><summary>🧠 The big idea: event-driven programming (read this one!)</summary><div class="dbody">Your Lab 1 console programs were a <b>script</b>: line 1, line 2, line 3… done. A GUI program is a <b>vending machine</b>: it starts up, draws itself, and then just <i>waits</i>. It might wait five seconds or five hours. When the user does something — a click, a keypress — Windows fires an <b>event</b>, and the matching handler method runs. Then… back to waiting. You no longer command the timeline; the <b>user</b> does. You just decide what happens in response. Almost every app on your phone works exactly this way.</div></details>
+
+    <details><summary>Two files, one form — what's the split?</summary><div class="dbody"><code>Form1.cs</code> and <code>Form1.Designer.cs</code> are two halves of the <i>same class</i> (C# calls this a <code>partial class</code>). The Designer file holds the machine-generated layout code; <code>Form1.cs</code> holds <b>your</b> logic. Clean separation: robots on one side, humans on the other. You will only ever edit <code>Form1.cs</code>.</div></details>
+
+    <div class="danger">⚠️ <b>Classic trap:</b> accidentally double-clicked the wrong thing and got a handler you don't want (like <code>Form1_Load</code>)? Don't just delete the method — that can break the Designer. Instead press <kbd>Ctrl</kbd>+<kbd>Z</kbd> right away, or ask me before surgery. 🩺</div>
+
+    <div class="markwrap"><button class="mark" type="button">Mark level complete</button></div>
+  </div>
+</article>
+
+<!-- ============ LEVEL 6 ============ -->
+<article class="level" id="L6" data-level="6">
+  <div class="titlebar"><span class="lvl">6</span><h2>Make it talk 💬</h2><span class="emo">🗣️</span><span class="tbtns">— ▢ ✕</span></div>
+  <div class="body">
+    <p>Put exactly one line inside the handler (type it — and pause after <code>txtName.</code> to watch IntelliSense list everything the text box can do):</p>
+
+    <div class="codewrap">
+      <div class="codehead"><span>Form1.cs — inside btnGreet_Click</span><button class="copy" type="button">Copy</button></div>
+      <pre class="code"><span class="k">private</span> <span class="k">void</span> <span class="m">btnGreet_Click</span>(<span class="k">object</span> sender, <span class="t">EventArgs</span> e)
+{
+    <span class="t">MessageBox</span>.<span class="m">Show</span>(<span class="s">"Hello, "</span> + txtName.Text + <span class="s">"!"</span>);
+}</pre>
+    </div>
+
+    <p>Press <kbd>F5</kbd>. Type your name in the box. Click <b>Greet me!</b> — and a pop-up greets you back:</p>
+
+    <figure class="fig">
+      <div class="winapp">
+        <div class="wtitle"><span class="t">My First GUI — Maria</span><span class="wb">— ▢ ✕</span></div>
+        <div class="wbody">
+          <span class="wf-label">What is your name?</span>
+          <span class="wf-text">Maria</span>
+          <span class="wf-btn">Greet me!</span>
+          <div class="msgbox">
+            <div class="mt"><span>Lab03_FirstGUI</span><span>✕</span></div>
+            <div class="mb">Hello, Maria!</div>
+            <div class="mf"><span class="wf-btn" style="min-width:70px; text-align:center">OK</span></div>
+          </div>
+        </div>
+      </div>
+      <figcaption><b>Figure 3.</b> The running greeter. Click the button as many times as you like — the handler runs <i>every</i> time. Try changing the name between clicks.</figcaption>
+    </figure>
+
+    <details><summary>Read that one line like a pro</summary><div class="dbody">Three old friends in new clothes. <b>(1)</b> <code>txtName.Text</code> — the dot means <i>look inside</i>: reach into the <code>txtName</code> object and grab its <code>Text</code> property, a <b>string</b> holding whatever the user typed. It's <code>Console.ReadLine()</code>'s cooler cousin — no waiting, the text is just <i>there</i>. <b>(2)</b> The <code>+</code> is your Lab 1 <b>text glue</b>, fusing three strings into one sentence. <b>(3)</b> <code>MessageBox.Show(…)</code> is the GUI world's <code>Console.WriteLine(…)</code> — same shape, but the output arrives as a pop-up instead of a printed line. New stage, same script.</div></details>
+
+    <div class="medal">🏅 <b>DELIVERABLE #1 — DONE!</b> A window ✓ three controls with professional names ✓ a click event ✓ personalized output ✓. This is exactly what the rubric checks. Show your screen to a neighbor — first GUI energy is contagious.</div>
+
+    <div class="markwrap"><button class="mark" type="button">Mark level complete</button></div>
+  </div>
+</article>
+
+<!-- ============ LEVEL 7 ============ -->
+<article class="level" id="L7" data-level="7">
+  <div class="titlebar"><span class="lvl">7</span><h2>Level-up the greeter</h2><span class="emo">✨</span><span class="tbtns">— ▢ ✕</span></div>
+  <div class="body">
+    <p>Pop-ups are fun but needy — they demand an OK click. Real apps usually answer <i>on the window itself</i>. Stop the program (close its window), go back to the <b>designer tab</b> (Form1.cs [Design]), and:</p>
+    <ol>
+      <li>Drag a new <b>Label</b> below the button. Set <b>(Name)</b>: <code>lblGreeting</code>, <b>Font</b>: 14pt bold, <b>ForeColor</b>: your pick — and <b>delete everything in its Text</b> so it starts invisible-ish.</li>
+      <li>Drag a second <b>Button</b> next to the first. <b>(Name)</b>: <code>btnClear</code>, <b>Text</b>: <code>Clear</code>.</li>
+      <li>Double-click <b>Clear</b> to get its own handler, then update <b>both</b> handlers:</li>
+    </ol>
+
+    <div class="codewrap">
+      <div class="codehead"><span>Form1.cs — both handlers</span><button class="copy" type="button">Copy</button></div>
+      <pre class="code"><span class="k">private</span> <span class="k">void</span> <span class="m">btnGreet_Click</span>(<span class="k">object</span> sender, <span class="t">EventArgs</span> e)
+{
+    lblGreeting.Text = <span class="s">"Hello, "</span> + txtName.Text + <span class="s">"! 👋"</span>;
+}
+
+<span class="k">private</span> <span class="k">void</span> <span class="m">btnClear_Click</span>(<span class="k">object</span> sender, <span class="t">EventArgs</span> e)
+{
+    txtName.Clear();          <span class="c">// empty the text box</span>
+    lblGreeting.Text = <span class="s">""</span>;   <span class="c">// hide the greeting</span>
+    txtName.Focus();          <span class="c">// put the cursor back, ready for the next name</span>
+}</pre>
+    </div>
+
+    <p><kbd>F5</kbd> again. Greet ▸ the label lights up. Clear ▸ everything resets and the cursor jumps home. Two buttons, two events, two personalities.</p>
+
+    <details><summary>Properties are a two-way street</summary><div class="dbody">In Level 4 you <i>set</i> <code>Text</code> with the Properties panel; now your code sets <code>lblGreeting.Text</code> while the program runs. Reading (<code>txtName.Text</code> on the right of <code>=</code>) and writing (<code>lblGreeting.Text</code> on the left) use the same dot-property — the Designer and your code are just two doors into the same objects. This is the entire secret of GUI programming: <b>read some properties, think, write some properties.</b></div></details>
+
+    <div class="check">✅ <b>Checkpoint:</b> the greeting appears on the form and Clear resets everything. Bonus experiment: click <b>Greet me!</b> with the box empty — “Hello, !” Slightly tragic. An <code>if</code> statement fixes that in Week 3; remember this moment.</div>
+
+    <div class="markwrap"><button class="mark" type="button">Mark level complete</button></div>
+  </div>
+</article>
+
+<!-- ============ LEVEL 8 ============ -->
+<article class="level" id="L8" data-level="8">
+  <div class="titlebar"><span class="lvl">8</span><h2>The calculator gets buttons</h2><span class="emo">🧮</span><span class="tbtns">— ▢ ✕</span></div>
+  <div class="body">
+    <p>Remember your Lab 1 console calculator? Same brain — new face. We'll add a <b>second project</b> to the same solution:</p>
+    <ol>
+      <li>In Solution Explorer, <b>right-click the solution line</b> (the very top: <i>Solution 'MAC109_GuiLabs'</i>) ▸ <b>Add</b> ▸ <b>New Project…</b> ▸ <b>Windows Forms App (C#)</b> ▸ name it <code>Lab04_GuiCalculator</code> ▸ Create.</li>
+      <li>Right-click the new <b>Lab04_GuiCalculator</b> project ▸ <b>Set as Startup Project</b> (its name turns bold — that's the one <kbd>F5</kbd> runs).</li>
+      <li>On its form, build this layout — you know all the moves now:</li>
+    </ol>
+    <ul>
+      <li>Form <b>Text</b>: <code>MAC 109 Calculator</code>, <b>StartPosition</b>: CenterScreen</li>
+      <li>Two labels: <code>First number:</code> and <code>Second number:</code></li>
+      <li>Two text boxes: <b>(Name)</b> <code>txtA</code> and <code>txtB</code></li>
+      <li>Four buttons in a row: <code>btnAdd</code> (Text <code>+</code>), <code>btnSub</code> (<code>−</code>), <code>btnMul</code> (<code>×</code>), <code>btnDiv</code> (<code>÷</code>)</li>
+      <li>One big empty label at the bottom: <b>(Name)</b> <code>lblResult</code>, Font 14pt bold</li>
+    </ul>
+
+    <figure class="fig">
+      <div class="winapp">
+        <div class="wtitle"><span class="t">MAC 109 Calculator</span><span class="wb">— ▢ ✕</span></div>
+        <div class="wbody">
+          <span class="wf-label">First number:</span>
+          <span class="wf-text">12</span>
+          <span class="wf-label">Second number:</span>
+          <span class="wf-text">4</span>
+          <div style="display:flex; gap:.5rem">
+            <span class="wf-btn primary" style="min-width:52px; text-align:center">+</span>
+            <span class="wf-btn" style="min-width:52px; text-align:center">−</span>
+            <span class="wf-btn" style="min-width:52px; text-align:center">×</span>
+            <span class="wf-btn" style="min-width:52px; text-align:center">÷</span>
+          </div>
+          <span class="wf-result">12 + 4 = 16</span>
+        </div>
+      </div>
+      <figcaption><b>Figure 4.</b> The target. Four buttons, four operations — each with its very own click event.</figcaption>
+    </figure>
+
+    <p>Double-click the <b>+</b> button and write its handler. Then double-click each remaining button and repeat the pattern, changing only the symbol in quotes and the math at the end:</p>
+
+    <div class="codewrap">
+      <div class="codehead"><span>Form1.cs — Lab04_GuiCalculator</span><button class="copy" type="button">Copy</button></div>
+      <pre class="code"><span class="k">private</span> <span class="k">void</span> <span class="m">btnAdd_Click</span>(<span class="k">object</span> sender, <span class="t">EventArgs</span> e)
+{
+    <span class="k">double</span> a = <span class="t">Convert</span>.<span class="m">ToDouble</span>(txtA.Text);
+    <span class="k">double</span> b = <span class="t">Convert</span>.<span class="m">ToDouble</span>(txtB.Text);
+    lblResult.Text = a + <span class="s">" + "</span> + b + <span class="s">" = "</span> + (a + b);
+}
+
+<span class="c">// btnSub_Click →  " - "  and  (a - b)</span>
+<span class="c">// btnMul_Click →  " * "  and  (a * b)</span>
+<span class="c">// btnDiv_Click →  " / "  and  (a / b)</span></pre>
+    </div>
+
+    <details><summary>Every line here is a Lab 1 flashback</summary><div class="dbody"><code>double</code> — a box for decimal numbers 📦. <code>Convert.ToDouble(…)</code> — the crucial transformation, because <code>txtA.Text</code> is <b>text</b> even when it looks like a number (text-"5" glued to text-"3" is "53", remember? 😱). And those parentheses in <code>(a + b)</code> — still forcing <b>math first, glue second</b>. Delete them in the + handler and run with 12 and 4 if you want to see <code>12 + 4 = 124</code> again. The only new ingredient in this whole calculator is the <i>buttons</i>. That's the point: the C# you learned in the console is the C# of every GUI.</div></details>
+
+    <div class="medal">🏅 <b>DELIVERABLE #2 — DONE</b> (pending the torture test in Level 9). Four working operations with labeled output — exactly what the rubric wants.</div>
+
+    <div class="markwrap"><button class="mark" type="button">Mark level complete</button></div>
+  </div>
+</article>
+
+<!-- ============ LEVEL 9 ============ -->
+<article class="level" id="L9" data-level="9">
+  <div class="titlebar"><span class="lvl">9</span><h2>Try to break it 😈</h2><span class="emo">🔨</span><span class="tbtns">— ▢ ✕</span></div>
+  <div class="body">
+    <p><kbd>F5</kbd>, then test like a professional — happy path first, sabotage second:</p>
+    <ul>
+      <li>😀 <b>12 and 4:</b> click all four buttons. Clean, labeled answers. Screenshot-worthy.</li>
+      <li>🔢 <b>7.5 and 2.5:</b> decimals — <code>double</code> handles them like a champion.</li>
+      <li>🕳️ <b>10 and 0, then ÷:</b> plot twist — no crash! Doubles shrug and answer <code>∞</code> (Infinity). We'll guard this properly with <code>if</code> in Week 3.</li>
+      <li>🍌 <b>Type <i>banana</i> as the first number, click +:</b> CRASH! Visual Studio dives into the code and highlights the guilty line in yellow: <code>System.FormatException: 'The input string 'banana' was not in a correct format.'</code></li>
+    </ul>
+
+    <figure class="fig">
+      <div class="ide">
+        <div class="cap">Lab04_GuiCalculator (Debugging) — Microsoft Visual Studio<span class="dots">— ▢ ✕</span></div>
+        <div class="row">
+          <div class="pane main">
+            <h4>Form1.cs — exception thrown</h4>
+            <pre><span class="k">double</span> a = <span class="t">Convert</span>.<span class="m">ToDouble</span>(txtA.Text);  <span style="background:#5a1e1e; color:#ffd7d7">⚠ System.FormatException</span>
+<span class="k">double</span> b = <span class="t">Convert</span>.<span class="m">ToDouble</span>(txtB.Text);</pre>
+          </div>
+        </div>
+        <div class="status run"><span>■ Stop Debugging (Shift+F5) to end the run</span></div>
+      </div>
+      <figcaption><b>Figure 5.</b> A crash while debugging: Visual Studio pauses <i>at the exact line</i>, names the exception, and waits. Read the message, then press the red ■ <b>Stop</b> button to exit.</figcaption>
+    </figure>
+
+    <details><summary>Is crashing… okay?</summary><div class="dbody">Today, yes — crashing <i>honestly</i> is fine, and the error message is gold: it names the exception, the reason, and the line. Notice what did <b>not</b> happen: the compiler didn't complain, because <code>Convert.ToDouble(txtA.Text)</code> is perfectly legal C#. This is a <b>runtime error</b> — the code is grammatical but reality (a banana) disagreed. Compile-time vs runtime errors is a quiz question with your name on it. Surviving bad input gracefully (<code>try/catch</code>) is Week 12's superpower.</div></details>
+
+    <div class="check">✅ <b>Checkpoint:</b> you found both limits — Infinity and the banana crash. Real-engineer move: add a <code>//</code> comment at the top of the file noting them. Future-you (and the rubric) will be impressed.</div>
+
+    <div class="markwrap"><button class="mark" type="button">Mark level complete</button></div>
+  </div>
+</article>
+
+<!-- ============ LEVEL 10 ============ -->
+<article class="level" id="L10" data-level="10">
+  <div class="titlebar"><span class="lvl">10</span><h2>Push or it never happened ☁️</h2><span class="emo">🚀</span><span class="tbtns">— ▢ ✕</span></div>
+  <div class="body">
+    <p>This lab machine will forget you. GitHub won't. Visual Studio has Git built right in — buttons only, just like VS Code at home:</p>
+    <ol>
+      <li>Menu bar ▸ <b>Git</b> ▸ <b>Create Git Repository…</b></li>
+      <li>In the dialog, choose <b>GitHub</b> and sign in with your GitHub account (the same one from the Weeks 1–2 practical). A browser window handles the login.</li>
+      <li>Repository name: <code>MAC109-gui-labs</code> · leave it <b>Public</b> · make sure “Push to remote” stays checked ▸ click <b>Create and Push</b>.</li>
+      <li>Wait for the status bar to settle, then visit <b>github.com/YOUR-USERNAME/MAC109-gui-labs</b> in the browser. Both project folders should be sitting there — that page's URL is your submission link. 🔗</li>
+      <li>Made more changes after pushing? Bottom-right of Visual Studio ▸ click the ↑ pencil icon ▸ type a message like <code>Finished GUI lab</code> ▸ <b>Commit All</b> ▸ then <b>Push</b> (the ↑ cloud arrow).</li>
+    </ol>
+
+    <div class="danger">🚪 <b>Before you leave the lab — the exit checklist:</b><br>① Pushed ✓ (verify on github.com, not just in Visual Studio) &nbsp;② Sign <b>out</b> of GitHub in the browser &nbsp;③ <b>File ▸ Account Settings ▸ sign out</b> of Visual Studio too. Shared machines, shared risks — protect your account like your MetroCard.</div>
+
+    <details><summary>Commit vs push — 15-second refresher</summary><div class="dbody"><b>Commit</b> = a labeled snapshot 📸 of your code on <i>this</i> machine. <b>Push</b> = uploading your snapshots to GitHub, where they survive lab-machine amnesia and reach your professor. On a classroom computer, a commit without a push is a photo saved on a camera you're about to hand back.</div></details>
+
+    <p>📬 <b>Final move:</b> open the graded lab page for this unit, complete the exercises, generate your submission code, and submit the <b>repo link + code + PDF</b> on Brightspace. Then look around the room: an hour ago none of these windows existed. 🪟✨</p>
+
+    <div class="markwrap"><button class="mark" type="button">Mark level complete</button></div>
+  </div>
+</article>
+
+</main>
+
+<footer>
+  MAC 109 · Introduction to Visual C# Programming · LaGuardia Community College (CUNY) · Prof. K. Kassou — First GUI practical, classroom edition: Windows lab machines + Visual Studio 2022.<br>
+  🏠 Note for your Mac at home: Windows Forms runs on Windows only, so the drag-and-drop designer isn't available in VS Code on macOS — finish and polish GUI labs in the classroom or during open lab hours. The C# itself? Identical everywhere.
+</footer>
+
+<script>
+(function(){
+  var TOTAL = 10, KEY = "mac109_gui_lab_progress";
+  var done = {};
+  try { done = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch(e) { done = {}; }
+
+  var levels = document.querySelectorAll(".level");
+  var tasks = document.querySelectorAll(".task");
+  var barfill = document.getElementById("barfill");
+  var pct = document.getElementById("pct");
+  var overlay = document.getElementById("overlay");
+  var celebrated = false;
+
+  function save(){ try { localStorage.setItem(KEY, JSON.stringify(done)); } catch(e){} }
+
+  function refresh(){
+    var count = 0;
+    levels.forEach(function(lv){
+      var n = lv.getAttribute("data-level");
+      var isDone = !!done[n];
+      lv.classList.toggle("done", isDone);
+      var btn = lv.querySelector(".mark");
+      if (btn) btn.textContent = isDone ? "✓ Level complete — tap to undo" : "Mark level complete";
+      if (isDone) count++;
+    });
+    tasks.forEach(function(t){
+      t.classList.toggle("done", !!done[t.getAttribute("data-l")]);
+    });
+    var p = Math.round(count / TOTAL * 100);
+    barfill.style.width = p + "%";
+    pct.textContent = p + "% complete" + (count === TOTAL ? " — 🏆 all levels!" : "");
+    if (count === TOTAL && !celebrated){ celebrated = true; overlay.classList.add("show"); }
+    if (count < TOTAL) celebrated = false;
+  }
+
+  levels.forEach(function(lv){
+    var btn = lv.querySelector(".mark");
+    if (!btn) return;
+    btn.addEventListener("click", function(){
+      var n = lv.getAttribute("data-level");
+      if (done[n]) delete done[n]; else done[n] = true;
+      save(); refresh();
+    });
+  });
+
+  document.getElementById("ovClose").addEventListener("click", function(){
+    overlay.classList.remove("show");
+  });
+
+  document.querySelectorAll(".copy").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      var pre = btn.closest(".codewrap").querySelector("pre.code");
+      var text = pre ? pre.innerText : "";
+      function flash(){ btn.textContent = "Copied ✓"; setTimeout(function(){ btn.textContent = "Copy"; }, 1600); }
+      if (navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(flash, flash);
+      } else {
+        var ta = document.createElement("textarea");
+        ta.value = text; document.body.appendChild(ta); ta.select();
+        try { document.execCommand("copy"); } catch(e){}
+        document.body.removeChild(ta); flash();
+      }
+    });
+  });
+
+  refresh();
+})();
+</script>
+</body>
+</html>
