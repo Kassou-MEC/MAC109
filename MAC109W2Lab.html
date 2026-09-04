@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MAC 109 · In-Class Studio #2 — Your App Learns Math · Calculator · BMI · Grade</title>
+<style>
+:root{
+  --paper:#EFF3FA; --ink:#201A2E; --muted:#5a5470;
+  --vs:#1273CF; --vs-deep:#0A4E8F; --win:#0078D4; --go:#107C10; --warn:#C50F1F;
+  --card:#ffffff; --edge:#d9dcec;
+  --ide:#1E1E1E; --ide2:#252526; --ide3:#333337; --ide-t:#D4D4D4; --ide-dim:#8a8a92;
+  --code-k:#569CD6; --code-s:#CE9178; --code-c:#6A9955; --code-t:#4EC9B0; --code-m:#DCDCAA; --code-n:#B5CEA8;
+  --radius:10px;
+  font-size:16px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:"Segoe UI", "Segoe UI Variable Text", system-ui, -apple-system, sans-serif;
+  line-height:1.6;
+}
+code,pre,kbd{font-family:"Cascadia Code","Cascadia Mono",Consolas,"SF Mono",Menlo,monospace}
+a{color:var(--win)}
+img{max-width:100%}
+h1,h2,h3{line-height:1.2}
+
+/* ---------- floating glyph backdrop ---------- */
+.glyphs{position:fixed; inset:0; overflow:hidden; pointer-events:none; z-index:0}
+.glyphs span{position:absolute; font-weight:800; color:var(--vs); opacity:.06; user-select:none}
+@media (prefers-reduced-motion:no-preference){
+  .glyphs span{animation:drift 26s linear infinite}
+  @keyframes drift{from{transform:translateY(105vh) rotate(-8deg)}to{transform:translateY(-15vh) rotate(8deg)}}
+}
+
+/* ---------- hero ---------- */
+.hero{position:relative; z-index:1; background:linear-gradient(150deg,var(--vs-deep) 0%,var(--vs) 55%,#3FA2F7 100%); color:#fff; padding:3.2rem 1.2rem 2.6rem}
+.hero .wrap{max-width:860px;margin:0 auto}
+.kicker{display:inline-block; background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.28); border-radius:999px; padding:.28rem .9rem; font-size:.8rem; letter-spacing:.04em; font-weight:600}
+.hero h1{font-size:clamp(1.9rem,4.5vw,3rem); font-weight:800; margin:.9rem 0 .6rem}
+.hero p.lead{font-size:1.08rem; max-width:46rem; color:#EDE6F7; margin:0 0 1.2rem}
+.hero .chips{display:flex; flex-wrap:wrap; gap:.55rem}
+.hero .chip{background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.25); border-radius:8px; padding:.4rem .75rem; font-size:.85rem}
+
+/* ---------- layout ---------- */
+main{position:relative; z-index:1; max-width:860px; margin:0 auto; padding:1.4rem 1.2rem 4rem}
+
+/* ---------- quest map (taskbar) ---------- */
+.map{background:var(--card); border:1px solid var(--edge); border-radius:var(--radius); padding:1.1rem 1.2rem 1.3rem; margin-top:-2.2rem; box-shadow:0 10px 30px rgba(59,30,94,.14)}
+.map h2{margin:.1rem 0 .2rem; font-size:1.15rem}
+.map p{margin:.1rem 0 .8rem; color:var(--muted); font-size:.92rem}
+.bar{height:12px; background:#e5e2f2; border-radius:999px; overflow:hidden; margin-bottom:.35rem}
+.bar i{display:block; height:100%; width:0%; background:linear-gradient(90deg,var(--win),var(--vs)); border-radius:999px; transition:width .45s ease}
+.pct{font-size:.8rem; color:var(--muted); margin-bottom:.7rem}
+.taskbar{display:flex; flex-wrap:wrap; gap:.45rem}
+.task{display:flex; align-items:center; gap:.45rem; text-decoration:none; color:var(--ink); background:#f2f1fa; border:1px solid var(--edge); border-radius:8px; padding:.38rem .62rem; font-size:.83rem; font-weight:600; transition:transform .12s ease, background .2s}
+.task:hover{transform:translateY(-2px); background:#e9e6f6}
+.task .n{display:grid; place-items:center; width:1.35rem; height:1.35rem; border-radius:6px; background:var(--vs); color:#fff; font-size:.75rem; flex:none}
+.task.done{background:#e7f4e8; border-color:#bfe0c2}
+.task.done .n{background:var(--go)}
+.task.done .n::before{content:"✓"}
+.task:not(.done) .n::before{content:attr(data-n)}
+
+/* ---------- level windows ---------- */
+.level{background:var(--card); border:1px solid var(--edge); border-radius:var(--radius); margin:1.7rem 0; box-shadow:0 6px 22px rgba(32,26,46,.08); overflow:hidden; scroll-margin-top:1rem}
+.titlebar{display:flex; align-items:center; gap:.7rem; padding:.55rem .9rem; background:linear-gradient(90deg,var(--vs-deep),var(--vs)); color:#fff}
+.level.done .titlebar{background:linear-gradient(90deg,#0c5d0c,var(--go))}
+.titlebar .lvl{display:grid; place-items:center; min-width:1.7rem; height:1.7rem; border-radius:7px; background:rgba(255,255,255,.18); font-weight:800; font-size:.9rem}
+.titlebar h2{flex:1; margin:0; font-size:1.06rem; font-weight:700}
+.titlebar .emo{font-size:1.15rem}
+.tbtns{display:flex; gap:.45rem; font-size:.8rem; opacity:.85; letter-spacing:.1em}
+.body{padding:1.15rem 1.25rem 1.35rem}
+.body>p:first-child{margin-top:.2rem}
+.level ol{padding-left:1.25rem; margin:.7rem 0}
+.level ol li{margin:.45rem 0}
+.level ul{padding-left:1.2rem}
+.level ul li{margin:.4rem 0}
+kbd{background:#eceaf6; border:1px solid #cfcbe6; border-bottom-width:2px; border-radius:6px; padding:.08rem .42rem; font-size:.85em}
+.small{font-size:.87rem; color:var(--muted)}
+
+/* checkpoint + medal + tip */
+.check{border-left:4px solid var(--go); background:#f0f8f0; border-radius:0 8px 8px 0; padding:.7rem .9rem; margin:1rem 0}
+.medal{border:1.5px solid #e6c34a; background:#fdf7e3; border-radius:8px; padding:.75rem .95rem; margin:1rem 0; font-size:.95rem}
+.tip{border-left:4px solid var(--win); background:#eef6fd; border-radius:0 8px 8px 0; padding:.7rem .9rem; margin:1rem 0; font-size:.93rem}
+.danger{border-left:4px solid var(--warn); background:#fdefef; border-radius:0 8px 8px 0; padding:.7rem .9rem; margin:1rem 0; font-size:.93rem}
+
+/* explainer accordions */
+details{border:1px solid var(--edge); border-radius:8px; margin:.8rem 0; background:#faf9fd; overflow:hidden}
+details summary{cursor:pointer; padding:.65rem .9rem; font-weight:700; font-size:.95rem; list-style:none; position:relative; padding-right:2.2rem}
+details summary::after{content:"+"; position:absolute; right:.9rem; top:.5rem; font-size:1.15rem; color:var(--vs); transition:transform .2s}
+details[open] summary::after{transform:rotate(45deg)}
+details .dbody{padding:0 .95rem .85rem; font-size:.95rem}
+details summary::-webkit-details-marker{display:none}
+
+/* mark complete */
+.markwrap{margin-top:1.2rem; display:flex; justify-content:flex-end}
+.mark{appearance:none; border:1.5px solid var(--vs); background:#fff; color:var(--vs); font:inherit; font-weight:700; font-size:.92rem; border-radius:8px; padding:.5rem 1.05rem; cursor:pointer; transition:all .15s}
+.mark:hover{background:#f4effb}
+.level.done .mark{background:var(--go); border-color:var(--go); color:#fff}
+.mark:focus-visible,.task:focus-visible,.copy:focus-visible{outline:3px solid var(--win); outline-offset:2px}
+
+/* ---------- code blocks ---------- */
+.codewrap{position:relative; margin:.9rem 0}
+.codehead{display:flex; align-items:center; justify-content:space-between; background:var(--ide3); color:#cfcfd6; border-radius:8px 8px 0 0; padding:.4rem .8rem; font-size:.8rem}
+.copy{appearance:none; border:1px solid #55555e; background:#2a2a30; color:#e8e8ee; border-radius:6px; padding:.18rem .65rem; font:inherit; font-size:.78rem; cursor:pointer}
+.copy:hover{background:#3a3a44}
+pre.code{margin:0; background:var(--ide); color:var(--ide-t); border-radius:0 0 8px 8px; padding:.9rem 1rem; overflow-x:auto; font-size:.86rem; line-height:1.55}
+.k{color:var(--code-k)} .s{color:var(--code-s)} .c{color:var(--code-c)} .t{color:var(--code-t)} .m{color:var(--code-m)} .n{color:var(--code-n)}
+
+/* ---------- IDE figure mockups ---------- */
+.fig{margin:1rem 0}
+.fig figcaption{font-size:.85rem; color:var(--muted); margin-top:.45rem}
+.ide{background:var(--ide); border-radius:10px; overflow:hidden; border:1px solid #101012; font-size:.8rem; color:var(--ide-t); box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.ide .cap{background:var(--ide3); padding:.42rem .8rem; display:flex; align-items:center; gap:.6rem; color:#d8d8de}
+.ide .cap .dots{letter-spacing:.15em; opacity:.7; font-size:.75rem; margin-left:auto}
+.ide .row{display:flex; min-height:150px}
+.ide .pane{padding:.6rem .7rem}
+.ide .side{background:var(--ide2); flex:0 0 27%; border-right:1px solid #111; min-width:0}
+.ide .main{flex:1; min-width:0}
+.ide .side h4,.ide .main h4{margin:.1rem 0 .4rem; font-size:.72rem; font-weight:600; color:var(--ide-dim); letter-spacing:.06em}
+.ide .item{padding:.14rem .3rem; border-radius:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.ide .item.sel{background:#094771; color:#fff}
+.ide .status{background:var(--vs-deep); color:#efe7fa; padding:.3rem .8rem; font-size:.72rem; display:flex; gap:1rem}
+.ide .status.run{background:#8B3A00}
+.ide pre{margin:0; font-size:.8rem; line-height:1.55; overflow-x:auto}
+
+/* running WinForms window mockup */
+.winapp{background:#F3F3F3; color:#111; border:1px solid #b9b9c2; border-radius:8px; overflow:hidden; max-width:430px; margin:.4rem auto; box-shadow:0 14px 30px rgba(32,26,46,.22); font-size:.88rem}
+.winapp .wtitle{display:flex; align-items:center; background:#fff; border-bottom:1px solid #e2e2e8; padding:.4rem .7rem; gap:.5rem}
+.winapp .wtitle .t{flex:1; font-size:.82rem}
+.winapp .wtitle .wb{color:#444; letter-spacing:.35em; font-size:.8rem}
+.winapp .wbody{padding:1rem .95rem 1.15rem; display:flex; flex-direction:column; gap:.65rem}
+.wf-label{font-size:.92rem}
+.wf-text{background:#fff; border:1px solid #7a7a7a; border-radius:2px; padding:.3rem .5rem; font-size:.9rem; color:#333}
+.wf-btn{display:inline-block; background:#E1E1E1; border:1px solid #ADADAD; padding:.32rem .95rem; font-size:.88rem; border-radius:2px; width:max-content}
+.wf-btn.primary{background:#0078D4; border-color:#005A9E; color:#fff}
+.wf-result{font-weight:700; font-size:1.02rem; color:#0B5394}
+.msgbox{background:#fff; border:1px solid #9aa; border-radius:6px; max-width:300px; margin:.6rem auto 0; box-shadow:0 10px 24px rgba(0,0,0,.28); overflow:hidden}
+.msgbox .mt{background:#fff; border-bottom:1px solid #eee; font-size:.78rem; padding:.3rem .6rem; display:flex}
+.msgbox .mt span:last-child{margin-left:auto; color:#555}
+.msgbox .mb{padding:.8rem .8rem .2rem; font-size:.9rem}
+.msgbox .mf{padding:.5rem .6rem .6rem; display:flex; justify-content:flex-end; background:#F0F0F0; margin-top:.6rem}
+
+/* start-window template cards */
+.tcards{display:grid; gap:.5rem; padding:.2rem 0}
+.tcard{border:1px solid #3c3c44; border-radius:6px; padding:.5rem .65rem; background:#2b2b31}
+.tcard.sel{border-color:var(--win); background:#0e2a3f}
+.tcard b{display:block; font-size:.82rem; color:#fff}
+.tcard span{font-size:.72rem; color:var(--ide-dim)}
+.tags{margin-top:.25rem; display:flex; gap:.35rem}
+.tags i{font-style:normal; font-size:.66rem; border:1px solid #4a4a55; border-radius:4px; padding:.05rem .4rem; color:#c9c9d2}
+
+/* properties grid mockup */
+.propgrid{display:grid; grid-template-columns:1fr 1.2fr; font-size:.78rem}
+.propgrid div{padding:.22rem .5rem; border-bottom:1px solid #2c2c31; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.propgrid .pv{color:#9CDCFE}
+.propgrid .hl{background:#094771; color:#fff}
+
+/* ---------- completion overlay ---------- */
+.overlay{position:fixed; inset:0; background:rgba(24,16,40,.82); display:none; place-items:center; z-index:50; padding:1rem}
+.overlay.show{display:grid}
+.trophycard{background:var(--card); border-radius:16px; max-width:480px; width:100%; text-align:center; padding:2.2rem 1.6rem; box-shadow:0 30px 80px rgba(0,0,0,.45); border-top:8px solid var(--vs)}
+.trophycard .big{font-size:3.6rem}
+.trophycard h3{font-size:1.6rem; margin:.5rem 0 .4rem}
+.trophycard p{color:var(--muted); margin:.2rem 0 1.2rem}
+.trophycard button{appearance:none; border:none; background:var(--vs); color:#fff; font:inherit; font-weight:700; border-radius:9px; padding:.65rem 1.5rem; cursor:pointer}
+.trophycard button:hover{background:var(--vs-deep)}
+
+footer{position:relative; z-index:1; text-align:center; color:var(--muted); font-size:.83rem; padding:1.5rem 1.2rem 2.5rem; max-width:860px; margin:0 auto}
+@media (max-width:560px){
+  .ide .row{flex-direction:column}
+  .ide .side{flex:none; border-right:none; border-bottom:1px solid #111}
+}
+  @media(max-width:760px){.l2grid,.l6grid{grid-template-columns:1fr!important}}
+</style>
+</head>
+<body>
+
+<div class="glyphs" aria-hidden="true">
+  <span style="left:6%; font-size:3.2rem; animation-delay:-3s">🧮</span>
+  <span style="left:22%; font-size:2.4rem; animation-delay:-11s">{ }</span>
+  <span style="left:41%; font-size:3rem; animation-delay:-7s">+=</span>
+  <span style="left:60%; font-size:2.6rem; animation-delay:-16s">÷</span>
+  <span style="left:76%; font-size:3rem; animation-delay:-1s">C#</span>
+  <span style="left:90%; font-size:2.2rem; animation-delay:-20s">;</span>
+</div>
+
+<div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="ovTitle">
+  <div class="trophycard">
+    <div class="big">🏆</div>
+    <h3 id="ovTitle">IT CALCULATES!</h3>
+    <p>All 10 levels complete — your app reads real input, converts it, computes with it, and answers on screen. Milestone 2, built and pushed. The console concepts are officially yours.</p>
+    <button id="ovClose">Ship it! 🚀</button>
+  </div>
+</div>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="kicker">MAC 109 · In-class studio practical #2 · Week 2 · Calculator · BMI · Grade tools</span>
+    <h1>Your app learns math today 🧮</h1>
+    <p class="lead">This morning you mastered <b>data types, input/output, and casting</b> in the console. This lab moves those exact concepts into your project app: same C#, new costume. By the end, your window computes — calculator, BMI or grade tool, plus <b>your domain's formula</b> — and Milestone 2 is on GitHub.</p>
+    <div class="chips">
+      <span class="chip">🏫 In-class · B-209</span>
+      <span class="chip">🎯 Builds Milestone 2</span>
+      <span class="chip">⏱️ ~2 hours</span>
+      <span class="chip">🧠 Uses ONLY this morning's concepts</span>
+      <span class="chip">☁️ Push &amp; sign out before leaving!</span>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<section class="map" id="map">
+  <h2>🗺️ Quest map</h2>
+  <p>Tick off levels as you go — your progress is saved on this browser. Finish all 10 for a surprise.</p>
+  <div class="bar"><i id="barfill"></i></div>
+  <div class="pct" id="pct">0% complete</div>
+  <nav class="taskbar" aria-label="Levels">
+    <a class="task" href="#L1" data-l="1"><span class="n" data-n="1"></span>Back to your project</a>
+    <a class="task" href="#L2" data-l="2"><span class="n" data-n="2"></span>Console → GUI</a>
+    <a class="task" href="#L3" data-l="3"><span class="n" data-n="3"></span>Add the inputs</a>
+    <a class="task" href="#L4" data-l="4"><span class="n" data-n="4"></span>The first handler ➕</a>
+    <a class="task" href="#L5" data-l="5"><span class="n" data-n="5"></span>The full calculator</a>
+    <a class="task" href="#L6" data-l="6"><span class="n" data-n="6"></span>BMI or grade tool</a>
+    <a class="task" href="#L7" data-l="7"><span class="n" data-n="7"></span>Your domain formula</a>
+    <a class="task" href="#L8" data-l="8"><span class="n" data-n="8"></span>Break it &amp; fix it 😈</a>
+    <a class="task" href="#L9" data-l="9"><span class="n" data-n="9"></span>Polish pass</a>
+    <a class="task" href="#L10" data-l="10"><span class="n" data-n="10"></span>Push Milestone 2</a>
+  </nav>
+</section>
+
+<!-- ============ LEVEL 1 ============ -->
+<article class="level" id="L1" data-level="1">
+  <div class="titlebar"><span class="lvl">1</span><h2>Back to your project</h2><span class="emo">🔁</span><span class="tbtns">— ▢ ✕</span></div>
+  <div class="body">
+    <p>This morning lived in <code>CSharpLab</code> (the console). The lab lives in <code>mac109-project</code> — your real app. Get it open and running:</p>
+    <ol>
+      <li>In VS Code: <b>File ▸ Open Recent ▸ mac109-project</b>. Fresh lab machine? Clone it again exactly like Week 1: <b>Source Control ▸ Clone Repository</b> ▸ paste your repo link from github.com ▸ Documents ▸ MAC109.</li>
+      <li>Open <code>MainWindow.cs</code>. If it still holds lecture experiments, rewind it: <b>Source Control ▸ right-click MainWindow.cs ▸ Discard Changes</b> — Git restores your Milestone 1 instantly.</li>
+      <li><kbd>F5</kbd>. Your greeter window opens, exactly as you pushed it. Type your name, click <b>Say Hello</b>, smile, close it.</li>
+    </ol>
+    <div class="danger">🧠 <b>Lab-machine reality check:</b> this computer can be wiped tonight. Whatever you build in the next two hours exists only if Level 10 happens. Push before you leave — it's the law of B-209.</div>
+    <details><summary>Why did Discard Changes work like a time machine?</summary><div class="dbody">Because your last <b>push</b> saved a snapshot of MainWindow.cs on GitHub, and your last <b>commit</b> saved one locally. Discard Changes rolls the file back to that snapshot. This is why professionals commit before experimenting: Git turns "I broke everything" into a two-click repair. You'll rely on this forever.</div></details>
+    <div class="markwrap"><button class="mark" type="button">Mark level complete</button></div>
+  </div>
+</article>
+
+<!-- ============ LEVEL 2 ============ -->
+<article class="level" id="L2" data-level="2">
+  <div class="titlebar"><span class="lvl">2</span><h2>Console → GUI: the translation table</h2><span class="emo">🔤</span><span class="tbtns">— ▢ ✕</span></div>
+  <div class="body">
+    <p>Everything from the lecture transfers. Three swaps — and the entire middle stays <b>character-for-character identical</b>:</p>
+    <div class="tcards">
+      <div class="tcard"><b>Console.ReadLine() ➜ txtA.Text</b><br>The console waited for Enter; your app reads whatever sits in a TextBox the instant a button is clicked. Both hand you a <b>string</b> — always.</div>
+      <div class="tcard"><b>Console.WriteLine(…) ➜ lblResult.Text = …</b><br>The console printed a line; your app writes the same glued string into a TextBlock on the window.</div>
+      <div class="tcard"><b>Top-to-bottom program ➜ event handler</b><br>The console program ran once and ended. A handler is the same recipe, parked inside a method, re-run on <i>every click</i>.</div>
+    </div>
+    <figure class="fig">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.9rem" class="l2grid">
+        <div class="codewrap" style="margin:0">
+          <div class="codehead"><span>This morning — console (Example 9)</span></div>
+          <pre class="code"><span class="c">// runs once, top to bottom</span>
+string input = txtInput… <span class="c">← no wait,</span>
+<span class="c">   that was the console:</span>
+<span class="k">string</span> input = Console.ReadLine();
+<span class="k">double</span> a = Convert.ToDouble(input);
+<span class="k">double</span> b = <span class="n">4</span>;
+Console.WriteLine(a + <span class="s">&quot; + &quot;</span> + b + <span class="s">&quot; = &quot;</span> + (a + b));</pre>
+        </div>
+        <div class="codewrap" style="margin:0">
+          <div class="codehead"><span>This afternoon — your app's handler</span></div>
+          <pre class="code"><span class="c">// runs on EVERY click of [+]</span>
+<span class="k">void</span> BtnAdd_Click(<span class="k">object</span> sender, RoutedEventArgs e)
+{
+    <span class="k">double</span> a = Convert.ToDouble(txtA.Text);
+    <span class="k">double</span> b = Convert.ToDouble(txtB.Text);
+    lblResult.Text = a + <span class="s">&quot; + &quot;</span> + b + <span class="s">&quot; = &quot;</span> + (a + b);
+}</pre>
+        </div>
+      </div>
+      <figcaption><b>Figure 1.</b> Spot the middle: <b>declare ▸ Convert ▸ compute ▸ glue</b> — untouched. Only the doors (input in, output out) changed.</figcaption>
+    </figure>
+    <div class="check">✅ <b>Checkpoint (no code yet):</b> say the five-line rhythm out loud once — <i>read, convert, compute, glue, write</i>. That sentence is the whole lab.</div>
+    <div class="markwrap"><button class="mark" type="button">Mark level complete</button></div>
+  </div>
+</article>
+
+<!-- ============ LEVEL 3 ============ -->
+<article class="level" id="L3" data-level="3">
+  <div class="titlebar"><span class="lvl">3</span><h2>Add the inputs — two boxes and a result line</h2><span class="emo">📝</span><span class="tbtns">— ▢ ✕</span></div>
+  <div class="body">
+    <p>Three new <b>fields</b> (declared at class level so handlers can reach them — same reason as txtName last week) and one line added to your layout:</p>
+    <div class="codewrap">
+      <div class="codehead"><span>MainWindow.cs — three additions, two spots</span><button class="copy" type="button">Copy</button></div>
+      <pre class="code"><span class="c">// 1 · NEW FIELDS — type these under lblGreeting, above the constructor:</span>
+TextBox txtA = <span class="k">new</span> TextBox { Watermark = <span class="s">&quot;First number&quot;</span> };
+TextBox txtB = <span class="k">new</span> TextBox { Watermark = <span class="s">&quot;Second number&quot;</span> };
+TextBlock lblResult = <span class="k">new</span> TextBlock { FontSize = <span class="n">18</span> };
+
+<span class="c">// 2 · GROW THE LAYOUT — your Children list becomes:</span>
+Children = { lblWelcome, txtName, btnGreet, lblGreeting,
+             txtA, txtB, lblResult }</pre>
+    </div>
+    <ol>
+      <li><b>Type</b> the three field lines (don't paste — feel IntelliSense offer <code>Watermark</code> after the dot).</li>
+      <li>Add the three names to the <code>Children</code> list, after <code>lblGreeting</code>.</li>
+      <li><kbd>F5</kbd> — two fresh boxes under your greeter, and an invisible (empty) result line waiting below them.</li>
+    </ol>
+    <figure class="fig">
+      <div class="winapp" style="max-width:380px">
+        <div class="wtitle"><span class="t">My Studio App — Maria</span><span class="wb">— ▢ ✕</span></div>
+        <div class="wbody">
+          <span class="wf-result" style="font-size:1.05rem;color:#111">Welcome to MAC 109!</span>
+          <span class="wf-text" style="color:#9a9aa5">Type your name…</span>
+          <span class="wf-btn">Say Hello</span>
+          <span class="wf-text" style="color:#9a9aa5">First number</span>
+          <span class="wf-text" style="color:#9a9aa5">Second number</span>
+        </div>
+      </div>
+      <figcaption><b>Figure 2.</b> After F5: the calculator's front door exists. The Watermark hints are your console prompts, reborn — they tell the user what to type, before any code runs.</figcaption>
+    </figure>
+    <div class="check">✅ <b>Checkpoint:</b> boxes visible, app still greets. Nothing computes yet — the boxes are input without processing, half a sandwich.</div>
+    <div class="markwrap"><button class="mark" type="button">Mark level complete</button></div>
+  </div>
+</article>
+
+<!-- ============ LEVEL 4 ============ -->
+<article class="level" id="L4" data-level="4">
+  <div class="titlebar"><span class="lvl">4</span><h2>The first handler — where the lecture becomes an app</h2><span class="emo">➕</span><span class="tbtns">— ▢ ✕</span></div>
+  <div class="body">
+    <p>One button, one subscription, and the five-line rhythm. Type it slowly — every line is one you ran in the console this morning:</p>
+    <div class="codewrap">
+      <div class="codehead"><span>MainWindow.cs — two additions</span><button class="copy" type="button">Copy</button></div>
+      <pre class="code"><span class="c">// 1 · in the constructor, under the greeter lines:</span>
+<span class="k">var</span> btnAdd = <span class="k">new</span> Button { Content = <span class="s">&quot;+&quot;</span> };
+btnAdd.Click += BtnAdd_Click;
+<span class="c">//    …and add btnAdd to Children, between txtB and lblResult.</span>
+
+<span class="c">// 2 · after BtnGreet_Click — the whole morning in five lines:</span>
+<span class="k">void</span> BtnAdd_Click(<span class="k">object</span> sender, RoutedEventArgs e)
+{
+    <span class="k">double</span> a = Convert.ToDouble(txtA.Text);   <span class="c">// read + cast   (Casting tab)</span>
+    <span class="k">double</span> b = Convert.ToDouble(txtB.Text);   <span class="c">// read + cast</span>
+    lblResult.Text = a + <span class="s">&quot; + &quot;</span> + b + <span class="s">&quot; = &quot;</span> + (a + b);   <span class="c">// compute in ( ), glue, write</span>
+}</pre>
+    </div>
+    <ol>
+      <li>Add the button + wiring; grow <code>Children</code> to <code>…txtA, txtB, btnAdd, lblResult</code>.</li>
+      <li>Type the handler. When you type <code>txtA.</code> and pause — IntelliSense lists <code>Text</code>. Take the gift.</li>
+      <li><kbd>F5</kbd> ▸ 12 and 4 ▸ click <b>+</b>.</li>
+    </ol>
+    <figure class="fig">
+      <div class="winapp" style="max-width:380px">
+        <div class="wtitle"><span class="t">My Studio App — Maria</span><span class="wb">— ▢ ✕</span></div>
+        <div class="wbody">
+          <span class="wf-text">12</span>
+          <span class="wf-text">4</span>
+          <span class="wf-btn">+</span>
+          <span class="wf-result">12 + 4 = 16</span>
+        </div>
+      </div>
+      <figcaption><b>Figure 3.</b> ▶ The output (greeter section above not shown). Click again with new numbers — the handler re-runs every time. Try 7.5 and 2.5: decimals welcome, that's the double at work.</figcaption>
+    </figure>
+    <details><summary>Why (a + b) in parentheses?</summary><div class="dbody">Because <code>+</code> runs left to right and the glue chain starts with a number-then-string. Without the parentheses, once <code>" + "</code> enters the chain everything after it glues — you'd get <code>12 + 4 = 124</code>. The parentheses force the MATH to happen first. This is Example 6's "Total: 52" trap, defeated in the wild.</div></details>
+    <div class="check">✅ <b>Checkpoint:</b> real input ▸ Convert ▸ compute ▸ glued answer on the window. The lecture is now an app.</div>
+    <div class="markwrap"><button class="mark" type="button">Mark level complete</button></div>
+  </div>
+</article>
+
+<!-- ============ LEVEL 5 ============ -->
+<article class="level" id="L5" data-level="5">
+  <div class="titlebar"><span class="lvl">5</span><h2>The full calculator — four buttons, one row</h2><span class="emo">🧮</span><span class="tbtns">— ▢ ✕</span></div>
+  <div class="body">
+    <p>Three sibling handlers (each is BtnAdd with <b>two characters</b> changed) and one new layout trick — a <b>horizontal</b> StackPanel that turns four buttons into a row:</p>
+    <div class="codewrap">
+      <div class="codehead"><span>MainWindow.cs — the additions</span><button class="copy" type="button">Copy</button></div>
+      <pre class="code"><span class="c">// 1 · top of the file — Orientation lives here:</span>
+<span class="k">using</span> Avalonia.Layout;
+
+<span class="c">// 2 · in the constructor, replacing your single btnAdd lines:</span>
+<span class="k">var</span> btnAdd = <span class="k">new</span> Button { Content = <span class="s">&quot;+&quot;</span> };  btnAdd.Click += BtnAdd_Click;
+<span class="k">var</span> btnSub = <span class="k">new</span> Button { Content = <span class="s">&quot;−&quot;</span> };  btnSub.Click += BtnSub_Click;
+<span class="k">var</span> btnMul = <span class="k">new</span> Button { Content = <span class="s">&quot;×&quot;</span> };  btnMul.Click += BtnMul_Click;
+<span class="k">var</span> btnDiv = <span class="k">new</span> Button { Content = <span class="s">&quot;÷&quot;</span> };  btnDiv.Click += BtnDiv_Click;
+<span class="k">var</span> buttonRow = <span class="k">new</span> StackPanel { Orientation = Orientation.Horizontal, Spacing = <span class="n">8</span>,
+                                 Children = { btnAdd, btnSub, btnMul, btnDiv } };
+<span class="c">//    Children list: …txtA, txtB, buttonRow, lblResult  ← the row rides as ONE child</span>
+
+<span class="c">// 3 · three siblings after BtnAdd_Click — copy it, change 2 characters each:</span>
+<span class="c">//    BtnSub_Click →  a - b   and  &quot; − &quot;</span>
+<span class="c">//    BtnMul_Click →  a * b   and  &quot; × &quot;</span>
+<span class="c">//    BtnDiv_Click →  a / b   and  &quot; ÷ &quot;</span></pre>
+    </div>
+    <p>Stuck, or want to diff against the reference? The complete file — greeter + all four handlers, ready to paste whole:</p>
+    <div class="codewrap">
+  <div class="codehead"><span>MainWindow.cs — COMPLETE FILE · greeter + full calculator (paste it all, F5)</span><button class="copy" type="button">Copy</button></div>
+  <pre class="code"><span class="k">using</span> Avalonia;
+<span class="k">using</span> Avalonia.Controls;
+<span class="k">using</span> Avalonia.Interactivity;
+<span class="k">using</span> Avalonia.Layout;
+<span class="k">using</span> Avalonia.Media;
+
+<span class="k">namespace</span> MyStudioApp;
+
+<span class="k">public</span> <span class="k">class</span> MainWindow : Window
+{
+<span class="c">    // ---- fields: controls the handlers must reach later ----</span>
+    TextBox txtName = <span class="k">new</span> TextBox { Watermark = <span class="s">&quot;Type your name…&quot;</span> };
+    TextBlock lblGreeting = <span class="k">new</span> TextBlock { FontSize = <span class="n">18</span> };
+    TextBox txtA = <span class="k">new</span> TextBox { Watermark = <span class="s">&quot;First number&quot;</span> };
+    TextBox txtB = <span class="k">new</span> TextBox { Watermark = <span class="s">&quot;Second number&quot;</span> };
+    TextBlock lblResult = <span class="k">new</span> TextBlock { FontSize = <span class="n">18</span>, FontWeight = FontWeight.Bold };
+
+    <span class="k">public</span> MainWindow()
+    {
+        Title = <span class="s">&quot;My Studio App — Maria&quot;</span>;
+        Width = <span class="n">500</span>; Height = <span class="n">520</span>;
+        Background = Brushes.MintCream;
+
+<span class="c">        // ---- greeter section (Week 1) ----</span>
+        <span class="k">var</span> lblWelcome = <span class="k">new</span> TextBlock { Text = <span class="s">&quot;Welcome to MAC 109!&quot;</span>, FontSize = <span class="n">22</span> };
+        <span class="k">var</span> btnGreet = <span class="k">new</span> Button { Content = <span class="s">&quot;Say Hello&quot;</span> };
+        btnGreet.Click += BtnGreet_Click;
+
+<span class="c">        // ---- calculator section (Week 2) ----</span>
+        <span class="k">var</span> btnAdd = <span class="k">new</span> Button { Content = <span class="s">&quot;+&quot;</span> };  btnAdd.Click += BtnAdd_Click;
+        <span class="k">var</span> btnSub = <span class="k">new</span> Button { Content = <span class="s">&quot;−&quot;</span> };  btnSub.Click += BtnSub_Click;
+        <span class="k">var</span> btnMul = <span class="k">new</span> Button { Content = <span class="s">&quot;×&quot;</span> };  btnMul.Click += BtnMul_Click;
+        <span class="k">var</span> btnDiv = <span class="k">new</span> Button { Content = <span class="s">&quot;÷&quot;</span> };  btnDiv.Click += BtnDiv_Click;
+        <span class="k">var</span> buttonRow = <span class="k">new</span> StackPanel { Orientation = Orientation.Horizontal, Spacing = <span class="n">8</span>,
+                                         Children = { btnAdd, btnSub, btnMul, btnDiv } };
+
+        Content = <span class="k">new</span> StackPanel
+        {
+            Margin = <span class="k">new</span> Thickness(<span class="n">20</span>), Spacing = <span class="n">12</span>,
+            Children = { lblWelcome, txtName, btnGreet, lblGreeting,
+                         txtA, txtB, buttonRow, lblResult }
+        };
+    }
+
+    <span class="k">void</span> BtnGreet_Click(<span class="k">object</span> sender, RoutedEventArgs e)
+    {
+        lblGreeting.Text = <span class="s">&quot;Hello, &quot;</span> + txtName.Text + <span class="s">&quot;!&quot;</span>;
+    }
+
+    <span class="k">void</span> BtnAdd_Click(<span class="k">object</span> sender, RoutedEventArgs e)
+    {
+        <span class="k">double</span> a = Convert.ToDouble(txtA.Text);
+        <span class="k">double</span> b = Convert.ToDouble(txtB.Text);
+        lblResult.Text = a + <span class="s">&quot; + &quot;</span> + b + <span class="s">&quot; = &quot;</span> + (a + b);
+    }
+
+    <span class="k">void</span> BtnSub_Click(<span class="k">object</span> sender, RoutedEventArgs e)
+    {
+        <span class="k">double</span> a = Convert.ToDouble(txtA.Text);
+        <span class="k">double</span> b = Convert.ToDouble(txtB.Text);
+        lblResult.Text = a + <span class="s">&quot; − &quot;</span> + b + <span class="s">&quot; = &quot;</span> + (a - b);
+    }
+
+    <span class="k">void</span> BtnMul_Click(<span class="k">object</span> sender, RoutedEventArgs e)
+    {
+        <span class="k">double</span> a = Convert.ToDouble(txtA.Text);
+        <span class="k">double</span> b = Convert.ToDouble(txtB.Text);
+        lblResult.Text = a + <span class="s">&quot; × &quot;</span> + b + <span class="s">&quot; = &quot;</span> + (a * b);
+    }
+
+    <span class="k">void</span> BtnDiv_Click(<span class="k">object</span> sender, RoutedEventArgs e)
+    {
+        <span class="k">double</span> a = Convert.ToDouble(txtA.Text);
+        <span class="k">double</span> b = Convert.ToDouble(txtB.Text);
+        lblResult.Text = a + <span class="s">&quot; ÷ &quot;</span> + b + <span class="s">&quot; = &quot;</span> + (a / b);
+    }
+}</pre>
+</div>
+
+    <figure class="fig">
+      <div class="winapp" style="max-width:380px">
+        <div class="wtitle"><span class="t">My Studio App — Maria</span><span class="wb">— ▢ ✕</span></div>
+        <div class="wbody">
+          <span class="wf-text">12</span>
+          <span class="wf-text">4</span>
+          <div style="display:flex;gap:.5rem;flex-wrap:wrap"><span class="wf-btn">+</span><span class="wf-btn">−</span><span class="wf-btn">×</span><span class="wf-btn">÷</span></div>
+          <span class="wf-result">12 ÷ 4 = 3</span>
+        </div>
+      </div>
+      <figcaption><b>Figure 4.</b> ▶ The output. Four buttons, four handlers, one shared pair of boxes — each answer labeled with its own symbol.</figcaption>
+    </figure>
+    <div class="tip">🕳️ <b>Mandatory weird experiment:</b> 10 ÷ 0. No crash — doubles shrug and answer <b>∞</b>. Legal, not smart. Next week's <code>if</code> teaches your app to refuse politely. Remember this moment.</div>
+    <div class="medal">🏅 <b>MILESTONE 2 CORE — DONE!</b> Live calculations from real input, on your window. Everything from here is choosing what else to compute.</div>
+    <div class="markwrap"><button class="mark" type="button">Mark level complete</button></div>
+  </div>
+</article>
+
+<!-- ============ LEVEL 6 ============ -->
+<article class="level" id="L6" data-level="6">
+  <div class="titlebar"><span class="lvl">6</span><h2>Pick a component: BMI tool 🏥 or grade tool 🎓</h2><span class="emo">⚗️</span><span class="tbtns">— ▢ ✕</span></div>
+  <div class="body">
+    <p>Same rhythm, second instrument. Choose ONE (finish early? build both) — and meet a small new friend: <code>Math.Round(value, 1)</code>, which trims <code>22.857142857142858</code> into a civilized <code>22.9</code>.</p>
+    <div class="tcards">
+      <div class="tcard"><b>🏥 BMI tool</b> — two inputs (weight kg, height m), one formula: <code>weight / (height * height)</code>. The parentheses aren't optional: without them PEMDAS divides first and multiplies after — wrong answer, no warning.</div>
+      <div class="tcard"><b>🎓 Grade tool</b> — three inputs, the bug hunt's formula done right: <code>(g1 + g2 + g3) / 3</code>. You fixed this exact line this morning; now it ships in your app.</div>
+    </div>
+    <div class="codewrap">
+      <div class="codehead"><span>Option A · BMI — the additions (fields ▸ button ▸ Children ▸ handler)</span><button class="copy" type="button">Copy</button></div>
+      <pre class="code"><span class="c">// fields, under lblResult:</span>
+TextBox txtWeight = <span class="k">new</span> TextBox { Watermark = <span class="s">&quot;Weight (kg)&quot;</span> };
+TextBox txtHeight = <span class="k">new</span> TextBox { Watermark = <span class="s">&quot;Height (m)&quot;</span> };
+
+<span class="c">// constructor, under the calculator buttons:</span>
+<span class="k">var</span> btnBmi = <span class="k">new</span> Button { Content = <span class="s">&quot;Calculate BMI&quot;</span> };  btnBmi.Click += BtnBmi_Click;
+<span class="c">// Children: …buttonRow, txtWeight, txtHeight, btnBmi, lblResult</span>
+
+<span class="c">// handler, after BtnDiv_Click:</span>
+<span class="k">void</span> BtnBmi_Click(<span class="k">object</span> sender, RoutedEventArgs e)
+{
+    <span class="k">double</span> weight = Convert.ToDouble(txtWeight.Text);
+    <span class="k">double</span> height = Convert.ToDouble(txtHeight.Text);
+    <span class="k">double</span> bmi = weight / (height * height);
+    lblResult.Text = <span class="s">&quot;BMI: &quot;</span> + Math.Round(bmi, <span class="n">1</span>);
+}</pre>
+    </div>
+    <details><summary>📦 The complete file with BMI added — paste-whole version</summary><div class="dbody" style="padding:0 .6rem .6rem">
+    <div class="codewrap">
+  <div class="codehead"><span>MainWindow.cs — COMPLETE FILE · calculator + BMI tool</span><button class="copy" type="button">Copy</button></div>
+  <pre class="code"><span class="k">using</span> Avalonia;
+<span class="k">using</span> Avalonia.Controls;
+<span class="k">using</span> Avalonia.Interactivity;
+<span class="k">using</span> Avalonia.Layout;
+<span class="k">using</span> Avalonia.Media;
+
+<span class="k">namespace</span> MyStudioApp;
+
+<span class="k">public</span> <span class="k">class</span> MainWindow : Window
+{
+<span class="c">    // ---- fields: controls the handlers must reach later ----</span>
+    TextBox txtName = <span class="k">new</span> TextBox { Watermark = <span class="s">&quot;Type your name…&quot;</span> };
+    TextBlock lblGreeting = <span class="k">new</span> TextBlock { FontSize = <span class="n">18</span> };
+    TextBox txtA = <span class="k">new</span> TextBox { Watermark = <span class="s">&quot;First number&quot;</span> };
+    TextBox txtB = <span class="k">new</span> TextBox { Watermark = <span class="s">&quot;Second number&quot;</span> };
+    TextBlock lblResult = <span class="k">new</span> TextBlock { FontSize = <span class="n">18</span>, FontWeight = FontWeight.Bold };
+    TextBox txtWeight = <span class="k">new</span> TextBox { Watermark = <span class="s">&quot;Weight (kg)&quot;</span> };
+    TextBox txtHeight = <span class="k">new</span> TextBox { Watermark = <span class="s">&quot;Height (m)&quot;</span> };
+
+    <span class="k">public</span> MainWindow()
+    {
+        Title = <span class="s">&quot;My Studio App — Maria&quot;</span>;
+        Width = <span class="n">500</span>; Height = <span class="n">520</span>;
+        Background = Brushes.MintCream;
+
+<span class="c">        // ---- greeter section (Week 1) ----</span>
+        <span class="k">var</span> lblWelcome = <span class="k">new</span> TextBlock { Text = <span class="s">&quot;Welcome to MAC 109!&quot;</span>, FontSize = <span class="n">22</span> };
+        <span class="k">var</span> btnGreet = <span class="k">new</span> Button { Content = <span class="s">&quot;Say Hello&quot;</span> };
+        btnGreet.Click += BtnGreet_Click;
+
+<span class="c">        // ---- calculator section (Week 2) ----</span>
+        <span class="k">var</span> btnAdd = <span class="k">new</span> Button { Content = <span class="s">&quot;+&quot;</span> };  btnAdd.Click += BtnAdd_Click;
+        <span class="k">var</span> btnSub = <span class="k">new</span> Button { Content = <span class="s">&quot;−&quot;</span> };  btnSub.Click += BtnSub_Click;
+        <span class="k">var</span> btnMul = <span class="k">new</span> Button { Content = <span class="s">&quot;×&quot;</span> };  btnMul.Click += BtnMul_Click;
+        <span class="k">var</span> btnDiv = <span class="k">new</span> Button { Content = <span class="s">&quot;÷&quot;</span> };  btnDiv.Click += BtnDiv_Click;
+        <span class="k">var</span> btnBmi = <span class="k">new</span> Button { Content = <span class="s">&quot;Calculate BMI&quot;</span> };  btnBmi.Click += BtnBmi_Click;
+        <span class="k">var</span> buttonRow = <span class="k">new</span> StackPanel { Orientation = Orientation.Horizontal, Spacing = <span class="n">8</span>,
+                                         Children = { btnAdd, btnSub, btnMul, btnDiv } };
+
+        Content = <span class="k">new</span> StackPanel
+        {
+            Margin = <span class="k">new</span> Thickness(<span class="n">20</span>), Spacing = <span class="n">12</span>,
+            Children = { lblWelcome, txtName, btnGreet, lblGreeting,
+                         txtA, txtB, buttonRow,
+                         txtWeight, txtHeight, btnBmi,
+                         lblResult }
+        };
+    }
+
+    <span class="k">void</span> BtnGreet_Click(<span class="k">object</span> sender, RoutedEventArgs e)
+    {
+        lblGreeting.Text = <span class="s">&quot;Hello, &quot;</span> + txtName.Text + <span class="s">&quot;!&quot;</span>;
+    }
+
+    <span class="k">void</span> BtnAdd_Click(<span class="k">object</span> sender, RoutedEventArgs e)
+    {
+        <span class="k">double</span> a = Convert.ToDouble(txtA.Text);
+        <span class="k">double</span> b = Convert.ToDouble(txtB.Text);
+        lblResult.Text = a + <span class="s">&quot; + &quot;</span> + b + <span class="s">&quot; = &quot;</span> + (a + b);
+    }
+
+    <span class="k">void</span> BtnSub_Click(<span class="k">object</span> sender, RoutedEventArgs e)
+    {
+        <span class="k">double</span> a = Convert.ToDouble(txtA.Text);
+        <span class="k">double</span> b = Convert.ToDouble(txtB.Text);
+        lblResult.Text = a + <span class="s">&quot; − &quot;</span> + b + <span class="s">&quot; = &quot;</span> + (a - b);
+    }
+
+    <span class="k">void</span> BtnMul_Click(<span class="k">object</span> sender, RoutedEventArgs e)
+    {
+        <span class="k">double</span> a = Convert.ToDouble(txtA.Text);
+        <span class="k">double</span> b = Convert.ToDouble(txtB.Text);
+        lblResult.Text = a + <span class="s">&quot; × &quot;</span> + b + <span class="s">&quot; = &quot;</span> + (a * b);
+    }
+
+    <span class="k">void</span> BtnDiv_Click(<span class="k">object</span> sender, RoutedEventArgs e)
+    {
+        <span class="k">double</span> a = Convert.ToDouble(txtA.Text);
+        <span class="k">double</span> b = Convert.ToDouble(txtB.Text);
+        lblResult.Text = a + <span class="s">&quot; ÷ &quot;</span> + b + <span class="s">&quot; = &quot;</span> + (a / b);
+    }
+
+    <span class="k">void</span> BtnBmi_Click(<span class="k">object</span> sender, RoutedEventArgs e)
+    {
+        <span class="k">double</span> weight = Convert.ToDouble(txtWeight.Text);
+        <span class="k">double</span> height = Convert.ToDouble(txtHeight.Text);
+        <span class="k">double</span> bmi = weight / (height * height);
+        lblResult.Text = <span class="s">&quot;BMI: &quot;</span> + Math.Round(bmi, <span class="n">1</span>);
+    }
+}</pre>
+</div>
+
+    </div></details>
+    <div class="codewrap">
+      <div class="codehead"><span>Option B · Grade tool — the additions</span><button class="copy" type="button">Copy</button></div>
+      <pre class="code"><span class="c">// fields, under lblResult:</span>
+TextBox txtG1 = <span class="k">new</span> TextBox { Watermark = <span class="s">&quot;Grade 1&quot;</span> };
+TextBox txtG2 = <span class="k">new</span> TextBox { Watermark = <span class="s">&quot;Grade 2&quot;</span> };
+TextBox txtG3 = <span class="k">new</span> TextBox { Watermark = <span class="s">&quot;Grade 3&quot;</span> };
+
+<span class="c">// constructor, under the calculator buttons:</span>
+<span class="k">var</span> btnAvg = <span class="k">new</span> Button { Content = <span class="s">&quot;Average&quot;</span> };  btnAvg.Click += BtnAvg_Click;
+<span class="c">// Children: …buttonRow, txtG1, txtG2, txtG3, btnAvg, lblResult</span>
+
+<span class="c">// handler, after BtnDiv_Click:</span>
+<span class="k">void</span> BtnAvg_Click(<span class="k">object</span> sender, RoutedEventArgs e)
+{
+    <span class="k">double</span> g1 = Convert.ToDouble(txtG1.Text);
+    <span class="k">double</span> g2 = Convert.ToDouble(txtG2.Text);
+    <span class="k">double</span> g3 = Convert.ToDouble(txtG3.Text);
+    <span class="k">double</span> avg = (g1 + g2 + g3) / <span class="n">3</span>;   <span class="c">// the parentheses ARE the fix</span>
+    lblResult.Text = <span class="s">&quot;Average: &quot;</span> + Math.Round(avg, <span class="n">1</span>);
+}</pre>
+    </div>
+    <details><summary>📦 The complete file with the grade tool added — paste-whole version</summary><div class="dbody" style="padding:0 .6rem .6rem">
+    <div class="codewrap">
+  <div class="codehead"><span>MainWindow.cs — COMPLETE FILE · calculator + grade tool</span><button class="copy" type="button">Copy</button></div>
+  <pre class="code"><span class="k">using</span> Avalonia;
+<span class="k">using</span> Avalonia.Controls;
+<span class="k">using</span> Avalonia.Interactivity;
+<span class="k">using</span> Avalonia.Layout;
+<span class="k">using</span> Avalonia.Media;
+
+<span class="k">namespace</span> MyStudioApp;
+
+<span class="k">public</span> <span class="k">class</span> MainWindow : Window
+{
+<span class="c">    // ---- fields: controls the handlers must reach later ----</span>
+    TextBox txtName = <span class="k">new</span> TextBox { Watermark = <span class="s">&quot;Type your name…&quot;</span> };
+    TextBlock lblGreeting = <span class="k">new</span> TextBlock { FontSize = <span class="n">18</span> };
+    TextBox txtA = <span class="k">new</span> TextBox { Watermark = <span class="s">&quot;First number&quot;</span> };
+    TextBox txtB = <span class="k">new</span> TextBox { Watermark = <span class="s">&quot;Second number&quot;</span> };
+    TextBlock lblResult = <span class="k">new</span> TextBlock { FontSize = <span class="n">18</span>, FontWeight = FontWeight.Bold };
+    TextBox txtG1 = <span class="k">new</span> TextBox { Watermark = <span class="s">&quot;Grade 1&quot;</span> };
+    TextBox txtG2 = <span class="k">new</span> TextBox { Watermark = <span class="s">&quot;Grade 2&quot;</span> };
+    TextBox txtG3 = <span class="k">new</span> TextBox { Watermark = <span class="s">&quot;Grade 3&quot;</span> };
+
+    <span class="k">public</span> MainWindow()
+    {
+        Title = <span class="s">&quot;My Studio App — Maria&quot;</span>;
+        Width = <span class="n">500</span>; Height = <span class="n">520</span>;
+        Background = Brushes.MintCream;
+
+<span class="c">        // ---- greeter section (Week 1) ----</span>
+        <span class="k">var</span> lblWelcome = <span class="k">new</span> TextBlock { Text = <span class="s">&quot;Welcome to MAC 109!&quot;</span>, FontSize = <span class="n">22</span> };
+        <span class="k">var</span> btnGreet = <span class="k">new</span> Button { Content = <span class="s">&quot;Say Hello&quot;</span> };
+        btnGreet.Click += BtnGreet_Click;
+
+<span class="c">        // ---- calculator section (Week 2) ----</span>
+        <span class="k">var</span> btnAdd = <span class="k">new</span> Button { Content = <span class="s">&quot;+&quot;</span> };  btnAdd.Click += BtnAdd_Click;
+        <span class="k">var</span> btnSub = <span class="k">new</span> Button { Content = <span class="s">&quot;−&quot;</span> };  btnSub.Click += BtnSub_Click;
+        <span class="k">var</span> btnMul = <span class="k">new</span> Button { Content = <span class="s">&quot;×&quot;</span> };  btnMul.Click += BtnMul_Click;
+        <span class="k">var</span> btnDiv = <span class="k">new</span> Button { Content = <span class="s">&quot;÷&quot;</span> };  btnDiv.Click += BtnDiv_Click;
+        <span class="k">var</span> btnAvg = <span class="k">new</span> Button { Content = <span class="s">&quot;Average&quot;</span> };  btnAvg.Click += BtnAvg_Click;
+        <span class="k">var</span> buttonRow = <span class="k">new</span> StackPanel { Orientation = Orientation.Horizontal, Spacing = <span class="n">8</span>,
+                                         Children = { btnAdd, btnSub, btnMul, btnDiv } };
+
+        Content = <span class="k">new</span> StackPanel
+        {
+            Margin = <span class="k">new</span> Thickness(<span class="n">20</span>), Spacing = <span class="n">12</span>,
+            Children = { lblWelcome, txtName, btnGreet, lblGreeting,
+                         txtA, txtB, buttonRow,
+                         txtG1, txtG2, txtG3, btnAvg,
+                         lblResult }
+        };
+    }
+
+    <span class="k">void</span> BtnGreet_Click(<span class="k">object</span> sender, RoutedEventArgs e)
+    {
+        lblGreeting.Text = <span class="s">&quot;Hello, &quot;</span> + txtName.Text + <span class="s">&quot;!&quot;</span>;
+    }
+
+    <span class="k">void</span> BtnAdd_Click(<span class="k">object</span> sender, RoutedEventArgs e)
+    {
+        <span class="k">double</span> a = Convert.ToDouble(txtA.Text);
+        <span class="k">double</span> b = Convert.ToDouble(txtB.Text);
+        lblResult.Text = a + <span class="s">&quot; + &quot;</span> + b + <span class="s">&quot; = &quot;</span> + (a + b);
+    }
+
+    <span class="k">void</span> BtnSub_Click(<span class="k">object</span> sender, RoutedEventArgs e)
+    {
+        <span class="k">double</span> a = Convert.ToDouble(txtA.Text);
+        <span class="k">double</span> b = Convert.ToDouble(txtB.Text);
+        lblResult.Text = a + <span class="s">&quot; − &quot;</span> + b + <span class="s">&quot; = &quot;</span> + (a - b);
+    }
+
+    <span class="k">void</span> BtnMul_Click(<span class="k">object</span> sender, RoutedEventArgs e)
+    {
+        <span class="k">double</span> a = Convert.ToDouble(txtA.Text);
+        <span class="k">double</span> b = Convert.ToDouble(txtB.Text);
+        lblResult.Text = a + <span class="s">&quot; × &quot;</span> + b + <span class="s">&quot; = &quot;</span> + (a * b);
+    }
+
+    <span class="k">void</span> BtnDiv_Click(<span class="k">object</span> sender, RoutedEventArgs e)
+    {
+        <span class="k">double</span> a = Convert.ToDouble(txtA.Text);
+        <span class="k">double</span> b = Convert.ToDouble(txtB.Text);
+        lblResult.Text = a + <span class="s">&quot; ÷ &quot;</span> + b + <span class="s">&quot; = &quot;</span> + (a / b);
+    }
+
+    <span class="k">void</span> BtnAvg_Click(<span class="k">object</span> sender, RoutedEventArgs e)
+    {
+        <span class="k">double</span> g1 = Convert.ToDouble(txtG1.Text);
+        <span class="k">double</span> g2 = Convert.ToDouble(txtG2.Text);
+        <span class="k">double</span> g3 = Convert.ToDouble(txtG3.Text);
+        <span class="k">double</span> avg = (g1 + g2 + g3) / <span class="n">3</span>;   <span class="c">// the parentheses ARE the bug fix</span>
+        lblResult.Text = <span class="s">&quot;Average: &quot;</span> + Math.Round(avg, <span class="n">1</span>);
+    }
+}</pre>
+</div>
+
+    </div></details>
+    <figure class="fig">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.9rem" class="l6grid">
+        <div>
+          <div class="winapp" style="max-width:340px;margin:0 auto">
+            <div class="wtitle"><span class="t">My Studio App — Maria</span><span class="wb">— ▢ ✕</span></div>
+            <div class="wbody">
+              <span class="wf-text">70</span>
+              <span class="wf-text">1.75</span>
+              <span class="wf-btn">Calculate BMI</span>
+              <span class="wf-result">BMI: 22.9</span>
+            </div>
+          </div>
+          <figcaption style="font-size:.85rem;color:var(--muted);margin-top:.45rem;text-align:center">▶ BMI: 70 kg, 1.75 m → 22.9 (Math.Round at work — the raw double is 22.857142857142858).</figcaption>
+        </div>
+        <div>
+          <div class="winapp" style="max-width:340px;margin:0 auto">
+            <div class="wtitle"><span class="t">My Studio App — Maria</span><span class="wb">— ▢ ✕</span></div>
+            <div class="wbody">
+              <span class="wf-text">85</span>
+              <span class="wf-text">90</span>
+              <span class="wf-text">95</span>
+              <span class="wf-btn">Average</span>
+              <span class="wf-result">Average: 90</span>
+            </div>
+          </div>
+          <figcaption style="font-size:.85rem;color:var(--muted);margin-top:.45rem;text-align:center">▶ Grade tool: 85, 90, 95 → 90. The bug hunt's formula, shipped correctly.</figcaption>
+        </div>
+      </div>
+    </figure>
+    <div class="check">✅ <b>Checkpoint:</b> a second component computing on the same window. Notice what you did NOT relearn: fields, wiring, Convert, glue. New feature, zero new concepts.</div>
+    <div class="markwrap"><button class="mark" type="button">Mark level complete</button></div>
+  </div>
+</article>
+
+<!-- ============ LEVEL 7 ============ -->
+<article class="level" id="L7" data-level="7">
+  <div class="titlebar"><span class="lvl">7</span><h2>Your domain formula — the milestone's heart</h2><span class="emo">💼</span><span class="tbtns">— ▢ ✕</span></div>
+  <div class="body">
+    <p>Milestone 2 isn't "build my calculator" — it's <b>make YOUR app calculate</b>. Find your project, then build its formula as a component exactly like Level 6, with boxes and variables named after your <b>domain</b>:</p>
+    <div class="tcards">
+      <div class="tcard"><b>🎓 Student Management</b> — <code>double avg = (g1 + g2 + g3) / 3;</code> → you may already own this from Level 6. Add a weighted version for a stretch.</div>
+      <div class="tcard"><b>📚 Library</b> — <code>double fee = daysLate * 0.25;</code> → box: <code>txtDaysLate</code> · output <code>"Fee: $" + fee</code></div>
+      <div class="tcard"><b>🍽️ Restaurant</b> — <code>double total = subtotal + subtotal * 0.08875;</code> → NYC's real tax rate. Output <code>"Total: $" + Math.Round(total, 2)</code></div>
+      <div class="tcard"><b>🏨 Hotel</b> — <code>double cost = nights * rate;</code> → boxes: <code>txtNights</code>, <code>txtRate</code> · output <code>"Stay: $" + cost</code></div>
+      <div class="tcard"><b>🏦 Banking</b> — <code>double interest = balance * rate / 100;</code> → boxes: <code>txtBalance</code>, <code>txtRate</code> · output <code>"Interest: $" + interest</code></div>
+      <div class="tcard"><b>📦 Inventory</b> — <code>double value = quantity * unitPrice;</code> → output <code>"Stock value: $" + value</code></div>
+    </div>
+    <ol>
+      <li>Add the input fields your formula needs — <b>named for your domain</b> (<code>txtNights</code>, never <code>txtA</code>).</li>
+      <li>Add one button with a domain label ("Book it", "Check fee", "Order total"…), wire it, grow <code>Children</code>.</li>
+      <li>Write the handler: read ▸ Convert ▸ your formula ▸ glue with a human label ▸ write.</li>
+      <li><kbd>F5</kbd> and test with real-ish numbers. Predict the answer before each click — Level 8 explains why.</li>
+    </ol>
+    <div class="tip">🌟 <b>Grading truth:</b> code that reads like the business — <code>nights * rate</code>, not <code>a * b</code> — is code your professor grades smiling. Naming is not decoration; it's design.</div>
+    <div class="check">✅ <b>Checkpoint:</b> your app now computes something only YOUR app would compute. That's the milestone's beating heart.</div>
+    <div class="markwrap"><button class="mark" type="button">Mark level complete</button></div>
+  </div>
+</article>
+
+<!-- ============ LEVEL 8 ============ -->
+<article class="level" id="L8" data-level="8">
+  <div class="titlebar"><span class="lvl">8</span><h2>Break it &amp; fix it — all three bug species, in a GUI</h2><span class="emo">😈</span><span class="tbtns">— ▢ ✕</span></div>
+  <div class="body">
+    <p>This morning you met the three species in the console. Now hunt them in your app — run each sabotage, read the evidence, undo (<kbd>Ctrl</kbd>+<kbd>Z</kbd>), confirm F5 still works:</p>
+    <ol>
+      <li>🧊 <b>Compile-time:</b> in any handler, delete <code>Convert.ToDouble(</code> and its closing <code>)</code>, leaving <code>double a = txtA.Text;</code> — instant squiggle, and Problems says <b>CS0029: cannot implicitly convert type 'string' to 'double'</b>. The exact error from the lecture's Example 3, wearing a GUI costume.</li>
+      <li>🍌 <b>Runtime:</b> everything compiling? F5, type <b>banana</b> in a number box, click the button. VS Code breaks on the Convert line: <b>System.FormatException</b>. Press ■ Stop. Compiled fine, exploded live — species two.</li>
+      <li>👻 <b>Logic:</b> remove the parentheses from your formula — <code>(a + b)</code> in the Add handler, or the grade tool's <code>(g1 + g2 + g3)</code>. F5. It runs <i>happily</i> and answers absurdly (<code>12 + 4 = 124</code> glue, or the infamous 206.7 average). No squiggle, no crash — just wrong. The compiler checks grammar, never intentions.</li>
+      <li>🕳️ <b>Bonus:</b> divide by zero once more, on purpose, and wave at <b>∞</b>. Next week it gets evicted.</li>
+    </ol>
+    <details><summary>The professional ritual, one more time</summary><div class="dbody"><b>Compile errors:</b> read the Problems panel top to bottom, fix the FIRST first — later errors are often echoes. <b>Runtime errors:</b> read the exception name and the line it broke on; the answer is usually the input. <b>Logic errors:</b> the only defense is prediction — know the expected answer BEFORE you click. 85/90/95 must average 90; if it doesn't, the code is lying politely.</div></details>
+    <div class="check">✅ <b>Checkpoint:</b> everything un-sabotaged, F5 green, all components computing correctly.</div>
+    <div class="markwrap"><button class="mark" type="button">Mark level complete</button></div>
+  </div>
+</article>
+
+<!-- ============ LEVEL 9 ============ -->
+<article class="level" id="L9" data-level="9">
+  <div class="titlebar"><span class="lvl">9</span><h2>Polish pass — five minutes of pro</h2><span class="emo">🎨</span><span class="tbtns">— ▢ ✕</span></div>
+  <div class="body">
+    <p>Small touches, outsized effect. All optional except the first:</p>
+    <ol>
+      <li><b>Human labels:</b> every output reads like a sentence with units — <code>"Total: $34.50"</code>, <code>"BMI: 22.9"</code> — never a naked number.</li>
+      <li><b>Money behaves:</b> wrap currency in <code>Math.Round(total, 2)</code> — two decimals, like a receipt.</li>
+      <li><b>Bold results:</b> give <code>lblResult</code> <code>FontWeight = FontWeight.Bold</code> (needs <code>using Avalonia.Media;</code> — same toolbox as your Background color).</li>
+      <li><b>Watermarks everywhere:</b> every box explains itself before a single click.</li>
+      <li><b>Title bump:</b> <code>Title = "My Studio App — YOUR NAME · v0.2";</code> — version numbers feel good, don't they?</li>
+    </ol>
+    <div class="codewrap">
+      <div class="codehead"><span>MainWindow.cs — the polish lines</span><button class="copy" type="button">Copy</button></div>
+      <pre class="code"><span class="k">using</span> Avalonia.Media;   <span class="c">// top of file, with the other usings</span>
+
+TextBlock lblResult = <span class="k">new</span> TextBlock { FontSize = <span class="n">18</span>, FontWeight = FontWeight.Bold };
+
+lblResult.Text = <span class="s">&quot;Total: $&quot;</span> + Math.Round(total, <span class="n">2</span>);   <span class="c">// inside your handler</span></pre>
+    </div>
+    <div class="check">✅ <b>Checkpoint:</b> F5 one last time and look at it like a stranger would. Boxes that explain themselves, answers with units, a bold result. That's a tool, not an exercise.</div>
+    <div class="markwrap"><button class="mark" type="button">Mark level complete</button></div>
+  </div>
+</article>
+
+<!-- ============ LEVEL 10 ============ -->
+<article class="level" id="L10" data-level="10">
+  <div class="titlebar"><span class="lvl">10</span><h2>Push Milestone 2, then sign out ☁️</h2><span class="emo">🚀</span><span class="tbtns">— ▢ ✕</span></div>
+  <div class="body">
+    <p>The machine forgets tonight; GitHub doesn't. <b>Pushing IS submitting:</b></p>
+    <ol>
+      <li>Open <code>README.md</code> ▸ add a "Week 2" line listing what your app now computes (calculator + your component + your domain formula). Save.</li>
+      <li><b>Source Control</b> icon ▸ your edited files sit under <b>Changes</b>.</li>
+      <li>Message: <code>Milestone 2: live calculations</code> ▸ <b>✓ Commit</b> ▸ <b>Yes</b> if asked about staging.</li>
+      <li><b>Sync Changes</b> ▸ sign in to GitHub in the browser if prompted.</li>
+      <li>Refresh your repo on <b>github.com</b> — open MainWindow.cs <i>on the website</i> and see today's handlers. That page is your submission: link it on <b>Brightspace</b>.</li>
+    </ol>
+    <div class="danger">🚪 <b>Exit checklist — every single week:</b><br>① Push verified on <b>github.com</b> (not just in VS Code) &nbsp;② Sign <b>out</b> of GitHub in the browser &nbsp;③ VS Code <b>Accounts</b> icon (bottom-left) ▸ your name ▸ <b>Sign Out</b>. Shared machines, shared risks.</div>
+    <details><summary>What exactly did the milestone require, again?</summary><div class="dbody">A GUI with <b>live calculations</b>: at least two input TextBoxes, a Button, an output TextBlock; <code>double</code> + <code>Convert.ToDouble</code>; math computed before gluing; a human-readable labeled result; your domain's formula with domain-named variables; pushed with the Milestone 2 message. Scroll your window: you didn't just meet it — you built three of them.</div></details>
+    <p>📬 <b>Final move:</b> submit the repo link, look at your window one more time. This morning it greeted. Now it thinks. Next Friday, it starts saying <i>no</i>. 🧮✨</p>
+    <div class="markwrap"><button class="mark" type="button">Mark level complete</button></div>
+  </div>
+</article>
+
+</main>
+
+<footer>
+  MAC 109 · Introduction to Visual C# Programming · LaGuardia Community College (CUNY) · Prof. K. Kassou — In-class studio practical #2: calculator, BMI &amp; grade components → Milestone 2.<br>
+  🏠 Finishing at home? Every step works identically on your own Windows, Mac, or Linux machine — and the morning lecture's example programs are your reference for every line.
+</footer>
+
+<script>
+(function(){
+  var TOTAL = 10, KEY = "mac109_studio2_progress";
+  var done = {};
+  try { done = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch(e) { done = {}; }
+
+  var levels = document.querySelectorAll(".level");
+  var tasks = document.querySelectorAll(".task");
+  var barfill = document.getElementById("barfill");
+  var pct = document.getElementById("pct");
+  var overlay = document.getElementById("overlay");
+  var celebrated = false;
+
+  function save(){ try { localStorage.setItem(KEY, JSON.stringify(done)); } catch(e){} }
+
+  function refresh(){
+    var count = 0;
+    levels.forEach(function(lv){
+      var n = lv.getAttribute("data-level");
+      var isDone = !!done[n];
+      lv.classList.toggle("done", isDone);
+      var btn = lv.querySelector(".mark");
+      if (btn) btn.textContent = isDone ? "✓ Level complete — tap to undo" : "Mark level complete";
+      if (isDone) count++;
+    });
+    tasks.forEach(function(t){
+      t.classList.toggle("done", !!done[t.getAttribute("data-l")]);
+    });
+    var p = Math.round(count / TOTAL * 100);
+    barfill.style.width = p + "%";
+    pct.textContent = p + "% complete" + (count === TOTAL ? " — 🏆 all levels!" : "");
+    if (count === TOTAL && !celebrated){ celebrated = true; overlay.classList.add("show"); }
+    if (count < TOTAL) celebrated = false;
+  }
+
+  levels.forEach(function(lv){
+    var btn = lv.querySelector(".mark");
+    if (!btn) return;
+    btn.addEventListener("click", function(){
+      var n = lv.getAttribute("data-level");
+      if (done[n]) delete done[n]; else done[n] = true;
+      save(); refresh();
+    });
+  });
+
+  document.getElementById("ovClose").addEventListener("click", function(){
+    overlay.classList.remove("show");
+  });
+
+  document.querySelectorAll(".copy").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      var pre = btn.closest(".codewrap").querySelector("pre.code");
+      var text = pre ? pre.innerText : "";
+      function flash(){ btn.textContent = "Copied ✓"; setTimeout(function(){ btn.textContent = "Copy"; }, 1600); }
+      if (navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(flash, flash);
+      } else {
+        var ta = document.createElement("textarea");
+        ta.value = text; document.body.appendChild(ta); ta.select();
+        try { document.execCommand("copy"); } catch(e){}
+        document.body.removeChild(ta); flash();
+      }
+    });
+  });
+
+  refresh();
+})();
+</script>
+</body>
+</html>
