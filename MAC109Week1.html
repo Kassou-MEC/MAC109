@@ -191,6 +191,18 @@
   .hero-code{margin-top:34px;max-width:560px}
   .startrow{display:flex;gap:40px;flex-wrap:wrap;margin-top:8px}
   .note{background:#332b00;border:1px solid #6b5900;border-radius:8px;padding:12px 16px;color:#e6d590;font-size:13.5px;line-height:1.5;margin-top:16px}
+
+  /* ---------- beginner examples & terminal ---------- */
+  .exgrid{display:grid;grid-template-columns:1.45fr 1fr;gap:14px;align-items:stretch;margin:14px 0}
+  @media(max-width:900px){.exgrid{grid-template-columns:1fr}}
+  .exgrid .codewin pre{font-size:13.5px;padding:12px 14px;line-height:1.75;white-space:pre}
+  .term{background:#0C0C0C;border:1px solid #3f3f46;border-radius:8px;padding:10px 14px 12px;font-family:var(--mono);font-size:13.5px;line-height:1.85;color:#CCCCCC;box-shadow:0 10px 26px rgba(0,0,0,.5)}
+  .term .thead{font-size:10.5px;letter-spacing:.12em;color:#6b7280;font-weight:700;margin-bottom:6px;font-family:inherit}
+  .term .tline{white-space:pre-wrap}
+  .term .terr{color:#F48771;font-weight:600}
+  .term .tdim{color:#6b6b6b;font-style:italic}
+  .tryit{border-left:4px solid var(--good);background:#12241a;border:1px solid #1e4030;border-left-width:4px;border-left-color:var(--good);border-radius:8px;padding:11px 15px;color:#bfe8cf;font-size:13.8px;line-height:1.6;margin:12px 0}
+  .exnote{font-size:13px;color:#9a9aa2;margin:-6px 0 12px 4px;line-height:1.5}
 </style>
 </head>
 <body>
@@ -353,43 +365,136 @@
 </section>
 
 <!-- 6 ▸ First program -->
-<section data-tab="First Code" data-file="MainWindow.cs">
-  <p class="eyebrow">05 · Code explanation — read every line</p>
-  <h2>Your first window, line by line</h2>
-  <p class="sub">One file, one language: <code class="inline">MainWindow.cs</code> is your <b>entire window</b> — the look AND the behavior. <b>Click any line</b> to see exactly what it does. By the end, no line in this file should feel like magic.</p>
+<section data-tab="First Code" data-file="Program.cs">
+  <p class="eyebrow">05 · Your first C# — read every line</p>
+  <h2>Your first complete C# program</h2>
+  <p class="sub">Every C# program wears the same suit: a <b>using</b> line, a <b>class</b> container, and a <b>Main</b> method where execution begins and runs <b>top to bottom</b>. The suit is identical every time — only the lines <i>inside Main</i> change. <b>Click any line</b> and read what it does; by the end, nothing here should feel like magic.</p>
   <div class="grid2">
     <div class="codewin">
-      <div class="bar"><i style="background:#f57"></i><i style="background:#fb5"></i><i style="background:#5c5"></i> MainWindow.cs — click a line</div>
+      <div class="bar"><i style="background:#f57"></i><i style="background:#fb5"></i><i style="background:#5c5"></i> Program.cs — click a line</div>
       <pre id="explCode"></pre>
     </div>
-    <div id="lineInfo2" class="card" style="border-left:4px solid var(--statusbar);min-height:180px">
-      <h3 id="explTitle" style="font-family:var(--mono);color:var(--warn);font-size:14px">← Pick a line</h3>
-      <p id="explText" style="margin-top:8px;line-height:1.6;font-size:14.5px">Every window you build this semester is made of pieces like these. Click line 1 to start.</p>
+    <div style="align-self:start;position:sticky;top:14px">
+      <div id="lineInfo2" class="card" style="border-left:4px solid var(--statusbar);min-height:150px">
+        <h3 id="explTitle" style="font-family:var(--mono);color:var(--warn);font-size:14px">← Pick a line</h3>
+        <p id="explText" style="margin-top:8px;line-height:1.6;font-size:14.5px">Ten lines: eight of suit, two of yours. Start with line 1 and walk down.</p>
+      </div>
+      <div class="term" style="margin-top:14px"><div class="thead">▶ RUN → OUTPUT</div>
+        <div class="tline">Hello, MAC 109!</div>
+        <div class="tline">I am Maria, and I code now.</div>
+      </div>
+      <p style="font-size:12.5px;color:#9a9aa2;margin-top:8px;line-height:1.5"><b>▶ The output.</b> Only the two WriteLine lines print. The suit prints nothing — it exists to hold, name, and start your code.</p>
     </div>
   </div>
-  <div class="card" style="margin-top:16px"><span class="pill">▶ Run result</span>
-    <pre style="font-family:var(--mono);font-size:14px;color:var(--good);margin-top:6px">A real window titled "My Studio App": a welcome heading, a text
-box waiting for a name, a button, and an empty line ready for the
-greeting — identical on Windows, macOS &amp; Linux.</pre>
-  </div>
+  <h3 style="margin:22px 0 4px;font-size:20px">Now many small programs — each one complete 🧪</h3>
+  <p class="sub" style="margin-bottom:10px">Every box below is an <b>entire program</b>, suit and all: copy it, paste it over everything in <code class="inline">Program.cs</code>, press F5, and it prints. Notice the suit never changes — read straight to the inside of <code class="inline">Main</code>.</p>
+  <div class="exgrid">
+    <div class="codewin"><div class="bar" style="display:flex;align-items:center;gap:8px">Program.cs — COMPLETE program · Example 1 · the classic first program<button class="copy excopy" type="button" style="margin-left:auto;background:#2a2a30;border:1px solid #55555e;color:#e8e8ee;border-radius:6px;padding:1px 9px;font:inherit;font-size:11.5px;cursor:pointer">Copy</button></div><pre><span class="cl"><span class="k">using</span><span class="p"> System;</span></span>
+<span class="cl"></span>
+<span class="cl"><span class="k">class</span><span class="p"> </span><span class="t">Program</span></span>
+<span class="cl"><span class="p">{</span></span>
+<span class="cl"><span class="p">    </span><span class="k">static void</span><span class="p"> </span><span class="m">Main</span><span class="p">()</span></span>
+<span class="cl"><span class="p">    {</span></span>
+<span class="cl"><span class="p">        </span><span class="t">Console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(</span><span class="s">&quot;Hello, World!&quot;</span><span class="p">);</span></span>
+<span class="cl"><span class="p">    }</span></span>
+<span class="cl"><span class="p">}</span></span></pre></div>
+    <div class="term"><div class="thead">▶ RUN → OUTPUT</div><div class="tline">Hello, World!</div></div>
+  </div><p class="exnote">One statement inside the suit. Anatomy of that statement, worth memorizing: <b>Console</b> = the screen · <b>.</b> = “look inside it” · <b>WriteLine</b> = the action “write one line” · <b>( … )</b> = what to write · quotes = it’s text · <b>;</b> = end of sentence.</p>
+  <div class="exgrid">
+    <div class="codewin"><div class="bar" style="display:flex;align-items:center;gap:8px">Program.cs — COMPLETE program · Example 2 · order is everything<button class="copy excopy" type="button" style="margin-left:auto;background:#2a2a30;border:1px solid #55555e;color:#e8e8ee;border-radius:6px;padding:1px 9px;font:inherit;font-size:11.5px;cursor:pointer">Copy</button></div><pre><span class="cl"><span class="k">using</span><span class="p"> System;</span></span>
+<span class="cl"></span>
+<span class="cl"><span class="k">class</span><span class="p"> </span><span class="t">Program</span></span>
+<span class="cl"><span class="p">{</span></span>
+<span class="cl"><span class="p">    </span><span class="k">static void</span><span class="p"> </span><span class="m">Main</span><span class="p">()</span></span>
+<span class="cl"><span class="p">    {</span></span>
+<span class="cl"><span class="p">        </span><span class="t">Console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(</span><span class="s">&quot;First, wake up.&quot;</span><span class="p">);</span></span>
+<span class="cl"><span class="p">        </span><span class="t">Console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(</span><span class="s">&quot;Second, coffee.&quot;</span><span class="p">);</span></span>
+<span class="cl"><span class="p">        </span><span class="t">Console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(</span><span class="s">&quot;Third, write C#.&quot;</span><span class="p">);</span></span>
+<span class="cl"><span class="p">    }</span></span>
+<span class="cl"><span class="p">}</span></span></pre></div>
+    <div class="term"><div class="thead">▶ RUN → OUTPUT</div><div class="tline">First, wake up.</div><div class="tline">Second, coffee.</div><div class="tline">Third, write C#.</div></div>
+  </div><p class="exnote">A program is a recipe: statements execute top to bottom, one at a time, and each WriteLine ends its own line. Swap two lines and the output swaps — the computer never improvises.</p>
+  <div class="exgrid">
+    <div class="codewin"><div class="bar" style="display:flex;align-items:center;gap:8px">Program.cs — COMPLETE program · Example 3 · numbers print too — no quotes<button class="copy excopy" type="button" style="margin-left:auto;background:#2a2a30;border:1px solid #55555e;color:#e8e8ee;border-radius:6px;padding:1px 9px;font:inherit;font-size:11.5px;cursor:pointer">Copy</button></div><pre><span class="cl"><span class="k">using</span><span class="p"> System;</span></span>
+<span class="cl"></span>
+<span class="cl"><span class="k">class</span><span class="p"> </span><span class="t">Program</span></span>
+<span class="cl"><span class="p">{</span></span>
+<span class="cl"><span class="p">    </span><span class="k">static void</span><span class="p"> </span><span class="m">Main</span><span class="p">()</span></span>
+<span class="cl"><span class="p">    {</span></span>
+<span class="cl"><span class="p">        </span><span class="t">Console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(</span><span class="s">&quot;The year is:&quot;</span><span class="p">);</span></span>
+<span class="cl"><span class="p">        </span><span class="t">Console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(</span><span class="n">2026</span><span class="p">);</span></span>
+<span class="cl"><span class="p">        </span><span class="t">Console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(</span><span class="n">3.14</span><span class="p">);</span></span>
+<span class="cl"><span class="p">    }</span></span>
+<span class="cl"><span class="p">}</span></span></pre></div>
+    <div class="term"><div class="thead">▶ RUN → OUTPUT</div><div class="tline">The year is:</div><div class="tline">2026</div><div class="tline">3.14</div></div>
+  </div><p class="exnote">Quotes mean text; no quotes means a number. They print the same but they are deeply different — next week (data types) that difference becomes the star of the show.</p>
+  <div class="exgrid">
+    <div class="codewin"><div class="bar" style="display:flex;align-items:center;gap:8px">Program.cs — COMPLETE program · Example 4 · the + glue<button class="copy excopy" type="button" style="margin-left:auto;background:#2a2a30;border:1px solid #55555e;color:#e8e8ee;border-radius:6px;padding:1px 9px;font:inherit;font-size:11.5px;cursor:pointer">Copy</button></div><pre><span class="cl"><span class="k">using</span><span class="p"> System;</span></span>
+<span class="cl"></span>
+<span class="cl"><span class="k">class</span><span class="p"> </span><span class="t">Program</span></span>
+<span class="cl"><span class="p">{</span></span>
+<span class="cl"><span class="p">    </span><span class="k">static void</span><span class="p"> </span><span class="m">Main</span><span class="p">()</span></span>
+<span class="cl"><span class="p">    {</span></span>
+<span class="cl"><span class="p">        </span><span class="t">Console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(</span><span class="s">&quot;Good &quot;</span><span class="p"> + </span><span class="s">&quot;morning, &quot;</span><span class="p"> + </span><span class="s">&quot;LaGuardia!&quot;</span><span class="p">);</span></span>
+<span class="cl"><span class="p">    }</span></span>
+<span class="cl"><span class="p">}</span></span></pre></div>
+    <div class="term"><div class="thead">▶ RUN → OUTPUT</div><div class="tline">Good morning, LaGuardia!</div></div>
+  </div><p class="exnote">For text, <b>+</b> means GLUE: three pieces joined into one printed line. Remember this one — it has a plot twist waiting in Week 2.</p>
+  <div class="exgrid">
+    <div class="codewin"><div class="bar" style="display:flex;align-items:center;gap:8px">Program.cs — COMPLETE program · Example 5 · comments — notes for humans<button class="copy excopy" type="button" style="margin-left:auto;background:#2a2a30;border:1px solid #55555e;color:#e8e8ee;border-radius:6px;padding:1px 9px;font:inherit;font-size:11.5px;cursor:pointer">Copy</button></div><pre><span class="cl"><span class="k">using</span><span class="p"> System;</span></span>
+<span class="cl"></span>
+<span class="cl"><span class="k">class</span><span class="p"> </span><span class="t">Program</span></span>
+<span class="cl"><span class="p">{</span></span>
+<span class="cl"><span class="p">    </span><span class="k">static void</span><span class="p"> </span><span class="m">Main</span><span class="p">()</span></span>
+<span class="cl"><span class="p">    {</span></span>
+<span class="cl"><span class="p">        </span><span class="c">// TODO: greet the class</span></span>
+<span class="cl"><span class="p">        </span><span class="t">Console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(</span><span class="s">&quot;Hello, everyone!&quot;</span><span class="p">);</span></span>
+<span class="cl"></span>
+<span class="cl"><span class="p">        </span><span class="c">// The line below is switched OFF:</span></span>
+<span class="cl"><span class="p">        </span><span class="c">// Console.WriteLine("I am invisible");</span></span>
+<span class="cl"><span class="p">        </span><span class="t">Console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(</span><span class="s">&quot;Goodbye!&quot;</span><span class="p">);</span></span>
+<span class="cl"><span class="p">    }</span></span>
+<span class="cl"><span class="p">}</span></span></pre></div>
+    <div class="term"><div class="thead">▶ RUN → OUTPUT</div><div class="tline">Hello, everyone!</div><div class="tline">Goodbye!</div></div>
+  </div><p class="exnote">Everything after <b>//</b> is invisible to the compiler — notes, reminders, and the classic move: “commenting out” a real statement to switch it off without deleting it. Blank lines are free too.</p>
+  <div class="tryit">🖊️ <b>Your turn (in this week's practice, or right now if your tools are ready):</b> three programs of your own — keep the suit, change only the inside of Main: ① print your name, your school, and your favorite emoji on three lines (yes, emoji work inside quotes 🎉) ② glue your first and last name into one line with <code class="inline">+</code> ③ a three-line story where the order matters — then swap two lines and run again.</div>
+  <div class="card" style="margin-top:14px"><span class="pill">Want to run these yourself, today?</span><p style="margin-top:8px;font-size:14.5px;line-height:1.7">Three clicks in VS Code: <b>Ctrl+Shift+P</b> (⇧⌘P on Mac) ▸ <b>.NET: New Project…</b> ▸ <b>Console App</b> ▸ name it <code class="inline">CSharpLab</code>. The generated <code class="inline">Program.cs</code> may greet you with a single line — that's a modern C# shortcut where the compiler wears the suit <i>for</i> you. Both styles are legal; select everything, paste our full version, <b>F5</b>. This week's home practice installs the tools; Week 2 builds a whole lecture inside this little lab.</p></div>
 </section>
 
 <!-- 7 ▸ Syntax rules + bug hunt -->
 <section data-tab="Syntax" data-file="SyntaxRules.cs">
   <p class="eyebrow">06 · Syntax fundamentals</p>
   <h2>The four rules of C# grammar</h2>
+  <p class="sub">Every error you'll make this month breaks one of these. (And <code class="inline">//</code> comments, from the previous tab, are always legal — the compiler simply skips them.)</p>
   <div class="grid2" style="margin-bottom:20px">
-    <div class="card"><span class="pill">Rule 1</span><h3>Statements end with <code class="inline">;</code></h3><p>The semicolon is C#'s period. Forgetting it is the #1 beginner error — the compiler will point at the exact line for you.</p></div>
-    <div class="card"><span class="pill">Rule 2</span><h3>C# is case-sensitive</h3><p><code class="inline">TextBlock</code> is a control; <code class="inline">textBlock</code> doesn't exist. <code class="inline">Content</code> works; <code class="inline">content</code> doesn't. Capital letters matter, always.</p></div>
-    <div class="card"><span class="pill">Rule 3</span><h3>Braces <code class="inline">{ }</code> group things</h3><p>They wrap a class body, a method body — and in <code class="inline">new Button { … }</code> they wrap the settings you apply while creating an object. Every <code class="inline">{</code> needs its <code class="inline">}</code>.</p></div>
-    <div class="card"><span class="pill">Rule 4</span><h3>Text lives in <code class="inline">" "</code></h3><p><code class="inline">Content = "Say Hello"</code> is a string; <code class="inline">Content = Say Hello</code> is a compile error. Comments start with <code class="inline">//</code> and are ignored by the compiler.</p></div>
+    <div class="card"><span class="pill">Rule 1</span><h3>Statements end with <code class="inline">;</code></h3><p>The semicolon is C#'s period. <code class="inline">Console.WriteLine("Hi")</code> is an unfinished sentence — the compiler answers <b>; expected</b> and points at the exact line. The #1 beginner error, forever.</p></div>
+    <div class="card"><span class="pill">Rule 2</span><h3>C# is case-sensitive</h3><p><code class="inline">Console</code> exists; <code class="inline">console</code> does not. <code class="inline">Main</code> is the starting point; <code class="inline">main</code> never runs. Capital letters are part of the name, always.</p></div>
+    <div class="card"><span class="pill">Rule 3</span><h3>Text lives in <code class="inline">" "</code></h3><p><code class="inline">Console.WriteLine("Hello")</code> prints text; <code class="inline">Console.WriteLine(Hello)</code> asks for a thing named Hello that doesn't exist — a compile error. Words for humans wear quotes.</p></div>
+    <div class="card"><span class="pill">Rule 4</span><h3>Every <code class="inline">{</code> needs its <code class="inline">}</code></h3><p>Braces are C#'s containers: the class wears a pair, Main wears a pair — you saw both in every program on the last tab. Pro tip: click next to any brace in VS Code and it <b>highlights its partner</b>. Lose one and the errors cascade.</p></div>
   </div>
   <h3 style="margin-bottom:8px">🐞 Bug hunt — find the 3 errors</h3>
-  <p class="sub" style="margin-bottom:12px">This constructor will not compile. Click the lines you think contain an error. <span id="bugScore" style="font-family:var(--mono);color:var(--warn)">Found: 0 / 3</span></p>
+  <p class="sub" style="margin-bottom:12px">A complete program that will not compile. Click the lines you think contain an error — the rules above are your field guide. <span id="bugScore" style="font-family:var(--mono);color:var(--warn)">Found: 0 / 3</span></p>
   <div class="codewin">
-    <div class="bar">Broken.cs — 3 errors hiding</div>
+    <div class="bar">Program.cs — 3 errors hiding</div>
     <pre id="bugCode"></pre>
   </div>
+  <div class="codewrap" style="margin-top:16px">
+    <div class="codehead"><span>The same COMPLETE (broken) program — once your tools are installed, paste it into Program.cs and watch the Problems panel find all three</span><button class="copy" type="button">Copy</button></div>
+    <pre class="code"><span class="k">using</span> System;
+
+<span class="k">class</span> <span class="t">Program</span>
+{
+    <span class="k">static void</span> <span class="m">Main</span>()
+    {
+        <span class="t">Console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(</span><span class="s">&quot;Welcome to MAC 109!&quot;</span><span class="p">);</span>
+        console.<span class="m">WriteLine</span>(<span class="s">&quot;C# is fun!&quot;</span>);
+        <span class="t">Console</span>.<span class="m">WriteLine</span>(<span class="s">&quot;Almost there&quot;</span>)
+        <span class="t">Console</span>.<span class="m">WriteLine</span>(See you Friday!);
+        <span class="t">Console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(</span><span class="s">&quot;Bye!&quot;</span><span class="p">);</span>
+    }
+}</pre>
+  </div>
+  <p class="note" style="margin-top:14px">🔍 <b>The professional ritual (memorize now, use forever):</b> open the <b>Problems</b> panel, read top to bottom, fix the FIRST error first — later errors are often echoes of it. Fix all three here and the program prints four friendly lines. From next week's lab onward you'll run this ritual on real code every single Friday.</p>
 </section>
 
 <!-- 8 ▸ Quiz -->
@@ -579,60 +684,34 @@ greeting — identical on Windows, macOS &amp; Linux.</pre>
 
   /* ---------- line-by-line explainer ---------- */
   var lines=[
-    {h:'<span class="k">public</span><span class="p"> </span><span class="k">class</span><span class="p"> </span><span class="t">MainWindow</span><span class="p"> : </span><span class="t">Window</span>',
-     t:'public class MainWindow : Window',
-     d:'Your class \u2014 the fundamental container of C# code. The \u201c: Window\u201d part means MainWindow IS a Window: it inherits a mountain of ready-made powers from Avalonia \u2014 a title bar, resizing, closing \u2014 for free. That\u2019s called inheritance; you\u2019ll master it in Week 9. Today, enjoy it.'},
+    {h:'<span class="k">using</span><span class="p"> System;</span>',
+     t:'using System;',
+     d:'The import line: \u201cthis file uses tools from the System toolbox\u201d \u2014 and System is where Console lives. (Modern projects often include it automatically, but we write it anyway: explicit code works pasted anywhere and matches every book you\u2019ll ever read.)'},
+    {h:'',t:'',d:'A blank line. The compiler ignores it completely \u2014 blank lines are paragraph breaks for humans.'},
+    {h:'<span class="k">class</span><span class="p"> </span><span class="t">Program</span>',
+     t:'class Program',
+     d:'The container. Every piece of C# lives inside a class \u2014 think of it as the labeled box holding your program, and \u201cProgram\u201d is simply its name. What classes REALLY are is Week 5\u2019s big reveal; today it\u2019s the box.'},
     {h:'<span class="p">{</span>',
      t:'{',
-     d:'The opening brace begins the body of the class. Everything until its matching } belongs to MainWindow.'},
-    {h:'<span class="p">    </span><span class="t">TextBox</span><span class="p"> txtName = </span><span class="k">new</span><span class="p"> </span><span class="t">TextBox</span><span class="p"> { </span><span class="m">Watermark</span><span class="p"> = </span><span class="s">&quot;Type your name\u2026&quot;</span><span class="p"> };</span>',
-     t:'TextBox txtName = new TextBox { … };',
-     d:'Your first object! \u201cnew TextBox\u201d creates a text box from Avalonia\u2019s TextBox class; the { } sets its properties while creating it \u2014 an object initializer. Watermark is the grey hint that vanishes when typing starts. It\u2019s declared here, at class level (a field), so that EVERY method in the class can reach it later.'},
-    {h:'<span class="p">    </span><span class="t">TextBlock</span><span class="p"> lblGreeting = </span><span class="k">new</span><span class="p"> </span><span class="t">TextBlock</span><span class="p"> { </span><span class="m">FontSize</span><span class="p"> = </span><span class="n">18</span><span class="p"> };</span>',
-     t:'TextBlock lblGreeting = new TextBlock { … };',
-     d:'A second field: an empty TextBlock, waiting. It shows nothing at first \u2014 until code fills it with a greeting. Designing a place for output BEFORE writing the code that produces it is a pro habit.'},
-    {h:'<span class="p">    </span><span class="k">public</span><span class="p"> </span><span class="m">MainWindow</span><span class="p">()</span>',
-     t:'public MainWindow()',
-     d:'The constructor \u2014 THE method that runs automatically the moment your window is created. It has the same name as the class and no return type; it\u2019s your setup recipe. (Constructors get their full lecture in Week 5 \u2014 for now: \u201cthis runs first.\u201d)'},
-    {h:'<span class="p">    </span><span class="p">{</span>',
+     d:'Opens the class body. Braces are C#\u2019s containers \u2014 and Rule 4 of the next tab: every { must eventually meet its }. This one\u2019s partner is the very last line of the file.'},
+    {h:'<span class="p">    </span><span class="k">static void</span><span class="p"> </span><span class="m">Main</span><span class="p">()</span>',
+     t:'static void Main()',
+     d:'THE starting point. When you press F5, the computer finds Main and begins executing its lines, top to bottom \u2014 no Main, no program. The costume words (static, void, the empty parentheses) get their full meaning in Week 4; today, read the line as: \u201cexecution enters here.\u201d'},
+    {h:'<span class="p">    {</span>',
      t:'{',
-     d:'Opens the constructor body. These statements run top-to-bottom, once, as the window is born.'},
-    {h:'<span class="p">        </span><span class="m">Title</span><span class="p"> = </span><span class="s">&quot;My Studio App&quot;</span><span class="p">; </span><span class="m">Width</span><span class="p"> = </span><span class="n">500</span><span class="p">; </span><span class="m">Height</span><span class="p"> = </span><span class="n">350</span><span class="p">;</span>',
-     t:'Title = "My Studio App"; Width = 500; Height = 350;',
-     d:'Three properties of the window itself \u2014 the title-bar text and the size. Three statements, three semicolons. No \u201cobject dot\u201d needed because inside MainWindow, these ARE the window\u2019s own settings.'},
-    {h:'<span class="p">        </span><span class="k">var</span><span class="p"> lblWelcome = </span><span class="k">new</span><span class="p"> </span><span class="t">TextBlock</span><span class="p"> { </span><span class="m">Text</span><span class="p"> = </span><span class="s">&quot;Welcome to MAC 109!&quot;</span><span class="p">, </span><span class="m">FontSize</span><span class="p"> = </span><span class="n">22</span><span class="p"> };</span>',
-     t:'var lblWelcome = new TextBlock { … };',
-     d:'TextBlock displays text \u2014 the GUI cousin of printing a line. \u201cvar\u201d tells the compiler \u201cyou figure out the type from the right-hand side.\u201d It\u2019s a local variable (not a field) because nothing outside the constructor needs it later.'},
-    {h:'<span class="p">        </span><span class="k">var</span><span class="p"> btnGreet = </span><span class="k">new</span><span class="p"> </span><span class="t">Button</span><span class="p"> { </span><span class="m">Content</span><span class="p"> = </span><span class="s">&quot;Say Hello&quot;</span><span class="p"> };</span>',
-     t:'var btnGreet = new Button { Content = "Say Hello" };',
-     d:'A Button object. Careful: a Button\u2019s text lives in Content, not Text \u2014 the classic beginner trap. Same object-initializer pattern as every other control: new Type { property = value }.'},
-    {h:'<span class="p">        </span><span class="p">btnGreet.</span><span class="m">Click</span><span class="p"> += </span><span class="m">BtnGreet_Click</span><span class="p">;</span>',
-     t:'btnGreet.Click += BtnGreet_Click;',
-     d:'The most important line in GUI programming: the event subscription. Read += as \u201cadd to the list\u201d: when btnGreet\u2019s Click event fires, run my BtnGreet_Click method. Your program stops being a top-to-bottom script and starts being a machine that WAITS for the user.'},
-    {h:'<span class="p">        </span><span class="m">Content</span><span class="p"> = </span><span class="k">new</span><span class="p"> </span><span class="t">StackPanel</span><span class="p"> { </span><span class="m">Margin</span><span class="p"> = </span><span class="k">new</span><span class="p"> </span><span class="t">Thickness</span><span class="p">(</span><span class="n">20</span><span class="p">), </span><span class="m">Spacing</span><span class="p"> = </span><span class="n">12</span><span class="p">,</span>',
-     t:'Content = new StackPanel { Margin = …, Spacing = 12,',
-     d:'A window shows exactly ONE thing: its Content. Ours is a StackPanel \u2014 a layout container that stacks its children top-to-bottom automatically. Margin adds breathing room from the edges; Spacing sets the gap between children. Layout by container, not by dragging pixels \u2014 and it survives every resize.'},
-    {h:'<span class="p">        </span><span class="p">    </span><span class="m">Children</span><span class="p"> = { lblWelcome, txtName, btnGreet, lblGreeting } };</span>',
-     t:'Children = { lblWelcome, txtName, btnGreet, lblGreeting } };',
-     d:'The stack\u2019s kids, in order. This one list IS your layout: reorder the names, reorder the window. Notice it mixes locals (lblWelcome, btnGreet) and fields (txtName, lblGreeting) \u2014 they\u2019re all just objects.'},
-    {h:'<span class="p">    </span><span class="p">}</span>',
+     d:'Opens Main\u2019s body. Everything between this brace and its partner runs, in order, when the program starts. This is where YOUR code lives.'},
+    {h:'<span class="p">        </span><span class="t">Console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(</span><span class="s">&quot;Hello, MAC 109!&quot;</span><span class="p">);</span>',
+     t:'Console.WriteLine("Hello, MAC 109!");',
+     d:'THE statement of Week 1 \u2014 memorize its anatomy: Console is the screen; the dot means \u201clook inside it\u201d; WriteLine is the action \u201cwrite one line\u201d; the parentheses hold WHAT to write; the quotes mark it as text; the semicolon ends the sentence. Six small ideas, one line.'},
+    {h:'<span class="p">        </span><span class="t">Console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(</span><span class="s">&quot;I am Maria, and I code now.&quot;</span><span class="p">);</span>',
+     t:'Console.WriteLine("I am Maria, and I code now.");',
+     d:'Same shape, different words \u2014 and that\u2019s the secret of programming: a small set of shapes, reused endlessly. Statements run top to bottom, so this prints second. You already read this line fluently. Feel that.'},
+    {h:'<span class="p">    }</span>',
      t:'}',
-     d:'Closes the constructor. Setup is done \u2014 the window appears, and the program now waits for events.'},
-    {h:'<span class="p">    </span><span class="k">void</span><span class="p"> </span><span class="m">BtnGreet_Click</span><span class="p">(</span><span class="k">object</span><span class="p"> sender, </span><span class="t">RoutedEventArgs</span><span class="p"> e)</span>',
-     t:'void BtnGreet_Click(object sender, RoutedEventArgs e)',
-     d:'The event handler \u2014 the method the += line pointed at. Its shape is standard: sender (who fired the event) and e (the details). You don\u2019t memorize this line; you copy it and change the name.'},
-    {h:'<span class="p">    </span><span class="p">{</span>',
-     t:'{',
-     d:'Opens the handler body. This code runs every single time the button is clicked \u2014 once per click, forever.'},
-    {h:'<span class="p">        </span><span class="p">lblGreeting.</span><span class="m">Text</span><span class="p"> = </span><span class="s">&quot;Hello, &quot;</span><span class="p"> + txtName.</span><span class="m">Text</span><span class="p"> + </span><span class="s">&quot;!&quot;</span><span class="p">;</span>',
-     t:'lblGreeting.Text = "Hello, " + txtName.Text + "!";',
-     d:'The payoff, and the whole rhythm of GUI code: READ a property (txtName.Text \u2014 whatever the user typed), GLUE strings with +, WRITE a property (lblGreeting.Text). The greeting appears on the window itself. This is why txtName and lblGreeting had to be fields \u2014 the handler needed to reach them.'},
-    {h:'<span class="p">    </span><span class="p">}</span>',
-     t:'}',
-     d:'Closes the handler.'},
+     d:'Closes Main. The program has no more statements to run, so it ends here \u2014 politely, having printed two lines.'},
     {h:'<span class="p">}</span>',
      t:'}',
-     d:'Closes the MainWindow class. Count them: every { has found its }. VS Code highlights matching pairs when your cursor touches one.'}
+     d:'Closes the class \u2014 the partner of line 4\u2019s brace. Count the pairs: two opens, two closes, perfectly matched. Ten lines total: eight of reusable suit, two that were truly yours. Next week the suit stays; the inside grows.'}
   ];
   var explPre=document.getElementById('explCode');
   lines.forEach(function(L,i){
@@ -650,15 +729,18 @@ greeting — identical on Windows, macOS &amp; Linux.</pre>
 
   /* ---------- bug hunt ---------- */
   var bugLines=[
-    {h:'<span class="k">public</span><span class="p"> </span><span class="m">MainWindow</span><span class="p">()</span>',bug:false,why:'Correct \u2014 a proper constructor: same name as the class, no return type.'},
-    {h:'<span class="p">{</span>',bug:false,why:'Correct \u2014 an honest opening brace.'},
-    {h:'<span class="p">    </span><span class="m">Title</span><span class="p"> = </span><span class="s">&quot;Bug Hunt&quot;</span><span class="p">; </span><span class="m">Width</span><span class="p"> = </span><span class="n">400</span><span class="p">;</span>',bug:false,why:'Correct \u2014 two statements, two semicolons, string in quotes.'},
-    {h:'<span class="p">    </span><span class="k">var</span><span class="p"> lblTitle = </span><span class="k">new</span><span class="p"> </span><span class="t">textBlock</span><span class="p"> { </span><span class="m">Text</span><span class="p"> = </span><span class="s">&quot;Find the bugs!&quot;</span><span class="p"> };</span>',bug:true,why:'Error 1: lowercase \u201ctextBlock\u201d \u2014 C# is case-sensitive; the class is TextBlock.'},
-    {h:'<span class="p">    </span><span class="k">var</span><span class="p"> txtInput = </span><span class="k">new</span><span class="p"> </span><span class="t">TextBox</span><span class="p"> { </span><span class="m">Watermark</span><span class="p"> = </span><span class="s">&quot;Type here\u2026&quot;</span><span class="p"> };</span>',bug:false,why:'Correct \u2014 a well-formed object initializer.'},
-    {h:'<span class="p">    </span><span class="k">var</span><span class="p"> btnGo = </span><span class="k">new</span><span class="p"> </span><span class="t">Button</span><span class="p"> { </span><span class="m">Content</span><span class="p"> = </span><span class="p">Press me</span><span class="p"> };</span>',bug:true,why:'Error 2: Press me isn\u2019t wrapped in double quotes, so the compiler thinks it\u2019s code, not a string.'},
-    {h:'<span class="p">    </span><span class="p">btnGo.</span><span class="m">Click</span><span class="p"> += </span><span class="m">BtnGo_Click</span>',bug:true,why:'Error 3: the statement is missing its semicolon at the end.'},
-    {h:'<span class="p">    </span><span class="m">Content</span><span class="p"> = </span><span class="k">new</span><span class="p"> </span><span class="t">StackPanel</span><span class="p"> { </span><span class="m">Children</span><span class="p"> = { lblTitle, txtInput, btnGo } };</span>',bug:false,why:'Correct \u2014 the layout line is fine; the bugs were all above.'},
-    {h:'<span class="p">}</span>',bug:false,why:'Correct \u2014 braces are balanced.'}
+    {h:'<span class="k">using</span><span class="p"> System;</span>',bug:false,why:'Correct \u2014 the toolbox line, exactly as it should be.'},
+    {h:'<span class="k">class</span><span class="p"> </span><span class="t">Program</span>',bug:false,why:'Correct \u2014 the container, capital P and all.'},
+    {h:'<span class="p">{</span>',bug:false,why:'Correct \u2014 an honest brace, partnered with the last line.'},
+    {h:'<span class="p">    </span><span class="k">static void</span><span class="p"> </span><span class="m">Main</span><span class="p">()</span>',bug:false,why:'Correct \u2014 the starting point, spelled with its capital M.'},
+    {h:'<span class="p">    {</span>',bug:false,why:'Correct \u2014 opens Main; your code starts below.'},
+    {h:'<span class="p">        </span><span class="t">Console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(</span><span class="s">&quot;Welcome to MAC 109!&quot;</span><span class="p">);</span>',bug:false,why:'Correct \u2014 all four rules obeyed. This one compiles proudly.'},
+    {h:'<span class="p">        </span><span class="p">console.</span><span class="m">WriteLine</span><span class="p">(</span><span class="s">&quot;C# is fun!&quot;</span><span class="p">);</span>',bug:true,why:'Bug \u2014 Rule 2: lowercase \u201cconsole\u201d. C# is case-sensitive and the class is Console. The compiler: \u2018console\u2019 does not exist in the current context.'},
+    {h:'<span class="p">        </span><span class="t">Console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(</span><span class="s">&quot;Almost there&quot;</span><span class="p">)</span>',bug:true,why:'Bug \u2014 Rule 1: the semicolon is missing. The compiler answers \u201c; expected\u201d and points here.'},
+    {h:'<span class="p">        </span><span class="t">Console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(See you Friday!);</span>',bug:true,why:'Bug \u2014 Rule 3: no quotes, so C# hunts for things named \u201cSee\u201d and \u201cyou\u201d and finds nothing. Text for humans must wear quotes.'},
+    {h:'<span class="p">        </span><span class="t">Console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(</span><span class="s">&quot;Bye!&quot;</span><span class="p">);</span>',bug:false,why:'Correct \u2014 and once the three bugs above are fixed, the program prints four friendly lines.'},
+    {h:'<span class="p">    }</span>',bug:false,why:'Correct \u2014 closes Main.'},
+    {h:'<span class="p">}</span>',bug:false,why:'Correct \u2014 closes the class. The suit was innocent all along; the bugs lived inside Main.'}
   ];
   var bugPre=document.getElementById('bugCode');var found=0;
   bugLines.forEach(function(L,i){
@@ -687,18 +769,18 @@ greeting — identical on Windows, macOS &amp; Linux.</pre>
     {q:'Which statement best describes the relationship between C# and .NET?',
      opts:['They are two names for the same thing','C# is the language you write; .NET is the platform and library your code runs on','.NET is the language; C# is the editor','C# only works on Windows computers'],
      a:1,why:'C# is the vocabulary and grammar; .NET supplies the runtime engine and thousands of pre-built classes \u2014 and it runs on Windows, macOS, and Linux alike.'},
-    {q:'Your classmate has a MacBook; you have a Windows laptop. You both clone the same starter project. What happens?',
-     opts:['Only the Windows copy runs \u2014 Macs need a virtual machine','Each must rewrite the GUI for their own system','Both build and run the identical app \u2014 .NET compiles to universal IL and Avalonia draws the same UI on every OS','It runs on Mac only if the Mac has Windows installed'],
-     a:2,why:'That\u2019s the whole point of our stack: the compiler produces universal IL, the .NET runtime translates it for each CPU, and Avalonia draws the interface identically everywhere.'},
-    {q:'In var b = new Button { Content = "Say Hello" };, what does the { } part do?',
-     opts:['It defines a new class','It sets the object\u2019s properties at the moment it is created \u2014 an object initializer','It is a comment','It makes the button invisible'],
-     a:1,why:'new Button creates the object; the braces immediately fill in its settings. One line: create + configure. You\u2019ll use this pattern for every control all semester.'},
-    {q:'Which line correctly creates a button?',
-     opts:['var b = new button { Content = &quot;Hi&quot; };','var b = new Button { Content = Hi };','var b = new Button { Content = &quot;Hi&quot; }','var b = new Button { Content = &quot;Hi&quot; };'],
-     a:3,why:'It needs the capital-B Button (case matters), quotes around the string, and a semicolon at the end. Each other option breaks exactly one rule from this tab.'},
-    {q:'The code inside BtnGreet_Click runs\u2026',
-     opts:['Automatically when the program starts','Once per second','Only when the user clicks the button whose Click attribute names it','Never \u2014 it\u2019s just a comment'],
-     a:2,why:'GUI apps are event-driven: handlers wait for their event. No click, no execution. That\u2019s the core difference from top-to-bottom console programs.'}
+    {q:'Your classmate has a MacBook; you have a Windows laptop. You both write the same C# program. What happens?',
+     opts:['Only the Windows copy runs \u2014 Macs need a virtual machine','Each must rewrite the program for their own system','Both build and run identically \u2014 the compiler produces universal IL and the .NET runtime translates it for each machine','It runs on Mac only if the Mac has Windows installed'],
+     a:2,why:'That\u2019s the whole point of our stack: universal IL from the compiler, translated by the runtime for each CPU. Same code, same behavior, every OS.'},
+    {q:'Inside Main: Console.WriteLine("Hi"); then Console.WriteLine("there"); \u2014 what prints?',
+     opts:['Hithere \u2014 on one line','Hi, then there \u2014 each on its own line, in that order','there, then Hi','Nothing \u2014 WriteLine only works outside Main'],
+     a:1,why:'Execution enters Main and runs its statements top to bottom, and each WriteLine ends its own line. Order in the code IS order on the screen.'},
+    {q:'Which line is completely correct?',
+     opts:['console.WriteLine(&quot;Hi&quot;);','Console.WriteLine(Hi);','Console.WriteLine(&quot;Hi&quot;)','Console.WriteLine(&quot;Hi&quot;);'],
+     a:3,why:'It needs capital-C Console (Rule 2), quotes around the text (Rule 3), and the semicolon (Rule 1). Each other option breaks exactly one rule from this tab.'},
+    {q:'What does the compiler do with a line that starts with // ?',
+     opts:['Prints it to the screen','Runs it more slowly','Ignores it completely \u2014 it exists only for humans','Reports an error'],
+     a:2,why:'Comments are invisible to the compiler \u2014 notes, plans, and switched-off lines. Rule 4, and your future self\u2019s best friend.'}
   ];
   var host=document.getElementById('quizHost');var score=0,answered=0;
   quiz.forEach(function(Q,qi){
@@ -886,6 +968,16 @@ greeting — identical on Windows, macOS &amp; Linux.</pre>
   });
   document.getElementById('closeRun').addEventListener('click',function(){overlay.classList.remove('show');});
   document.getElementById('msgOk').addEventListener('click',function(){msgbox.classList.remove('show');});
+
+  /* ---------- per-example copy buttons ---------- */
+  stage.querySelectorAll('.excopy').forEach(function(btn){
+    var pre=btn.closest('.codewin').querySelector('pre');
+    btn.addEventListener('click',function(e){
+      e.stopPropagation();
+      function flash(){btn.textContent='Copied \u2713';setTimeout(function(){btn.textContent='Copy';},1500);}
+      if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(pre.innerText).then(flash,flash);}else{flash();}
+    });
+  });
 
   /* ---------- boot ---------- */
   regen();
