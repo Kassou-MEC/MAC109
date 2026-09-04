@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MAC 109 · Week 1 — Introduction to Visual C# &amp; the .NET Ecosystem</title>
+<title>MAC 109 · Week 1 — Introduction, IDE Setup &amp; UI as C# Objects</title>
 <style>
   :root{
     --chrome:#1e1e1e; --panel:#252526; --card:#2d2d30; --border:#3e3e42;
@@ -155,7 +155,7 @@
   .ctl:active{cursor:grabbing}
   .ctl.selctl{outline:2px dashed var(--statusbar);outline-offset:2px}
   .ctl.Button{background:linear-gradient(#fdfdfd,#e1e1e1);border:1px solid #adadad;border-radius:3px;color:#222;font-size:12.5px;padding:5px 14px}
-  .ctl.Label{color:#222;font-size:12.5px;padding:2px 4px}
+  .ctl.TextBlock{color:#222;font-size:12.5px;padding:2px 4px}
   .ctl.TextBox{background:#fff;border:1px solid #7a7a7a;color:#444;font-size:12.5px;padding:4px 8px;min-width:110px}
   #props .prow{padding:9px 12px;border-bottom:1px solid #333;font-size:13px}
   #props label{display:block;color:var(--muted);font-size:11.5px;margin-bottom:4px;font-family:var(--mono)}
@@ -197,8 +197,8 @@
 <div id="ide">
   <div id="titlebar">
     <div class="logo" aria-hidden="true"></div>
-    <div class="menu"><span>File</span><span>Edit</span><span>View</span><span>Build</span><span>Debug</span><span>Help</span></div>
-    <div class="file">MAC109 › Week01 › Lecture.sln — Prof. K. Kassou</div>
+    <div class="menu"><span>File</span><span>Edit</span><span>View</span><span>Go</span><span>Run</span><span>Terminal</span><span>Help</span></div>
+    <div class="file">MAC109 › week01 › MainWindow.cs — Prof. K. Kassou</div>
   </div>
   <nav id="tabstrip" aria-label="Slides"></nav>
   <main id="stage"></main>
@@ -208,7 +208,7 @@
     <div id="progressWrap" aria-hidden="true"><div id="progressBar"></div></div>
     <span id="lncol">Ln 1, Col 1</span>
     <div class="grow"></div>
-    <span>C# 12 · .NET 8</span>
+    <span>C# 12 · .NET 8 · Avalonia UI</span>
     <span>Use ← → keys to navigate</span>
   </div>
 </div>
@@ -216,7 +216,7 @@
 <!-- run-mode modal -->
 <div id="runOverlay" role="dialog" aria-label="Running application">
   <div id="runForm">
-    <div class="wtitle"><span id="runFormTitle">Form1</span><span class="close" id="closeRun" title="Stop debugging">✕</span></div>
+    <div class="wtitle"><span id="runFormTitle">MainWindow</span><span class="close" id="closeRun" title="Stop debugging">✕</span></div>
     <div id="runCanvas"></div>
   </div>
 </div>
@@ -232,27 +232,28 @@
 
 <!-- 1 ▸ Title -->
 <section data-tab="Start" data-file="Start Page">
-  <p class="eyebrow">LaGuardia Community College · MEC Department · MAC 109</p>
-  <h1>Introduction to Visual C#<br>&amp; the .NET Ecosystem</h1>
-  <p class="sub">Week 1 — Your first steps as a software developer: the tools professionals use, how a program really runs, and your first working code.</p>
+  <p class="eyebrow">LaGuardia Community College · MEC Department · MAC 109 — Software Studio</p>
+  <h1>Introduction, IDE Setup<br>&amp; UI as C# Objects</h1>
+  <p class="sub">Week 1 — This course is a <b>software development studio</b>: you start building a real, cross-platform desktop app <em>today</em> and grow it every week into your final project. One language — C# — for everything: the logic AND the interface. And the same app runs on Windows, macOS, and Linux, whatever computer you own.</p>
   <div class="startrow">
     <div>
       <p class="pill">Today you will</p>
       <ul class="objlist">
-        <li>Define <b>C#</b>, <b>.NET</b>, and <b>IDE</b> in your own words</li>
-        <li>Navigate the Visual Studio interface with confidence</li>
+        <li>Define <b>C#</b>, <b>.NET</b>, <b>IDE</b>, and <b>Avalonia</b> in your own words</li>
         <li>Explain compilation — what happens when you press ▶ Run</li>
-        <li>Read every line of a real C# program</li>
-        <li>Build your first GUI — today, not in Week 7</li>
+        <li>Navigate <b>Visual Studio Code</b> with confidence</li>
+        <li>Read every line of a real GUI window — <b>written in pure C#</b></li>
+        <li>Clone the starter project and build your <b>GUI shell</b> — Milestone 1 starts today</li>
+        <li>Choose the <b>domain app</b> you'll build all semester</li>
       </ul>
     </div>
     <div class="codewin hero-code">
-      <div class="bar"><i style="background:#f57"></i><i style="background:#fb5"></i><i style="background:#5c5"></i> Program.cs</div>
+      <div class="bar"><i style="background:#f57"></i><i style="background:#fb5"></i><i style="background:#5c5"></i> MainWindow.cs</div>
       <pre>
-<span class="cl"><span class="ln">1</span><span class="t">Console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(</span><span class="s">"Welcome to MAC 109!"</span><span class="p">);</span></span></pre>
+<span class="cl"><span class="ln">1</span><span class="k">var</span><span class="p"> lbl = </span><span class="k">new</span> <span class="t">TextBlock</span><span class="p"> { </span><span class="m">Text</span><span class="p"> = </span><span class="s">"Welcome to MAC 109!"</span><span class="p"> };</span></span></pre>
     </div>
   </div>
-  <p class="note">💡 <b>How to use this deck:</b> click the tabs above (like Visual Studio document tabs), use the ← → arrow keys, or the Back / Next buttons in the blue status bar. Anything with a pulsing dot or a card is interactive — click it.</p>
+  <p class="note">💡 <b>How to use this deck:</b> click the tabs above (like VS Code editor tabs), use the ← → arrow keys, or the Back / Next buttons in the blue status bar. Anything with a pulsing dot or a card is interactive — click it.</p>
 </section>
 
 <!-- 2 ▸ Definitions -->
@@ -276,13 +277,13 @@
     <div class="flip" tabindex="0" role="button" aria-label="Flip definition card: IDE">
       <div class="inner">
         <div class="face front"><span class="big">IDE</span><small>Integrated Development Environment ▸ click</small></div>
-        <div class="face back"><p>An <b>IDE</b> is an all-in-one workshop for programmers: a smart editor, a compiler, a debugger, and a visual designer in one app. Ours is <b>Visual Studio</b> — the same tool used by professional .NET developers.</p></div>
+        <div class="face back"><p>An <b>IDE</b> is an all-in-one workshop for programmers: a smart editor, a compiler, a debugger, and version control in one app. Ours is <b>Visual Studio Code</b> plus one extension (C# Dev Kit) — free, and identical on Windows, macOS, and Linux.</p></div>
       </div>
     </div>
   </div>
   <div class="grid2" style="margin-top:18px">
-    <div class="card"><span class="pill">Analogy</span><h3>Language vs. platform</h3><p>Think of <b>C#</b> as the English language and <b>.NET</b> as a fully-stocked library plus a translator. You write the sentences; .NET supplies thousands of pre-written "books" (like <code class="inline">Console</code>) and makes the computer understand you.</p></div>
-    <div class="card"><span class="pill">Why C#?</span><h3>One language, many doors</h3><p>C# skills transfer directly to later MEC courses: game development in Unity (MAC 280) and data structures concepts (MAC 286) — and to jobs in enterprise software, one of NYC's biggest tech employers.</p></div>
+    <div class="card"><span class="pill">The 4th word · Avalonia UI</span><h3>The box of GUI parts</h3><p><b>Avalonia</b> is a library of ready-made window components — <code class="inline">Window</code>, <code class="inline">Button</code>, <code class="inline">TextBox</code> — that you create and arrange <b>entirely in C# code</b>, and that draw <b>pixel-identically on every operating system</b>. So: C# is the language, .NET is the platform, VS Code is the workshop, Avalonia is the box of GUI parts.</p></div>
+    <div class="card"><span class="pill">Why this stack?</span><h3>Free, professional, and yours</h3><p>Every tool is free and runs on <b>your</b> computer — Windows, Mac, or Linux, no exceptions. The same stack is used in production by teams at JetBrains and Unity, and your C# transfers straight to MAC 280 (Unity games) and MAC 286 (data structures).</p></div>
   </div>
 </section>
 
@@ -292,7 +293,7 @@
   <h2>Compilation: from your words to the CPU</h2>
   <p class="sub">A computer's processor only understands <b>machine code</b> — pure numbers. Something must translate your C#. Click each stage of the pipeline to see what happens there.</p>
   <div class="pipe" id="pipeline">
-    <div class="pnode" data-i="0"><b>Your C# code</b><span>Program.cs</span></div>
+    <div class="pnode" data-i="0"><b>Your code</b><span>MainWindow.cs</span></div>
     <div class="parrow">→</div>
     <div class="pnode" data-i="1"><b>Compiler</b><span>checks + translates</span></div>
     <div class="parrow">→</div>
@@ -302,7 +303,7 @@
     <div class="parrow">→</div>
     <div class="pnode" data-i="4"><b>CPU executes</b><span>your app runs 🚀</span></div>
   </div>
-  <div id="lineInfo"><h3 id="pipeTitle">Click a stage ↑</h3><p id="pipeText">Each box is one step of the journey your code takes every time you press ▶ Start in Visual Studio.</p></div>
+  <div id="lineInfo"><h3 id="pipeTitle">Click a stage ↑</h3><p id="pipeText">Each box is one step of the journey your code takes every time you press ▶ Run in VS Code — on any operating system.</p></div>
   <div class="grid2" style="margin-top:18px">
     <div class="card"><span class="pill">Compiled (C#)</span><h3>Translate the whole book first</h3><p>The compiler translates your <b>entire program before it runs</b>. Benefit: it catches spelling and grammar mistakes (<b>syntax errors</b>) up front, and the result runs fast.</p></div>
     <div class="card"><span class="pill">Interpreted (e.g., classic Python)</span><h3>Translate line-by-line, live</h3><p>An interpreter translates <b>while the program runs</b>, one line at a time. Flexible, but errors can hide until that exact line executes. C# takes the compiled road.</p></div>
@@ -310,65 +311,66 @@
 </section>
 
 <!-- 4 ▸ IDE tour -->
-<section data-tab="IDE Tour" data-file="VisualStudio.tour">
+<section data-tab="IDE Tour" data-file="VSCode.tour">
   <p class="eyebrow">03 · Know your workshop</p>
-  <h2>Visual Studio: a guided tour</h2>
-  <p class="sub">This is a map of the Visual Studio window. Click each numbered hotspot to learn what that area does. You'll use all five in Lab 1.</p>
+  <h2>Visual Studio Code: a guided tour</h2>
+  <p class="sub">This is a map of the VS Code window. Click each numbered hotspot to learn what that area does. You'll use all six before you leave today.</p>
   <div id="tourMock">
-    <div class="tm-title">Form1.cs — MyFirstApp — Microsoft Visual Studio</div>
+    <div class="tm-title">MainWindow.cs — mac109-starter — Visual Studio Code</div>
     <div id="tourGrid">
-      <div class="tm" id="tm-menu" data-t="Menu &amp; Toolbar" data-d="The command center. File ▸ New ▸ Project starts everything; Build compiles your code; the green ▶ Start button compiles AND runs. Memorize F5 = Start Debugging.">Menu bar &amp; toolbar<span class="hotspot">1</span></div>
-      <div class="tm" id="tm-toolbox" data-t="Toolbox" data-d="A shelf of ready-made GUI parts — Buttons, Labels, TextBoxes and more. In Windows Forms projects you drag controls from here onto your form. You'll simulate exactly this on the Practice tab!">Toolbox<span class="hotspot">2</span></div>
-      <div class="tm" id="tm-editor" data-t="Code Editor / Designer" data-d="The main work area. It shows either your C# code (with colors — syntax highlighting — and IntelliSense autocomplete) or the visual Form Designer where you arrange your GUI.">Editor / Designer<span class="hotspot">3</span></div>
-      <div class="tm" id="tm-solution" data-t="Solution Explorer" data-d="The file cabinet of your work. It shows your Solution and the Projects and files inside it. Double-click any file to open it in the editor.">Solution Explorer<span class="hotspot">4</span></div>
-      <div class="tm" id="tm-output" data-t="Output / Error List" data-d="Where Visual Studio talks back to you. Build messages appear here — and if your code has errors, the Error List names each one with the exact line number. Read it top-to-bottom; fix the FIRST error first.">Output &amp; Error List<span class="hotspot">5</span></div>
-      <div class="tm" id="tm-props" data-t="Properties Window" data-d="Shows the settings of whatever is selected — a Button's Text, a form's title, colors, sizes. Change a property here and the designer updates instantly. No code needed.">Properties<span class="hotspot">6</span></div>
+      <div class="tm" id="tm-menu" data-t="Menu bar &amp; Command Palette" data-d="The command center. Run ▸ Start Debugging (F5) compiles AND runs your app. Ctrl+Shift+P (Cmd on a Mac) opens the Command Palette — type any command's name instead of hunting through menus. Memorize F5 = Run.">Menu bar &amp; Command Palette<span class="hotspot">1</span></div>
+      <div class="tm" id="tm-toolbox" data-t="Activity Bar" data-d="The icon strip on the far left switches what the side panel shows: Explorer (your files), Search, Source Control (Git), Run &amp; Debug, and Extensions. Think of it as the mode selector for the whole window.">Activity Bar<span class="hotspot">2</span></div>
+      <div class="tm" id="tm-editor" data-t="Editor" data-d="The main work area: your C# with syntax colors and IntelliSense autocomplete — type txtName. and pause to see everything a TextBox can do. Made a change? Press F5: two seconds from edit to a running window.">Editor (your C#)<span class="hotspot">3</span></div>
+      <div class="tm" id="tm-solution" data-t="Explorer — your files" data-d="The file cabinet of your project: MainWindow.cs (your whole window — interface AND logic), Program.cs (startup), and the .csproj project file. Click any file to open it in the editor.">Explorer (your files)<span class="hotspot">4</span></div>
+      <div class="tm" id="tm-output" data-t="Panel — Problems &amp; Debug Console" data-d="Where VS Code talks back to you. The Problems tab names every error with its exact file and line number. Read it top-to-bottom and fix the FIRST error first — later errors are often echoes of it.">Problems &amp; Debug Console<span class="hotspot">5</span></div>
+      <div class="tm" id="tm-props" data-t="Source Control (Git)" data-d="Built-in Git. Type a message, click Commit, then Sync/Push — and your milestone is on GitHub. In this course, pushing IS submitting: if it isn't on GitHub, it doesn't exist.">Source Control (Git)<span class="hotspot">6</span></div>
     </div>
   </div>
   <div id="tourInfo"><h3 id="tourTitle">Click a hotspot ↑</h3><p id="tourText">Six areas, six jobs. Knowing where to look is half of learning an IDE.</p></div>
 </section>
 
-<!-- 5 ▸ Solutions & Projects -->
-<section data-tab="Solutions" data-file="Solution.sln">
+<!-- 5 ▸ Your project -->
+<section data-tab="Your Project" data-file="MyStudioApp.csproj">
   <p class="eyebrow">04 · Organizing your work</p>
-  <h2>Solutions &amp; Projects</h2>
-  <p class="sub">Visual Studio never works with loose files. Everything lives in a structure — and the vocabulary matters because your labs will say "create a new <b>project</b>."</p>
+  <h2>Your project: one folder, cloned from GitHub</h2>
+  <p class="sub">VS Code works with <b>folders</b>. Your whole semester lives in one folder — a Git <b>repository</b> cloned from the course starter — and you'll grow it week by week instead of starting over.</p>
   <div class="grid2">
     <div class="codewin">
-      <div class="bar">Solution Explorer</div>
+      <div class="bar">Explorer</div>
       <pre>
-<span class="cl"><span class="ln"> </span><span class="p">🗂  </span><span class="t">Solution 'MAC109Labs'</span><span class="c">   ← the binder</span></span>
-<span class="cl"><span class="ln"> </span><span class="p">  📁 </span><span class="m">Lab01_HelloWorld</span><span class="c">      ← a project</span></span>
-<span class="cl"><span class="ln"> </span><span class="p">      C# </span><span class="p">Program.cs</span><span class="c">        ← your code</span></span>
-<span class="cl"><span class="ln"> </span><span class="p">  📁 </span><span class="m">Lab02_Calculator</span><span class="c">      ← another project</span></span>
-<span class="cl"><span class="ln"> </span><span class="p">      C# </span><span class="p">Program.cs</span></span></pre>
+<span class="cl"><span class="ln"> </span><span class="p">📂 </span><span class="t">mac109-starter</span><span class="c">          ← the repository (folder)</span></span>
+<span class="cl"><span class="ln"> </span><span class="p">  📁 </span><span class="m">MyStudioApp</span><span class="c">           ← the project</span></span>
+<span class="cl"><span class="ln"> </span><span class="p">     C# </span><span class="p">MainWindow.cs</span><span class="c">       ← YOUR window: UI + logic</span></span>
+<span class="cl"><span class="ln"> </span><span class="p">     C# </span><span class="p">Program.cs</span><span class="c">          ← startup (look, don't touch)</span></span>
+<span class="cl"><span class="ln"> </span><span class="p">     ⚙ </span><span class="p">MyStudioApp.csproj</span><span class="c">   ← project file &amp; packages</span></span></pre>
     </div>
     <div>
-      <div class="card" style="margin-bottom:14px"><span class="pill">Solution (.sln)</span><h3>The binder</h3><p>A container that groups related projects. One solution can hold your whole semester of labs.</p></div>
-      <div class="card"><span class="pill">Project (.csproj)</span><h3>One program</h3><p>Everything needed to build <b>one app</b>: code files, settings, and the output type (Console App or Windows Forms App). Each lab = one project.</p></div>
+      <div class="card" style="margin-bottom:14px"><span class="pill">Repository (the folder)</span><h3>The binder</h3><p>A Git-tracked folder holding your entire project and its history. Cloned from GitHub today; pushed back to GitHub every week as your milestone. One repo = your whole semester.</p></div>
+      <div class="card"><span class="pill">Project (.csproj)</span><h3>One app</h3><p>Everything needed to build <b>one app</b>: which files to compile, which .NET version to use, and which packages it needs — including <b>Avalonia</b>, the GUI framework itself.</p></div>
     </div>
   </div>
-  <p class="note">📌 <b>Lab 1 first steps:</b> File ▸ New ▸ Project ▸ <b>Console App</b> ▸ name it <code class="inline">Lab01_HelloWorld</code> ▸ choose a folder you'll remember (not Downloads!) ▸ Create.</p>
+  <p class="note">📌 <b>Today's first steps:</b> open VS Code ▸ Source Control icon ▸ <b>Clone Repository</b> ▸ paste the starter link from Brightspace ▸ choose a folder you'll remember (not Downloads!) ▸ Open. Then press <b>F5</b> — a real window appears before you've written a single line.</p>
 </section>
 
 <!-- 6 ▸ First program -->
-<section data-tab="First Code" data-file="Program.cs">
+<section data-tab="First Code" data-file="MainWindow.cs">
   <p class="eyebrow">05 · Code explanation — read every line</p>
-  <h2>Your first C# program, line by line</h2>
-  <p class="sub"><b>Click any line of code</b> to see exactly what it does. By the end, no line in this file should feel like magic.</p>
+  <h2>Your first window, line by line</h2>
+  <p class="sub">One file, one language: <code class="inline">MainWindow.cs</code> is your <b>entire window</b> — the look AND the behavior. <b>Click any line</b> to see exactly what it does. By the end, no line in this file should feel like magic.</p>
   <div class="grid2">
     <div class="codewin">
-      <div class="bar"><i style="background:#f57"></i><i style="background:#fb5"></i><i style="background:#5c5"></i> Program.cs — click a line</div>
+      <div class="bar"><i style="background:#f57"></i><i style="background:#fb5"></i><i style="background:#5c5"></i> MainWindow.cs — click a line</div>
       <pre id="explCode"></pre>
     </div>
     <div id="lineInfo2" class="card" style="border-left:4px solid var(--statusbar);min-height:180px">
       <h3 id="explTitle" style="font-family:var(--mono);color:var(--warn);font-size:14px">← Pick a line</h3>
-      <p id="explText" style="margin-top:8px;line-height:1.6;font-size:14.5px">Every C# program is built from pieces like these. Click line 1 to start.</p>
+      <p id="explText" style="margin-top:8px;line-height:1.6;font-size:14.5px">Every window you build this semester is made of pieces like these. Click line 1 to start.</p>
     </div>
   </div>
-  <div class="card" style="margin-top:16px"><span class="pill">Output</span>
-    <pre style="font-family:var(--mono);font-size:14px;color:var(--good);margin-top:6px">Hello, LaGuardia!
-What is your name? _</pre>
+  <div class="card" style="margin-top:16px"><span class="pill">▶ Run result</span>
+    <pre style="font-family:var(--mono);font-size:14px;color:var(--good);margin-top:6px">A real window titled "My Studio App": a welcome heading, a text
+box waiting for a name, a button, and an empty line ready for the
+greeting — identical on Windows, macOS &amp; Linux.</pre>
   </div>
 </section>
 
@@ -377,13 +379,13 @@ What is your name? _</pre>
   <p class="eyebrow">06 · Syntax fundamentals</p>
   <h2>The four rules of C# grammar</h2>
   <div class="grid2" style="margin-bottom:20px">
-    <div class="card"><span class="pill">Rule 1</span><h3>Statements end with <code class="inline">;</code></h3><p>The semicolon is C#'s period. Forgetting it is the #1 beginner error — the compiler will point at the line for you.</p></div>
-    <div class="card"><span class="pill">Rule 2</span><h3>C# is case-sensitive</h3><p><code class="inline">Console</code> works; <code class="inline">console</code> does not exist. Capital letters matter, always.</p></div>
-    <div class="card"><span class="pill">Rule 3</span><h3>Braces <code class="inline">{ }</code> group code</h3><p>Every opening <code class="inline">{</code> needs a closing <code class="inline">}</code>. Visual Studio highlights matching pairs for you.</p></div>
-    <div class="card"><span class="pill">Rule 4</span><h3>Strings live in <code class="inline">" "</code></h3><p>Text data must be wrapped in double quotes. Comments start with <code class="inline">//</code> and are ignored by the compiler.</p></div>
+    <div class="card"><span class="pill">Rule 1</span><h3>Statements end with <code class="inline">;</code></h3><p>The semicolon is C#'s period. Forgetting it is the #1 beginner error — the compiler will point at the exact line for you.</p></div>
+    <div class="card"><span class="pill">Rule 2</span><h3>C# is case-sensitive</h3><p><code class="inline">TextBlock</code> is a control; <code class="inline">textBlock</code> doesn't exist. <code class="inline">Content</code> works; <code class="inline">content</code> doesn't. Capital letters matter, always.</p></div>
+    <div class="card"><span class="pill">Rule 3</span><h3>Braces <code class="inline">{ }</code> group things</h3><p>They wrap a class body, a method body — and in <code class="inline">new Button { … }</code> they wrap the settings you apply while creating an object. Every <code class="inline">{</code> needs its <code class="inline">}</code>.</p></div>
+    <div class="card"><span class="pill">Rule 4</span><h3>Text lives in <code class="inline">" "</code></h3><p><code class="inline">Content = "Say Hello"</code> is a string; <code class="inline">Content = Say Hello</code> is a compile error. Comments start with <code class="inline">//</code> and are ignored by the compiler.</p></div>
   </div>
   <h3 style="margin-bottom:8px">🐞 Bug hunt — find the 3 errors</h3>
-  <p class="sub" style="margin-bottom:12px">This code will not compile. Click the lines you think contain an error. <span id="bugScore" style="font-family:var(--mono);color:var(--warn)">Found: 0 / 3</span></p>
+  <p class="sub" style="margin-bottom:12px">This constructor will not compile. Click the lines you think contain an error. <span id="bugScore" style="font-family:var(--mono);color:var(--warn)">Found: 0 / 3</span></p>
   <div class="codewin">
     <div class="bar">Broken.cs — 3 errors hiding</div>
     <pre id="bugCode"></pre>
@@ -400,92 +402,93 @@ What is your name? _</pre>
 </section>
 
 <!-- 9 ▸ GUI concept -->
-<section data-tab="GUI Intro" data-file="Form1.Designer.cs">
+<section data-tab="GUI Ideas" data-file="Events.cs">
   <p class="eyebrow">08 · Developing a GUI — the concepts</p>
   <h2>What is a GUI, really?</h2>
   <p class="sub">A <b>G</b>raphical <b>U</b>ser <b>I</b>nterface is a program you operate with windows, buttons, and text boxes instead of typed commands. Three ideas make every GUI work:</p>
   <div class="grid3">
-    <div class="card"><span class="pill">Idea 1 · Controls</span><h3>Building blocks</h3><p>A <b>control</b> is a reusable visual component: <code class="inline">Button</code>, <code class="inline">Label</code>, <code class="inline">TextBox</code>. Each is an <b>object</b> created from a class — your first taste of object-oriented programming.</p></div>
-    <div class="card"><span class="pill">Idea 2 · Properties</span><h3>Settings of an object</h3><p>Every control has <b>properties</b> that describe it: its <code class="inline">Text</code>, its position, its color. Change the property → the control changes. <code class="inline">btnGreet.Text = "Say Hello";</code></p></div>
+    <div class="card"><span class="pill">Idea 1 · Controls</span><h3>Building blocks</h3><p>A <b>control</b> is a reusable visual component: <code class="inline">Button</code>, <code class="inline">TextBlock</code>, <code class="inline">TextBox</code>. Each is an <b>object</b> created from an Avalonia class — your first taste of object-oriented programming.</p></div>
+    <div class="card"><span class="pill">Idea 2 · Properties</span><h3>Settings of an object</h3><p>Every control has <b>properties</b> that describe it: its text, its size, its color. Set them as you create the object — <code class="inline">new Button { Content = "Say Hello" }</code> — or change them live at any time: <code class="inline">btnGreet.Content = "Clicked!";</code></p></div>
     <div class="card"><span class="pill">Idea 3 · Events</span><h3>Code that waits</h3><p>GUI programs are <b>event-driven</b>: they wait for something to happen — a <code class="inline">Click</code>, a key press — then run the <b>event handler</b> method you wrote. No click, no code.</p></div>
   </div>
   <div class="codewin" style="margin-top:18px">
-    <div class="bar">The anatomy of an event handler</div>
+    <div class="bar">The anatomy of an event handler — MainWindow.cs</div>
     <pre>
-<span class="cl"><span class="ln">1</span><span class="c">// "When btnGreet is clicked, run this method"</span></span>
-<span class="cl"><span class="ln">2</span><span class="k">private void</span> <span class="m">btnGreet_Click</span><span class="p">(</span><span class="k">object</span><span class="p"> sender, </span><span class="t">EventArgs</span><span class="p"> e)</span></span>
+<span class="cl"><span class="ln">1</span><span class="c">// btnGreet.Click += BtnGreet_Click;   ← "when clicked, run this method"</span></span>
+<span class="cl"><span class="ln">2</span><span class="k">private void</span> <span class="m">BtnGreet_Click</span><span class="p">(</span><span class="k">object</span><span class="p"> sender, </span><span class="t">RoutedEventArgs</span><span class="p"> e)</span></span>
 <span class="cl"><span class="ln">3</span><span class="p">{</span></span>
-<span class="cl"><span class="ln">4</span><span class="p">    </span><span class="t">MessageBox</span><span class="p">.</span><span class="m">Show</span><span class="p">(</span><span class="s">"Hello, "</span><span class="p"> + txtName.Text + </span><span class="s">"!"</span><span class="p">);</span></span>
+<span class="cl"><span class="ln">4</span><span class="p">    lblGreeting.Text = </span><span class="s">"Hello, "</span><span class="p"> + txtName.Text + </span><span class="s">"!"</span><span class="p">;</span></span>
 <span class="cl"><span class="ln">5</span><span class="p">}</span></span></pre>
   </div>
-  <p class="note">🔎 Read line 4 aloud: "Show a message box containing <i>Hello,</i> plus whatever is typed in the txtName text box." You can already read GUI code. Next tab: you build one.</p>
+  <p class="note">🔎 Read line 4 aloud: "Set lblGreeting's Text to <i>Hello,</i> plus whatever is typed in the txtName text box." The greeting appears <b>on the window itself</b> — and the <code class="inline">+=</code> line (comment, line 1) is what connects the button to this method. You can already read GUI code. Next tab: you build one.</p>
 </section>
 
 <!-- 10 ▸ GUI practice -->
-<section data-tab="★ Practice" data-file="Form1.cs [Design]">
+<section data-tab="★ Practice" data-file="MainWindow.cs [Design]">
   <p class="eyebrow">09 · Practice — build a GUI right now</p>
-  <h2>Mini Forms Designer</h2>
-  <p class="sub">This works like the real Visual Studio designer. <b>1)</b> Click a control in the Toolbox to add it to the form. <b>2)</b> Drag controls to arrange them. <b>3)</b> Select one and edit its <code class="inline">Text</code> in Properties. <b>4)</b> Watch the C# code write itself. <b>5)</b> Press ▶ Start — your Button really works.</p>
+  <h2>Mini GUI Designer — in pure C#</h2>
+  <p class="sub">Our stack has no drag-and-drop designer — you build UI in C# — and this simulator shows you the mapping: <b>every design choice becomes a line of C#.</b> <b>1)</b> Click a control in the Toolbox to add it. <b>2)</b> Drag to arrange — <b>drag one above another and watch the Children list reorder.</b> <b>3)</b> Edit its properties. <b>4)</b> Watch the C# write itself. <b>5)</b> Press ▶ Run — your Button really works.</p>
   <div id="builder">
     <div class="bpanel">
       <div class="bhead">Toolbox</div>
       <div class="toolitem" data-add="Button"><span class="ico">btn</span> Button</div>
-      <div class="toolitem" data-add="Label"><span class="ico">lbl</span> Label</div>
+      <div class="toolitem" data-add="TextBlock"><span class="ico">lbl</span> TextBlock</div>
       <div class="toolitem" data-add="TextBox"><span class="ico">txt</span> TextBox</div>
       <div style="padding:11px 12px;color:var(--muted);font-size:12px;line-height:1.5">Click to add.<br>Then drag on the form.</div>
     </div>
     <div>
       <div class="bpanel">
-        <div class="bhead">Form1.cs [Design]</div>
+        <div class="bhead">Design canvas — your window</div>
         <div id="formHost">
           <div id="designForm">
-            <div class="wtitle"><span id="designTitle">My First App</span><span class="btns">— ▢ ✕</span></div>
+            <div class="wtitle"><span id="designTitle">My Studio App</span><span class="btns">— ▢ ✕</span></div>
             <div id="canvas"></div>
           </div>
         </div>
       </div>
       <div class="brun">
-        <button id="runBtn">▶ Start</button>
+        <button id="runBtn">▶ Run</button>
         <button id="resetBtn">↺ Reset form</button>
       </div>
       <div class="codewin" id="genCodeWin">
-        <div class="bar">Form1.Designer.cs — generated automatically, just like real Visual Studio</div>
+        <div class="bar">MainWindow.cs — the C# this design describes (in class, you'll type yours; the StackPanel stacks children top-to-bottom)</div>
         <pre id="genCode"></pre>
       </div>
     </div>
     <div class="bpanel" id="props">
       <div class="bhead">Properties</div>
-      <div id="propBody"><div class="hint">Select a control on the form to edit its properties — exactly like window #6 in the IDE tour.</div></div>
+      <div id="propBody"><div class="hint">Select a control on the form to edit its properties — each one becomes a property assignment in your C#.</div></div>
     </div>
   </div>
-  <p class="note">🎯 <b>Challenge:</b> recreate the "Greeter" — one Label ("What is your name?"), one TextBox, one Button ("Say Hello"). Run it, type your name, click the button. When the message box greets you, you have officially built an event-driven GUI in Week 1.</p>
+  <p class="note">🎯 <b>Challenge:</b> recreate the "Greeter" — a TextBlock ("What is your name?"), a TextBox, a Button ("Say Hello"), and a second TextBlock for the answer. Arrange them top-to-bottom, run, type your name, click — the greeting appears right on the window. That's your Milestone 1 shell, simulated.</p>
 </section>
 
 <!-- 11 ▸ Wrap up -->
-<section data-tab="Wrap-Up" data-file="Lab01.md">
+<section data-tab="Wrap-Up" data-file="Milestone01.md">
   <p class="eyebrow">10 · Before you leave</p>
   <h2>Week 1 — what you can now do</h2>
   <div class="grid2">
     <div>
       <ul class="checklist">
-        <li>Define <b>C#</b> (the language), <b>.NET</b> (the platform), and <b>IDE</b> (the workshop).</li>
-        <li>Explain <b>compilation</b>: C# → compiler → IL → JIT → CPU, and why compiled beats interpreted for catching errors early.</li>
-        <li>Name the six key areas of <b>Visual Studio</b> and what each is for.</li>
-        <li>Read a console program line by line: <code class="inline">using</code>, <code class="inline">Main</code>, <code class="inline">Console.WriteLine</code>, <code class="inline">Console.ReadLine</code>.</li>
+        <li>Define <b>C#</b> (the language), <b>.NET</b> (the platform), <b>VS Code</b> (the workshop), and <b>Avalonia</b> (the box of GUI parts).</li>
+        <li>Explain <b>compilation</b>: C# → compiler → IL → JIT → CPU — and why the very same app runs on Windows, macOS, and Linux.</li>
+        <li>Name the six key areas of <b>VS Code</b> and what each is for.</li>
+        <li>Read <code class="inline">MainWindow.cs</code> line by line: fields, the constructor, <code class="inline">new Type { … }</code> object initializers, and <code class="inline">+=</code> event wiring.</li>
         <li>Describe GUI programming with three words: <b>controls, properties, events</b>.</li>
       </ul>
     </div>
     <div class="card">
-      <span class="pill">Lab 1 · due before next class</span>
-      <h3>Hello, C# — IDE setup &amp; first program</h3>
-      <p style="margin-top:10px">1. Install <b>Visual Studio Community</b> with the <b>.NET desktop development</b> workload (or use an MEC lab machine).<br><br>
-      2. Create a Console App named <code class="inline">Lab01_HelloWorld</code>.<br><br>
-      3. Make it print a welcome line, ask for the user's name with <code class="inline">Console.ReadLine()</code>, and greet them back.<br><br>
-      4. Push your project to <b>GitHub</b> and submit the link on <b>Brightspace</b>.</p>
+      <span class="pill">Milestone 1 · due before next studio</span>
+      <h3>Working GUI Shell</h3>
+      <p style="margin-top:10px">1. Set up the free stack on <b>your</b> computer — Windows, Mac, or Linux: .NET SDK + VS Code + the C# Dev Kit extension (step-by-step guide on Brightspace) — or use an MEC lab machine.<br><br>
+      2. Clone the course starter repository (link on Brightspace) and run it with <b>F5</b>.<br><br>
+      3. Personalize your shell: your name in the window <code class="inline">Title</code>, a welcome TextBlock, a TextBox, and a Button whose Click event responds.<br><br>
+      4. Choose your semester domain app — Student Management, Library, Restaurant Ordering, Hotel Reservation, Banking, or Inventory — and write your choice in the README.<br><br>
+      5. Commit &amp; push to <b>GitHub</b>; submit your repo link on <b>Brightspace</b>.</p>
       <p style="margin-top:12px;color:var(--warn)">Stuck installing? Come to office hours — setup problems are normal and fixable in minutes.</p>
     </div>
   </div>
-  <p class="note">📅 <b>Next week:</b> Variables, data types &amp; arithmetic — your programs start doing math. Quiz 1 covers today's definitions.</p>
+  <p class="note">📅 <b>Next week:</b> Input/output, data types &amp; casting — your GUI starts doing live calculations (calculator, BMI, or grade tool). We open with a 5-minute review of today's definitions.</p>
 </section>
 
 </template>
@@ -547,11 +550,11 @@ What is your name? _</pre>
 
   /* ---------- compilation pipeline ---------- */
   var pipeInfo=[
-    ['Program.cs — your source code','What you type in the editor: human-readable C#. The computer cannot run this directly — it\u2019s for people (and the compiler) to read.'],
-    ['The C# compiler (csc)','When you press ▶ Start or Build, the compiler reads your ENTIRE file. First it checks grammar — every missing semicolon or misspelled word becomes a syntax error with a line number. Only if everything is legal does it translate your code.'],
-    ['IL — Intermediate Language','The compiler\u2019s output: a compact, universal instruction set that isn\u2019t tied to any one computer. This is why the same C# program can run on different machines.'],
-    ['The .NET runtime & JIT compiler','When your app launches, the runtime\u2019s Just-In-Time compiler translates IL into the exact machine code your specific CPU speaks — right before it\u2019s needed. It also manages memory for you.'],
-    ['The CPU runs your app','Pure machine instructions execute. Your window opens, your text prints — the whole pipeline typically takes under a second.']
+    ['Your source code (C#)','What you type in the editor: human-readable C# \u2014 the logic AND the interface, one language. The computer cannot run it directly; it exists for people (and the compiler) to read.'],
+    ['The C# compiler','When you press \u25b6 Run or Build, the compiler reads your ENTIRE project. First it checks grammar: every missing semicolon or misspelled word becomes an error with a file and line number. Only if everything is legal does it translate your code.'],
+    ['IL \u2014 Intermediate Language','The compiler\u2019s output: a compact, universal instruction set that isn\u2019t tied to any one computer. The SAME IL runs on Windows, macOS, and Linux \u2014 this is the secret behind our cross-platform studio.'],
+    ['The .NET runtime & JIT compiler','When your app launches, the runtime\u2019s Just-In-Time compiler translates IL into the exact machine code YOUR specific CPU speaks \u2014 Intel, AMD, or Apple Silicon \u2014 right before it\u2019s needed. It also manages memory for you.'],
+    ['The CPU runs your app','Pure machine instructions execute. Your window opens, your button waits for its click \u2014 the whole pipeline typically takes under a second.']
   ];
   var pipeNodes=stage.querySelectorAll('#pipeline .pnode');
   pipeNodes.forEach(function(n){
@@ -576,29 +579,60 @@ What is your name? _</pre>
 
   /* ---------- line-by-line explainer ---------- */
   var lines=[
-    {h:'<span class="k">using</span> <span class="t">System</span><span class="p">;</span>',
-     t:'using System;',
-     d:'A "using directive." It tells the compiler: "I\u2019ll be borrowing tools from the System library" — that\u2019s where Console lives. Like listing a textbook on your syllabus before citing it.'},
-    {h:'',t:'',d:'A blank line. The compiler ignores it completely — it exists only to make the code easier for humans to read. Whitespace is free; use it.'},
-    {h:'<span class="k">class</span> <span class="t">Program</span>',
-     t:'class Program',
-     d:'A class is a container for code — the fundamental building block of object-oriented programming. Every C# program has at least one. Ours is named Program (names are capitalized by convention).'},
-    {h:'<span class="p">{</span>',t:'{',d:'The opening brace begins the body of the class. Everything until its matching } belongs to Program.'},
-    {h:'<span class="p">    </span><span class="k">static void</span> <span class="m">Main</span><span class="p">()</span>',
-     t:'static void Main()',
-     d:'Main is THE entry point — the first method the .NET runtime calls when your app starts. No Main, no program. "void" means it returns no value; "static" means it belongs to the class itself (full details in Week 5 — for now, this line is the standard recipe).'},
-    {h:'<span class="p">    {</span>',t:'{',d:'Opens the body of Main. The statements inside run top-to-bottom, in order — that\u2019s called sequential execution.'},
-    {h:'<span class="p">        </span><span class="t">Console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(</span><span class="s">"Hello, LaGuardia!"</span><span class="p">);</span>',
-     t:'Console.WriteLine("Hello, LaGuardia!");',
-     d:'The famous one. Console is a class representing the text window; WriteLine is its method that prints text and moves to a new line. The quoted text is a string argument — the data we hand to the method. The dot means "look inside." Read it right-to-left: print this string, using WriteLine, from Console.'},
-    {h:'<span class="p">        </span><span class="t">Console</span><span class="p">.</span><span class="m">Write</span><span class="p">(</span><span class="s">"What is your name? "</span><span class="p">);</span>',
-     t:'Console.Write("What is your name? ");',
-     d:'Write vs WriteLine: Write prints WITHOUT moving to the next line, so the user types their answer right after the question. Small difference, big effect on how output looks.'},
-    {h:'<span class="p">        </span><span class="t">Console</span><span class="p">.</span><span class="m">ReadLine</span><span class="p">();</span>',
-     t:'Console.ReadLine();',
-     d:'The opposite direction: ReadLine PAUSES the program and waits for the user to type something and press Enter. Input, not output. In Lab 1 you\u2019ll capture what they type into a variable — that\u2019s Week 2\u2019s topic.'},
-    {h:'<span class="p">    }</span>',t:'}',d:'Closes Main. When execution reaches this brace, Main is finished — and the program ends.'},
-    {h:'<span class="p">}</span>',t:'}',d:'Closes the Program class. Count them: every { has found its }. Visual Studio matches the pairs for you when your cursor touches one.'}
+    {h:'<span class="k">public</span><span class="p"> </span><span class="k">class</span><span class="p"> </span><span class="t">MainWindow</span><span class="p"> : </span><span class="t">Window</span>',
+     t:'public class MainWindow : Window',
+     d:'Your class \u2014 the fundamental container of C# code. The \u201c: Window\u201d part means MainWindow IS a Window: it inherits a mountain of ready-made powers from Avalonia \u2014 a title bar, resizing, closing \u2014 for free. That\u2019s called inheritance; you\u2019ll master it in Week 9. Today, enjoy it.'},
+    {h:'<span class="p">{</span>',
+     t:'{',
+     d:'The opening brace begins the body of the class. Everything until its matching } belongs to MainWindow.'},
+    {h:'<span class="p">    </span><span class="t">TextBox</span><span class="p"> txtName = </span><span class="k">new</span><span class="p"> </span><span class="t">TextBox</span><span class="p"> { </span><span class="m">Watermark</span><span class="p"> = </span><span class="s">&quot;Type your name\u2026&quot;</span><span class="p"> };</span>',
+     t:'TextBox txtName = new TextBox { … };',
+     d:'Your first object! \u201cnew TextBox\u201d creates a text box from Avalonia\u2019s TextBox class; the { } sets its properties while creating it \u2014 an object initializer. Watermark is the grey hint that vanishes when typing starts. It\u2019s declared here, at class level (a field), so that EVERY method in the class can reach it later.'},
+    {h:'<span class="p">    </span><span class="t">TextBlock</span><span class="p"> lblGreeting = </span><span class="k">new</span><span class="p"> </span><span class="t">TextBlock</span><span class="p"> { </span><span class="m">FontSize</span><span class="p"> = </span><span class="n">18</span><span class="p"> };</span>',
+     t:'TextBlock lblGreeting = new TextBlock { … };',
+     d:'A second field: an empty TextBlock, waiting. It shows nothing at first \u2014 until code fills it with a greeting. Designing a place for output BEFORE writing the code that produces it is a pro habit.'},
+    {h:'<span class="p">    </span><span class="k">public</span><span class="p"> </span><span class="m">MainWindow</span><span class="p">()</span>',
+     t:'public MainWindow()',
+     d:'The constructor \u2014 THE method that runs automatically the moment your window is created. It has the same name as the class and no return type; it\u2019s your setup recipe. (Constructors get their full lecture in Week 5 \u2014 for now: \u201cthis runs first.\u201d)'},
+    {h:'<span class="p">    </span><span class="p">{</span>',
+     t:'{',
+     d:'Opens the constructor body. These statements run top-to-bottom, once, as the window is born.'},
+    {h:'<span class="p">        </span><span class="m">Title</span><span class="p"> = </span><span class="s">&quot;My Studio App&quot;</span><span class="p">; </span><span class="m">Width</span><span class="p"> = </span><span class="n">500</span><span class="p">; </span><span class="m">Height</span><span class="p"> = </span><span class="n">350</span><span class="p">;</span>',
+     t:'Title = "My Studio App"; Width = 500; Height = 350;',
+     d:'Three properties of the window itself \u2014 the title-bar text and the size. Three statements, three semicolons. No \u201cobject dot\u201d needed because inside MainWindow, these ARE the window\u2019s own settings.'},
+    {h:'<span class="p">        </span><span class="k">var</span><span class="p"> lblWelcome = </span><span class="k">new</span><span class="p"> </span><span class="t">TextBlock</span><span class="p"> { </span><span class="m">Text</span><span class="p"> = </span><span class="s">&quot;Welcome to MAC 109!&quot;</span><span class="p">, </span><span class="m">FontSize</span><span class="p"> = </span><span class="n">22</span><span class="p"> };</span>',
+     t:'var lblWelcome = new TextBlock { … };',
+     d:'TextBlock displays text \u2014 the GUI cousin of printing a line. \u201cvar\u201d tells the compiler \u201cyou figure out the type from the right-hand side.\u201d It\u2019s a local variable (not a field) because nothing outside the constructor needs it later.'},
+    {h:'<span class="p">        </span><span class="k">var</span><span class="p"> btnGreet = </span><span class="k">new</span><span class="p"> </span><span class="t">Button</span><span class="p"> { </span><span class="m">Content</span><span class="p"> = </span><span class="s">&quot;Say Hello&quot;</span><span class="p"> };</span>',
+     t:'var btnGreet = new Button { Content = "Say Hello" };',
+     d:'A Button object. Careful: a Button\u2019s text lives in Content, not Text \u2014 the classic beginner trap. Same object-initializer pattern as every other control: new Type { property = value }.'},
+    {h:'<span class="p">        </span><span class="p">btnGreet.</span><span class="m">Click</span><span class="p"> += </span><span class="m">BtnGreet_Click</span><span class="p">;</span>',
+     t:'btnGreet.Click += BtnGreet_Click;',
+     d:'The most important line in GUI programming: the event subscription. Read += as \u201cadd to the list\u201d: when btnGreet\u2019s Click event fires, run my BtnGreet_Click method. Your program stops being a top-to-bottom script and starts being a machine that WAITS for the user.'},
+    {h:'<span class="p">        </span><span class="m">Content</span><span class="p"> = </span><span class="k">new</span><span class="p"> </span><span class="t">StackPanel</span><span class="p"> { </span><span class="m">Margin</span><span class="p"> = </span><span class="k">new</span><span class="p"> </span><span class="t">Thickness</span><span class="p">(</span><span class="n">20</span><span class="p">), </span><span class="m">Spacing</span><span class="p"> = </span><span class="n">12</span><span class="p">,</span>',
+     t:'Content = new StackPanel { Margin = …, Spacing = 12,',
+     d:'A window shows exactly ONE thing: its Content. Ours is a StackPanel \u2014 a layout container that stacks its children top-to-bottom automatically. Margin adds breathing room from the edges; Spacing sets the gap between children. Layout by container, not by dragging pixels \u2014 and it survives every resize.'},
+    {h:'<span class="p">        </span><span class="p">    </span><span class="m">Children</span><span class="p"> = { lblWelcome, txtName, btnGreet, lblGreeting } };</span>',
+     t:'Children = { lblWelcome, txtName, btnGreet, lblGreeting } };',
+     d:'The stack\u2019s kids, in order. This one list IS your layout: reorder the names, reorder the window. Notice it mixes locals (lblWelcome, btnGreet) and fields (txtName, lblGreeting) \u2014 they\u2019re all just objects.'},
+    {h:'<span class="p">    </span><span class="p">}</span>',
+     t:'}',
+     d:'Closes the constructor. Setup is done \u2014 the window appears, and the program now waits for events.'},
+    {h:'<span class="p">    </span><span class="k">void</span><span class="p"> </span><span class="m">BtnGreet_Click</span><span class="p">(</span><span class="k">object</span><span class="p"> sender, </span><span class="t">RoutedEventArgs</span><span class="p"> e)</span>',
+     t:'void BtnGreet_Click(object sender, RoutedEventArgs e)',
+     d:'The event handler \u2014 the method the += line pointed at. Its shape is standard: sender (who fired the event) and e (the details). You don\u2019t memorize this line; you copy it and change the name.'},
+    {h:'<span class="p">    </span><span class="p">{</span>',
+     t:'{',
+     d:'Opens the handler body. This code runs every single time the button is clicked \u2014 once per click, forever.'},
+    {h:'<span class="p">        </span><span class="p">lblGreeting.</span><span class="m">Text</span><span class="p"> = </span><span class="s">&quot;Hello, &quot;</span><span class="p"> + txtName.</span><span class="m">Text</span><span class="p"> + </span><span class="s">&quot;!&quot;</span><span class="p">;</span>',
+     t:'lblGreeting.Text = "Hello, " + txtName.Text + "!";',
+     d:'The payoff, and the whole rhythm of GUI code: READ a property (txtName.Text \u2014 whatever the user typed), GLUE strings with +, WRITE a property (lblGreeting.Text). The greeting appears on the window itself. This is why txtName and lblGreeting had to be fields \u2014 the handler needed to reach them.'},
+    {h:'<span class="p">    </span><span class="p">}</span>',
+     t:'}',
+     d:'Closes the handler.'},
+    {h:'<span class="p">}</span>',
+     t:'}',
+     d:'Closes the MainWindow class. Count them: every { has found its }. VS Code highlights matching pairs when your cursor touches one.'}
   ];
   var explPre=document.getElementById('explCode');
   lines.forEach(function(L,i){
@@ -616,16 +650,15 @@ What is your name? _</pre>
 
   /* ---------- bug hunt ---------- */
   var bugLines=[
-    {h:'<span class="k">using</span> <span class="t">System</span><span class="p">;</span>',bug:false,why:'Correct — the using directive ends with its semicolon.'},
-    {h:'<span class="k">class</span> <span class="t">Greeter</span>',bug:false,why:'Correct — class declarations don\u2019t take a semicolon before the brace.'},
-    {h:'<span class="p">{</span>',bug:false,why:'Correct — an honest opening brace.'},
-    {h:'<span class="p">    </span><span class="k">static void</span> <span class="m">Main</span><span class="p">()</span>',bug:false,why:'Correct — a proper Main entry point.'},
-    {h:'<span class="p">    {</span>',bug:false,why:'Correct.'},
-    {h:'<span class="p">        </span><span class="t">console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(</span><span class="s">"Hi there!"</span><span class="p">);</span>',bug:true,why:'Error 1: lowercase "console" — C# is case-sensitive; the class is Console.'},
-    {h:'<span class="p">        </span><span class="t">Console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(</span><span class="s">"Welcome to MAC 109"</span><span class="p">)</span>',bug:true,why:'Error 2: the statement is missing its semicolon at the end.'},
-    {h:'<span class="p">        </span><span class="t">Console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(</span><span class="p">Bye for now!</span><span class="p">);</span>',bug:true,why:'Error 3: the text isn\u2019t wrapped in double quotes, so the compiler thinks it\u2019s code, not a string.'},
-    {h:'<span class="p">    }</span>',bug:false,why:'Correct.'},
-    {h:'<span class="p">}</span>',bug:false,why:'Correct — braces are balanced; the bugs were all inside.'}
+    {h:'<span class="k">public</span><span class="p"> </span><span class="m">MainWindow</span><span class="p">()</span>',bug:false,why:'Correct \u2014 a proper constructor: same name as the class, no return type.'},
+    {h:'<span class="p">{</span>',bug:false,why:'Correct \u2014 an honest opening brace.'},
+    {h:'<span class="p">    </span><span class="m">Title</span><span class="p"> = </span><span class="s">&quot;Bug Hunt&quot;</span><span class="p">; </span><span class="m">Width</span><span class="p"> = </span><span class="n">400</span><span class="p">;</span>',bug:false,why:'Correct \u2014 two statements, two semicolons, string in quotes.'},
+    {h:'<span class="p">    </span><span class="k">var</span><span class="p"> lblTitle = </span><span class="k">new</span><span class="p"> </span><span class="t">textBlock</span><span class="p"> { </span><span class="m">Text</span><span class="p"> = </span><span class="s">&quot;Find the bugs!&quot;</span><span class="p"> };</span>',bug:true,why:'Error 1: lowercase \u201ctextBlock\u201d \u2014 C# is case-sensitive; the class is TextBlock.'},
+    {h:'<span class="p">    </span><span class="k">var</span><span class="p"> txtInput = </span><span class="k">new</span><span class="p"> </span><span class="t">TextBox</span><span class="p"> { </span><span class="m">Watermark</span><span class="p"> = </span><span class="s">&quot;Type here\u2026&quot;</span><span class="p"> };</span>',bug:false,why:'Correct \u2014 a well-formed object initializer.'},
+    {h:'<span class="p">    </span><span class="k">var</span><span class="p"> btnGo = </span><span class="k">new</span><span class="p"> </span><span class="t">Button</span><span class="p"> { </span><span class="m">Content</span><span class="p"> = </span><span class="p">Press me</span><span class="p"> };</span>',bug:true,why:'Error 2: Press me isn\u2019t wrapped in double quotes, so the compiler thinks it\u2019s code, not a string.'},
+    {h:'<span class="p">    </span><span class="p">btnGo.</span><span class="m">Click</span><span class="p"> += </span><span class="m">BtnGo_Click</span>',bug:true,why:'Error 3: the statement is missing its semicolon at the end.'},
+    {h:'<span class="p">    </span><span class="m">Content</span><span class="p"> = </span><span class="k">new</span><span class="p"> </span><span class="t">StackPanel</span><span class="p"> { </span><span class="m">Children</span><span class="p"> = { lblTitle, txtInput, btnGo } };</span>',bug:false,why:'Correct \u2014 the layout line is fine; the bugs were all above.'},
+    {h:'<span class="p">}</span>',bug:false,why:'Correct \u2014 braces are balanced.'}
   ];
   var bugPre=document.getElementById('bugCode');var found=0;
   bugLines.forEach(function(L,i){
@@ -652,16 +685,19 @@ What is your name? _</pre>
   /* ---------- quiz ---------- */
   var quiz=[
     {q:'Which statement best describes the relationship between C# and .NET?',
-     opts:['They are two names for the same thing','C# is the language you write; .NET is the platform and library your code runs on','.NET is the language; C# is the editor','C# only works on Apple computers'],
-     a:1,why:'C# is the vocabulary and grammar; .NET supplies the runtime engine and thousands of pre-built classes like Console and MessageBox.'},
-    {q:'You press ▶ Start and Visual Studio reports "; expected — line 7." What happened?',
-     opts:['The program ran and then crashed on line 7','The compiler found a syntax error BEFORE running anything','.NET is not installed','The CPU rejected your machine code'],
-     a:1,why:'Compilation happens first. Because C# is compiled, grammar mistakes are caught up front — nothing runs until the whole file is legal.'},
-    {q:'Which line correctly prints text to the screen?',
-     opts:['console.writeline("Hi");','Console.WriteLine(Hi);','Console.WriteLine("Hi");','Console.WriteLine("Hi")'],
-     a:2,why:'It needs the capital-C Console (case matters), quotes around the string, and a semicolon at the end. Each other option breaks exactly one rule.'},
-    {q:'In GUI programming, code inside btnGreet_Click runs…',
-     opts:['Automatically when the program starts','Once per second','Only when the user clicks the btnGreet button','Never — it\u2019s just a comment'],
+     opts:['They are two names for the same thing','C# is the language you write; .NET is the platform and library your code runs on','.NET is the language; C# is the editor','C# only works on Windows computers'],
+     a:1,why:'C# is the vocabulary and grammar; .NET supplies the runtime engine and thousands of pre-built classes \u2014 and it runs on Windows, macOS, and Linux alike.'},
+    {q:'Your classmate has a MacBook; you have a Windows laptop. You both clone the same starter project. What happens?',
+     opts:['Only the Windows copy runs \u2014 Macs need a virtual machine','Each must rewrite the GUI for their own system','Both build and run the identical app \u2014 .NET compiles to universal IL and Avalonia draws the same UI on every OS','It runs on Mac only if the Mac has Windows installed'],
+     a:2,why:'That\u2019s the whole point of our stack: the compiler produces universal IL, the .NET runtime translates it for each CPU, and Avalonia draws the interface identically everywhere.'},
+    {q:'In var b = new Button { Content = "Say Hello" };, what does the { } part do?',
+     opts:['It defines a new class','It sets the object\u2019s properties at the moment it is created \u2014 an object initializer','It is a comment','It makes the button invisible'],
+     a:1,why:'new Button creates the object; the braces immediately fill in its settings. One line: create + configure. You\u2019ll use this pattern for every control all semester.'},
+    {q:'Which line correctly creates a button?',
+     opts:['var b = new button { Content = &quot;Hi&quot; };','var b = new Button { Content = Hi };','var b = new Button { Content = &quot;Hi&quot; }','var b = new Button { Content = &quot;Hi&quot; };'],
+     a:3,why:'It needs the capital-B Button (case matters), quotes around the string, and a semicolon at the end. Each other option breaks exactly one rule from this tab.'},
+    {q:'The code inside BtnGreet_Click runs\u2026',
+     opts:['Automatically when the program starts','Once per second','Only when the user clicks the button whose Click attribute names it','Never \u2014 it\u2019s just a comment'],
      a:2,why:'GUI apps are event-driven: handlers wait for their event. No click, no execution. That\u2019s the core difference from top-to-bottom console programs.'}
   ];
   var host=document.getElementById('quizHost');var score=0,answered=0;
@@ -690,14 +726,14 @@ What is your name? _</pre>
   var canvas=document.getElementById('canvas');
   var propBody=document.getElementById('propBody');
   var genCode=document.getElementById('genCode');
-  var controls=[];var counts={Button:0,Label:0,TextBox:0};var selected=null;var nextY=14;
+  var controls=[];var counts={Button:0,TextBlock:0,TextBox:0};var selected=null;var nextY=14;
 
-  var defaults={Button:'button',Label:'label',TextBox:''};
-  var prefix={Button:'btn',Label:'lbl',TextBox:'txt'};
+  var defaults={Button:'button',TextBlock:'text',TextBox:''};
+  var prefix={Button:'btnButton',TextBlock:'lblText',TextBox:'txtInput'};
 
   function addControl(type){
     counts[type]++;
-    var c={type:type,name:prefix[type]+type+counts[type],
+    var c={type:type,name:prefix[type]+counts[type],
            text:type==='TextBox'?'':defaults[type]+counts[type],
            x:24+((controls.length%3)*10),y:nextY,el:null};
     nextY=Math.min(nextY+42,190);
@@ -724,7 +760,7 @@ What is your name? _</pre>
     if(!selected){propBody.innerHTML='<div class="hint">Select a control on the form to edit its properties.</div>';return;}
     propBody.innerHTML=
       '<div class="prow"><label>(Name)</label><input id="pName" value="'+esc(selected.name)+'"></div>'+
-      '<div class="prow"><label>Text</label><input id="pText" value="'+esc(selected.text)+'"></div>'+
+      '<div class="prow"><label>'+(selected.type==='Button'?'Content':'Text')+'</label><input id="pText" value="'+esc(selected.text)+'"></div>'+
       '<div class="prow" style="color:var(--muted);font-size:12px;line-height:1.5">Type: <b style="color:var(--type)">'+selected.type+'</b><br>Location: ('+Math.round(selected.x)+', '+Math.round(selected.y)+')</div>'+
       '<div class="prow"><button id="pDel" style="width:100%;background:#5a1d1d;color:#ffb4a5;border:1px solid #7a2a2a;border-radius:5px;padding:7px;cursor:pointer;font-size:12.5px">Delete control</button></div>';
     document.getElementById('pText').addEventListener('input',function(e){selected.text=e.target.value;paint(selected);regen();});
@@ -764,46 +800,54 @@ What is your name? _</pre>
   function line(html){return '<span class="cl">'+html+'</span>';}
   function regen(){
     var out=[];
-    out.push(line('<span class="c">// Auto-generated by the Designer — one object per control</span>'));
-    controls.forEach(function(c){
-      out.push(line('<span class="k">private</span> <span class="t">'+c.type+'</span> <span class="p">'+c.name+' = </span><span class="k">new</span> <span class="t">'+c.type+'</span><span class="p">();</span>'));
-    });
+    out.push(line('<span class="c">// MainWindow.cs \u2014 the C# this design describes</span>'));
     if(controls.length){
-      out.push(line('<span class="p"> </span>'));
+      var btn=firstButton(),txt=firstTextBox(),tb=firstTextBlock();
       controls.forEach(function(c){
-        out.push(line('<span class="p">'+c.name+'.Text = </span><span class="s">"'+esc(c.text)+'"</span><span class="p">;</span>'));
-        out.push(line('<span class="p">'+c.name+'.Location = </span><span class="k">new</span> <span class="t">Point</span><span class="p">('+Math.round(c.x)+', '+Math.round(c.y)+');</span>'));
+        var bits='<span class="k">var</span><span class="p"> '+c.name+' = </span><span class="k">new</span> <span class="t">'+c.type+'</span><span class="p"> { </span>';
+        if(c.type==='Button'){bits+='<span class="m">Content</span><span class="p"> = </span><span class="s">"'+esc(c.text)+'"</span>';}
+        else if(c.type==='TextBlock'){bits+='<span class="m">Text</span><span class="p"> = </span><span class="s">"'+esc(c.text)+'"</span>';}
+        else{bits+='<span class="m">Watermark</span><span class="p"> = </span><span class="s">"Type here\u2026"</span>';}
+        bits+='<span class="p"> };</span>';
+        out.push(line(bits));
       });
-      var btn=firstButton();
       if(btn){
         out.push(line('<span class="p"> </span>'));
-        out.push(line('<span class="c">// Wire the Click event to its handler</span>'));
-        out.push(line('<span class="p">'+btn.name+'.Click += </span><span class="m">'+btn.name+'_Click</span><span class="p">;</span>'));
+        out.push(line('<span class="p">'+btn.name+'.</span><span class="m">Click</span><span class="p"> += </span><span class="m">'+btn.name+'_Click</span><span class="p">;</span>  <span class="c">// when clicked, run the method below</span>'));
+      }
+      out.push(line('<span class="p"> </span>'));
+      var ordered=controls.slice().sort(function(a,b){return a.y-b.y;});
+      var names=ordered.map(function(c){return c.name;}).join(', ');
+      out.push(line('<span class="m">Content</span><span class="p"> = </span><span class="k">new</span> <span class="t">StackPanel</span><span class="p"> { </span><span class="m">Margin</span><span class="p"> = </span><span class="k">new</span> <span class="t">Thickness</span><span class="p">(</span><span class="n">20</span><span class="p">), </span><span class="m">Spacing</span><span class="p"> = </span><span class="n">12</span><span class="p">,</span>'));
+      out.push(line('<span class="p">    </span><span class="m">Children</span><span class="p"> = { '+names+' } };</span>  <span class="c">// top-to-bottom order \u2014 drag to change it!</span>'));
+      if(btn){
         out.push(line('<span class="p"> </span>'));
-        out.push(line('<span class="k">private void</span> <span class="m">'+btn.name+'_Click</span><span class="p">(</span><span class="k">object</span><span class="p"> sender, </span><span class="t">EventArgs</span><span class="p"> e)</span>'));
+        out.push(line('<span class="k">void</span> <span class="m">'+btn.name+'_Click</span><span class="p">(</span><span class="k">object</span><span class="p"> sender, </span><span class="t">RoutedEventArgs</span><span class="p"> e)</span>'));
         out.push(line('<span class="p">{</span>'));
-        var txt=firstTextBox();
-        if(txt){
-          out.push(line('<span class="p">    </span><span class="t">MessageBox</span><span class="p">.</span><span class="m">Show</span><span class="p">(</span><span class="s">"Hello, "</span><span class="p"> + '+txt.name+'.Text + </span><span class="s">"!"</span><span class="p">);</span>'));
+        if(tb&&txt){
+          out.push(line('<span class="p">    '+tb.name+'.</span><span class="m">Text</span><span class="p"> = </span><span class="s">"Hello, "</span><span class="p"> + '+txt.name+'.</span><span class="m">Text</span><span class="p"> + </span><span class="s">"!"</span><span class="p">;</span>'));
+        }else if(tb){
+          out.push(line('<span class="p">    '+tb.name+'.</span><span class="m">Text</span><span class="p"> = </span><span class="s">"You clicked '+esc(btn.text)+'!"</span><span class="p">;</span>'));
         }else{
-          out.push(line('<span class="p">    </span><span class="t">MessageBox</span><span class="p">.</span><span class="m">Show</span><span class="p">(</span><span class="s">"You clicked '+esc(btn.text)+'!"</span><span class="p">);</span>'));
+          out.push(line('<span class="c">    // add a TextBlock so the app has somewhere to answer</span>'));
         }
         out.push(line('<span class="p">}</span>'));
       }
     }else{
-      out.push(line('<span class="c">// (empty form — add controls from the Toolbox)</span>'));
+      out.push(line('<span class="c">// (empty window \u2014 add controls from the Toolbox)</span>'));
     }
     genCode.innerHTML=out.join('');
   }
   function firstButton(){for(var i=0;i<controls.length;i++)if(controls[i].type==='Button')return controls[i];return null;}
   function firstTextBox(){for(var i=0;i<controls.length;i++)if(controls[i].type==='TextBox')return controls[i];return null;}
+  function firstTextBlock(){for(var i=0;i<controls.length;i++)if(controls[i].type==='TextBlock')return controls[i];return null;}
 
   stage.querySelectorAll('.toolitem').forEach(function(t){
     t.addEventListener('click',function(){addControl(t.dataset.add);regen();});
   });
   document.getElementById('resetBtn').addEventListener('click',function(){
     controls.forEach(function(c){canvas.removeChild(c.el);});
-    controls=[];counts={Button:0,Label:0,TextBox:0};selected=null;nextY=14;
+    controls=[];counts={Button:0,TextBlock:0,TextBox:0};selected=null;nextY=14;
     renderProps();regen();
   });
 
@@ -813,7 +857,7 @@ What is your name? _</pre>
   var msgbox=document.getElementById('msgbox');
   document.getElementById('runBtn').addEventListener('click',function(){
     runCanvas.innerHTML='';
-    var inputs={};
+    var inputs={},liveEls={};
     controls.forEach(function(c){
       var el;
       if(c.type==='TextBox'){
@@ -825,13 +869,14 @@ What is your name? _</pre>
         el.className='ctl '+c.type;el.textContent=c.text;
         el.style.cursor=c.type==='Button'?'pointer':'default';
       }
+      liveEls[c.name]=el;
       el.style.left=c.x+'px';el.style.top=c.y+'px';el.style.position='absolute';
       if(c.type==='Button'){
         el.addEventListener('click',function(){
-          var txt=firstTextBox();
+          var txt=firstTextBox(),tb=firstTextBlock();
           var msg=txt&&inputs[txt.name]?('Hello, '+(inputs[txt.name].value||'friend')+'!'):('You clicked '+c.text+'!');
-          document.getElementById('msgText').textContent=msg;
-          msgbox.classList.add('show');
+          if(tb&&liveEls[tb.name]){liveEls[tb.name].textContent=msg;}
+          else{document.getElementById('msgText').textContent=msg;msgbox.classList.add('show');}
         });
       }
       runCanvas.appendChild(el);
