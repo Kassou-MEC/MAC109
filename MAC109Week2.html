@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MAC 109 · Week 2 — Input/Output, Data Types &amp; Casting</title>
+<title>MAC 109 · Week 2 — Data Types, Input/Output &amp; Casting in C#</title>
 <style>
   :root{
     --chrome:#1e1e1e; --panel:#252526; --card:#2d2d30; --border:#3e3e42;
@@ -221,6 +221,31 @@
   .wf-out{font-weight:700;color:#0B5394;font-size:15px}
   .wf-out.bad{color:#B3261E}
   .figcap{font-size:12.5px;color:#9a9aa2;margin:6px auto 0;text-align:center;max-width:560px;line-height:1.5}
+
+  /* ---------- playground examples ---------- */
+  .exgrid{display:grid;grid-template-columns:1.45fr 1fr;gap:14px;align-items:stretch;margin:14px 0}
+  @media(max-width:900px){.exgrid{grid-template-columns:1fr}}
+  .exgrid .codewin pre{font-size:13.5px;padding:12px 14px;line-height:1.7;white-space:pre}
+  .outbox{background:#F5FFFA;border:1px solid #52525b;border-radius:10px;padding:10px 14px 12px;color:#111;font-family:'Segoe UI',system-ui,sans-serif;box-shadow:0 10px 26px rgba(0,0,0,.4)}
+  .obhead{font-size:10.5px;letter-spacing:.12em;color:#6b7280;font-weight:700;margin-bottom:6px}
+  .obline{font-family:var(--mono);font-size:13.5px;line-height:1.8;color:#111}
+  .obline.err{color:#B3261E;font-weight:600}
+  .obline.dim{color:#6b7280}
+  .tryit{border-left:4px solid var(--good);background:#12241a;border:1px solid #1e4030;border-left-width:4px;border-left-color:var(--good);border-radius:8px;padding:11px 15px;color:#bfe8cf;font-size:13.8px;line-height:1.6;margin:12px 0}
+  .exnote{font-size:13px;color:#9a9aa2;margin:-6px 0 10px 4px;line-height:1.5}
+  .agenda{border:1px solid #333;border-radius:10px;overflow:hidden;margin-top:14px}
+  .agenda .arow{display:flex;gap:14px;padding:9px 14px;border-bottom:1px solid #2a2a2e;font-size:14px}
+  .agenda .arow:last-child{border-bottom:none}
+  .agenda .at{font-family:var(--mono);color:var(--statusbar);flex:0 0 92px;font-size:13px}
+  .agenda .arow.brk{background:#1f1a10;color:#e6d590}
+
+  /* ---------- terminal output mockups ---------- */
+  .term{background:#0C0C0C;border:1px solid #3f3f46;border-radius:8px;padding:10px 14px 12px;font-family:var(--mono);font-size:13.5px;line-height:1.85;color:#CCCCCC;box-shadow:0 10px 26px rgba(0,0,0,.5)}
+  .term .thead{font-size:10.5px;letter-spacing:.12em;color:#6b7280;font-weight:700;margin-bottom:6px;font-family:'Segoe UI',system-ui,sans-serif}
+  .term .tline{white-space:pre-wrap}
+  .term .tin{color:#4FC1A6;font-weight:700}
+  .term .terr{color:#F48771;font-weight:600}
+  .term .tdim{color:#6b6b6b;font-style:italic}
 </style>
 </head>
 <body>
@@ -228,7 +253,7 @@
   <div id="titlebar">
     <div class="logo" aria-hidden="true"></div>
     <div class="menu"><span>File</span><span>Edit</span><span>View</span><span>Go</span><span>Run</span><span>Terminal</span><span>Help</span></div>
-    <div class="file">MAC109 › week02 › MainWindow.cs — Prof. K. Kassou</div>
+    <div class="file">MAC109 › week02 › Program.cs — Prof. K. Kassou</div>
   </div>
   <nav id="tabstrip" aria-label="Slides"></nav>
   <main id="stage"></main>
@@ -238,7 +263,7 @@
     <div id="progressWrap" aria-hidden="true"><div id="progressBar"></div></div>
     <span id="lncol">Ln 1, Col 1</span>
     <div class="grow"></div>
-    <span>C# 12 · .NET 8 · Avalonia UI</span>
+    <span>C# 12 · .NET 8 · Console</span>
     <span>Use ← → keys to navigate</span>
   </div>
 </div>
@@ -248,409 +273,279 @@
 <!-- 1 ▸ Start -->
 <section data-tab="Start" data-file="Start Page">
   <p class="eyebrow">LaGuardia Community College · MEC Department · MAC 109 — Software Studio</p>
-  <h1>Week 2: Your app<br>learns math 🧮</h1>
-  <p class="sub">Input/output, data types &amp; casting. Last week your app could <em>talk</em>. Today it learns to <em>calculate</em> — and along the way you'll meet the strangest fact in beginner programming: <code class="inline">"5" + "3"</code> is not <code class="inline">8</code>.</p>
+  <h1>Week 2: Data types,<br>input/output &amp; casting 🧠</h1>
+  <p class="sub">A <b>pure C#</b> lecture. Three concepts, each with a definition and a series of complete, runnable example programs — copy, paste into <code class="inline">Program.cs</code>, press F5, read the output. No windows, no buttons, no GUI: just you, the language, and the terminal. (The GUI gets its turn in today's classroom lab.)</p>
   <div class="startrow">
     <div>
       <p class="pill">Today you will</p>
       <ul class="objlist">
-        <li>Explain why <b>"5" + "3" = "53"</b> — and never be fooled again</li>
-        <li>Choose the right <b>type</b>: string, int, double (and meet bool &amp; var)</li>
-        <li>Cross the bridge both ways with <b>Convert</b> — text ⇄ number</li>
-        <li>Use <b>+ − * / %</b>, parentheses, and dodge the int-division trap</li>
-        <li>Read a real calculation handler <b>line by line</b></li>
-        <li>Ship <b>Milestone 2</b>: a live calculation in YOUR domain app</li>
+        <li>Define <b>variable</b> and <b>data type</b>; declare string, int, double, bool</li>
+        <li>Define <b>output</b> and <b>input</b>; write with <code class="inline">Console.WriteLine</code>, read with <code class="inline">Console.ReadLine</code></li>
+        <li>Prove that input is <b>always a string</b> — then fix it</li>
+        <li>Define <b>casting</b>; convert both directions with <code class="inline">Convert</code></li>
+        <li>Meet all three bug species: compile-time, runtime, logic</li>
       </ul>
     </div>
     <div class="codewin hero-code">
-      <div class="bar"><i style="background:#f57"></i><i style="background:#fb5"></i><i style="background:#5c5"></i> MainWindow.cs</div>
+      <div class="bar"><i style="background:#f57"></i><i style="background:#fb5"></i><i style="background:#5c5"></i> Program.cs — a COMPLETE C# program</div>
       <pre>
-<span class="cl"><span class="ln">1</span><span class="k">double</span><span class="p"> a = </span><span class="t">Convert</span><span class="p">.</span><span class="m">ToDouble</span><span class="p">(txtA.</span><span class="m">Text</span><span class="p">);</span></span></pre>
+<span class="cl"><span class="ln">1</span><span class="t">Console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(</span><span class="s">&quot;5&quot;</span><span class="p"> + </span><span class="s">&quot;3&quot;</span><span class="p">);</span>   <span class="c">// prints 53?!</span></span>
+<span class="cl"><span class="ln">2</span><span class="t">Console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(</span><span class="n">5</span><span class="p"> + </span><span class="n">3</span><span class="p">);</span>       <span class="c">// prints 8. Today explains why.</span></span></pre>
     </div>
   </div>
-  <p class="note">💡 <b>How to use this deck:</b> click the tabs above (like VS Code editor tabs), use the ← → arrow keys, or the Back / Next buttons in the blue status bar. Anything with a card or a clickable line is interactive — click it.</p>
+  <div class="agenda">
+    <div class="arow"><span class="at">8:00</span><span><b>This lecture</b> — definitions + complete example programs for data types, input/output, and casting. Type them, run them, read them.</span></div>
+    <div class="arow brk"><span class="at">~10:00</span><span>☕ Break</span></div>
+    <div class="arow"><span class="at">10:15</span><span><b>Classroom lab</b> — the Week 2 lab page: apply exactly these concepts inside your project app → Milestone 2</span></div>
+    <div class="arow"><span class="at">~12:15</span><span><b>Ship it</b> — commit &amp; push, verify on github.com</span></div>
+  </div>
+  <p class="note">💡 <b>How to use this deck:</b> tabs above, ← → arrow keys, or Back / Next in the blue status bar. Every code box is a <b>complete program</b> — its Copy button gives you the whole file, nothing to add.</p>
 </section>
 
-<!-- 2 ▸ Warm-up -->
-<section data-tab="The Twist" data-file="Recap.cs">
-  <p class="eyebrow">01 · Warm-up — and a plot twist</p>
-  <h2>The Greeter's dark secret</h2>
-  <p class="sub">Last week's rhythm was <b>read → glue → write</b>: read <code class="inline">txtName.Text</code>, glue with <code class="inline">+</code>, write <code class="inline">lblGreeting.Text</code>. So… let's "add" two numbers the same way:</p>
-  <div class="codewin">
-    <div class="bar">MainWindow.cs — looks reasonable, right?</div>
-    <pre>
-<span class="cl"><span class="ln">1</span><span class="p">lblResult.</span><span class="m">Text</span><span class="p"> = txtA.</span><span class="m">Text</span><span class="p"> + txtB.</span><span class="m">Text</span><span class="p">;</span></span></pre>
+<!-- 2 ▸ Setup -->
+<section data-tab="Setup" data-file="CSharpLab (console)">
+  <p class="eyebrow">01 · Two minutes of setup — then pure C#</p>
+  <h2>Your console lab: a project with no windows</h2>
+  <p class="sub">For today we use a <b>Console App</b> — the simplest kind of C# program: text in, text out, in the terminal panel. Perfect for studying the language with zero distractions. Create it once, use it all morning:</p>
+  <ol class="objlist" style="list-style:none">
+    <li>In VS Code press <b>Ctrl+Shift+P</b> (⇧⌘P on Mac) ▸ type <b>new project</b> ▸ choose <b>.NET: New Project…</b> ▸ <b>Console App</b>.</li>
+    <li>Name it <code class="inline">CSharpLab</code> ▸ location: your <b>Documents ▸ MAC109</b> folder ▸ Create, and open it.</li>
+    <li>One-time input fix: ⚙ <b>Settings</b> ▸ search <code class="inline">csharp debug console</code> ▸ set to <b>Integrated Terminal</b>. (This lets you TYPE answers when a program asks — several examples today do.)</li>
+    <li>Open <code class="inline">Program.cs</code>. It contains a single line — and that single line is a complete program. Press <b>F5</b>.</li>
+  </ol>
+  <div class="exgrid">
+    <div class="codewin"><div class="bar">Program.cs — as generated. Yes, this is the ENTIRE program.</div><pre><span class="t">Console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(</span><span class="s">&quot;Hello, World!&quot;</span><span class="p">);</span></pre></div>
+    <div class="term"><div class="thead">TERMINAL</div><div class="tline">Hello, World!</div></div>
   </div>
-  <div class="grid2" style="margin-top:16px">
-    <div class="card"><span class="pill">The user types</span><h3 style="font-family:var(--mono)">5 &nbsp;and&nbsp; 3</h3><p>Two innocent numbers, one in each TextBox. Click the button…</p></div>
-    <div class="card" style="border-left:4px solid var(--warn,#e5c07b)"><span class="pill">The app answers</span><h3 style="font-family:var(--mono);font-size:1.6rem">"53" 😱</h3><p>Not 8. Fifty-three. The + didn't add — it <b>glued</b>.</p></div>
+  <div class="grid2" style="margin-top:14px">
+    <div class="card"><span class="pill">Where's all the ceremony?</span><h3>Top-level statements</h3><p>Modern C# lets a program be just… statements, top to bottom. (A class and a Main method still exist under the hood — the compiler writes them for you. We'll meet the full ceremony in Week 4.) For today: <b>what you paste is what runs, in order.</b></p></div>
+    <div class="card"><span class="pill">The workflow for every example</span><h3>Paste ▸ F5 ▸ read ▸ tinker</h3><p>Each example replaces <b>everything</b> in Program.cs. Run it, compare the terminal against the slide — then <b>change the values and run again</b>. The tinkering is the learning.</p></div>
   </div>
-
-  <div class="winapp">
-    <div class="wtitle"><span class="t">My Studio App</span><span class="wb">— ▢ ✕</span></div>
-    <div class="wbody">
-      <span class="wf-text">5</span>
-      <span class="wf-text">3</span>
-      <span class="wf-btn">Combine</span>
-      <span class="wf-out">53</span>
-    </div>
-  </div>
-  <p class="figcap"><b>What the user sees.</b> Two numbers went in; a glued string came out. Not a crash, not an error — just quietly, confidently wrong.</p>
-  <div class="card" style="margin-top:16px"><span class="pill">The whole secret of Week 2</span><h3>.Text is ALWAYS a string</h3><p>Even when it <i>looks</i> like a number, whatever comes out of a TextBox is <b>text</b> — the characters "5" and "3", not the values 5 and 3. And for text, <code class="inline">+</code> means <b>concatenate</b> (glue). To do math, we must first tell C# "treat this as a number" — that's what <b>types</b> and <b>Convert</b> are for. Everything today flows from this one fact.</p></div>
+  <p class="note">🧯 <b>If F5 asks questions:</b> pick <b>C#</b>, then <b>CSharpLab</b>. And your GUI project from Week 1 is untouched — this is a separate folder; you'll be back in it for the lab.</p>
 </section>
 
-<!-- 3 ▸ Types -->
-<section data-tab="Types" data-file="DataTypes.cs">
-  <p class="eyebrow">02 · Data types</p>
-  <h2>Every variable has a type — forever</h2>
-  <p class="sub">A <b>type</b> tells C# what kind of thing lives in a variable and what operations make sense on it. Click each card to flip it — guess first!</p>
+<!-- 3 ▸ Data types -->
+<section data-tab="Data Types" data-file="01_DataTypes.cs">
+  <p class="eyebrow">02 · Concept 1 — variables &amp; data types</p>
+  <h2>Data types: what kind of thing is in the box?</h2>
+  <p class="sub"><b>Definition — variable:</b> a named storage box holding one value. <b>Definition — data type:</b> the rule that says what kind of value the box holds and which operations make sense on it. Declaration syntax, always: <code class="inline">type name = value;</code></p>
   <div class="grid3">
     <div class="flip" tabindex="0" role="button" aria-label="Flip card: string">
       <div class="inner">
         <div class="face front"><span class="big">string</span><small>text of any length ▸ click to flip</small></div>
-        <div class="face back"><p>A <b>string</b> holds <b>text</b> in double quotes: <code class="inline">"Maria"</code>, <code class="inline">"Hello!"</code> — even <code class="inline">"5"</code>. For strings, <code class="inline">+</code> glues. Every <code class="inline">.Text</code> property is a string, always.</p></div>
+        <div class="face back"><p>A <b>string</b> holds <b>text</b> in double quotes: <code class="inline">"Maria"</code>, <code class="inline">"Hello!"</code> — even <code class="inline">"5"</code>. For strings, <code class="inline">+</code> means <b>glue</b>.</p></div>
       </div>
     </div>
     <div class="flip" tabindex="0" role="button" aria-label="Flip card: int">
       <div class="inner">
         <div class="face front"><span class="big">int</span><small>whole numbers ▸ click to flip</small></div>
-        <div class="face back"><p>An <b>int</b> holds <b>whole numbers</b>: <code class="inline">42</code>, <code class="inline">-3</code>, <code class="inline">0</code>. Perfect for counting things that can't be fractional: students, rooms, items in stock. No quotes — quotes would make it a string!</p></div>
+        <div class="face back"><p>An <b>int</b> holds <b>whole numbers</b>: <code class="inline">42</code>, <code class="inline">-3</code>, <code class="inline">0</code>. For counting things that can't be fractional. No quotes — quotes would make it a string!</p></div>
       </div>
     </div>
     <div class="flip" tabindex="0" role="button" aria-label="Flip card: double">
       <div class="inner">
         <div class="face front"><span class="big">double</span><small>decimal numbers ▸ click to flip</small></div>
-        <div class="face back"><p>A <b>double</b> holds numbers <b>with decimals</b>: <code class="inline">3.5</code>, <code class="inline">19.99</code>, <code class="inline">98.6</code>. Money, averages, measurements. When in doubt this semester, <b>use double</b> — it handles whole numbers too.</p></div>
+        <div class="face back"><p>A <b>double</b> holds numbers <b>with decimals</b>: <code class="inline">3.5</code>, <code class="inline">19.99</code>. Money, averages, measurements. When in doubt, use double.</p></div>
       </div>
     </div>
   </div>
-  <div class="grid2" style="margin-top:18px">
-    <div class="card"><span class="pill">Preview · bool</span><h3>true / false</h3><p>A <b>bool</b> holds exactly two possible values: <code class="inline">true</code> or <code class="inline">false</code>. It's the fuel of decisions — and it becomes the star of the show next week, when your app learns <code class="inline">if</code>.</p></div>
-    <div class="card"><span class="pill">Shortcut · var</span><h3>"Compiler, you figure it out"</h3><p><code class="inline">var price = 19.99;</code> — the compiler sees the value and makes <code class="inline">price</code> a double. Convenient! But don't be fooled: the type is still <b>locked in forever</b>. <code class="inline">var</code> saves typing, not thinking.</p></div>
+  <div class="grid2" style="margin-top:14px">
+    <div class="card"><span class="pill">4th type · bool</span><h3>true / false</h3><p>A <b>bool</b> holds exactly two values: <code class="inline">true</code> or <code class="inline">false</code>. The fuel of every decision a program makes — next week's star. Watch how it prints in Example 1…</p></div>
+    <div class="card"><span class="pill">Shortcut · var</span><h3>"Compiler, you figure it out"</h3><p><code class="inline">var price = 19.99;</code> — the compiler infers <b>double</b> from the value. It saves typing, not thinking: the type is still locked in forever.</p></div>
   </div>
-  <p class="note">🧠 <b>Declaration anatomy</b> — memorize this shape: <code class="inline">type name = value;</code> &nbsp;→&nbsp; <code class="inline">double price = 19.99;</code> reads as "create a box named <i>price</i> that only holds decimal numbers, and put 19.99 in it."</p>
+  <div class="exgrid">
+    <div class="codewin"><div class="bar" style="display:flex;align-items:center;gap:8px">Program.cs — COMPLETE file · Example 1 · declare, then print<button class="copy exminicopy" type="button" style="margin-left:auto;background:#2a2a30;border:1px solid #55555e;color:#e8e8ee;border-radius:6px;padding:1px 9px;font:inherit;font-size:11.5px;cursor:pointer">Copy</button></div><pre><span class="cl"><span class="k">string</span><span class="p"> school = </span><span class="s">&quot;LaGuardia&quot;</span><span class="p">;</span></span>
+<span class="cl"><span class="k">int</span><span class="p"> credits = </span><span class="n">3</span><span class="p">;</span></span>
+<span class="cl"><span class="k">double</span><span class="p"> gpa = </span><span class="n">3.72</span><span class="p">;</span></span>
+<span class="cl"><span class="k">bool</span><span class="p"> enrolled = </span><span class="k">true</span><span class="p">;</span></span>
+<span class="cl"></span>
+<span class="cl"><span class="t">Console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(</span><span class="s">&quot;School: &quot;</span><span class="p"> + school</span><span class="p">);</span></span>
+<span class="cl"><span class="t">Console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(</span><span class="s">&quot;Credits: &quot;</span><span class="p"> + credits</span><span class="p">);</span></span>
+<span class="cl"><span class="t">Console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(</span><span class="s">&quot;GPA: &quot;</span><span class="p"> + gpa</span><span class="p">);</span></span>
+<span class="cl"><span class="t">Console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(</span><span class="s">&quot;Enrolled: &quot;</span><span class="p"> + enrolled</span><span class="p">);</span></span></pre></div>
+    <div class="term"><div class="thead">TERMINAL</div><div class="tline">School: LaGuardia</div><div class="tline">Credits: 3</div><div class="tline">GPA: 3.72</div><div class="tline">Enrolled: True</div></div>
+  </div><p class="exnote">Four boxes, four types, one shape: <b>type name = value;</b> Print a variable’s NAME (no quotes) and its VALUE comes out. And notice <b>True</b> with a capital T — that’s how C# spells its bools.</p>
+  <div class="exgrid">
+    <div class="codewin"><div class="bar" style="display:flex;align-items:center;gap:8px">Program.cs — COMPLETE file · Example 2 · variables vary<button class="copy exminicopy" type="button" style="margin-left:auto;background:#2a2a30;border:1px solid #55555e;color:#e8e8ee;border-radius:6px;padding:1px 9px;font:inherit;font-size:11.5px;cursor:pointer">Copy</button></div><pre><span class="cl"><span class="k">int</span><span class="p"> level = </span><span class="n">1</span><span class="p">;</span></span>
+<span class="cl"><span class="t">Console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(</span><span class="s">&quot;Level: &quot;</span><span class="p"> + level</span><span class="p">);</span></span>
+<span class="cl"></span>
+<span class="cl"><span class="p">level = level + </span><span class="n">1</span><span class="p">;</span></span>
+<span class="cl"><span class="t">Console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(</span><span class="s">&quot;Level: &quot;</span><span class="p"> + level</span><span class="p">);</span></span></pre></div>
+    <div class="term"><div class="thead">TERMINAL</div><div class="tline">Level: 1</div><div class="tline">Level: 2</div></div>
+  </div><p class="exnote">Line 4 is strange algebra but perfect instructions: “take level’s current value, add 1, store it back in the box.” The box keeps its name; the contents change. That’s why they’re called variables.</p>
+  <div class="exgrid">
+    <div class="codewin"><div class="bar" style="display:flex;align-items:center;gap:8px">Program.cs — COMPLETE file · Example 3 · the type is a promise — this file refuses to build (on purpose)<button class="copy exminicopy" type="button" style="margin-left:auto;background:#2a2a30;border:1px solid #55555e;color:#e8e8ee;border-radius:6px;padding:1px 9px;font:inherit;font-size:11.5px;cursor:pointer">Copy</button></div><pre><span class="cl"><span class="k">int</span><span class="p"> age = </span><span class="s">&quot;nineteen&quot;</span><span class="p">;</span></span>
+<span class="cl"><span class="t">Console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(</span><span class="p">age</span><span class="p">);</span></span></pre></div>
+    <div class="term"><div class="thead">TERMINAL</div><div class="tline terr">✗ error CS0029: Cannot implicitly convert</div><div class="tline terr">  type 'string' to 'int'</div><div class="tline tdim">— red squiggle in the editor; nothing runs.</div></div>
+  </div><p class="exnote">A <b>compile-time error</b>: the box is for ints, you offered text, and C# refuses BEFORE anything runs — with the file, line, and reason in the Problems panel. The type system is a seatbelt, not a nag. Fix it (age = 19) and run.</p>
+  <div class="exgrid">
+    <div class="codewin"><div class="bar" style="display:flex;align-items:center;gap:8px">Program.cs — COMPLETE file · Example 4 · types decide what ÷ means<button class="copy exminicopy" type="button" style="margin-left:auto;background:#2a2a30;border:1px solid #55555e;color:#e8e8ee;border-radius:6px;padding:1px 9px;font:inherit;font-size:11.5px;cursor:pointer">Copy</button></div><pre><span class="cl"><span class="t">Console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(</span><span class="n">7</span><span class="p"> / </span><span class="n">2</span><span class="p">);</span>      <span class="c">// int ÷ int</span></span>
+<span class="cl"><span class="t">Console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(</span><span class="n">7.0</span><span class="p"> / </span><span class="n">2</span><span class="p">);</span>    <span class="c">// double in the mix</span></span>
+<span class="cl"><span class="t">Console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(</span><span class="n">7</span><span class="p"> % </span><span class="n">2</span><span class="p">);</span>      <span class="c">// % = the remainder</span></span></pre></div>
+    <div class="term"><div class="thead">TERMINAL</div><div class="tline terr">3</div><div class="tline">3.5</div><div class="tline">1</div></div>
+  </div><p class="exnote"><b>7 / 2 is 3</b>, not 3.5 — whole ÷ whole stays whole, decimals chopped without mercy or warning. One double (7.0) and division turns honest. And % gives the remainder after division: 7 % 2 = 1. (Remainder 0 means “divides evenly” — that trick pays off next week.)</p>
+  <div class="tryit">🖊️ <b>Your turn:</b> declare three variables that belong to <b>your domain app</b> — Hotel: <code class="inline">int nights = 3;</code> <code class="inline">double rate = 129.99;</code> <code class="inline">string guest = "Aisha";</code> — and print each with a label. Then predict <code class="inline">Console.WriteLine(9 / 4);</code> and <code class="inline">9 % 4</code>, and verify.</div>
 </section>
 
-<!-- 4 ▸ Convert -->
-<section data-tab="Convert" data-file="Convert.cs">
-  <p class="eyebrow">03 · Casting — crossing the bridge</p>
-  <h2>Convert: from text to number and back</h2>
-  <p class="sub">Your UI speaks <b>string</b>; your math speaks <b>number</b>. <code class="inline">Convert</code> is the bridge between them — and you'll cross it in <i>every</i> calculation you ever write.</p>
-  <div class="codewin">
-    <div class="bar">The full round trip — text ▸ number ▸ math ▸ text</div>
-    <pre>
-<span class="cl"><span class="ln">1</span><span class="k">string</span><span class="p"> input = txtAge.</span><span class="m">Text</span><span class="p">;              </span><span class="c">// "19"  ← text (it's ALWAYS text)</span></span>
-<span class="cl"><span class="ln">2</span><span class="k">int</span><span class="p"> age = </span><span class="t">Convert</span><span class="p">.</span><span class="m">ToInt32</span><span class="p">(input);       </span><span class="c">//  19   ← now a real number</span></span>
-<span class="cl"><span class="ln">3</span><span class="k">int</span><span class="p"> next = age + </span><span class="n">1</span><span class="p">;                     </span><span class="c">//  20   ← math works!</span></span>
-<span class="cl"><span class="ln">4</span><span class="p">lblOut.</span><span class="m">Text</span><span class="p"> = </span><span class="s">"Next year: "</span><span class="p"> + next;   </span><span class="c">// "Next year: 20" ← text again</span></span></pre>
-  </div>
-  <div class="winapp" style="max-width:320px">
-    <div class="wtitle"><span class="t">Convert Demo</span><span class="wb">— ▢ ✕</span></div>
-    <div class="wbody">
-      <span class="wf-text">19</span>
-      <span class="wf-btn">Next year</span>
-      <span class="wf-out">Next year: 20</span>
-    </div>
-  </div>
-  <p class="figcap"><b>The round trip, on screen.</b> "19" crossed the bridge, became 19, gained a year as a real number, and came back as text.</p>
-  <div class="grid2" style="margin-top:16px">
-    <div class="card"><span class="pill">Text → number</span><h3>The Convert family</h3><p><code class="inline">Convert.ToDouble(txtPrice.Text)</code> for decimals · <code class="inline">Convert.ToInt32(txtCount.Text)</code> for whole numbers. Same shape every time: <b>Convert dot To-the-type-you-want, parentheses around the text.</b></p></div>
-    <div class="card"><span class="pill">Number → text</span><h3>Glue does it for free</h3><p>Going back is easier: the moment a number touches a string with <code class="inline">+</code>, C# converts it automatically — that's line 4 above. (There's also <code class="inline">next.ToString()</code> when you need it explicitly.)</p></div>
-  </div>
-  <p class="note">🍌 <b>The banana warning:</b> <code class="inline">Convert.ToDouble("banana")</code> compiles perfectly — the grammar is legal — but <b>explodes when it runs</b> (a FormatException). That's a <i>runtime error</i>, a whole different beast from the red squiggles you met last week. Next week, <code class="inline">if</code> starts guarding the door; in Week 10, <code class="inline">try/catch</code> finishes the job. For now: type numbers during your demos. 😉</p>
-</section>
-
-<!-- 5 ▸ Operators -->
-<section data-tab="Operators" data-file="Operators.cs">
-  <p class="eyebrow">04 · Arithmetic &amp; the order of operations</p>
-  <h2>Five operators, three traps</h2>
-  <p class="sub">C# does arithmetic with <code class="inline">+</code> <code class="inline">−</code> <code class="inline">*</code> <code class="inline">/</code> and one stranger: <code class="inline">%</code>, the <b>remainder</b>. It follows PEMDAS, like your math classes — parentheses first. Now: <b>predict each result, then click the row to check yourself.</b></p>
-  <div id="predictHost"></div>
-  <p class="note">🎯 Scored 9/9 in your head? You just dodged the three classic Week-2 traps: <b>glue</b> ("5"+"3"), <b>int division</b> (7/2), and <b>left-to-right gluing</b> ("Total: "+5+2). They will each appear on a quiz someday. You didn't hear it from me.</p>
-</section>
-
-<!-- 6 ▸ Anatomy -->
-<section data-tab="Anatomy" data-file="BtnAdd_Click.cs">
-  <p class="eyebrow">05 · Code explanation — read every line</p>
-  <h2>A calculation handler, line by line</h2>
-  <p class="sub">This is the beating heart of every calculator, BMI tool, and grade averager: read strings, convert, compute, glue, write. <b>Click any line.</b></p>
-  <div class="grid2">
+<!-- 4 ▸ Input/Output -->
+<section data-tab="Input/Output" data-file="02_InputOutput.cs">
+  <p class="eyebrow">03 · Concept 2 — input &amp; output</p>
+  <h2>I/O: how a program talks and listens</h2>
+  <p class="sub"><b>Definition — output:</b> the program writing information to the screen — in C#: <code class="inline">Console.WriteLine(…)</code>, one line per call. <b>Definition — input:</b> the program reading information from the user — in C#: <code class="inline">Console.ReadLine()</code>, which <b>waits</b> for you to type and press Enter, then hands back what you typed. Every useful program is a sandwich: <b>input → processing → output</b>.</p>
+  <div class="exgrid">
+    <div class="codewin"><div class="bar" style="display:flex;align-items:center;gap:8px">Program.cs — COMPLETE file · Example 5 · output — statements run in order<button class="copy exminicopy" type="button" style="margin-left:auto;background:#2a2a30;border:1px solid #55555e;color:#e8e8ee;border-radius:6px;padding:1px 9px;font:inherit;font-size:11.5px;cursor:pointer">Copy</button></div><pre><span class="cl"><span class="t">Console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(</span><span class="s">&quot;Hello, MAC 109!&quot;</span><span class="p">);</span></span>
+<span class="cl"><span class="t">Console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(</span><span class="n">2026</span><span class="p">);</span></span>
+<span class="cl"><span class="t">Console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(</span><span class="n">3.14</span><span class="p">);</span></span></pre></div>
+    <div class="term"><div class="thead">TERMINAL</div><div class="tline">Hello, MAC 109!</div><div class="tline">2026</div><div class="tline">3.14</div></div>
+  </div><p class="exnote">Three statements, three lines, in order — a program is a recipe read top to bottom. Numbers print without quotes; they’re converted to characters only at the moment of display.</p>
+  <div class="exgrid">
+    <div class="codewin"><div class="bar" style="display:flex;align-items:center;gap:8px">Program.cs — COMPLETE file · Example 6 · the plot twist — one +, two meanings<button class="copy exminicopy" type="button" style="margin-left:auto;background:#2a2a30;border:1px solid #55555e;color:#e8e8ee;border-radius:6px;padding:1px 9px;font:inherit;font-size:11.5px;cursor:pointer">Copy</button></div><pre><span class="cl"><span class="t">Console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(</span><span class="s">&quot;5&quot;</span><span class="p"> + </span><span class="s">&quot;3&quot;</span><span class="p">);</span></span>
+<span class="cl"><span class="t">Console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(</span><span class="n">5</span><span class="p"> + </span><span class="n">3</span><span class="p">);</span></span>
+<span class="cl"><span class="t">Console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(</span><span class="s">&quot;Total: &quot;</span><span class="p"> + </span><span class="n">5</span><span class="p"> + </span><span class="n">2</span><span class="p">);</span></span>
+<span class="cl"><span class="t">Console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(</span><span class="s">&quot;Total: &quot;</span><span class="p"> + (</span><span class="n">5</span><span class="p"> + </span><span class="n">2</span><span class="p">)</span><span class="p">);</span></span></pre></div>
+    <div class="term"><div class="thead">TERMINAL</div><div class="tline terr">53</div><div class="tline">8</div><div class="tline terr">Total: 52</div><div class="tline">Total: 7</div></div>
+  </div><p class="exnote">With quotes they’re STRINGS, and for strings + means GLUE: “53”. Lines 3–4 show the trap at full size: + works left to right, so one leading string turns everything after it into glue — until parentheses force the math first. This is the single most important output of the day.</p>
+  <div class="grid2" style="margin-top:4px">
     <div class="codewin">
-      <div class="bar"><i style="background:#f57"></i><i style="background:#fb5"></i><i style="background:#5c5"></i> MainWindow.cs — click a line</div>
+      <div class="bar" style="display:flex;align-items:center;gap:10px"><i style="background:#f57"></i><i style="background:#fb5"></i><i style="background:#5c5"></i> Example 7 — click each line<button class="copy" id="copyFull" type="button" style="margin-left:auto;background:#2a2a30;border:1px solid #55555e;color:#e8e8ee;border-radius:6px;padding:2px 10px;font:inherit;font-size:12px;cursor:pointer">Copy file</button></div>
       <pre id="explCode"></pre>
     </div>
-    <div id="lineInfo2" class="card" style="border-left:4px solid var(--statusbar);min-height:180px">
-      <h3 id="explTitle" style="font-family:var(--mono);color:var(--warn);font-size:14px">← Pick a line</h3>
-      <p id="explText" style="margin-top:8px;line-height:1.6;font-size:14.5px">Five short lines that you will write, in some costume, every single week until December. Click line 1 to start.</p>
-    </div>
-  </div>
-  <div class="winapp">
-    <div class="wtitle"><span class="t">Anatomy Demo — Week 2</span><span class="wb">— ▢ ✕</span></div>
-    <div class="wbody">
-      <span class="wf-text">7.5</span>
-      <span class="wf-text">2.5</span>
-      <span class="wf-btn">+</span>
-      <span class="wf-out">7.5 + 2.5 = 10</span>
-    </div>
-  </div>
-  <p class="figcap"><b>▶ The output.</b> Exactly what the file below produces when you paste it and press F5: two inputs, one click, honest math. Decimals welcome — that's the double at work.</p>
-
-  <div class="codewrap" style="margin-top:16px">
-    <div class="codehead"><span>Follow along for real — the COMPLETE file this handler lives in (paste into MainWindow.cs, press F5)</span><button class="copy" type="button">Copy</button></div>
-    <pre class="code"><span class="k">using</span> Avalonia;
-<span class="k">using</span> Avalonia.Controls;
-<span class="k">using</span> Avalonia.Interactivity;
-
-<span class="k">namespace</span> MyStudioApp;
-
-<span class="k">public class</span> <span class="t">MainWindow</span> : <span class="t">Window</span>
-{
-    <span class="t">TextBox</span> txtA = <span class="k">new</span> <span class="t">TextBox</span> { <span class="m">Watermark</span> = <span class="s">&quot;First number&quot;</span> };
-    <span class="t">TextBox</span> txtB = <span class="k">new</span> <span class="t">TextBox</span> { <span class="m">Watermark</span> = <span class="s">&quot;Second number&quot;</span> };
-    <span class="t">TextBlock</span> lblResult = <span class="k">new</span> <span class="t">TextBlock</span> { <span class="m">FontSize</span> = <span class="n">18</span> };
-
-    <span class="k">public</span> <span class="m">MainWindow</span>()
-    {
-        Title = <span class="s">&quot;Anatomy Demo — Week 2&quot;</span>;
-        <span class="m">Width</span> = <span class="n">420</span>; <span class="m">Height</span> = <span class="n">300</span>;
-
-        <span class="k">var</span> btnAdd = <span class="k">new</span> <span class="t">Button</span> { <span class="m">Content</span> = <span class="s">&quot;+&quot;</span> };
-        btnAdd.<span class="m">Click</span> += <span class="m">BtnAdd_Click</span>;
-
-        <span class="m">Content</span> = <span class="k">new</span> <span class="t">StackPanel</span>
-        {
-            <span class="m">Margin</span> = <span class="k">new</span> <span class="t">Thickness</span>(<span class="n">20</span>), <span class="m">Spacing</span> = <span class="n">12</span>,
-            <span class="m">Children</span> = { txtA, txtB, btnAdd, lblResult }
-        };
-    }
-
-    <span class="c">// runs every time the [+] button is clicked</span>
-    <span class="k">void</span> <span class="m">BtnAdd_Click</span>(<span class="k">object</span> sender, <span class="t">RoutedEventArgs</span> e)
-    {
-        <span class="k">double</span> a = <span class="t">Convert</span>.<span class="m">ToDouble</span>(txtA.<span class="m">Text</span>);
-        <span class="k">double</span> b = <span class="t">Convert</span>.<span class="m">ToDouble</span>(txtB.<span class="m">Text</span>);
-        <span class="k">double</span> answer = a + b;
-        lblResult.<span class="m">Text</span> = a + <span class="s">&quot; + &quot;</span> + b + <span class="s">&quot; = &quot;</span> + answer;
-    }
-}</pre>
-  </div>
-  <p class="note">🧪 <b>Safe to experiment:</b> pasting this replaces your MainWindow.cs — and that's fine, because your Milestone 1 is safely pushed on GitHub (that's exactly what Git is for 😉). Play here, then restore your own file: Source Control ▸ right-click MainWindow.cs ▸ <b>Discard Changes</b>.</p>
-</section>
-
-<!-- 7 ▸ Build it -->
-<section data-tab="Build It" data-file="MainWindow.cs">
-  <p class="eyebrow">06 · Studio target — the calculator panel</p>
-  <h2>Four buttons, four handlers, one pattern</h2>
-  <p class="sub">In studio you'll add this <b>calculation panel</b> to your own app. Three new fields, four buttons — and the Add handler you just read. The other three are the same five lines with one character changed:</p>
-  <div class="codewrap">
-    <div class="codehead"><span>MainWindow.cs — additions for the calculator panel</span><button class="copy" type="button">Copy</button></div>
-    <pre class="code"><span class="c">// 1 · new fields, next to txtName and lblGreeting:</span>
-<span class="t">TextBox</span> txtA = <span class="k">new</span> <span class="t">TextBox</span> { <span class="m">Watermark</span> = <span class="s">"First number"</span> };
-<span class="t">TextBox</span> txtB = <span class="k">new</span> <span class="t">TextBox</span> { <span class="m">Watermark</span> = <span class="s">"Second number"</span> };
-<span class="t">TextBlock</span> lblResult = <span class="k">new</span> <span class="t">TextBlock</span> { <span class="m">FontSize</span> = <span class="n">18</span> };
-
-<span class="c">// 2 · in the constructor — four buttons, four subscriptions:</span>
-<span class="k">var</span> btnAdd = <span class="k">new</span> <span class="t">Button</span> { <span class="m">Content</span> = <span class="s">"+"</span> };  btnAdd.<span class="m">Click</span> += <span class="m">BtnAdd_Click</span>;
-<span class="k">var</span> btnSub = <span class="k">new</span> <span class="t">Button</span> { <span class="m">Content</span> = <span class="s">"−"</span> };  btnSub.<span class="m">Click</span> += <span class="m">BtnSub_Click</span>;
-<span class="k">var</span> btnMul = <span class="k">new</span> <span class="t">Button</span> { <span class="m">Content</span> = <span class="s">"×"</span> };  btnMul.<span class="m">Click</span> += <span class="m">BtnMul_Click</span>;
-<span class="k">var</span> btnDiv = <span class="k">new</span> <span class="t">Button</span> { <span class="m">Content</span> = <span class="s">"÷"</span> };  btnDiv.<span class="m">Click</span> += <span class="m">BtnDiv_Click</span>;
-<span class="c">// …and add them all, plus txtA, txtB, lblResult, to the Children list.</span>
-
-<span class="c">// 3 · after the constructor — the Add handler, then its three siblings:</span>
-<span class="k">void</span> <span class="m">BtnAdd_Click</span>(<span class="k">object</span> sender, <span class="t">RoutedEventArgs</span> e)
-{
-    <span class="k">double</span> a = <span class="t">Convert</span>.<span class="m">ToDouble</span>(txtA.<span class="m">Text</span>);
-    <span class="k">double</span> b = <span class="t">Convert</span>.<span class="m">ToDouble</span>(txtB.<span class="m">Text</span>);
-    <span class="k">double</span> answer = a + b;
-    lblResult.<span class="m">Text</span> = a + <span class="s">" + "</span> + b + <span class="s">" = "</span> + answer;
-}
-<span class="c">// BtnSub_Click →  a - b   and  " − "</span>
-<span class="c">// BtnMul_Click →  a * b   and  " × "</span>
-<span class="c">// BtnDiv_Click →  a / b   and  " ÷ "</span></pre>
-  </div>
-  <div class="winapp">
-    <div class="wtitle"><span class="t">My Studio App — Maria</span><span class="wb">— ▢ ✕</span></div>
-    <div class="wbody">
-      <span class="wf-text">12</span>
-      <span class="wf-text">4</span>
-      <div class="wf-row"><span class="wf-btn">+</span><span class="wf-btn">−</span><span class="wf-btn">×</span><span class="wf-btn">÷</span></div>
-      <span class="wf-out" style="font-weight:800">12 + 4 = 16</span>
-    </div>
-  </div>
-  <p class="figcap"><b>▶ The output.</b> The calculator panel, running. Each button produces its own labeled answer — click ÷ and the same boxes read "12 ÷ 4 = 3".</p>
-  <div class="grid2" style="margin-top:16px">
-    <div class="card"><span class="pill">Why double, not int?</span><h3>Because ÷ exists</h3><p>With <code class="inline">int</code>, <code class="inline">7 / 2</code> would be <code class="inline">3</code> and your users would riot. <code class="inline">double</code> gives honest division — and handles whole numbers fine too.</p></div>
-    <div class="card"><span class="pill">Weird preview 🕳️</span><h3>10 ÷ 0 = ∞ ?!</h3><p>Try it: no crash — doubles shrug and answer <code class="inline">∞</code> (Infinity). Legal, but not smart. Next week's <code class="inline">if</code> teaches your app to refuse politely instead.</p></div>
-  </div>
-  <p class="note">🧩 These are the <i>additions</i> — the fully assembled program, every line explained AND copy-pasteable in one piece, is waiting on the next tab: <b>The Whole File</b>.</p>
-</section>
-
-<!-- 7b ▸ The whole file -->
-<section data-tab="The Whole File" data-file="MainWindow.cs (complete)">
-  <p class="eyebrow">07 · The complete picture</p>
-  <h2>The whole program — every line explained</h2>
-  <p class="sub">This is the <b>entire</b> <code class="inline">MainWindow.cs</code> after Milestone 2 — Week 1's greeter and this week's calculator living together, exactly as it runs. <b>Click any line</b> for its explanation; the panel follows you as you scroll. Nothing in this file should be a mystery anymore.</p>
-  <div class="grid2">
-    <div class="codewin">
-      <div class="bar" style="display:flex;align-items:center;gap:10px"><i style="background:#f57"></i><i style="background:#fb5"></i><i style="background:#5c5"></i> MainWindow.cs — 77 lines, all yours<button class="copy" id="copyFull" type="button" style="margin-left:auto;background:#2a2a30;border:1px solid #55555e;color:#e8e8ee;border-radius:6px;padding:2px 10px;font:inherit;font-size:12px;cursor:pointer">Copy whole file</button></div>
-      <pre id="explCode2"></pre>
-    </div>
     <div style="align-self:start;position:sticky;top:14px">
-      <div class="card" style="border-left:4px solid var(--statusbar);min-height:180px">
-        <h3 id="explTitle2" style="font-family:var(--mono);color:var(--warn);font-size:14px">← Pick a line</h3>
-        <p id="explText2" style="margin-top:8px;line-height:1.6;font-size:14.5px">Three zones to notice as you read: <b>fields</b> (the shared shelf), the <b>constructor</b> (setup, runs once), and the <b>handlers</b> (waiting for clicks). Start at line 1 and walk down.</p>
+      <div class="card" style="border-left:4px solid var(--statusbar);min-height:150px">
+        <h3 id="explTitle" style="font-family:var(--mono);color:var(--warn);font-size:14px">← Pick a line</h3>
+        <p id="explText" style="margin-top:8px;line-height:1.6;font-size:14.5px">Your first program that LISTENS. Four lines — click each one; then paste, F5, and type your name in the terminal when it waits.</p>
       </div>
-      <div class="card" style="margin-top:12px"><span class="pill">Reading challenge 🔍</span><p style="margin-top:8px;font-size:14px;line-height:1.6">Find, without hints: ① the five <code class="inline">+=</code> subscriptions ② the one place + glues on purpose ③ the parentheses that force math before glue ④ the line that would answer ∞.</p></div>
+      <div class="term" style="margin-top:14px"><div class="thead">TERMINAL</div>
+        <div class="tline">What's your name?</div>
+        <div class="tline tin">Aisha</div>
+        <div class="tline">Welcome, Aisha!</div>
+      </div>
+      <p class="figcap"><b>▶ Example 7 running.</b> The green line is what YOU type. Program waits at ReadLine; Enter releases it.</p>
     </div>
   </div>
-  <div class="winapp mint" style="max-width:420px">
-    <div class="wtitle"><span class="t">My Studio App — Maria</span><span class="wb">— ▢ ✕</span></div>
-    <div class="wbody">
-      <span class="wf-big">Welcome to MAC 109!</span>
-      <span class="wf-text">Maria</span>
-      <span class="wf-btn">Say Hello</span>
-      <span class="wf-out">Hello, Maria!</span>
-      <span class="wf-text">12</span>
-      <span class="wf-text">4</span>
-      <div class="wf-row"><span class="wf-btn">+</span><span class="wf-btn">−</span><span class="wf-btn">×</span><span class="wf-btn">÷</span></div>
-      <span class="wf-out" style="font-weight:800">12 × 4 = 48</span>
-    </div>
-  </div>
-  <p class="figcap"><b>▶ All 77 lines, on screen.</b> Week 1's greeter on top, Week 2's calculator below, MintCream behind everything — one StackPanel's <code class="inline" style="background:#2a2a30;color:#9CDCFE">Children</code> list, top to bottom, exactly in the order the code declares it.</p>
+  <div class="exgrid">
+    <div class="codewin"><div class="bar" style="display:flex;align-items:center;gap:8px">Program.cs — COMPLETE file · Example 8 · the proof — input is ALWAYS a string (type 21)<button class="copy exminicopy" type="button" style="margin-left:auto;background:#2a2a30;border:1px solid #55555e;color:#e8e8ee;border-radius:6px;padding:1px 9px;font:inherit;font-size:11.5px;cursor:pointer">Copy</button></div><pre><span class="cl"><span class="t">Console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(</span><span class="s">&quot;Type a number:&quot;</span><span class="p">);</span></span>
+<span class="cl"><span class="k">string</span><span class="p"> input = </span><span class="t">Console</span><span class="p">.</span><span class="m">ReadLine</span><span class="p">()</span><span class="p">;</span></span>
+<span class="cl"><span class="t">Console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(</span><span class="p">input + input</span><span class="p">);</span></span></pre></div>
+    <div class="term"><div class="thead">TERMINAL</div><div class="tline">Type a number:</div><div class="tline tin">21</div><div class="tline terr">2121</div></div>
+  </div><p class="exnote">Not 42. ReadLine handed you the STRING “21” — two characters, not a value — and string + string glues. <b>Input is always text, even when it looks like a number.</b> Which leaves exactly one question: how do we get the real number out? Next tab.</p>
+  <div class="tryit">🖊️ <b>Your turn:</b> three drills: ① echo your input three times on three lines ② print it SHOUTING (glue <code class="inline">"!!!"</code>) ③ a two-question mad-lib — ask for a name, then a food, then print "<i>name</i> loves <i>food</i>". Each drill is a complete little program of your own.</div>
+  <p class="note">🟡 <b>One honest footnote:</b> VS Code may draw a gentle underline beneath <code class="inline">Console.ReadLine()</code> muttering about "null" — that's C# asking "what if there IS no input?", a question we answer properly in Week 3. The program runs fine; ignore it for today.</p>
 </section>
 
-<!-- 8 ▸ Your domain -->
-<section data-tab="Your App" data-file="DomainMath.cs">
-  <p class="eyebrow">08 · Same pattern, your nouns</p>
-  <h2>Every domain app has a formula waiting</h2>
-  <p class="sub">Milestone 2 isn't "build a calculator" — it's "make <b>your</b> app calculate." Find your project below; the five-line pattern is identical, only the names and math change:</p>
-  <div class="grid3">
-    <div class="card"><span class="pill">🎓 Student Management</span><h3>Grade average</h3><p><code class="inline">double avg = (g1 + g2 + g3) / 3;</code><br>Three grade boxes in, one average out. The parentheses are doing real work here — see the bug hunt.</p></div>
-    <div class="card"><span class="pill">📚 Library</span><h3>Late fee</h3><p><code class="inline">double fee = daysLate * 0.25;</code><br>Days-late box in, fee out. Label it like a human: <code class="inline">"Fee: $" + fee</code>.</p></div>
-    <div class="card"><span class="pill">🍽️ Restaurant</span><h3>Total with NYC tax</h3><p><code class="inline">double total = subtotal + subtotal * 0.08875;</code><br>Yes, 8.875% is really New York's rate. Your app just got local.</p></div>
-    <div class="card"><span class="pill">🏨 Hotel</span><h3>Stay cost</h3><p><code class="inline">double cost = nights * rate;</code><br>Two boxes (nights, nightly rate), one button, one very useful number.</p></div>
-    <div class="card"><span class="pill">🏦 Banking</span><h3>Yearly interest</h3><p><code class="inline">double interest = balance * rate / 100;</code><br>Balance and percent in — earnings out. (Order of operations: * and / left to right — works out fine here.)</p></div>
-    <div class="card"><span class="pill">📦 Inventory</span><h3>Stock value</h3><p><code class="inline">double value = quantity * unitPrice;</code><br>How much is sitting on the shelf? Now your app knows.</p></div>
+<!-- 5 ▸ Casting -->
+<section data-tab="Casting" data-file="03_Casting.cs">
+  <p class="eyebrow">04 · Concept 3 — casting &amp; conversion</p>
+  <h2>Casting: changing a value's type on purpose</h2>
+  <p class="sub"><b>Definition — casting (type conversion):</b> transforming a value from one data type to another. Input arrives as string; math needs int or double; <b>Convert</b> is the bridge. Same shape every time: <code class="inline">Convert.To<i>Type</i>( theText )</code>.</p>
+  <div class="grid2">
+    <div class="card"><span class="pill">Text → number · explicit</span><h3>The Convert family</h3><p><code class="inline">Convert.ToInt32("21")</code> → the int 21 &nbsp;·&nbsp; <code class="inline">Convert.ToDouble("19.99")</code> → the double 19.99. You must ASK — C# never silently guesses a string into a number.</p></div>
+    <div class="card"><span class="pill">Number → text · automatic</span><h3>Glue converts for free</h3><p>The moment a number touches a string with <code class="inline">+</code>, C# converts it to text automatically. Explicit version when you want it: <code class="inline">price.ToString()</code>.</p></div>
   </div>
-  <p class="note">🌟 <b>Studio move:</b> pick your formula, name your variables after your domain (<code class="inline">nights</code>, not <code class="inline">a</code>) — code that reads like the business is code your professor grades smiling.</p>
+  <div class="exgrid">
+    <div class="codewin"><div class="bar" style="display:flex;align-items:center;gap:8px">Program.cs — COMPLETE file · Example 9 · fixing Example 8 — same input, honest math (type 21)<button class="copy exminicopy" type="button" style="margin-left:auto;background:#2a2a30;border:1px solid #55555e;color:#e8e8ee;border-radius:6px;padding:1px 9px;font:inherit;font-size:11.5px;cursor:pointer">Copy</button></div><pre><span class="cl"><span class="t">Console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(</span><span class="s">&quot;Type a whole number:&quot;</span><span class="p">);</span></span>
+<span class="cl"><span class="k">string</span><span class="p"> input = </span><span class="t">Console</span><span class="p">.</span><span class="m">ReadLine</span><span class="p">()</span><span class="p">;</span></span>
+<span class="cl"><span class="k">int</span><span class="p"> n = </span><span class="t">Convert</span><span class="p">.</span><span class="m">ToInt32</span><span class="p">(input);</span></span>
+<span class="cl"><span class="t">Console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(</span><span class="p">n + n</span><span class="p">);</span></span></pre></div>
+    <div class="term"><div class="thead">TERMINAL</div><div class="tline">Type a whole number:</div><div class="tline tin">21</div><div class="tline">42</div></div>
+  </div><p class="exnote">One new line — the bridge crossing. The string “21” becomes the int 21 BEFORE + gets involved, so + means math again. Compare line-for-line with Example 8: that single Convert is the entire difference between 2121 and 42.</p>
+  <div class="exgrid">
+    <div class="codewin"><div class="bar" style="display:flex;align-items:center;gap:8px">Program.cs — COMPLETE file · Example 10 · real arithmetic on input — and the compact style<button class="copy exminicopy" type="button" style="margin-left:auto;background:#2a2a30;border:1px solid #55555e;color:#e8e8ee;border-radius:6px;padding:1px 9px;font:inherit;font-size:11.5px;cursor:pointer">Copy</button></div><pre><span class="cl"><span class="t">Console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(</span><span class="s">&quot;How old are you?&quot;</span><span class="p">);</span></span>
+<span class="cl"><span class="k">int</span><span class="p"> age = </span><span class="t">Convert</span><span class="p">.</span><span class="m">ToInt32</span><span class="p">(</span><span class="t">Console</span><span class="p">.</span><span class="m">ReadLine</span><span class="p">()</span><span class="p">);</span></span>
+<span class="cl"><span class="t">Console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(</span><span class="s">&quot;Next year: &quot;</span><span class="p"> + (age + </span><span class="n">1</span><span class="p">)</span><span class="p">);</span></span></pre></div>
+    <div class="term"><div class="thead">TERMINAL</div><div class="tline">How old are you?</div><div class="tline tin">19</div><div class="tline">Next year: 20</div></div>
+  </div><p class="exnote">Line 2 nests ReadLine directly inside Convert — read and convert in one motion; you’ll see this style everywhere. Line 3’s parentheses force (age + 1) to be MATH before it joins the glue.</p>
+  <div class="exgrid">
+    <div class="codewin"><div class="bar" style="display:flex;align-items:center;gap:8px">Program.cs — COMPLETE file · Example 11 · decimals cross with ToDouble (type 4.25)<button class="copy exminicopy" type="button" style="margin-left:auto;background:#2a2a30;border:1px solid #55555e;color:#e8e8ee;border-radius:6px;padding:1px 9px;font:inherit;font-size:11.5px;cursor:pointer">Copy</button></div><pre><span class="cl"><span class="t">Console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(</span><span class="s">&quot;Price of one item:&quot;</span><span class="p">);</span></span>
+<span class="cl"><span class="k">double</span><span class="p"> price = </span><span class="t">Convert</span><span class="p">.</span><span class="m">ToDouble</span><span class="p">(</span><span class="t">Console</span><span class="p">.</span><span class="m">ReadLine</span><span class="p">()</span><span class="p">);</span></span>
+<span class="cl"><span class="t">Console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(</span><span class="s">&quot;Three items: &quot;</span><span class="p"> + (price * </span><span class="n">3</span><span class="p">)</span><span class="p">);</span></span></pre></div>
+    <div class="term"><div class="thead">TERMINAL</div><div class="tline">Price of one item:</div><div class="tline tin">4.25</div><div class="tline">Three items: 12.75</div></div>
+  </div><p class="exnote">ToInt32 for whole numbers, ToDouble for anything that might carry a decimal point. Feed this one 4.25 and the math keeps every cent.</p>
+  <div class="exgrid">
+    <div class="codewin"><div class="bar" style="display:flex;align-items:center;gap:8px">Program.cs — COMPLETE file · Example 12 · the return trip is free<button class="copy exminicopy" type="button" style="margin-left:auto;background:#2a2a30;border:1px solid #55555e;color:#e8e8ee;border-radius:6px;padding:1px 9px;font:inherit;font-size:11.5px;cursor:pointer">Copy</button></div><pre><span class="cl"><span class="k">double</span><span class="p"> total = </span><span class="n">19.99</span><span class="p">;</span></span>
+<span class="cl"><span class="k">string</span><span class="p"> label = </span><span class="s">&quot;Total: $&quot;</span><span class="p"> + total;</span></span>
+<span class="cl"><span class="t">Console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(</span><span class="p">label</span><span class="p">);</span></span></pre></div>
+    <div class="term"><div class="thead">TERMINAL</div><div class="tline">Total: $19.99</div></div>
+  </div><p class="exnote">Number → text needs no Convert: the glue on line 2 converts total automatically on its way into label. The full round trip of every program you’ll write: text in → number → math → text out.</p>
+  <div class="exgrid">
+    <div class="codewin"><div class="bar" style="display:flex;align-items:center;gap:8px">Program.cs — COMPLETE file · Example 13 · the banana 🍌 — run it, type banana, watch it explode<button class="copy exminicopy" type="button" style="margin-left:auto;background:#2a2a30;border:1px solid #55555e;color:#e8e8ee;border-radius:6px;padding:1px 9px;font:inherit;font-size:11.5px;cursor:pointer">Copy</button></div><pre><span class="cl"><span class="t">Console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(</span><span class="s">&quot;Type a number:&quot;</span><span class="p">);</span></span>
+<span class="cl"><span class="k">double</span><span class="p"> d = </span><span class="t">Convert</span><span class="p">.</span><span class="m">ToDouble</span><span class="p">(</span><span class="t">Console</span><span class="p">.</span><span class="m">ReadLine</span><span class="p">()</span><span class="p">);</span></span>
+<span class="cl"><span class="t">Console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(</span><span class="p">d * </span><span class="n">2</span><span class="p">);</span></span></pre></div>
+    <div class="term"><div class="thead">TERMINAL</div><div class="tline">Type a number:</div><div class="tline tin">banana</div><div class="tline terr">Unhandled exception.</div><div class="tline terr">System.FormatException: The input string</div><div class="tline terr">  'banana' was not in a correct format.</div></div>
+  </div><p class="exnote">It COMPILED perfectly — the grammar is legal — and exploded only when it RAN, because no double hides inside “banana”. Meet the <b>runtime error</b>, a different species from Example 3’s compile error. Guards arrive next week (if); armor in Week 10 (try/catch). Until then: feed your demos numbers.</p>
+  <div class="tryit">🖊️ <b>Your turn:</b> ① ask for a number, print its <b>square</b> ② QA time — feed Example 13: an empty Enter, the word <code class="inline">ten</code>, and <code class="inline">3,5</code> with a comma; predict each before running ③ then close VS Code’s terminal and test yourself below — brain only:</div>
+  <div id="predictHost"></div>
+  <p class="note">🎯 9/9? The trio is yours: types, I/O, casting. ☕ Break — then the <b>Week 2 Lab page</b>, where these exact concepts go to work inside your project app.</p>
 </section>
 
 <!-- 9 ▸ Bug hunt -->
 <section data-tab="Bug Hunt" data-file="Broken.cs">
-  <p class="eyebrow">09 · Debugging practice</p>
+  <p class="eyebrow">05 · Debugging practice</p>
   <h2>Find the 3 bugs — one is invisible 👻</h2>
-  <p class="sub">Two of these bugs stop the build. The third <b>compiles perfectly and runs happily — and gives the wrong answer.</b> Click the lines you suspect. <span id="bugScore" style="font-family:var(--mono);color:var(--warn)">Found: 0 / 3</span></p>
+  <p class="sub">A complete grade-averager built from today's concepts. Two bugs stop the build; the third <b>compiles, runs, and lies</b>. Hunt here first — click the lines you suspect. <span id="bugScore" style="font-family:var(--mono);color:var(--warn)">Found: 0 / 3</span></p>
   <div class="codewin">
-    <div class="bar">Broken.cs — a grade-average handler with problems</div>
+    <div class="bar">Broken.cs — click suspicious lines</div>
     <pre id="bugCode"></pre>
   </div>
-  <p class="note">👻 The invisible one is called a <b>logic error</b> — the most dangerous kind, because nothing warns you. The compiler checks your <i>grammar</i>, never your <i>intentions</i>. Defense: predict the answer before you run (85, 90, 95 should average 90 — did it?).</p>
-
   <div class="codewrap" style="margin-top:16px">
-    <div class="codehead"><span>Hunt in VS Code for real — the COMPLETE broken file (paste into MainWindow.cs)</span><button class="copy" type="button">Copy</button></div>
-    <pre class="code"><span class="k">using</span> Avalonia;
-<span class="k">using</span> Avalonia.Controls;
-<span class="k">using</span> Avalonia.Interactivity;
+    <div class="codehead"><span>COMPLETE (broken) FILE — paste into Program.cs and hunt with the real Problems panel</span><button class="copy" type="button">Copy</button></div>
+    <pre class="code"><span class="k">double</span> g1 = <span class="n">85</span>;
+<span class="k">double</span> g2 = <span class="n">90</span>
+<span class="k">double</span> g3 = <span class="n">95</span>;
 
-<span class="k">namespace</span> MyStudioApp;
+<span class="k">double</span> avg = g1 + g2 + g3 / <span class="n">3</span>;
 
-<span class="k">public class</span> <span class="t">MainWindow</span> : <span class="t">Window</span>
-{
-    <span class="t">TextBox</span> txtG1 = <span class="k">new</span> <span class="t">TextBox</span> { <span class="m">Watermark</span> = <span class="s">&quot;Grade 1&quot;</span> };
-    <span class="t">TextBox</span> txtG2 = <span class="k">new</span> <span class="t">TextBox</span> { <span class="m">Watermark</span> = <span class="s">&quot;Grade 2&quot;</span> };
-    <span class="t">TextBox</span> txtG3 = <span class="k">new</span> <span class="t">TextBox</span> { <span class="m">Watermark</span> = <span class="s">&quot;Grade 3&quot;</span> };
-    <span class="t">TextBlock</span> lblResult = <span class="k">new</span> <span class="t">TextBlock</span> { <span class="m">FontSize</span> = <span class="n">18</span> };
-
-    <span class="k">public</span> <span class="m">MainWindow</span>()
-    {
-        Title = <span class="s">&quot;Bug Hunt — Week 2&quot;</span>;
-        <span class="m">Width</span> = <span class="n">420</span>; <span class="m">Height</span> = <span class="n">340</span>;
-
-        <span class="k">var</span> btnAvg = <span class="k">new</span> <span class="t">Button</span> { <span class="m">Content</span> = <span class="s">&quot;Average&quot;</span> };
-        btnAvg.<span class="m">Click</span> += <span class="m">BtnAvg_Click</span>;
-
-        <span class="m">Content</span> = <span class="k">new</span> <span class="t">StackPanel</span>
-        {
-            <span class="m">Margin</span> = <span class="k">new</span> <span class="t">Thickness</span>(<span class="n">20</span>), <span class="m">Spacing</span> = <span class="n">12</span>,
-            <span class="m">Children</span> = { txtG1, txtG2, txtG3, btnAvg, lblResult }
-        };
-    }
-
-    <span class="k">void</span> <span class="m">BtnAvg_Click</span>(<span class="k">object</span> sender, <span class="t">RoutedEventArgs</span> e)
-    {
-        <span class="k">double</span> g1 = <span class="t">Convert</span>.<span class="m">ToDouble</span>(txtG1.<span class="m">Text</span>);
-        <span class="k">double</span> g2 = <span class="t">Convert</span>.<span class="m">ToDouble</span>(txtG2);
-        <span class="k">double</span> g3 = <span class="t">Convert</span>.<span class="m">ToDouble</span>(txtG3.<span class="m">Text</span>)
-        <span class="k">double</span> avg = g1 + g2 + g3 / <span class="n">3</span>;
-        lblResult.<span class="m">Text</span> = <span class="s">&quot;Average: &quot;</span> + avg;
-    }
-}</pre>
+console.<span class="m">WriteLine</span>(<span class="s">&quot;Average: &quot;</span> + avg);</pre>
   </div>
-  <div class="card" style="margin-top:14px"><span class="pill">The full ritual 🔬</span><p style="margin-top:8px;font-size:14.5px;line-height:1.65">① Paste ▸ the <b>Problems</b> panel lights up with the two compile errors — read them top to bottom, fix the FIRST first. ② Both fixed? <b>F5</b>, enter <code class="inline">85</code>, <code class="inline">90</code>, <code class="inline">95</code> ▸ click Average ▸ <b>206.67?!</b> That's the invisible bug running happily. ③ Fix line 33 with parentheses ▸ F5 ▸ <b>90</b>. ④ Restore your own app: Source Control ▸ MainWindow.cs ▸ <b>Discard Changes</b>.</p></div>
+  <div class="card" style="margin-top:14px"><span class="pill">The full ritual 🔬</span><p style="margin-top:8px;font-size:14.5px;line-height:1.65">① Paste ▸ <b>Problems</b> shows the two compile errors — read top to bottom, fix the FIRST first (the missing <code class="inline">;</code>, then the lowercase <code class="inline">console</code> — C# is case-sensitive and the class is <b>C</b>onsole). ② <b>F5</b> ▸ <b style="color:#e5726a">Average: 206.66666666666666</b>?! — the invisible bug, running happily: PEMDAS divided only g3. ③ Parenthesize: <code class="inline">(g1 + g2 + g3) / 3</code> ▸ F5 ▸ <b>Average: 90</b>. Sanity restored.</p></div>
   <div class="grid2" style="margin-top:16px">
     <div>
-      <div class="winapp" style="margin-top:0">
-        <div class="wtitle"><span class="t">Bug Hunt — Week 2</span><span class="wb">— ▢ ✕</span></div>
-        <div class="wbody">
-          <span class="wf-text">85</span>
-          <span class="wf-text">90</span>
-          <span class="wf-text">95</span>
-          <span class="wf-btn">Average</span>
-          <span class="wf-out bad">Average: 206.66666666666666</span>
-        </div>
-      </div>
-      <p class="figcap">😱 <b>Compile errors fixed, logic bug still in.</b> Runs perfectly, answers absurdly — only g3 got divided.</p>
+      <div class="term"><div class="thead">TERMINAL — before the parentheses</div><div class="tline terr">Average: 206.66666666666666</div></div>
+      <p class="figcap">😱 Compile errors fixed, logic bug still in.</p>
     </div>
     <div>
-      <div class="winapp" style="margin-top:0">
-        <div class="wtitle"><span class="t">Bug Hunt — Week 2</span><span class="wb">— ▢ ✕</span></div>
-        <div class="wbody">
-          <span class="wf-text">85</span>
-          <span class="wf-text">90</span>
-          <span class="wf-text">95</span>
-          <span class="wf-btn">Average</span>
-          <span class="wf-out">Average: 90</span>
-        </div>
-      </div>
-      <p class="figcap">✅ <b>After (g1 + g2 + g3) / 3.</b> Same inputs, same click — sanity restored by two parentheses.</p>
+      <div class="term"><div class="thead">TERMINAL — after (g1 + g2 + g3) / 3</div><div class="tline">Average: 90</div></div>
+      <p class="figcap">✅ 85, 90, 95 → 90.</p>
     </div>
   </div>
+  <p class="note">👻 The invisible one is a <b>logic error</b> — the most dangerous species, because nothing warns you. The compiler checks your <i>grammar</i>, never your <i>intentions</i>. Defense: predict the answer before you run.</p>
 </section>
 
 <!-- 10 ▸ Quiz -->
 <section data-tab="Quiz" data-file="KnowledgeCheck.cs">
-  <p class="eyebrow">10 · Knowledge check</p>
+  <p class="eyebrow">06 · Knowledge check</p>
   <h2>Prove it to yourself</h2>
   <p class="sub">No grade, no pressure — just you versus five questions. <span id="quizScore" style="font-family:var(--mono);color:var(--warn)">Score: 0 / 5</span></p>
   <div id="quizHost"></div>
 </section>
 
 <!-- 11 ▸ Wrap up -->
-<section data-tab="Wrap-Up" data-file="Milestone02.md">
-  <p class="eyebrow">11 · Before you leave</p>
-  <h2>Week 2 — what you can now do</h2>
+<section data-tab="Wrap-Up" data-file="NextStop_Lab.md">
+  <p class="eyebrow">07 · Before the lab</p>
+  <h2>Week 2 concepts — what you can now do</h2>
   <div class="grid2">
     <div>
       <ul class="checklist">
-        <li>Explain the twist: <code class="inline">.Text</code> is always a <b>string</b>, and for strings <code class="inline">+</code> glues.</li>
-        <li>Declare variables with the right <b>type</b>: string for text, int for counts, double for everything decimal.</li>
-        <li>Cross the bridge: <code class="inline">Convert.ToDouble(…)</code> in, automatic gluing out.</li>
-        <li>Compute with <code class="inline">+ − * / %</code>, use parentheses on purpose, and dodge int division.</li>
-        <li>Spot all three bug species: compile-time, runtime (🍌), and the invisible logic error.</li>
+        <li>Define <b>variable</b>, <b>data type</b>, <b>input</b>, <b>output</b>, and <b>casting</b> — in your own words.</li>
+        <li>Declare with <code class="inline">type name = value;</code> — string, int, double, bool.</li>
+        <li>Write output with <code class="inline">Console.WriteLine</code>; read input with <code class="inline">Console.ReadLine</code>.</li>
+        <li>Prove the twist: input is always a string, and for strings <code class="inline">+</code> glues.</li>
+        <li>Cross the bridge both ways: <code class="inline">Convert.ToInt32 / ToDouble</code> in, automatic gluing out.</li>
+        <li>Name all three bug species — compile-time, runtime (🍌), logic — and the ritual for each.</li>
       </ul>
     </div>
     <div class="card">
-      <span class="pill">Milestone 2 · due before next studio</span>
-      <h3>GUI with Live Calculations</h3>
-      <p style="margin-top:10px">1. In <b>your</b> domain app, add a calculation panel: at least <b>two TextBox inputs</b>, a <b>Button</b>, and an output <b>TextBlock</b>.<br><br>
-      2. Use <code class="inline">double</code> + <code class="inline">Convert.ToDouble</code> — and compute <b>before</b> you glue.<br><br>
-      3. Use your domain's formula (previous tab) and domain-named variables — <code class="inline">nights</code>, <code class="inline">subtotal</code>, not <code class="inline">a</code>, <code class="inline">b</code>.<br><br>
-      4. Label the output like a human: <code class="inline">"Total: $" + total</code>.<br><br>
-      5. 🌟 Stretch: a second button with a second formula.<br><br>
-      6. Commit &amp; push: <code class="inline">Milestone 2: live calculations</code> — then verify on github.com and check Brightspace for the submission link.</p>
+      <span class="pill">Next stop · Week 2 Classroom Lab</span>
+      <h3>Same concepts, inside your project</h3>
+      <p style="margin-top:10px">After the break, open the <b>Week 2 Lab page</b> and return to your <code class="inline">mac109-project</code>. Everything transfers:</p>
+      <p style="margin-top:10px">▸ Where today you wrote <code class="inline">Console.ReadLine()</code>, your app reads from its input boxes<br>
+      ▸ Where today you wrote <code class="inline">Console.WriteLine(…)</code>, your app writes to its labels<br>
+      ▸ The middle — <b>declare, Convert, compute, glue</b> — is <i>character-for-character identical</i><br>
+      ▸ Your domain's formula (nights × rate, grade average, order total…) → <b>Milestone 2</b>, pushed before you leave</p>
+      <p style="margin-top:12px;color:var(--warn)">The lab assumes exactly — and only — what this lecture taught. Any concept feels wobbly? Re-run its examples first; that's what they're for.</p>
     </div>
   </div>
-  <p class="note">📅 <b>Next week:</b> Decision structures — <code class="inline">if</code> — your app learns to say <i>no</i>: no empty boxes, no dividing by zero, no "Hello, !". Bring last week's tragic empty-name greeting; we're fixing it.</p>
+  <p class="note">📅 <b>Next week:</b> Decision structures — <code class="inline">if</code> — your programs learn to say <i>no</i>: no empty input, no bananas, no dividing by zero. Bring today's crash memories; we're weaponizing them.</p>
 </section>
 </template>
 
@@ -711,30 +606,16 @@
 
   /* ---------- line-by-line explainer ---------- */
   var lines=[
-    {h:'<span class="c">// runs every time the [+] button is clicked</span>',
-     t:'// comment',
-     d:'A comment \u2014 the compiler ignores everything after //. Good handlers start with one line saying WHEN they run. Free documentation, zero cost.'},
-    {h:'<span class="k">void</span><span class="p"> </span><span class="m">BtnAdd_Click</span><span class="p">(</span><span class="k">object</span><span class="p"> sender, </span><span class="t">RoutedEventArgs</span><span class="p"> e)</span>',
-     t:'void BtnAdd_Click(object sender, RoutedEventArgs e)',
-     d:'The event handler \u2014 same standard shape as last week\u2019s BtnGreet_Click. Somewhere in the constructor, btnAdd.Click += BtnAdd_Click; pointed at this method. New week, same wiring.'},
-    {h:'<span class="p">{</span>',
-     t:'{',
-     d:'Opens the handler body. Everything inside runs top-to-bottom, once per click.'},
-    {h:'<span class="p">    </span><span class="k">double</span><span class="p"> a = </span><span class="t">Convert</span><span class="p">.</span><span class="m">ToDouble</span><span class="p">(txtA.</span><span class="m">Text</span><span class="p">);</span>',
-     t:'double a = Convert.ToDouble(txtA.Text);',
-     d:'The bridge crossing. txtA.Text is a STRING (\u201c7.5\u201d \u2014 characters, not a value). Convert.ToDouble turns it into the number 7.5, which we store in a new variable: type double, name a. Declaration anatomy: type name = value;'},
-    {h:'<span class="p">    </span><span class="k">double</span><span class="p"> b = </span><span class="t">Convert</span><span class="p">.</span><span class="m">ToDouble</span><span class="p">(txtB.</span><span class="m">Text</span><span class="p">);</span>',
-     t:'double b = Convert.ToDouble(txtB.Text);',
-     d:'Same bridge, second box. Notice you\u2019re reading the pattern now, not the letters \u2014 that\u2019s what fluency feels like. By December you\u2019ll write this line in your sleep.'},
-    {h:'<span class="p">    </span><span class="k">double</span><span class="p"> answer = a + b;</span>',
-     t:'double answer = a + b;',
-     d:'THE line that makes Week 2 work: a and b are doubles, so + means real addition \u2014 7.5 + 2.5 is 10, not \u201c7.52.5\u201d. Compute FIRST, into its own well-named variable, glue LATER. Separating math from display will save you from a hundred bugs.'},
-    {h:'<span class="p">    </span><span class="p">lblResult.</span><span class="m">Text</span><span class="p"> = a + </span><span class="s">&quot; + &quot;</span><span class="p"> + b + </span><span class="s">&quot; = &quot;</span><span class="p"> + answer;</span>',
-     t:'lblResult.Text = a + " + " + b + " = " + answer;',
-     d:'The return trip across the bridge \u2014 for free. The moment a number touches a string with +, C# converts it to text automatically. Five pieces glue left to right into \u201c7.5 + 2.5 = 10\u201d, written onto the window. Read \u2192 convert \u2192 compute \u2192 glue \u2192 write: the rhythm of every calculation you\u2019ll ever ship.'},
-    {h:'<span class="p">}</span>',
-     t:'}',
-     d:'Closes the handler. The app goes back to waiting \u2014 event-driven, exactly like last week.'}
+    {h:'<span class="t">Console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(</span><span class="s">&quot;What&#39;s your name?&quot;</span><span class="p">);</span>',
+     t:'Console.WriteLine("What\u2019s your name?");',
+     d:'The prompt \u2014 pure politeness, but essential: ReadLine gives no sign it\u2019s waiting, so a program that doesn\u2019t announce itself just sits there looking frozen. Always prompt before you read.'},
+    {h:'<span class="k">string</span><span class="p"> name = </span><span class="t">Console</span><span class="p">.</span><span class="m">ReadLine</span><span class="p">()</span><span class="p">;</span>',
+     t:'string name = Console.ReadLine();',
+     d:'The input line, and three ideas at once: Console.ReadLine() PAUSES the program until you press Enter; it returns whatever you typed as a STRING; and we store that string in a variable \u2014 type name = value; with the value coming from the user instead of from us.'},
+    {h:'',t:'',d:'A blank line \u2014 free, ignored, used like a paragraph break.'},
+    {h:'<span class="t">Console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(</span><span class="s">&quot;Welcome, &quot;</span><span class="p"> + name + </span><span class="s">&quot;!&quot;</span><span class="p">);</span>',
+     t:'Console.WriteLine("Welcome, " + name + "!");',
+     d:'The output line: glue the greeting around whatever name holds, and write one line to the terminal. Input \u2192 (tiny) processing \u2192 output \u2014 the complete sandwich, in four lines. Every program you ever write is a bigger version of this.'}
   ];
   var explPre=document.getElementById('explCode');
   lines.forEach(function(L,i){
@@ -750,270 +631,23 @@
     explPre.appendChild(div);
   });
 
-  var lines2=[
-    {h:'<span class="k">using</span><span class="p"> Avalonia;</span>',
-     t:'using Avalonia;',
-     d:'The using lines are import statements: “this file will use tools from these toolboxes.” Avalonia holds core pieces like Thickness. Note what’s MISSING: no “using System” for Convert — the project file auto-includes the everyday toolboxes for you (implicit usings).'},
-    {h:'<span class="k">using</span><span class="p"> Avalonia.Controls;</span>',
-     t:'using Avalonia.Controls;',
-     d:'The controls toolbox: Window, Button, TextBox, TextBlock, StackPanel all live here. Delete this line and every control name in the file turns red.'},
-    {h:'<span class="k">using</span><span class="p"> Avalonia.Interactivity;</span>',
-     t:'using Avalonia.Interactivity;',
-     d:'Home of RoutedEventArgs — the “details envelope” every event handler receives. Needed the moment your file has a Click handler.'},
-    {h:'<span class="k">using</span><span class="p"> Avalonia.Layout;</span>',
-     t:'using Avalonia.Layout;',
-     d:'Home of Orientation — which we use once, to lay the four calculator buttons side by side instead of stacked. New this week!'},
-    {h:'<span class="k">using</span><span class="p"> Avalonia.Media;</span>',
-     t:'using Avalonia.Media;',
-     d:'The looks toolbox: Brushes (your Background color) and FontWeight live here. If Brushes is ever squiggly red, this line is the cure.'},
-    {h:'',
-     t:'',
-     d:'A blank line. Whitespace is free and the compiler ignores it — professionals use blank lines like paragraph breaks, to group related lines into readable sections.'},
-    {h:'<span class="k">namespace</span><span class="p"> MyStudioApp;</span>',
-     t:'namespace MyStudioApp;',
-     d:'The namespace is your project’s last name — it groups every file of MyStudioApp under one family name so it can never clash with someone else’s MainWindow. One line, set by the starter; you’ll never change it.'},
-    {h:'',
-     t:'',
-     d:'A blank line. Whitespace is free and the compiler ignores it — professionals use blank lines like paragraph breaks, to group related lines into readable sections.'},
-    {h:'<span class="k">public class</span><span class="p"> </span><span class="t">MainWindow</span><span class="p"> : </span><span class="t">Window</span>',
-     t:'public class MainWindow : Window',
-     d:'Your class — and “: Window” means MainWindow IS a Window, inheriting the title bar, resizing, and closing behavior for free. Same line as Week 1; it just has more inside it now.'},
-    {h:'<span class="p">{</span>',
-     t:'{',
-     d:'Opens the class body. Everything down to the very last } belongs to MainWindow.'},
-    {h:'<span class="p">    </span><span class="c">// ---- fields: controls the handlers must reach later ----</span>',
-     t:'// fields comment',
-     d:'A section-header comment. The compiler ignores it; future-you (and your professor) will thank present-you. Notice the file has three zones: fields, constructor, handlers.'},
-    {h:'<span class="p">    </span><span class="t">TextBox</span><span class="p"> txtName = </span><span class="k">new</span><span class="p"> </span><span class="t">TextBox</span><span class="p"> { </span><span class="m">Watermark</span><span class="p"> = </span><span class="s">&quot;Type your name…&quot;</span><span class="p"> };</span>',
-     t:'TextBox txtName = new TextBox { … };',
-     d:'Week 1’s field, still here: a TextBox object created with an object initializer, declared at class level so BtnGreet_Click can reach it. Fields are the “shared shelf” of the class.'},
-    {h:'<span class="p">    </span><span class="t">TextBlock</span><span class="p"> lblGreeting = </span><span class="k">new</span><span class="p"> </span><span class="t">TextBlock</span><span class="p"> { </span><span class="m">FontSize</span><span class="p"> = </span><span class="n">18</span><span class="p"> };</span>',
-     t:'TextBlock lblGreeting = new TextBlock { … };',
-     d:'The greeter’s output line — empty until code fills it. On the shelf for the same reason: a handler writes to it.'},
-    {h:'<span class="p">    </span><span class="t">TextBox</span><span class="p"> txtA = </span><span class="k">new</span><span class="p"> </span><span class="t">TextBox</span><span class="p"> { </span><span class="m">Watermark</span><span class="p"> = </span><span class="s">&quot;First number&quot;</span><span class="p"> };</span>',
-     t:'TextBox txtA = new TextBox { … };',
-     d:'NEW this week: the calculator’s first input. A field, because FOUR different handlers will read txtA.Text. One box, many readers — exactly what fields are for.'},
-    {h:'<span class="p">    </span><span class="t">TextBox</span><span class="p"> txtB = </span><span class="k">new</span><span class="p"> </span><span class="t">TextBox</span><span class="p"> { </span><span class="m">Watermark</span><span class="p"> = </span><span class="s">&quot;Second number&quot;</span><span class="p"> };</span>',
-     t:'TextBox txtB = new TextBox { … };',
-     d:'Second input, same story. Naming pattern check: txt-prefix for TextBoxes, lbl for TextBlocks, btn for Buttons — your code reads like a labeled toolbox.'},
-    {h:'<span class="p">    </span><span class="t">TextBlock</span><span class="p"> lblResult = </span><span class="k">new</span><span class="p"> </span><span class="t">TextBlock</span><span class="p"> { </span><span class="m">FontSize</span><span class="p"> = </span><span class="n">18</span><span class="p">, </span><span class="m">FontWeight</span><span class="p"> = </span><span class="t">FontWeight</span><span class="p">.</span><span class="m">Bold</span><span class="p"> };</span>',
-     t:'TextBlock lblResult = new TextBlock { … };',
-     d:'Where every answer lands. Two properties in one initializer, comma-separated — and FontWeight.Bold shows that even boldness is an object with a name (from Avalonia.Media, line 5).'},
-    {h:'',
-     t:'',
-     d:'A blank line. Whitespace is free and the compiler ignores it — professionals use blank lines like paragraph breaks, to group related lines into readable sections.'},
-    {h:'<span class="p">    </span><span class="k">public</span><span class="p"> </span><span class="m">MainWindow</span><span class="p">()</span>',
-     t:'public MainWindow()',
-     d:'The constructor — runs once, automatically, the instant the window is created. Everything inside is setup: configure the window, build the controls, wire the events, hand over the layout.'},
-    {h:'<span class="p">    </span><span class="p">{</span>',
-     t:'{',
-     d:'Opens the constructor body. These lines run top to bottom exactly once, as the window is born.'},
-    {h:'<span class="p">        </span><span class="m">Title</span><span class="p"> = </span><span class="s">&quot;My Studio App — Maria&quot;</span><span class="p">;</span>',
-     t:'Title = "…";',
-     d:'The window’s own properties — no dot-something needed because inside MainWindow, Title IS this window’s title. Yours should carry YOUR name.'},
-    {h:'<span class="p">        </span><span class="m">Width</span><span class="p"> = </span><span class="n">500</span><span class="p">; </span><span class="m">Height</span><span class="p"> = </span><span class="n">520</span><span class="p">;</span>',
-     t:'Width = 500; Height = 520;',
-     d:'Two statements sharing a line — legal because each ends with its own semicolon. Height grew from 350 to 520 this week: the window has more to hold now.'},
-    {h:'<span class="p">        </span><span class="m">Background</span><span class="p"> = </span><span class="t">Brushes</span><span class="p">.</span><span class="m">MintCream</span><span class="p">;</span>',
-     t:'Background = Brushes.MintCream;',
-     d:'The studio color from the in-class lab. Brushes is a catalog of ready-made color objects — type “Brushes.” and let IntelliSense show you the whole paint aisle.'},
-    {h:'',
-     t:'',
-     d:'A blank line. Whitespace is free and the compiler ignores it — professionals use blank lines like paragraph breaks, to group related lines into readable sections.'},
-    {h:'<span class="p">        </span><span class="c">// ---- greeter section (Week 1) ----</span>',
-     t:'// greeter comment',
-     d:'Section marker: everything Week 1 built, untouched. This is the studio model in miniature — new features join old ones; nothing gets thrown away.'},
-    {h:'<span class="p">        </span><span class="k">var</span><span class="p"> lblWelcome = </span><span class="k">new</span><span class="p"> </span><span class="t">TextBlock</span><span class="p"> { </span><span class="m">Text</span><span class="p"> = </span><span class="s">&quot;Welcome to MAC 109!&quot;</span><span class="p">, </span><span class="m">FontSize</span><span class="p"> = </span><span class="n">22</span><span class="p"> };</span>',
-     t:'var lblWelcome = new TextBlock { … };',
-     d:'A LOCAL variable (var), not a field — because no handler ever needs the welcome sign again after setup. Field vs local is a decision you now make on purpose: who needs to reach this later?'},
-    {h:'<span class="p">        </span><span class="k">var</span><span class="p"> btnGreet = </span><span class="k">new</span><span class="p"> </span><span class="t">Button</span><span class="p"> { </span><span class="m">Content</span><span class="p"> = </span><span class="s">&quot;Say Hello&quot;</span><span class="p"> };</span>',
-     t:'var btnGreet = new Button { … };',
-     d:'The Week 1 button. Reminder that never expires: a Button’s text lives in Content, not Text.'},
-    {h:'<span class="p">        </span><span class="p">btnGreet.</span><span class="m">Click</span><span class="p"> += </span><span class="m">BtnGreet_Click</span><span class="p">;</span>',
-     t:'btnGreet.Click += BtnGreet_Click;',
-     d:'The event subscription — “when clicked, run that method.” You’ll count five of these in this file by the end. Each one is a promise the handlers below must keep.'},
-    {h:'',
-     t:'',
-     d:'A blank line. Whitespace is free and the compiler ignores it — professionals use blank lines like paragraph breaks, to group related lines into readable sections.'},
-    {h:'<span class="p">        </span><span class="c">// ---- calculator section (Week 2) ----</span>',
-     t:'// calculator comment',
-     d:'This week’s new zone begins. Four buttons, four subscriptions — watch how compactly the pattern repeats.'},
-    {h:'<span class="p">        </span><span class="k">var</span><span class="p"> btnAdd = </span><span class="k">new</span><span class="p"> </span><span class="t">Button</span><span class="p"> { </span><span class="m">Content</span><span class="p"> = </span><span class="s">&quot;+&quot;</span><span class="p"> };  btnAdd.</span><span class="m">Click</span><span class="p"> += </span><span class="m">BtnAdd_Click</span><span class="p">;</span>',
-     t:'var btnAdd = …;  btnAdd.Click += …;',
-     d:'Create the [+] button and wire it — two statements on one line, create-then-subscribe. Each button gets its OWN handler: one event, one method, one job.'},
-    {h:'<span class="p">        </span><span class="k">var</span><span class="p"> btnSub = </span><span class="k">new</span><span class="p"> </span><span class="t">Button</span><span class="p"> { </span><span class="m">Content</span><span class="p"> = </span><span class="s">&quot;−&quot;</span><span class="p"> };  btnSub.</span><span class="m">Click</span><span class="p"> += </span><span class="m">BtnSub_Click</span><span class="p">;</span>',
-     t:'var btnSub = …;  btnSub.Click += …;',
-     d:'Create the [−] button and wire it — two statements on one line, create-then-subscribe. Same recipe as the line above; only the symbol and the method name change.'},
-    {h:'<span class="p">        </span><span class="k">var</span><span class="p"> btnMul = </span><span class="k">new</span><span class="p"> </span><span class="t">Button</span><span class="p"> { </span><span class="m">Content</span><span class="p"> = </span><span class="s">&quot;×&quot;</span><span class="p"> };  btnMul.</span><span class="m">Click</span><span class="p"> += </span><span class="m">BtnMul_Click</span><span class="p">;</span>',
-     t:'var btnMul = …;  btnMul.Click += …;',
-     d:'Create the [×] button and wire it — two statements on one line, create-then-subscribe. Same recipe as the line above; only the symbol and the method name change.'},
-    {h:'<span class="p">        </span><span class="k">var</span><span class="p"> btnDiv = </span><span class="k">new</span><span class="p"> </span><span class="t">Button</span><span class="p"> { </span><span class="m">Content</span><span class="p"> = </span><span class="s">&quot;÷&quot;</span><span class="p"> };  btnDiv.</span><span class="m">Click</span><span class="p"> += </span><span class="m">BtnDiv_Click</span><span class="p">;</span>',
-     t:'var btnDiv = …;  btnDiv.Click += …;',
-     d:'Create the [÷] button and wire it — two statements on one line, create-then-subscribe. Same recipe as the line above; only the symbol and the method name change.'},
-    {h:'<span class="p">        </span><span class="k">var</span><span class="p"> buttonRow = </span><span class="k">new</span><span class="p"> </span><span class="t">StackPanel</span><span class="p"> { </span><span class="m">Orientation</span><span class="p"> = </span><span class="t">Orientation</span><span class="p">.</span><span class="m">Horizontal</span><span class="p">, </span><span class="m">Spacing</span><span class="p"> = </span><span class="n">8</span><span class="p">,</span>',
-     t:'var buttonRow = new StackPanel { Orientation = Horizontal, …',
-     d:'NEW LAYOUT TRICK: a StackPanel inside a StackPanel. This inner one stacks sideways (Orientation.Horizontal — from Avalonia.Layout, line 4), turning four buttons into one tidy row. Containers inside containers is how every real app is laid out.'},
-    {h:'<span class="p">        </span><span class="p">                                 </span><span class="m">Children</span><span class="p"> = { btnAdd, btnSub, btnMul, btnDiv } };</span>',
-     t:'Children = { btnAdd, btnSub, btnMul, btnDiv } };',
-     d:'The row’s kids, left to right. Same Children idea as the main layout — the list IS the arrangement.'},
-    {h:'',
-     t:'',
-     d:'A blank line. Whitespace is free and the compiler ignores it — professionals use blank lines like paragraph breaks, to group related lines into readable sections.'},
-    {h:'<span class="p">        </span><span class="m">Content</span><span class="p"> = </span><span class="k">new</span><span class="p"> </span><span class="t">StackPanel</span><span class="p"></span>',
-     t:'Content = new StackPanel',
-     d:'The window shows exactly ONE thing: its Content. Ours is the main vertical StackPanel — and this statement is deliberately spread over several lines for readability. C# doesn’t care about line breaks; only the final semicolon ends it.'},
-    {h:'<span class="p">        </span><span class="p">{</span>',
-     t:'{',
-     d:'Opens the StackPanel’s object initializer — the settings block of the layout itself.'},
-    {h:'<span class="p">        </span><span class="p">    </span><span class="m">Margin</span><span class="p"> = </span><span class="k">new</span><span class="p"> </span><span class="t">Thickness</span><span class="p">(</span><span class="n">20</span><span class="p">), </span><span class="m">Spacing</span><span class="p"> = </span><span class="n">12</span><span class="p">,</span>',
-     t:'Margin = new Thickness(20), Spacing = 12,',
-     d:'Breathing room from the window edges, and a 12-pixel gap between every child. Two properties, one comma — we’re still inside the { } settings list.'},
-    {h:'<span class="p">        </span><span class="p">    </span><span class="m">Children</span><span class="p"> = { lblWelcome, txtName, btnGreet, lblGreeting,</span>',
-     t:'Children = { lblWelcome, txtName, btnGreet, lblGreeting,',
-     d:'THE layout, part 1: Week 1’s controls, top to bottom. Reorder these names and the window reorders — the list is the design.'},
-    {h:'<span class="p">        </span><span class="p">                 txtA, txtB, buttonRow, lblResult }</span>',
-     t:'txtA, txtB, buttonRow, lblResult }',
-     d:'THE layout, part 2: this week’s additions — and notice buttonRow slots in as ONE child, carrying its four buttons inside it. Containers compose.'},
-    {h:'<span class="p">        </span><span class="p">};</span>',
-     t:'};',
-     d:'One brace closes the initializer, and the semicolon finally ends the Content = … statement that began five lines up.'},
-    {h:'<span class="p">    </span><span class="p">}</span>',
-     t:'}',
-     d:'Closes the constructor. Setup complete: the window appears and the app starts WAITING — for whichever of the five buttons the user clicks first.'},
-    {h:'',
-     t:'',
-     d:'A blank line. Whitespace is free and the compiler ignores it — professionals use blank lines like paragraph breaks, to group related lines into readable sections.'},
-    {h:'<span class="p">    </span><span class="k">void</span><span class="p"> </span><span class="m">BtnGreet_Click</span><span class="p">(</span><span class="k">object</span><span class="p"> sender, </span><span class="t">RoutedEventArgs</span><span class="p"> e)</span>',
-     t:'void BtnGreet_Click(object sender, RoutedEventArgs e)',
-     d:'Handler zone begins — Week 1’s greeter, keeping its promise from the += line above. Standard shape: sender (who fired) and e (the details).'},
-    {h:'<span class="p">    </span><span class="p">{</span>',
-     t:'{',
-     d:'Opens the greeter’s body — runs once per click, forever.'},
-    {h:'<span class="p">        </span><span class="p">lblGreeting.</span><span class="m">Text</span><span class="p"> = </span><span class="s">&quot;Hello, &quot;</span><span class="p"> + txtName.</span><span class="m">Text</span><span class="p"> + </span><span class="s">&quot;!&quot;</span><span class="p">;</span>',
-     t:'lblGreeting.Text = "Hello, " + txtName.Text + "!";',
-     d:'Read → glue → write, Week 1 edition. Here + glues correctly BY DESIGN — a greeting should be text. Compare with the calculator handlers below, where the same + must be tamed first.'},
-    {h:'<span class="p">    </span><span class="p">}</span>',
-     t:'}',
-     d:'Closes the greeter.'},
-    {h:'',
-     t:'',
-     d:'A blank line. Whitespace is free and the compiler ignores it — professionals use blank lines like paragraph breaks, to group related lines into readable sections.'},
-    {h:'<span class="p">    </span><span class="k">void</span><span class="p"> </span><span class="m">BtnAdd_Click</span><span class="p">(</span><span class="k">object</span><span class="p"> sender, </span><span class="t">RoutedEventArgs</span><span class="p"> e)</span>',
-     t:'void BtnAdd_Click(object sender, RoutedEventArgs e)',
-     d:'The [+] button’s handler. Read the five-line rhythm once, carefully — the next three handlers are this one with a single character changed.'},
-    {h:'<span class="p">    </span><span class="p">{</span>',
-     t:'{',
-     d:'Opens the handler.'},
-    {h:'<span class="p">        </span><span class="k">double</span><span class="p"> a = </span><span class="t">Convert</span><span class="p">.</span><span class="m">ToDouble</span><span class="p">(txtA.</span><span class="m">Text</span><span class="p">);</span>',
-     t:'double a = Convert.ToDouble(txtA.Text);',
-     d:'The bridge: txtA.Text is a STRING; Convert.ToDouble makes it a number we can do math on. This is the line that prevents “53”.'},
-    {h:'<span class="p">        </span><span class="k">double</span><span class="p"> b = </span><span class="t">Convert</span><span class="p">.</span><span class="m">ToDouble</span><span class="p">(txtB.</span><span class="m">Text</span><span class="p">);</span>',
-     t:'double b = Convert.ToDouble(txtB.Text);',
-     d:'Second crossing. Both inputs are honest doubles now — decimals welcome.'},
-    {h:'<span class="p">        </span><span class="p">lblResult.</span><span class="m">Text</span><span class="p"> = a + </span><span class="s">&quot; + &quot;</span><span class="p"> + b + </span><span class="s">&quot; = &quot;</span><span class="p"> + (</span><span class="p">a + b</span><span class="p">);</span>',
-     t:'lblResult.Text = a + " + " + b + " = " + (a + b);',
-     d:'Glue with a bodyguard: the parentheses force (a + b) to be MATH before it joins the glue chain. Delete them and + would glue digits instead — the exact trap from the Operators tab. Numbers convert to text automatically on the way out.'},
-    {h:'<span class="p">    </span><span class="p">}</span>',
-     t:'}',
-     d:'Closes the [+] handler.'},
-    {h:'',
-     t:'',
-     d:'A blank line. Whitespace is free and the compiler ignores it — professionals use blank lines like paragraph breaks, to group related lines into readable sections.'},
-    {h:'<span class="p">    </span><span class="k">void</span><span class="p"> </span><span class="m">BtnSub_Click</span><span class="p">(</span><span class="k">object</span><span class="p"> sender, </span><span class="t">RoutedEventArgs</span><span class="p"> e)</span>',
-     t:'void BtnSub_Click(object sender, RoutedEventArgs e)',
-     d:'The [−] button’s handler. Same signature, different job — one method per button.'},
-    {h:'<span class="p">    </span><span class="p">{</span>',
-     t:'{',
-     d:'Opens the handler.'},
-    {h:'<span class="p">        </span><span class="k">double</span><span class="p"> a = </span><span class="t">Convert</span><span class="p">.</span><span class="m">ToDouble</span><span class="p">(txtA.</span><span class="m">Text</span><span class="p">);</span>',
-     t:'double a = Convert.ToDouble(txtA.Text);',
-     d:'The bridge again — identical in all four handlers.'},
-    {h:'<span class="p">        </span><span class="k">double</span><span class="p"> b = </span><span class="t">Convert</span><span class="p">.</span><span class="m">ToDouble</span><span class="p">(txtB.</span><span class="m">Text</span><span class="p">);</span>',
-     t:'double b = Convert.ToDouble(txtB.Text);',
-     d:'Second input, converted.'},
-    {h:'<span class="p">        </span><span class="p">lblResult.</span><span class="m">Text</span><span class="p"> = a + </span><span class="s">&quot; − &quot;</span><span class="p"> + b + </span><span class="s">&quot; = &quot;</span><span class="p"> + (</span><span class="p">a - b</span><span class="p">);</span>',
-     t:'lblResult.Text = a + " − " + b + " = " + (a - b);',
-     d:'Only two characters differ from the Add handler: the symbol in quotes and the operator in the parentheses.'},
-    {h:'<span class="p">    </span><span class="p">}</span>',
-     t:'}',
-     d:'Closes the [−] handler.'},
-    {h:'',
-     t:'',
-     d:'A blank line. Whitespace is free and the compiler ignores it — professionals use blank lines like paragraph breaks, to group related lines into readable sections.'},
-    {h:'<span class="p">    </span><span class="k">void</span><span class="p"> </span><span class="m">BtnMul_Click</span><span class="p">(</span><span class="k">object</span><span class="p"> sender, </span><span class="t">RoutedEventArgs</span><span class="p"> e)</span>',
-     t:'void BtnMul_Click(object sender, RoutedEventArgs e)',
-     d:'The [×] button’s handler. Same signature, different job — one method per button.'},
-    {h:'<span class="p">    </span><span class="p">{</span>',
-     t:'{',
-     d:'Opens the handler.'},
-    {h:'<span class="p">        </span><span class="k">double</span><span class="p"> a = </span><span class="t">Convert</span><span class="p">.</span><span class="m">ToDouble</span><span class="p">(txtA.</span><span class="m">Text</span><span class="p">);</span>',
-     t:'double a = Convert.ToDouble(txtA.Text);',
-     d:'The bridge again — identical in all four handlers.'},
-    {h:'<span class="p">        </span><span class="k">double</span><span class="p"> b = </span><span class="t">Convert</span><span class="p">.</span><span class="m">ToDouble</span><span class="p">(txtB.</span><span class="m">Text</span><span class="p">);</span>',
-     t:'double b = Convert.ToDouble(txtB.Text);',
-     d:'Second input, converted.'},
-    {h:'<span class="p">        </span><span class="p">lblResult.</span><span class="m">Text</span><span class="p"> = a + </span><span class="s">&quot; × &quot;</span><span class="p"> + b + </span><span class="s">&quot; = &quot;</span><span class="p"> + (</span><span class="p">a * b</span><span class="p">);</span>',
-     t:'lblResult.Text = a + " × " + b + " = " + (a * b);',
-     d:'Only two characters differ from the Add handler: the symbol in quotes and the operator in the parentheses.'},
-    {h:'<span class="p">    </span><span class="p">}</span>',
-     t:'}',
-     d:'Closes the [×] handler.'},
-    {h:'',
-     t:'',
-     d:'A blank line. Whitespace is free and the compiler ignores it — professionals use blank lines like paragraph breaks, to group related lines into readable sections.'},
-    {h:'<span class="p">    </span><span class="k">void</span><span class="p"> </span><span class="m">BtnDiv_Click</span><span class="p">(</span><span class="k">object</span><span class="p"> sender, </span><span class="t">RoutedEventArgs</span><span class="p"> e)</span>',
-     t:'void BtnDiv_Click(object sender, RoutedEventArgs e)',
-     d:'The [÷] button’s handler. Same signature, different job — one method per button.'},
-    {h:'<span class="p">    </span><span class="p">{</span>',
-     t:'{',
-     d:'Opens the handler.'},
-    {h:'<span class="p">        </span><span class="k">double</span><span class="p"> a = </span><span class="t">Convert</span><span class="p">.</span><span class="m">ToDouble</span><span class="p">(txtA.</span><span class="m">Text</span><span class="p">);</span>',
-     t:'double a = Convert.ToDouble(txtA.Text);',
-     d:'The bridge again — identical in all four handlers.'},
-    {h:'<span class="p">        </span><span class="k">double</span><span class="p"> b = </span><span class="t">Convert</span><span class="p">.</span><span class="m">ToDouble</span><span class="p">(txtB.</span><span class="m">Text</span><span class="p">);</span>',
-     t:'double b = Convert.ToDouble(txtB.Text);',
-     d:'Second input, converted.'},
-    {h:'<span class="p">        </span><span class="p">lblResult.</span><span class="m">Text</span><span class="p"> = a + </span><span class="s">&quot; ÷ &quot;</span><span class="p"> + b + </span><span class="s">&quot; = &quot;</span><span class="p"> + (</span><span class="p">a / b</span><span class="p">);</span>',
-     t:'lblResult.Text = a + " ÷ " + b + " = " + (a / b);',
-     d:'Two characters changed — and one landmine inherited: with 0 in the second box, doubles answer ∞ instead of crashing. Legal, not smart. Next week’s if statement stands guard here.'},
-    {h:'<span class="p">    </span><span class="p">}</span>',
-     t:'}',
-     d:'Closes the [÷] handler.'},
-    {h:'<span class="p">}</span>',
-     t:'}',
-     d:'The final brace closes the MainWindow class. Take inventory: 5 using lines, 5 fields, 1 constructor, 5 handlers, 5 subscriptions — and every single line now has a job you can name. That’s what “knowing your codebase” feels like.'}
-  ];
-  var explPre2=document.getElementById('explCode2');
-  lines2.forEach(function(L,i){
-    var div=document.createElement('span');
-    div.className='cl explain';
-    div.innerHTML='<span class="ln">'+(i+1)+'</span>'+(L.h||'<span class="p"> </span>');
-    div.addEventListener('click',function(){
-      explPre2.querySelectorAll('.cl').forEach(function(x){x.classList.remove('sel');});
-      div.classList.add('sel');
-      document.getElementById('explTitle2').textContent='Line '+(i+1)+(L.t?' \u00b7 '+L.t:'');
-      document.getElementById('explText2').textContent=L.d;
-    });
-    explPre2.appendChild(div);
-  });
-  var FULLCODE="using Avalonia;\nusing Avalonia.Controls;\nusing Avalonia.Interactivity;\nusing Avalonia.Layout;\nusing Avalonia.Media;\n\nnamespace MyStudioApp;\n\npublic class MainWindow : Window\n{\n    // ---- fields: controls the handlers must reach later ----\n    TextBox txtName = new TextBox { Watermark = \"Type your name\u2026\" };\n    TextBlock lblGreeting = new TextBlock { FontSize = 18 };\n    TextBox txtA = new TextBox { Watermark = \"First number\" };\n    TextBox txtB = new TextBox { Watermark = \"Second number\" };\n    TextBlock lblResult = new TextBlock { FontSize = 18, FontWeight = FontWeight.Bold };\n\n    public MainWindow()\n    {\n        Title = \"My Studio App \u2014 Maria\";\n        Width = 500; Height = 520;\n        Background = Brushes.MintCream;\n\n        // ---- greeter section (Week 1) ----\n        var lblWelcome = new TextBlock { Text = \"Welcome to MAC 109!\", FontSize = 22 };\n        var btnGreet = new Button { Content = \"Say Hello\" };\n        btnGreet.Click += BtnGreet_Click;\n\n        // ---- calculator section (Week 2) ----\n        var btnAdd = new Button { Content = \"+\" };  btnAdd.Click += BtnAdd_Click;\n        var btnSub = new Button { Content = \"\u2212\" };  btnSub.Click += BtnSub_Click;\n        var btnMul = new Button { Content = \"\u00d7\" };  btnMul.Click += BtnMul_Click;\n        var btnDiv = new Button { Content = \"\u00f7\" };  btnDiv.Click += BtnDiv_Click;\n        var buttonRow = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8,\n                                         Children = { btnAdd, btnSub, btnMul, btnDiv } };\n\n        Content = new StackPanel\n        {\n            Margin = new Thickness(20), Spacing = 12,\n            Children = { lblWelcome, txtName, btnGreet, lblGreeting,\n                         txtA, txtB, buttonRow, lblResult }\n        };\n    }\n\n    void BtnGreet_Click(object sender, RoutedEventArgs e)\n    {\n        lblGreeting.Text = \"Hello, \" + txtName.Text + \"!\";\n    }\n\n    void BtnAdd_Click(object sender, RoutedEventArgs e)\n    {\n        double a = Convert.ToDouble(txtA.Text);\n        double b = Convert.ToDouble(txtB.Text);\n        lblResult.Text = a + \" + \" + b + \" = \" + (a + b);\n    }\n\n    void BtnSub_Click(object sender, RoutedEventArgs e)\n    {\n        double a = Convert.ToDouble(txtA.Text);\n        double b = Convert.ToDouble(txtB.Text);\n        lblResult.Text = a + \" \u2212 \" + b + \" = \" + (a - b);\n    }\n\n    void BtnMul_Click(object sender, RoutedEventArgs e)\n    {\n        double a = Convert.ToDouble(txtA.Text);\n        double b = Convert.ToDouble(txtB.Text);\n        lblResult.Text = a + \" \u00d7 \" + b + \" = \" + (a * b);\n    }\n\n    void BtnDiv_Click(object sender, RoutedEventArgs e)\n    {\n        double a = Convert.ToDouble(txtA.Text);\n        double b = Convert.ToDouble(txtB.Text);\n        lblResult.Text = a + \" \u00f7 \" + b + \" = \" + (a / b);\n    }\n}\n";
+  var FULLCODE="Console.WriteLine(\"What's your name?\");\nstring name = Console.ReadLine();\n\nConsole.WriteLine(\"Welcome, \" + name + \"!\");\n";
   var cf=document.getElementById('copyFull');
   if(cf){cf.addEventListener('click',function(e){
     e.stopPropagation();
-    function flash(){cf.textContent='Copied \u2713';setTimeout(function(){cf.textContent='Copy whole file';},1600);}
+    function flash(){cf.textContent='Copied \u2713';setTimeout(function(){cf.textContent='Copy file';},1600);}
     if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(FULLCODE).then(flash,flash);}else{flash();}
   });}
 
   /* ---------- bug hunt ---------- */
   var bugLines=[
-    {h:'<span class="k">void</span><span class="p"> </span><span class="m">BtnAvg_Click</span><span class="p">(</span><span class="k">object</span><span class="p"> sender, </span><span class="t">RoutedEventArgs</span><span class="p"> e)</span>',bug:false,why:'Correct \u2014 a well-formed handler signature.'},
-    {h:'<span class="p">{</span>',bug:false,why:'Correct \u2014 an honest brace.'},
-    {h:'<span class="p">    </span><span class="k">double</span><span class="p"> g1 = </span><span class="t">Convert</span><span class="p">.</span><span class="m">ToDouble</span><span class="p">(txtG1.</span><span class="m">Text</span><span class="p">);</span>',bug:false,why:'Correct \u2014 the bridge, crossed properly.'},
-    {h:'<span class="p">    </span><span class="k">double</span><span class="p"> g2 = </span><span class="t">Convert</span><span class="p">.</span><span class="m">ToDouble</span><span class="p">(txtG2);</span>',bug:true,why:'Bug 1: missing .Text \u2014 this tries to convert the whole TextBox OBJECT into a number. The compiler refuses: it needs the string inside, txtG2.Text.'},
-    {h:'<span class="p">    </span><span class="k">double</span><span class="p"> g3 = </span><span class="t">Convert</span><span class="p">.</span><span class="m">ToDouble</span><span class="p">(txtG3.</span><span class="m">Text</span><span class="p">)</span>',bug:true,why:'Bug 2: the semicolon is missing at the end \u2014 ; expected. Rule 1 never retires.'},
-    {h:'<span class="p">    </span><span class="k">double</span><span class="p"> avg = g1 + g2 + g3 / </span><span class="n">3</span><span class="p">;</span>',bug:true,why:'Bug 3 \u2014 the invisible one 👻. This COMPILES and RUNS\u2026 wrongly. Division beats addition (PEMDAS), so only g3 gets divided: 85 + 90 + 95/3 = 206.67, not 90. Fix: (g1 + g2 + g3) / 3. The compiler checks grammar, never intentions.'},
-    {h:'<span class="p">    </span><span class="p">lblResult.</span><span class="m">Text</span><span class="p"> = </span><span class="s">&quot;Average: &quot;</span><span class="p"> + avg;</span>',bug:false,why:'Correct \u2014 glue converts the number to text for free.'},
-    {h:'<span class="p">}</span>',bug:false,why:'Correct \u2014 braces balanced. The bugs were all above.'}
+    {h:'<span class="k">double</span><span class="p"> g1 = </span><span class="n">85</span><span class="p">;</span>',bug:false,why:'Correct \u2014 type name = value; with its semicolon.'},
+    {h:'<span class="k">double</span><span class="p"> g2 = </span><span class="n">90</span>',bug:true,why:'Bug 1: the semicolon is missing \u2014 ; expected. The #1 beginner error, hiding in plain sight.'},
+    {h:'<span class="k">double</span><span class="p"> g3 = </span><span class="n">95</span><span class="p">;</span>',bug:false,why:'Correct \u2014 nothing wrong here.'},
+    {h:'',bug:false,why:'A blank line \u2014 innocent.'},
+    {h:'<span class="k">double</span><span class="p"> avg = g1 + g2 + g3 / </span><span class="n">3</span><span class="p">;</span>',bug:true,why:'Bug 3 \u2014 the invisible one 👻. This COMPILES and RUNS\u2026 wrongly. Division beats addition (PEMDAS), so only g3 is divided: 85 + 90 + 95/3 = 206.67, not 90. Fix: (g1 + g2 + g3) / 3.'},
+    {h:'',bug:false,why:'Another innocent blank line.'},
+    {h:'<span class="p">console.</span><span class="m">WriteLine</span><span class="p">(</span><span class="s">&quot;Average: &quot;</span><span class="p"> + avg);</span>',bug:true,why:'Bug 2: lowercase \u201cconsole\u201d \u2014 C# is case-sensitive and the class is Console. The compiler: \u2018console\u2019 does not exist in the current context.'}
   ];
   var bugPre=document.getElementById('bugCode');var found=0;
   bugLines.forEach(function(L,i){
@@ -1039,21 +673,21 @@
 
   /* ---------- quiz ---------- */
   var quiz=[
-    {q:'The user types 5 and 3. What does lblResult.Text = txtA.Text + txtB.Text; display?',
+    {q:'string a = Console.ReadLine() reads \u201c5\u201d, and b reads \u201c3\u201d. What does Console.WriteLine(a + b) print?',
      opts:['8','53','5 + 3','A compile error'],
-     a:1,why:'Both .Text values are strings, and for strings + means glue. \u201c5\u201d glued to \u201c3\u201d is \u201c53\u201d. To get 8, Convert both sides to numbers first.'},
-    {q:'In C#, what is 7 / 2 when both numbers are ints?',
+     a:1,why:'ReadLine always returns strings, and for strings + means glue: \u201c5\u201d glued to \u201c3\u201d is \u201c53\u201d. To get 8, Convert both to numbers first.'},
+    {q:'In C#, what does Console.WriteLine(7 / 2); print?',
      opts:['3.5','3','4','An error'],
-     a:1,why:'Whole number \u00f7 whole number stays whole: C# truncates to 3, no rounding, no warning. Use doubles (7.0 / 2) when you want 3.5 \u2014 which is why our calculators speak double.'},
+     a:1,why:'int \u00f7 int stays int: C# truncates to 3 \u2014 no rounding, no warning. Write 7.0 / 2 when you want 3.5.'},
     {q:'Which line correctly turns what the user typed into a number?',
-     opts:['double x = txtAge.Text;','double x = Convert.ToDouble(txtAge);','double x = Convert.ToDouble(txtAge.Text);','double x = "txtAge.Text";'],
-     a:2,why:'You need the string INSIDE the box (.Text), handed to Convert.ToDouble. Option 1 forgets to convert, option 2 converts the whole TextBox object, option 4 is just a string in quotes.'},
-    {q:'What is 17 % 5 ?',
+     opts:['double x = Console.ReadLine();','double x = "Console.ReadLine()";','double x = Convert.ToDouble(Console.ReadLine());','double x = Convert(Console.ReadLine());'],
+     a:2,why:'ReadLine hands you a string; Convert.ToDouble transforms it. Option 1 forgets to convert (compile error), option 2 is just a string in quotes, option 4 isn\u2019t how Convert is called.'},
+    {q:'What does Console.WriteLine(17 % 5); print?',
      opts:['3.4','3','2','0'],
-     a:2,why:'% is the REMAINDER: 5 fits into 17 three times (15), leaving 2. Bonus intuition: anything % 2 tells you even (0) or odd (1) \u2014 that trick pays off next week.'},
-    {q:'What does lblResult.Text = "Total: " + 5 + 2; display?',
+     a:2,why:'% is the REMAINDER: 5 fits into 17 three times (15), leaving 2. Bonus: anything % 2 answers even (0) or odd (1).'},
+    {q:'What does Console.WriteLine("Total: " + 5 + 2); print?',
      opts:['Total: 7','Total: 52','52','A compile error'],
-     a:1,why:'+ works left to right. \u201cTotal: \u201d + 5 glues into text first (\u201cTotal: 5\u201d), and from then on everything glues: \u201cTotal: 52\u201d. Compute first \u2014 "Total: " + (5 + 2) \u2014 or better, into a named variable.'}
+     a:1,why:'+ runs left to right: \u201cTotal: \u201d + 5 glues first, and from then on everything glues \u2014 \u201cTotal: 52\u201d. Force the math with parentheses: "Total: " + (5 + 2).'}
   ];
   var host=document.getElementById('quizHost');var score=0,answered=0;
   quiz.forEach(function(Q,qi){
@@ -1106,6 +740,17 @@
       function flash(){btn.textContent='Copied \u2713';setTimeout(function(){btn.textContent='Copy';},1600);}
       if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(pre.innerText).then(flash,flash);}
       else{flash();}
+    });
+  });
+
+  /* ---------- per-example copy buttons ---------- */
+  stage.querySelectorAll('.codewin').forEach(function(w){
+    var btn=w.querySelector('.copy');var pre=w.querySelector('pre');
+    if(!btn||!pre||btn.id==='copyFull')return;
+    btn.addEventListener('click',function(e){
+      e.stopPropagation();
+      function flash(){btn.textContent='Copied \u2713';setTimeout(function(){btn.textContent='Copy';},1500);}
+      if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(pre.innerText).then(flash,flash);}else{flash();}
     });
   });
 
