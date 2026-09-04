@@ -149,6 +149,12 @@
   details.why .body{padding:0 20px 14px;font-size:16.5px}
   details.why .body p{margin-bottom:10px}
 
+
+  /* embedded videos */
+  .video{position:relative;border:3px solid var(--ink);border-radius:16px;overflow:hidden;box-shadow:7px 7px 0 rgba(45,36,54,.2);aspect-ratio:16/9;margin:14px 0;background:#000}
+  .video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+  @media print{.video{display:none}}
+
   /* celebration */
   #party{position:fixed;inset:0;pointer-events:none;z-index:100;overflow:hidden}
   .confetto{position:absolute;top:-30px;font-size:26px;animation:fall linear forwards}
@@ -177,7 +183,7 @@
 <body>
 <div id="scrollbar"></div>
 <div id="party"></div>
-<div id="trophy"><div class="big">🏆</div><h3>YOU DID IT!</h3><p>All 10 levels complete — two real programs,<br>built and published. Welcome to programming!</p><button onclick="document.getElementById('trophy').classList.remove('show')">Let's go! 🚀</button></div>
+<div id="trophy"><div class="big">🏆</div><h3>YOU DID IT!</h3><p>All 10 levels complete — your app is alive, personalized,<br>and published on your own GitHub. Milestone 1: done!</p><button onclick="document.getElementById('trophy').classList.remove('show')">Let's go! 🚀</button></div>
 
 <!-- ================= HERO ================= -->
 <header id="hero">
@@ -185,16 +191,16 @@
   <span class="float" style="right:10%;top:12%;font-size:38px;--r:9deg;animation-delay:1s">C#</span>
   <span class="float" style="right:22%;bottom:14%;font-size:52px;--r:-7deg;animation-delay:2s">;</span>
   <span class="float" style="left:20%;bottom:10%;font-size:34px;--r:14deg;animation-delay:.5s">▶</span>
-  <span class="float" style="left:45%;top:6%;font-size:30px;--r:-5deg;animation-delay:1.5s">//</span>
+  <span class="float" style="left:45%;top:6%;font-size:30px;--r:-5deg;animation-delay:1.5s">🪟</span>
   <div class="in">
-    <span class="badge">MAC 109 · WEEKS 1–2 PRACTICAL · MAC + VS CODE</span>
-    <h1>Build your first two<br>real programs today 🚀</h1>
-    <p class="tag">Ten small levels. Zero scary terminal commands — everything happens with clicks inside <b>VS Code</b>. By the end, your Mac runs programs <i>you</i> wrote, published on your own GitHub.</p>
+    <span class="badge">MAC 109 · WEEK 1 PRACTICAL · WINDOWS · MACOS · LINUX</span>
+    <h1>Your app starts today 🚀</h1>
+    <p class="tag">Ten small levels, zero terminal commands. Install the free tools, clone your starter, and leave with a real window <i>you</i> built — in pure <b>C#</b>. Works on whatever computer you own.</p>
     <div class="meta">
-      <span class="chip"><span>🎯</span>Builds both Lab 1 deliverables</span>
+      <span class="chip"><span>🎯</span>Builds Milestone 1</span>
       <span class="chip"><span>⏱️</span>~60–90 minutes</span>
       <span class="chip"><span>🖱️</span>Click-only workflow</span>
-      <span class="chip"><span>📅</span>Lab 1 due Fri, Oct 9</span>
+      <span class="chip"><span>🧩</span>One language: C#</span>
     </div>
   </div>
 </header>
@@ -207,15 +213,15 @@
   <div id="questBar"><div id="questFill"></div></div>
   <span id="questPct">0% complete</span>
   <a class="qitem" href="#L1" data-q="L1"><span class="dot">1</span>Install the .NET SDK</a>
-  <a class="qitem" href="#L2" data-q="L2"><span class="dot">2</span>Give VS Code its C# brain</a>
-  <a class="qitem" href="#L3" data-q="L3"><span class="dot">3</span>Create Lab01 — no typing!</a>
-  <a class="qitem" href="#L4" data-q="L4"><span class="dot">4</span>Meet your project</a>
-  <a class="qitem" href="#L5" data-q="L5"><span class="dot">5</span>Press play ▶</a>
-  <a class="qitem" href="#L6" data-q="L6"><span class="dot">6</span>Write the real program</a>
-  <a class="qitem" href="#L7" data-q="L7"><span class="dot">7</span>Talk to your program</a>
-  <a class="qitem" href="#L8" data-q="L8"><span class="dot">8</span>Build the calculator</a>
+  <a class="qitem" href="#L2" data-q="L2"><span class="dot">2</span>Install VS Code</a>
+  <a class="qitem" href="#L3" data-q="L3"><span class="dot">3</span>Give VS Code its C# brain</a>
+  <a class="qitem" href="#L4" data-q="L4"><span class="dot">4</span>Get YOUR copy of the starter</a>
+  <a class="qitem" href="#L5" data-q="L5"><span class="dot">5</span>Meet your project</a>
+  <a class="qitem" href="#L6" data-q="L6"><span class="dot">6</span>Press play ▶</a>
+  <a class="qitem" href="#L7" data-q="L7"><span class="dot">7</span>Make it yours</a>
+  <a class="qitem" href="#L8" data-q="L8"><span class="dot">8</span>Build the Greeter</a>
   <a class="qitem" href="#L9" data-q="L9"><span class="dot">9</span>Try to break it 😈</a>
-  <a class="qitem" href="#L10" data-q="L10"><span class="dot">10</span>Publish to GitHub</a>
+  <a class="qitem" href="#L10" data-q="L10"><span class="dot">10</span>Push your milestone</a>
 </nav>
 
 <main>
@@ -223,27 +229,48 @@
 <!-- ============ LEVEL 1 ============ -->
 <section class="level" id="L1" style="--c:#7c3aed;--shadow:rgba(124,58,237,.18)">
   <div class="lvhead"><div class="lvnum">1</div><h2>Install the .NET SDK</h2><span class="emoji">🧰</span></div>
-  <p class="lead">The <b>SDK</b> is the engine that turns your C# into a running program. VS Code is the steering wheel — this is the motor. One-time install, normal Mac style: download, double-click, done.</p>
+  <p class="lead">The <b>SDK</b> is the engine that turns your C# into a running program — it contains the compiler and the runtime from the Week 1 deck. One-time install: download, double-click, done. And yes, it's completely <b>free</b>.</p>
   <ol class="steps">
-    <li>In Safari or Chrome, go to <code class="inline">dotnet.microsoft.com/download</code>.</li>
-    <li>Click the big <b>Download .NET SDK</b> button. Choose <b>Arm64</b> (that's for Apple Silicon — any M1, M2, M3, M4 Mac). Only very old Intel Macs need x64.</li>
-    <li>Open the downloaded <code class="inline">.pkg</code> and click Continue until it says installed. All defaults are perfect.</li>
+    <li>In your browser, go to <code class="inline">dotnet.microsoft.com/download</code>.</li>
+    <li>Click the big <b>Download .NET SDK</b> button (the <b>SDK</b>, not the "Runtime" — you're a developer now).</li>
+    <li>Pick your machine: <b>Windows</b> → the x64 installer. <b>Mac</b> → <b>Arm64</b> for any Apple Silicon Mac (M1–M4); x64 only for old Intel Macs. <b>Linux</b> → follow the Linux instructions linked on that same page for your distribution.</li>
+    <li>Run the downloaded installer and click Continue/Next until it says installed. All defaults are perfect.</li>
   </ol>
-  <details class="why"><summary>Why do I need this if I already have VS Code?</summary><div class="body">
-    <p>Kitchen analogy: <b>VS Code is the countertop</b> — a lovely place to work — but <b>the SDK is the oven</b> 🔥. Without it, nothing cooks. The SDK contains the C# <b>compiler</b> (the grammar-checker-translator from the Week 1 deck) and the <b>runtime</b> that executes your program. VS Code just presses its buttons for you.</p>
+  <figure>
+    <div class="video"><iframe src="https://www.youtube-nocookie.com/embed/ZVGutgqBMUM" title="Getting Started with C# and .NET in VS Code (Official Beginner Guide)" loading="lazy" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe></div>
+    <figcaption><b>Video companion for Levels 1–3.</b> Microsoft's official beginner guide walks the whole setup — .NET SDK, VS Code, and the C# extension — on camera. If a detail on screen differs from this page, follow the written steps here (our course clones a starter instead of creating a new project). <a href="https://www.youtube.com/watch?v=ZVGutgqBMUM" target="_blank" rel="noopener">Open on YouTube ↗</a></figcaption>
+  </figure>
+  <details class="why"><summary>Why do I need this if I'm about to install VS Code too?</summary><div class="body">
+    <p>Kitchen analogy: <b>VS Code is the countertop</b> — a lovely place to work — but <b>the SDK is the oven</b> 🔥. Without it, nothing cooks. The SDK <i>is</i> C# on your machine: the <b>compiler</b> (the grammar-checker-translator) and the <b>runtime</b> that executes your program. VS Code just presses its buttons for you. Install both, and your computer officially speaks C# — whether it runs Windows, macOS, or Linux.</p>
   </div></details>
   <button class="donebtn" data-lv="L1">Mark level complete</button>
 </section>
 
 <!-- ============ LEVEL 2 ============ -->
 <section class="level" id="L2" style="--c:#3b82f6;--shadow:rgba(59,130,246,.18)">
-  <div class="lvhead"><div class="lvnum">2</div><h2>Give VS Code its C# brain</h2><span class="emoji">🧠</span></div>
-  <p class="lead">Fresh VS Code doesn't speak C#. The free <b>C# Dev Kit</b> extension (by Microsoft) teaches it everything: rainbow syntax colors, autocomplete, error squiggles, a Solution Explorer, and — most importantly for us — the <b>▶ Run button</b>.</p>
+  <div class="lvhead"><div class="lvnum">2</div><h2>Install Visual Studio Code</h2><span class="emoji">💻</span></div>
+  <p class="lead"><b>VS Code</b> is your workshop for the semester — a free code editor that is <i>identical</i> on Windows, macOS, and Linux. Whatever computer you own, your screen will match your classmates' and the lecture slides.</p>
   <ol class="steps">
-    <li>Open VS Code. Click the <b>Extensions</b> icon in the left bar (four squares, one flying away) — or press <span class="kbd">⇧ ⌘ X</span>.</li>
+    <li>Go to <code class="inline">code.visualstudio.com</code> and click the big <b>Download</b> button — it auto-detects your operating system.</li>
+    <li><b>Windows:</b> run the installer, keep every default. <b>Mac:</b> the download is the app itself — drag <b>Visual Studio Code</b> into your <b>Applications</b> folder, then open it. <b>Linux:</b> grab the .deb/.rpm from the same page (or your software store) and install.</li>
+    <li>Open VS Code once so it settles in. A Welcome tab appears — you can close it.</li>
+  </ol>
+  <div class="bubble tip">💡 Already have VS Code from another class? You're done — skip to Level 3. And no account or sign-in is ever required for anything in this course's setup.</div>
+  <details class="why"><summary>Is VS Code the same as Visual Studio?</summary><div class="body">
+    <p>Different tools, confusing names. <b>Visual Studio</b> is a Windows-only heavyweight. <b>Visual Studio Code</b> is its lightweight sibling that runs everywhere — and once we add the C# extension in Level 3, it becomes a full <b>IDE</b>: editor + compiler buttons + debugger + Git, all in one window. One workshop for the whole class, no matter the machine.</p>
+  </div></details>
+  <button class="donebtn" data-lv="L2">Mark level complete</button>
+</section>
+
+<!-- ============ LEVEL 3 ============ -->
+<section class="level" id="L3" style="--c:#ec4899;--shadow:rgba(236,72,153,.18)">
+  <div class="lvhead"><div class="lvnum">3</div><h2>Give VS Code its C# brain</h2><span class="emoji">🧠</span></div>
+  <p class="lead">Fresh VS Code doesn't speak C#. The free <b>C# Dev Kit</b> extension (by Microsoft) teaches it everything: rainbow syntax colors, IntelliSense autocomplete, error squiggles, a Solution Explorer, and — most importantly for us — the <b>▶ Run button</b>.</p>
+  <ol class="steps">
+    <li>In VS Code, click the <b>Extensions</b> icon in the left bar (four squares, one flying away) — or press <span class="kbd">⇧ ⌘ X</span> on Mac / <span class="kbd">Ctrl ⇧ X</span> on Windows &amp; Linux.</li>
     <li>In the search box, type <b>C# Dev Kit</b>.</li>
     <li>Click <b>Install</b> on the top result, published by <b>Microsoft</b>. It automatically brings its friend, the base "C#" extension.</li>
-    <li>When it finishes, you'll see a new <b>Solution Explorer</b> icon appear — that's your sign it worked.</li>
+    <li>When it finishes, a new <b>Solution Explorer</b> icon appears — that's your sign it worked.</li>
   </ol>
   <figure><div class="shot mac">
     <div class="tbar"><i class="r"></i><i class="y"></i><i class="g"></i><span>Visual Studio Code — Extensions</span></div>
@@ -255,229 +282,248 @@
         <span style="background:#0e639c;color:#fff;border-radius:4px;padding:5px 16px;font-size:13px;font-weight:700">Install</span>
       </div>
     </div>
-  </div><figcaption><b>Figure 1.</b> Install the one that says <b>Microsoft</b>. (Figures in this guide are faithful recreations of the real screens — colors may vary slightly on your Mac.)</figcaption></figure>
-  <div class="bubble win">✅ <b>Checkpoint:</b> Extensions ▸ Installed now lists "C# Dev Kit". High five — setup is done <i>forever</i>. Everything from here is the fun part.</div>
-  <button class="donebtn" data-lv="L2">Mark level complete</button>
-</section>
-
-<!-- ============ LEVEL 3 ============ -->
-<section class="level" id="L3" style="--c:#ec4899;--shadow:rgba(236,72,153,.18)">
-  <div class="lvhead"><div class="lvnum">3</div><h2>Create Lab01 — without typing a single command</h2><span class="emoji">✨</span></div>
-  <p class="lead">Meet the <b>Command Palette</b> — VS Code's magic search box that can do <i>anything</i>. We'll use it to have the SDK build a complete, ready-to-run project for us.</p>
-  <ol class="steps">
-    <li>Press <span class="kbd">⇧ ⌘ P</span> (Shift + Command + P). A search box drops from the top.</li>
-    <li>Type <b>new project</b> and choose <b>“.NET: New Project…”</b>.</li>
-    <li>From the template list, pick <b>Console App</b>.</li>
-    <li>Name it exactly <code class="inline">Lab01_HelloWorld</code> and press Return.</li>
-    <li>For the location, click <b>Choose folder</b> ▸ go to <b>Documents</b> ▸ click <b>New Folder</b> ▸ name it <code class="inline">MAC109</code> ▸ Select. (All your labs will live here — never in Downloads! 📁)</li>
-    <li>Press Return to confirm, and when VS Code asks, click <b>Open</b> to open the new project window. If a blue box asks "Do you trust the authors?", click <b>Yes, I trust</b> — the author is you!</li>
-  </ol>
-  <figure><div class="shot mac">
-    <div class="tbar"><i class="r"></i><i class="y"></i><i class="g"></i><span>Visual Studio Code</span></div>
-    <div class="palette">
-      <div class="palbox">
-        <div class="pin">&gt; new project</div>
-        <div class="prow sel"><span>.NET: New Project…</span><small>C# Dev Kit</small></div>
-        <div class="prow"><span>.NET: Open Solution</span><small>C# Dev Kit</small></div>
-        <div class="prow"><span>File: New Untitled Text File</span><small>⌘N</small></div>
-      </div>
-    </div>
-  </div><figcaption><b>Figure 2.</b> The Command Palette (⇧⌘P). Type a few letters, pick the highlighted entry, Return. You'll use this box for the rest of your programming life.</figcaption></figure>
-  <details class="why"><summary>What just happened behind the curtain?</summary><div class="body">
-    <p>The C# Dev Kit asked the SDK to scaffold a <b>Console App</b> — the same thing Visual Studio's File ▸ New ▸ Project does on the Windows lab machines. A console app is a program that talks through text: it prints lines, and it can read what you type. Every concept in Weeks 1–6 lives in console apps; windows and buttons arrive in Week 7.</p>
-  </div></details>
+  </div><figcaption><b>Figure 1.</b> Install the one that says <b>Microsoft</b>. (Figures in this guide are faithful recreations of the real screens — colors may vary slightly on your machine.)</figcaption></figure>
+  <div class="bubble win">✅ <b>Checkpoint:</b> Extensions ▸ Installed now lists "C# Dev Kit". High five — with the SDK (Level 1) + VS Code (Level 2) + this brain, your machine is a complete C# development studio, <i>forever</i>. Everything from here is the fun part.</div>
+  <div class="bubble tip">🎬 Prefer more video? Two other walkthroughs of this same setup: <a href="https://www.youtube.com/watch?v=VixiHSXb_h0" target="_blank" rel="noopener">full C# in VS Code install guide ↗</a> · <a href="https://www.youtube.com/watch?v=43Y7ir-5fYQ" target="_blank" rel="noopener">Windows 11-specific setup ↗</a></div>
   <button class="donebtn" data-lv="L3">Mark level complete</button>
 </section>
 
 <!-- ============ LEVEL 4 ============ -->
 <section class="level" id="L4" style="--c:#06b6a4;--shadow:rgba(6,182,164,.18)">
-  <div class="lvhead"><div class="lvnum">4</div><h2>Meet your project</h2><span class="emoji">🔎</span></div>
-  <p class="lead">Look at the <b>Explorer</b> on the left (top icon in the activity bar). The SDK generated a small family of files — here's who's who:</p>
-  <figure><div class="shot mac vsc">
-    <div class="tbar"><i class="r"></i><i class="y"></i><i class="g"></i><span>Program.cs — Lab01_HelloWorld</span></div>
-    <div class="vmain">
-      <div class="actbar"><div class="ico on"></div><div class="ico"></div><div class="ico"></div><div class="ico"></div></div>
-      <div class="explorer">
-        <div class="hd">EXPLORER · LAB01_HELLOWORLD</div>
-        <div class="it dim">▸ bin</div>
-        <div class="it dim">▸ obj</div>
-        <div class="it">Lab01_HelloWorld.csproj</div>
-        <div class="it sel">Program.cs</div>
-      </div>
-      <div>
-        <div class="tabrow"><div class="tab">Program.cs</div></div>
-        <div class="dark darkpad">
-<span class="cl"><span class="ln">1</span><span class="c">// See https://aka.ms/new-console-template for more information</span></span>
-<span class="cl"><span class="ln">2</span><span class="t">Console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(</span><span class="s">"Hello, World!"</span><span class="p">);</span></span>
-        </div>
+  <div class="lvhead"><div class="lvnum">4</div><h2>Get YOUR copy of the starter — one folder, cloned from GitHub</h2><span class="emoji">⑂</span></div>
+  <p class="lead">Here's the studio model in one sentence: <b>your whole semester lives in one folder</b>, a Git repository you copy from the course starter today and grow every week until it's your final project. Let's get your copy — with buttons only.</p>
+  <ol class="steps">
+    <li>Create a free account at <code class="inline">github.com</code> if you don't have one (any email works; pick a professional username — it will be on your résumé 😉).</li>
+    <li>While signed in, open the course starter link from <b>Brightspace</b>: <code class="inline">github.com/Kassou-MEC/mac109-starter</code>.</li>
+    <li>Click the green <b>Use this template</b> button ▸ <b>Create a new repository</b>.</li>
+    <li>Repository name: <code class="inline">mac109-project</code> · keep it <b>Public</b> · click <b>Create repository</b>. 🎉 You now <i>own</i> a copy of the starter.</li>
+    <li>On <b>your</b> new repo's page, click the green <b>Code</b> button and press the 📋 icon to copy the HTTPS link.</li>
+    <li>In VS Code, click the <b>Source Control</b> icon in the left bar (the branching lines) ▸ <b>Clone Repository</b> ▸ paste the link ▸ press Return.</li>
+    <li>For the location: go to <b>Documents</b> ▸ <b>New Folder</b> ▸ name it <code class="inline">MAC109</code> ▸ Select. (Never Downloads! 📁)</li>
+    <li>When VS Code asks, click <b>Open</b> — and <b>Yes, I trust the authors</b>. The author is you now.</li>
+  </ol>
+  <figure><div class="shot mac">
+    <div class="tbar"><i class="r"></i><i class="y"></i><i class="g"></i><span>Visual Studio Code</span></div>
+    <div class="palette">
+      <div class="palbox">
+        <div class="pin">&gt; git clone</div>
+        <div class="prow sel"><span>Git: Clone</span><small>paste your repo link next</small></div>
+        <div class="prow"><span>Git: Clone (Recursive)</span><small></small></div>
       </div>
     </div>
-    <div class="sbar"><span>main*</span><span class="grow"></span><span>Ln 2, Col 1</span><span>C#</span></div>
-  </div><figcaption><b>Figure 3.</b> Your first project, open in VS Code. Click <b>Program.cs</b> to see the starter code.</figcaption></figure>
-  <ul class="dots">
-    <li><b>Program.cs</b> 💜 — your code. The only file you'll ever edit today.</li>
-    <li><b>Lab01_HelloWorld.csproj</b> — the project's settings card (like the Project in Visual Studio). Look, don't touch.</li>
-    <li><b>bin</b> &amp; <b>obj</b> — robot-made folders where compiled results land. Ignore them completely.</li>
-  </ul>
-  <details class="why"><summary>Hold on — where are <code>class Program</code> and <code>Main()</code> from the lecture?!</summary><div class="body">
-    <p>Excellent eye! 👀 Modern C# uses <b>top-level statements</b>: for simple programs, the compiler secretly writes the <code class="inline">class Program { static void Main() { … } }</code> wrapper around your code so you don't have to. Both styles are 100% real C#. The classic long form from the Week 1 deck is what truly happens underneath — and we'll write it ourselves when classes arrive in Week 9. For now: less boilerplate, more fun.</p>
+  </div><figcaption><b>Figure 2.</b> The same move without the mouse: press <span class="kbd">⇧ ⌘ P</span> / <span class="kbd">Ctrl ⇧ P</span>, type <b>clone</b>, choose <b>Git: Clone</b>, paste your link.</figcaption></figure>
+  <figure>
+    <div class="video"><iframe src="https://www.youtube-nocookie.com/embed/xTSuSMt8bKs" title="How to Clone a GitHub Repository in VS Code" loading="lazy" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe></div>
+    <figcaption><b>Video.</b> A two-minute clone walkthrough, on camera — same buttons you just clicked. <a href="https://www.youtube.com/watch?v=xTSuSMt8bKs" target="_blank" rel="noopener">Open on YouTube ↗</a></figcaption>
+  </figure>
+  <div class="bubble tip">🛠️ <b>If VS Code says Git isn't installed:</b> click the download link it offers (or visit <code class="inline">git-scm.com</code>), install with every default, restart VS Code, and repeat step 6. Macs often offer to install it automatically — click Install and wait.</div>
+  <details class="why"><summary>Why "Use this template" instead of just cloning the professor's repo?</summary><div class="body">
+    <p>Cloning the professor's repo would give you a copy you <b>can't push to</b> — like borrowing a library book and trying to write in it. The <b>Use this template</b> button mints a brand-new repository that <i>you</i> own. That matters because in this course, <b>pushing IS submitting</b>: every weekly milestone is you pushing to this one repo, all semester long.</p>
   </div></details>
   <button class="donebtn" data-lv="L4">Mark level complete</button>
 </section>
 
 <!-- ============ LEVEL 5 ============ -->
 <section class="level" id="L5" style="--c:#ffb703;--shadow:rgba(255,183,3,.22)">
-  <div class="lvhead"><div class="lvnum">5</div><h2>Press play ▶ — your first execution</h2><span class="emoji">🎬</span></div>
-  <p class="lead">Time to run it. No commands — just the play button.</p>
-  <ol class="steps">
-    <li>Make sure <b>Program.cs</b> is open.</li>
-    <li>Click the <b>▶ Run</b> button at the top-right of the editor (or press <span class="kbd">F5</span> — on a Mac keyboard that's <span class="kbd">fn F5</span>).</li>
-    <li>If VS Code asks which debugger, choose <b>C#</b>, then <b>C#: Lab01_HelloWorld</b>. It only asks the first time.</li>
-    <li>A panel opens at the bottom of VS Code — that's your program's stage. Watch it!</li>
-  </ol>
+  <div class="lvhead"><div class="lvnum">5</div><h2>Meet your project</h2><span class="emoji">🔎</span></div>
+  <p class="lead">Click the <b>Explorer</b> icon (top of the left bar). Your cloned folder holds a small family of files — here's who's who:</p>
   <figure><div class="shot mac vsc">
-    <div class="tbar"><i class="r"></i><i class="y"></i><i class="g"></i><span>Lab01_HelloWorld — running</span></div>
-    <div class="runrow">▶ <span class="runbtnmock">Run</span> <span>🐞 Debug</span></div>
-    <div class="panelhd"><b>TERMINAL</b> PROBLEMS &nbsp; OUTPUT &nbsp; DEBUG CONSOLE</div>
-    <div class="dark darkpad"><span class="grn">●</span> Building…
-<span class="ok-out">Hello, World!</span>
-
-Program exited with code 0.</div>
-    <div class="sbar"><span>main*</span><span class="grow"></span><span>C#</span></div>
-  </div><figcaption><b>Figure 4.</b> The bottom panel opens by itself and shows your program's output. "Exited with code 0" is programmer-speak for <i>everything went great</i>.</figcaption></figure>
-  <details class="why"><summary>What actually happened when I pressed ▶? (Week 1 flashback)</summary><div class="body">
-    <p>The whole pipeline from the lecture, in one second: your <b>C# source</b> → the <b>compiler</b> checked every character and translated it to <b>IL</b> → the <b>.NET runtime (JIT)</b> converted IL to machine code for your Mac's chip → the <b>CPU</b> executed it and the text appeared. 🧪 <b>Experiment:</b> delete the semicolon on line 2 and press ▶ again — the compiler refuses and underlines the exact spot in red. That's a <b>syntax error</b> being caught <i>before</i> anything runs. Fix it and feel powerful.</p>
+    <div class="tbar"><i class="r"></i><i class="y"></i><i class="g"></i><span>MainWindow.cs — mac109-project</span></div>
+    <div class="vmain">
+      <div class="actbar"><div class="ico on"></div><div class="ico"></div><div class="ico"></div><div class="ico"></div></div>
+      <div class="explorer">
+        <div class="hd">EXPLORER · MAC109-PROJECT</div>
+        <div class="it">📁 MyStudioApp</div>
+        <div class="it sel">&nbsp;&nbsp;C# MainWindow.cs</div>
+        <div class="it">&nbsp;&nbsp;C# Program.cs</div>
+        <div class="it dim">&nbsp;&nbsp;⚙ MyStudioApp.csproj</div>
+        <div class="it">📄 README.md</div>
+      </div>
+      <div class="dark"><div class="darkpad">
+<span class="cl"><span class="ln">1</span><span class="k">public class</span> <span class="t">MainWindow</span> <span class="p">:</span> <span class="t">Window</span></span>
+<span class="cl"><span class="ln">2</span><span class="p">{</span></span>
+<span class="cl"><span class="ln">3</span><span class="p">    </span><span class="k">public</span> <span class="m">MainWindow</span><span class="p">()</span></span>
+<span class="cl"><span class="ln">4</span><span class="p">    {</span></span>
+<span class="cl"><span class="ln">5</span><span class="p">        </span><span class="c">// your window is built right here…</span></span>
+      </div></div>
+    </div>
+  </div><figcaption><b>Figure 3.</b> One window, one file: <code class="inline">MainWindow.cs</code> is both the looks <i>and</i> the behavior.</figcaption></figure>
+  <ul class="dots">
+    <li><b>MainWindow.cs</b> — <b>YOUR window</b>: the interface and the logic, in one C# file. This is where you'll live for weeks.</li>
+    <li><b>Program.cs</b> — the ignition: it starts the app and shows your MainWindow. Look, don't touch.</li>
+    <li><b>MyStudioApp.csproj</b> — the recipe card: which .NET version to use and which packages the app needs — including <b>Avalonia</b>, the GUI framework itself.</li>
+    <li><b>README.md</b> — your project's front page on GitHub. You'll edit it in Level 10.</li>
+  </ul>
+  <details class="why"><summary>Wait — when do I install Avalonia UI?</summary><div class="body">
+    <p>Surprise: <b>you already arranged it</b>. Avalonia isn't an app you install like VS Code — it's a <b>package</b> your project asks for, listed in one line of the <code class="inline">.csproj</code> recipe. The very first time you press ▶ Run, the .NET SDK reads that recipe and downloads Avalonia automatically (you'll see "Restoring…" flash by — that's it arriving). This is how professionals ship libraries: the project carries its own shopping list, so it builds the same on every machine and every operating system.</p>
   </div></details>
-  <div class="bubble win">✅ <b>Checkpoint:</b> you saw <b>Hello, World!</b> appear. You just compiled and executed a real program. That's not a small thing — celebrate for 10 seconds. 🎉</div>
   <button class="donebtn" data-lv="L5">Mark level complete</button>
 </section>
 
 <!-- ============ LEVEL 6 ============ -->
 <section class="level" id="L6" style="--c:#7c3aed;--shadow:rgba(124,58,237,.18)">
-  <div class="lvhead"><div class="lvnum">6</div><h2>Write the REAL Lab01 program</h2><span class="emoji">✍️</span></div>
-  <p class="lead">Deliverable #1 needs a banner, a question, your user's name, and a personal goodbye. Select everything in <b>Program.cs</b> (<span class="kbd">⌘ A</span>), delete it, and type — or paste — this:</p>
-  <div class="copyblock"><div class="cbbar">Program.cs — Lab01_HelloWorld</div><button class="copybtn">Copy</button><pre>// Lab01_HelloWorld — MAC 109
-// Author: YOUR NAME — Fall 2026
-
-Console.WriteLine("==============================");
-Console.WriteLine("   Welcome to MAC 109!");
-Console.WriteLine("   Intro to Visual C#");
-Console.WriteLine("==============================");
-
-Console.Write("What is your name? ");
-string name = Console.ReadLine();
-
-Console.WriteLine("Nice to meet you, " + name + "!");
-Console.WriteLine("See you in class on Friday. Goodbye!");</pre></div>
-  <p class="lead" style="margin-top:10px">Save with <span class="kbd">⌘ S</span> — the little dot on the file tab turns into an ✕ when saved. Now, what does each piece do?</p>
-  <details class="why" open><summary>The <code>//</code> lines — comments</summary><div class="body"><p>Anything after <code class="inline">//</code> is a note for humans; the compiler skips it entirely. Every file you submit starts with your name and the lab number — it's also where you disclose any AI help, per the course policy. 🤖</p></div></details>
-  <details class="why"><summary>The four <code>WriteLine</code>s — the banner</summary><div class="body"><p>Each <code class="inline">Console.WriteLine("…")</code> prints its text and <b>ends the line</b>, so the four calls stack into a banner. Read one aloud right-to-left: "take this string → hand it to the WriteLine method → which lives inside the Console class." The dot means <i>look inside</i>. 🎁</p></div></details>
-  <details class="why"><summary><code>Console.Write</code> — the one WITHOUT "Line"</summary><div class="body"><p><code class="inline">Write</code> prints but does <b>not</b> end the line — so the cursor waits right after "What is your name? " and your user answers on the same line. This tiny difference is literally Exercise B2 in your Lab 1 page. 😉</p></div></details>
-  <details class="why"><summary><code>string name = Console.ReadLine();</code> — your first variable!</summary><div class="body"><p>Three things happen, right to left: <b>(1)</b> <code class="inline">ReadLine()</code> <i>pauses</i> the program and waits for typing + Return. <b>(2)</b> Whatever was typed comes back as a <b>string</b> (text). <b>(3)</b> <code class="inline">string name =</code> creates a labeled box 📦 in memory called <code class="inline">name</code> and stores the text inside. Variables — boxes with labels — are ALL of Week 2's lecture.</p></div></details>
-  <details class="why"><summary>The <code>+</code> in the goodbye line — text glue</summary><div class="body"><p>With strings, <code class="inline">+</code> doesn't do math — it <b>glues text</b> (concatenation): <code class="inline">"Nice to meet you, " + name + "!"</code> fuses into one sentence with the real name in the middle. Same symbol, different job depending on the data type. Remember this — it becomes a plot twist in the calculator. 🌀</p></div></details>
-  <div class="bubble tip">💡 <b>Feel the IntelliSense:</b> type <code class="inline">Console.</code> and pause — a menu of everything inside Console pops up. Arrow down to WriteLine, press <span class="kbd">Tab</span>. Pros never type full names; they let the editor finish. It also means fewer spelling bugs!</div>
+  <div class="lvhead"><div class="lvnum">6</div><h2>Press play ▶ — your first execution</h2><span class="emoji">🎬</span></div>
+  <p class="lead">Time for the pipeline from the Week 1 deck to run for real: compiler → IL → runtime → <i>your window on screen</i>.</p>
+  <ol class="steps">
+    <li>In the Explorer, click <code class="inline">MainWindow.cs</code> to open it.</li>
+    <li>Press <span class="kbd">F5</span> — or menu <b>Run ▸ Start Debugging</b>. If VS Code asks what kind of project, pick <b>C#</b>.</li>
+    <li>First run only: watch the bottom of the window say <b>Restoring…</b> — that's Avalonia downloading itself (needs internet, happens once), then <b>Building…</b></li>
+    <li>…and a real window appears: <b>My Studio App</b>. Move it. Resize it. Close it with the ✕ (that also stops the run).</li>
+  </ol>
+  <figure><div class="shot mac">
+    <div class="tbar"><i class="r"></i><i class="y"></i><i class="g"></i><span>My Studio App</span></div>
+    <div style="background:#f6f6f8;padding:26px 24px;font-family:var(--body)">
+      <p style="font-size:21px;font-weight:800;color:#222;margin-bottom:14px">Welcome to MAC 109!</p>
+      <div style="background:#fff;border:1.5px solid #9a9aa5;border-radius:4px;padding:8px 12px;color:#8a8a95;font-size:15px;max-width:340px;margin-bottom:14px">Type your name…</div>
+      <span style="display:inline-block;background:#e9e9ee;border:1.5px solid #b5b5c0;border-radius:4px;padding:8px 18px;font-size:15px;color:#222">Say Hello</span>
+    </div>
+  </div><figcaption><b>Figure 4.</b> What you're building toward by Level 8. On your very first run the window may hold just the welcome line — that's the starter shell, ready for you.</figcaption></figure>
+  <div class="bubble win">✅ <b>Checkpoint:</b> a window opened. Savor this: your computer just compiled and ran a cross-platform GUI that <i>you own</i>. A classmate pressing F5 on a different operating system gets the pixel-identical window. That's the whole point of our stack.</div>
+  <figure>
+    <div class="video"><iframe src="https://www.youtube-nocookie.com/embed/qcZSr2ejH5I" title="Build amazing cross-platform UI for .NET with Avalonia UI" loading="lazy" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe></div>
+    <figcaption><b>Optional video, for the curious.</b> A tour of what Avalonia — the framework you just ran — can really do, from Microsoft's OSS Spotlight. Pure inspiration fuel for your semester project. <a href="https://www.youtube.com/watch?v=qcZSr2ejH5I" target="_blank" rel="noopener">Open on YouTube ↗</a></figcaption>
+  </figure>
   <button class="donebtn" data-lv="L6">Mark level complete</button>
 </section>
 
 <!-- ============ LEVEL 7 ============ -->
 <section class="level" id="L7" style="--c:#3b82f6;--shadow:rgba(59,130,246,.18)">
-  <div class="lvhead"><div class="lvnum">7</div><h2>Talk to your program</h2><span class="emoji">💬</span></div>
-  <p class="lead">Press <b>▶ Run</b> again. This time your program stops and <i>waits for you</i>. Click inside the bottom panel, type your name, press Return:</p>
-  <figure><div class="shot mac">
-    <div class="tbar"><i class="r"></i><i class="y"></i><i class="g"></i><span>TERMINAL panel — Lab01_HelloWorld</span></div>
-    <div class="dark darkpad">==============================
-   Welcome to MAC 109!
-   Intro to Visual C#
-==============================
-What is your name? <span class="usr">Maria</span>
-<span class="ok-out">Nice to meet you, Maria!
-See you in class on Friday. Goodbye!</span></div>
-  </div><figcaption><b>Figure 5.</b> The program pauses at <code style="font-family:var(--mono)">ReadLine</code>, hears "Maria", and answers back. Your code just had its first conversation with a human. 🥹</figcaption></figure>
-  <div class="bubble win">🏅 <b>DELIVERABLE #1 — DONE!</b> Banner ✓ question ✓ name read ✓ personal goodbye ✓. This exact behavior is what the Lab 1 rubric checks.</div>
+  <div class="lvhead"><div class="lvnum">7</div><h2>Make it yours</h2><span class="emoji">✍️</span></div>
+  <p class="lead"><code class="inline">MainWindow.cs</code> is the exact file from the lecture's <b>First Code</b> tab — go click through those line-by-line explanations if you haven't. Now edit it for the first time:</p>
+  <div class="copyblock">
+    <div class="cbbar">MainWindow.cs — the starter shell (what you cloned)</div>
+    <button class="copybtn">Copy</button>
+    <pre><span class="k">using</span> Avalonia;
+<span class="k">using</span> Avalonia.Controls;
+
+<span class="k">namespace</span> MyStudioApp;
+
+<span class="k">public class</span> <span class="t">MainWindow</span> : <span class="t">Window</span>
+{
+    <span class="k">public</span> <span class="m">MainWindow</span>()
+    {
+        Title = <span class="s">"My Studio App"</span>;
+        Width = <span class="p">500</span>; Height = <span class="p">350</span>;
+
+        <span class="k">var</span> lblWelcome = <span class="k">new</span> <span class="t">TextBlock</span> { Text = <span class="s">"Welcome to MAC 109!"</span>, FontSize = <span class="p">22</span> };
+
+        Content = <span class="k">new</span> <span class="t">StackPanel</span>
+        {
+            Margin = <span class="k">new</span> <span class="t">Thickness</span>(<span class="p">20</span>), Spacing = <span class="p">12</span>,
+            Children = { lblWelcome }
+        };
+    }
+}</pre>
+  </div>
+  <ol class="steps">
+    <li>Change the <code class="inline">Title</code> string to <code class="inline">"My Studio App — YOUR NAME"</code>. Keep the quotes!</li>
+    <li>Change the welcome <code class="inline">Text</code> to a greeting of your own.</li>
+    <li>Press <span class="kbd">F5</span>. Your name is now in a title bar. Officially a developer. 😎</li>
+  </ol>
+  <details class="why"><summary>Remind me — why no separate design file?</summary><div class="body">
+    <p>Because in this course, <b>the UI is C# objects</b>. <code class="inline">new TextBlock { … }</code> creates a control and sets its properties in one move (an <b>object initializer</b>), and the <code class="inline">StackPanel</code>'s <code class="inline">Children</code> list <i>is</i> your layout — top-to-bottom, in list order. One file, one language, and every edit you just made was real C#.</p>
+  </div></details>
   <button class="donebtn" data-lv="L7">Mark level complete</button>
 </section>
 
 <!-- ============ LEVEL 8 ============ -->
 <section class="level" id="L8" style="--c:#ec4899;--shadow:rgba(236,72,153,.18)">
-  <div class="lvhead"><div class="lvnum">8</div><h2>Build the calculator</h2><span class="emoji">🧮</span></div>
-  <p class="lead">Second project, same magic: <span class="kbd">⇧ ⌘ P</span> → <b>.NET: New Project…</b> → <b>Console App</b> → name it <code class="inline">Lab02_Calculator</code> → same <b>MAC109</b> folder → Open. Then replace Program.cs with:</p>
-  <div class="copyblock"><div class="cbbar">Program.cs — Lab02_Calculator</div><button class="copybtn">Copy</button><pre>// Lab02_Calculator — MAC 109
-// Author: YOUR NAME — Fall 2026
+  <div class="lvhead"><div class="lvnum">8</div><h2>Build the Greeter</h2><span class="emoji">💬</span></div>
+  <p class="lead">The beating heart of Milestone 1: a button that <b>answers</b>. You'll add four things — two <b>fields</b>, a <b>Button</b>, and the <b>event wiring</b> — turning the shell into the lecture's full program:</p>
+  <div class="copyblock">
+    <div class="cbbar">MainWindow.cs — the complete Greeter (your target)</div>
+    <button class="copybtn">Copy</button>
+    <pre><span class="k">using</span> Avalonia;
+<span class="k">using</span> Avalonia.Controls;
+<span class="k">using</span> Avalonia.Interactivity;
 
-Console.WriteLine("=== MAC 109 Calculator ===");
+<span class="k">namespace</span> MyStudioApp;
 
-Console.Write("First number: ");
-double a = Convert.ToDouble(Console.ReadLine());
+<span class="k">public class</span> <span class="t">MainWindow</span> : <span class="t">Window</span>
+{
+    <span class="t">TextBox</span> txtName = <span class="k">new</span> <span class="t">TextBox</span> { Watermark = <span class="s">"Type your name…"</span> };
+    <span class="t">TextBlock</span> lblGreeting = <span class="k">new</span> <span class="t">TextBlock</span> { FontSize = <span class="p">18</span> };
 
-Console.Write("Second number: ");
-double b = Convert.ToDouble(Console.ReadLine());
+    <span class="k">public</span> <span class="m">MainWindow</span>()
+    {
+        Title = <span class="s">"My Studio App — Maria"</span>;
+        Width = <span class="p">500</span>; Height = <span class="p">350</span>;
 
-Console.WriteLine(a + " + " + b + " = " + (a + b));
-Console.WriteLine(a + " - " + b + " = " + (a - b));
-Console.WriteLine(a + " * " + b + " = " + (a * b));
-Console.WriteLine(a + " / " + b + " = " + (a / b));</pre></div>
+        <span class="k">var</span> lblWelcome = <span class="k">new</span> <span class="t">TextBlock</span> { Text = <span class="s">"Welcome to MAC 109!"</span>, FontSize = <span class="p">22</span> };
+        <span class="k">var</span> btnGreet = <span class="k">new</span> <span class="t">Button</span> { Content = <span class="s">"Say Hello"</span> };
+        btnGreet.Click += BtnGreet_Click;
+
+        Content = <span class="k">new</span> <span class="t">StackPanel</span>
+        {
+            Margin = <span class="k">new</span> <span class="t">Thickness</span>(<span class="p">20</span>), Spacing = <span class="p">12</span>,
+            Children = { lblWelcome, txtName, btnGreet, lblGreeting }
+        };
+    }
+
+    <span class="k">void</span> <span class="m">BtnGreet_Click</span>(<span class="k">object</span> sender, <span class="t">RoutedEventArgs</span> e)
+    {
+        lblGreeting.Text = <span class="s">"Hello, "</span> + txtName.Text + <span class="s">"!"</span>;
+    }
+}</pre>
+  </div>
+  <ol class="steps">
+    <li>Add the third <code class="inline">using</code> line at the top — the handler's <code class="inline">RoutedEventArgs</code> lives there.</li>
+    <li>Add the two <b>field</b> lines (<code class="inline">txtName</code>, <code class="inline">lblGreeting</code>) just above the constructor. Type them — feel the IntelliSense menu appear after every dot and <code class="inline">new</code>.</li>
+    <li>Inside the constructor, add the <code class="inline">btnGreet</code> line and the <code class="inline">Click +=</code> wiring line.</li>
+    <li>Update the <code class="inline">Children</code> list to hold all four controls, in order.</li>
+    <li>Add the <code class="inline">BtnGreet_Click</code> method after the constructor. Then <span class="kbd">F5</span> ▸ type your name ▸ click <b>Say Hello</b>.</li>
+  </ol>
   <h2 style="font-size:22px;margin:18px 0 4px;font-family:var(--disp)">Three new ideas 💥</h2>
-  <details class="why" open><summary><code>double</code> — a box for decimal numbers</summary><div class="body"><p><code class="inline">string</code> boxes hold text; <code class="inline">double</code> boxes hold numbers that can have decimals (3, 3.5, −41.07). Math needs number boxes. <code class="inline">double a</code> and <code class="inline">double b</code> give us two. 📦📦</p></div></details>
-  <details class="why"><summary><code>Convert.ToDouble(...)</code> — the crucial transformation</summary><div class="body"><p>Everything a keyboard produces is <b>text</b>. Type 5, and <code class="inline">ReadLine()</code> hands you the <i>string</i> "5" — and here's the trap: <code class="inline">"5" + "3"</code> glues into <b>"53"</b>! 😱 <code class="inline">Convert.ToDouble</code> transforms text-"5" into number-5.0 so real math can happen. Read the line inside-out: read the text → convert to double → store in box <code class="inline">a</code>. (This is quiz question 3 in Lab 1 — now you own it.)</p></div></details>
-  <details class="why"><summary>Why the parentheses in <code>(a + b)</code>?</summary><div class="body"><p>That line mixes both jobs of <code class="inline">+</code>: gluing text AND adding numbers. The parentheses force <code class="inline">(a + b)</code> to be computed as <b>math first</b>; the answer then gets glued into the sentence. 🧪 <b>Try the sabotage:</b> delete those parentheses, run with 12 and 4, and you'll get <code class="inline">12 + 4 = 124</code> — everything glued left-to-right as text! Put them back. Breaking things on purpose is genuinely how programmers learn.</p></div></details>
-  <details class="why"><summary>Why don't −, ×, ÷ need the same trick?</summary><div class="body"><p>Because <code class="inline">-</code>, <code class="inline">*</code>, <code class="inline">/</code> mean <i>nothing</i> for text — C# has no choice but to treat them as math. Only <code class="inline">+</code> lives a double life.</p></div></details>
+  <ul class="dots">
+    <li><b>Fields vs var:</b> <code class="inline">txtName</code> and <code class="inline">lblGreeting</code> are declared at class level (<b>fields</b>) so the handler can reach them later. <code class="inline">lblWelcome</code> and <code class="inline">btnGreet</code> are <code class="inline">var</code> locals — nobody needs them after setup.</li>
+    <li><b>The += subscription:</b> <code class="inline">btnGreet.Click += BtnGreet_Click;</code> means "when this button is clicked, run that method." Your program now <i>waits</i> for the user — that's event-driven programming.</li>
+    <li><b>Read → glue → write:</b> the handler reads <code class="inline">txtName.Text</code>, glues strings with <code class="inline">+</code>, and writes <code class="inline">lblGreeting.Text</code>. That rhythm is 90% of GUI code.</li>
+  </ul>
+  <div class="bubble win">✅ <b>DELIVERABLE:</b> the greeting appears <i>on the window itself</i>. That is the working core of Milestone 1 — everything left is polish and publishing.</div>
   <button class="donebtn" data-lv="L8">Mark level complete</button>
 </section>
 
 <!-- ============ LEVEL 9 ============ -->
 <section class="level" id="L9" style="--c:#06b6a4;--shadow:rgba(6,182,164,.18)">
   <div class="lvhead"><div class="lvnum">9</div><h2>Try to break it 😈</h2><span class="emoji">🔨</span></div>
-  <p class="lead">Press <b>▶ Run</b>, feed it 12 and 4, and enjoy the happy path:</p>
-  <figure><div class="shot mac">
-    <div class="tbar"><i class="r"></i><i class="y"></i><i class="g"></i><span>TERMINAL panel — Lab02_Calculator</span></div>
-    <div class="dark darkpad">=== MAC 109 Calculator ===
-First number: <span class="usr">12</span>
-Second number: <span class="usr">4</span>
-<span class="ok-out">12 + 4 = 16
-12 - 4 = 8
-12 * 4 = 48
-12 / 4 = 3</span></div>
-  </div><figcaption><b>Figure 6.</b> All four operations, neatly labeled — exactly what the rubric wants.</figcaption></figure>
-  <p class="lead">Now run it three more times, professional-tester style, and watch what happens:</p>
-  <ul class="dots">
-    <li>🔢 <b>Decimals:</b> 7.5 and 2.5 — doubles handle them like champions.</li>
-    <li>🕳️ <b>Divide by zero:</b> 10 and 0 — plot twist: no crash! Doubles answer <code class="inline">∞</code> (Infinity). We'll guard against this properly with <code class="inline">if</code> statements in Week 3.</li>
-    <li>🍌 <b>A word:</b> type <i>banana</i> as the first number — CRASH! <code class="inline">System.FormatException</code>. Read the red message: it names the exact problem. Surviving bad input is Week 12's superpower (try/catch); for now, crashing honestly is fine.</li>
-  </ul>
-  <div class="bubble win">🏅 <b>DELIVERABLE #2 — DONE!</b> Bonus style points: add a comment noting the two limits you discovered. That's what real engineers do.</div>
+  <p class="lead">Professionals test on purpose. Run three sabotage experiments — and after each one, <b>undo</b> (<span class="kbd">⌘ Z</span> / <span class="kbd">Ctrl Z</span>) and confirm F5 works again:</p>
+  <ol class="steps">
+    <li>🔡 Change <code class="inline">TextBlock</code> to <code class="inline">textBlock</code> (lowercase t). A red squiggle appears instantly, and the <b>Problems</b> panel says the type <code class="inline">textBlock</code> could not be found. C# is case-sensitive — Rule 2 from the lecture.</li>
+    <li>✂️ Delete the semicolon at the end of the <code class="inline">Title</code> line. The Problems panel points at the exact spot: <b>; expected</b>.</li>
+    <li>💥 Delete one closing quote from <code class="inline">"Say Hello"</code>. Suddenly <i>many</i> errors appear at once — one missing quote confuses everything after it. The pro move: <b>fix the FIRST error first</b>; the rest usually vanish.</li>
+    <li>🕳️ Everything fixed? One last experiment, no code broken: run the app, leave the box empty, click <b>Say Hello</b>. "Hello, !" — slightly tragic. Nothing crashed, but it's not smart either. Week 3's <code class="inline">if</code> statement fixes exactly this. Remember this moment.</li>
+  </ol>
+  <details class="why"><summary>Why celebrate errors?</summary><div class="body">
+    <p>Because these are <b>compile-time errors</b> — the compiler catching mistakes <i>before</i> anything runs, with a file, a line number, and a reason. That's a gift. Reading error messages calmly (top to bottom, first error first) is the single most valuable habit you'll build this semester. The squiggle is not judging you; it's helping.</p>
+  </div></details>
   <button class="donebtn" data-lv="L9">Mark level complete</button>
 </section>
 
 <!-- ============ LEVEL 10 ============ -->
 <section class="level" id="L10" style="--c:#ffb703;--shadow:rgba(255,183,3,.22)">
-  <div class="lvhead"><div class="lvnum">10</div><h2>Publish to GitHub — with buttons only</h2><span class="emoji">🚀</span></div>
-  <p class="lead">Your GitHub repo IS your submission. VS Code can create it, upload it, everything — no commands. First, open the whole course folder so both labs travel together: <b>File ▸ Open Folder…</b> ▸ choose <b>Documents ▸ MAC109</b> ▸ Open.</p>
+  <div class="lvhead"><div class="lvnum">10</div><h2>Push your milestone — with buttons only</h2><span class="emoji">🚀</span></div>
+  <p class="lead">In this course, <b>pushing IS submitting</b>. Two clicks send your work to GitHub, where it's safe forever and visible to your professor.</p>
   <ol class="steps">
-    <li>Click the <b>Source Control</b> icon in the left bar (three connected dots) — or <span class="kbd">⌃ ⇧ G</span>.</li>
-    <li>Click <b>Initialize Repository</b>.</li>
-    <li>In the Message box, type a real description: <code class="inline">Lab 1: HelloWorld and Calculator</code> — then click the big <b>✓ Commit</b> button. If asked "stage all changes?", click <b>Yes</b>.</li>
-    <li>Click <b>Publish Branch</b>. VS Code asks you to sign in to GitHub — click <b>Allow</b> and finish in the browser (one time only).</li>
-    <li>Choose <b>Publish to a PUBLIC repository</b> and name it <code class="inline">MAC109-labs</code>.</li>
-    <li>Done! Click the popup's <b>Open on GitHub</b> — both project folders are online. Copy that page's URL: it's what you paste into Lab 1 and Brightspace. 🔗</li>
+    <li>In the Explorer, open <code class="inline">README.md</code> and make it yours: your <b>name</b>, the course, and — decision time! — your <b>semester domain app</b>: Student Management, Library, Restaurant Ordering, Hotel Reservation, Banking, or Inventory. This choice is part of Milestone 1. Save with <span class="kbd">⌘ S</span> / <span class="kbd">Ctrl S</span>.</li>
+    <li>Click the <b>Source Control</b> icon (the branching lines). Your edited files are listed under <b>Changes</b>.</li>
+    <li>In the message box, type: <code class="inline">Milestone 1: working GUI shell</code></li>
+    <li>Click <b>✓ Commit</b> ▸ if VS Code asks about staging, click <b>Yes</b>.</li>
+    <li>Click <b>Sync Changes</b>. A browser window opens — <b>Sign in with GitHub</b> ▸ <b>Authorize</b>. (One time only; after this it's a single click.)</li>
+    <li>Refresh your repo page on <code class="inline">github.com</code> — your code and README are live. 🎉 That page's URL is your submission: paste it on <b>Brightspace</b>.</li>
   </ol>
-  <figure><div class="shot mac">
-    <div class="tbar"><i class="r"></i><i class="y"></i><i class="g"></i><span>Visual Studio Code — Source Control</span></div>
-    <div style="background:#252526;padding:14px 16px;font-family:var(--body)">
-      <div style="background:#3c3c3c;border-radius:6px;color:#eee;font-size:13px;padding:8px 10px">Lab 1: HelloWorld and Calculator</div>
-      <div style="background:#0e639c;color:#fff;text-align:center;border-radius:6px;padding:8px;margin-top:10px;font-weight:800;font-size:14px">✓ Commit</div>
-      <div style="background:#2ea043;color:#fff;text-align:center;border-radius:6px;padding:8px;margin-top:8px;font-weight:800;font-size:14px">☁ Publish Branch</div>
-      <div style="color:#9a9a9a;font-size:12px;margin-top:12px">Changes (14) · Lab01_HelloWorld/Program.cs · Lab02_Calculator/Program.cs · …</div>
-    </div>
-  </div><figcaption><b>Figure 7.</b> The Source Control view: message → Commit → Publish Branch. Three clicks and you're a published developer.</figcaption></figure>
-  <details class="why"><summary>What do "commit" and "publish" actually mean?</summary><div class="body"><p><b>Commit</b> = take a labeled snapshot 📸 of your code at this moment ("Lab 1 finished"). <b>Publish</b> = upload the snapshots to GitHub, where the world (and your professor) can see them. Later in the course you'll commit after every work session — a time machine for your code.</p></div></details>
-  <div class="bubble tip">📬 <b>Final move:</b> open <b>lab1.html</b>, complete the interactive exercises, generate your submission code, save the PDF — and submit the repo link + code + PDF on Brightspace before class on <b>Friday, Oct 9</b>. See you there!</div>
+  <div class="bubble tip">💡 <b>Commit early, commit often.</b> Every week's milestone is exactly these steps with a new message — and your commit history counts toward participation. A dead laptop can't eat homework that lives on GitHub.</div>
+  <details class="why"><summary>Commit vs push — 15-second version</summary><div class="body">
+    <p><b>Commit</b> = a labeled snapshot 📸 of your code on <i>your</i> machine. <b>Push</b> (part of Sync Changes) = uploading your snapshots to GitHub, where they survive spilled coffee, stolen backpacks, and "my computer died." A commit without a push is a photo saved on a camera nobody can see.</p>
+  </div></details>
   <button class="donebtn" data-lv="L10">Mark level complete</button>
 </section>
 
 </main>
 </div>
 
-<footer>MAC 109 · Introduction to Visual C# Programming · LaGuardia Community College (CUNY) · Prof. K. Kassou — Weeks 1–2 practical, Mac + VS Code, click-only edition. On the Windows lab machines, the same programs are built in Visual Studio (see the Week 1 deck); the C# is identical.</footer>
+<footer>
+  <p>MAC 109 · Introduction to Visual C# Programming · LaGuardia Community College (CUNY) · Prof. K. Kassou — Week 1 practical: install, clone, build, push. The steps on this page are <b>identical on Windows, macOS, and Linux</b> — that's the point of our stack. Stuck on any level? That's normal — bring it to office hours or post on Brightspace (setup problems are fixable in minutes).</p>
+</footer>
 
 <script>
 (function(){
