@@ -4,626 +4,685 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MAC 109 · In-Class Studio #1 — Your Project Is Born · VS Code + Avalonia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:ital,wght@0,400;0,600;0,800;1,400&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-:root{
-  --paper:#EFF3FA; --ink:#201A2E; --muted:#5a5470;
-  --vs:#1273CF; --vs-deep:#0A4E8F; --win:#0078D4; --go:#107C10; --warn:#C50F1F;
-  --card:#ffffff; --edge:#d9dcec;
-  --ide:#1E1E1E; --ide2:#252526; --ide3:#333337; --ide-t:#D4D4D4; --ide-dim:#8a8a92;
-  --code-k:#569CD6; --code-s:#CE9178; --code-c:#6A9955; --code-t:#4EC9B0; --code-m:#DCDCAA; --code-n:#B5CEA8;
-  --radius:10px;
-  font-size:16px;
-}
-*{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{
-  margin:0; background:var(--paper); color:var(--ink);
-  font-family:"Segoe UI", "Segoe UI Variable Text", system-ui, -apple-system, sans-serif;
-  line-height:1.6;
-}
-code,pre,kbd{font-family:"Cascadia Code","Cascadia Mono",Consolas,"SF Mono",Menlo,monospace}
-a{color:var(--win)}
-img{max-width:100%}
-h1,h2,h3{line-height:1.2}
+  :root{
+    --bg:#FFF9F2; --ink:#2d2436; --soft:#6b5f7a;
+    --purple:#7c3aed; --purple-d:#5b21b6; --coral:#ff6b6b; --sun:#ffb703;
+    --teal:#06b6a4; --sky:#3b82f6; --pink:#ec4899; --lime:#84cc16;
+    --card:#ffffff; --line:#efe4d8;
+    --disp:'Baloo 2','Nunito',system-ui,sans-serif;
+    --body:'Nunito',system-ui,sans-serif;
+    --mono:'JetBrains Mono','Cascadia Code','Consolas',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:18px;line-height:1.65}
+  ::selection{background:#ffe29a}
 
-/* ---------- floating glyph backdrop ---------- */
-.glyphs{position:fixed; inset:0; overflow:hidden; pointer-events:none; z-index:0}
-.glyphs span{position:absolute; font-weight:800; color:var(--vs); opacity:.06; user-select:none}
-@media (prefers-reduced-motion:no-preference){
-  .glyphs span{animation:drift 26s linear infinite}
-  @keyframes drift{from{transform:translateY(105vh) rotate(-8deg)}to{transform:translateY(-15vh) rotate(8deg)}}
-}
+  #scrollbar{position:fixed;top:0;left:0;height:6px;width:0;z-index:60;background:linear-gradient(90deg,var(--purple),var(--pink),var(--sun));border-radius:0 4px 4px 0}
 
-/* ---------- hero ---------- */
-.hero{position:relative; z-index:1; background:linear-gradient(150deg,var(--vs-deep) 0%,var(--vs) 55%,#3FA2F7 100%); color:#fff; padding:3.2rem 1.2rem 2.6rem}
-.hero .wrap{max-width:860px;margin:0 auto}
-.kicker{display:inline-block; background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.28); border-radius:999px; padding:.28rem .9rem; font-size:.8rem; letter-spacing:.04em; font-weight:600}
-.hero h1{font-size:clamp(1.9rem,4.5vw,3rem); font-weight:800; margin:.9rem 0 .6rem}
-.hero p.lead{font-size:1.08rem; max-width:46rem; color:#EDE6F7; margin:0 0 1.2rem}
-.hero .chips{display:flex; flex-wrap:wrap; gap:.55rem}
-.hero .chip{background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.25); border-radius:8px; padding:.4rem .75rem; font-size:.85rem}
+  /* ============ HERO ============ */
+  #hero{background:linear-gradient(135deg,#7c3aed 0%,#a855f7 45%,#ec4899 100%);color:#fff;padding:64px 24px 84px;position:relative;overflow:hidden}
+  #hero .float{position:absolute;font-family:var(--mono);font-weight:700;opacity:.16;user-select:none;animation:bob 6s ease-in-out infinite}
+  @keyframes bob{0%,100%{transform:translateY(0) rotate(var(--r,0deg))}50%{transform:translateY(-16px) rotate(var(--r,0deg))}}
+  @media (prefers-reduced-motion:reduce){.float{animation:none}}
+  #hero .in{max-width:1100px;margin:0 auto;position:relative}
+  #hero .badge{display:inline-block;background:rgba(255,255,255,.2);border:2px solid rgba(255,255,255,.5);border-radius:999px;padding:6px 18px;font-weight:800;font-size:15px;letter-spacing:.04em;margin-bottom:18px}
+  #hero h1{font-family:var(--disp);font-weight:800;font-size:clamp(38px,6vw,64px);line-height:1.08;margin-bottom:14px;text-shadow:0 3px 0 rgba(0,0,0,.12)}
+  #hero p.tag{font-size:clamp(18px,2.4vw,23px);max-width:38em;opacity:.95}
+  #hero .meta{display:flex;gap:14px;flex-wrap:wrap;margin-top:26px}
+  #hero .chip{background:#fff;color:var(--purple-d);border-radius:14px;padding:10px 18px;font-weight:800;font-size:15.5px;box-shadow:0 6px 0 rgba(0,0,0,.15)}
+  #hero .chip span{font-size:20px;margin-right:6px}
 
-/* ---------- layout ---------- */
-main{position:relative; z-index:1; max-width:860px; margin:0 auto; padding:1.4rem 1.2rem 4rem}
+  /* ============ LAYOUT ============ */
+  #wrap{max-width:1180px;margin:-42px auto 0;display:grid;grid-template-columns:270px 1fr;gap:28px;padding:0 24px 100px;position:relative}
+  @media(max-width:980px){#wrap{grid-template-columns:1fr}#quest{position:static;max-height:none}}
+  #quest{position:sticky;top:22px;align-self:start;max-height:calc(100vh - 44px);overflow:auto;background:var(--card);border:3px solid var(--ink);border-radius:22px;padding:18px;box-shadow:8px 8px 0 rgba(45,36,54,.15)}
+  #quest h3{font-family:var(--disp);font-size:20px;margin-bottom:4px}
+  #quest .sub{font-size:13.5px;color:var(--soft);margin-bottom:12px}
+  #questBar{height:14px;background:#f1e8dc;border:2px solid var(--ink);border-radius:99px;overflow:hidden;margin-bottom:6px}
+  #questFill{height:100%;width:0;background:linear-gradient(90deg,var(--teal),var(--lime));transition:width .4s}
+  #questPct{font-weight:800;font-size:13px;color:var(--teal);margin-bottom:12px;display:block}
+  .qitem{display:flex;align-items:center;gap:10px;padding:7px 6px;border-radius:12px;text-decoration:none;color:var(--ink);font-weight:600;font-size:14.5px}
+  .qitem:hover{background:#f6efe6}
+  .qitem .dot{flex:0 0 auto;width:26px;height:26px;border-radius:50%;border:2.5px solid var(--ink);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;background:#fff}
+  .qitem.done .dot{background:var(--lime);border-color:var(--lime)}
+  .qitem.done{color:#5c8a12;text-decoration:line-through;text-decoration-thickness:2px}
 
-/* ---------- quest map (taskbar) ---------- */
-.map{background:var(--card); border:1px solid var(--edge); border-radius:var(--radius); padding:1.1rem 1.2rem 1.3rem; margin-top:-2.2rem; box-shadow:0 10px 30px rgba(59,30,94,.14)}
-.map h2{margin:.1rem 0 .2rem; font-size:1.15rem}
-.map p{margin:.1rem 0 .8rem; color:var(--muted); font-size:.92rem}
-.bar{height:12px; background:#e5e2f2; border-radius:999px; overflow:hidden; margin-bottom:.35rem}
-.bar i{display:block; height:100%; width:0%; background:linear-gradient(90deg,var(--win),var(--vs)); border-radius:999px; transition:width .45s ease}
-.pct{font-size:.8rem; color:var(--muted); margin-bottom:.7rem}
-.taskbar{display:flex; flex-wrap:wrap; gap:.45rem}
-.task{display:flex; align-items:center; gap:.45rem; text-decoration:none; color:var(--ink); background:#f2f1fa; border:1px solid var(--edge); border-radius:8px; padding:.38rem .62rem; font-size:.83rem; font-weight:600; transition:transform .12s ease, background .2s}
-.task:hover{transform:translateY(-2px); background:#e9e6f6}
-.task .n{display:grid; place-items:center; width:1.35rem; height:1.35rem; border-radius:6px; background:var(--vs); color:#fff; font-size:.75rem; flex:none}
-.task.done{background:#e7f4e8; border-color:#bfe0c2}
-.task.done .n{background:var(--go)}
-.task.done .n::before{content:"✓"}
-.task:not(.done) .n::before{content:attr(data-n)}
+  main{min-width:0}
+  section.level{background:var(--card);border:3px solid var(--ink);border-radius:26px;padding:30px 32px;margin-bottom:34px;box-shadow:10px 10px 0 var(--shadow,rgba(124,58,237,.18));scroll-margin-top:24px}
+  @media(max-width:640px){section.level{padding:22px 18px}}
+  .lvhead{display:flex;align-items:center;gap:16px;margin-bottom:14px;flex-wrap:wrap}
+  .lvnum{flex:0 0 auto;width:58px;height:58px;border-radius:18px;background:var(--c,var(--purple));color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--disp);font-weight:800;font-size:24px;box-shadow:4px 4px 0 rgba(45,36,54,.25);transform:rotate(-4deg)}
+  .lvhead h2{font-family:var(--disp);font-weight:800;font-size:clamp(24px,3.4vw,32px);line-height:1.1}
+  .lvhead .emoji{font-size:32px}
+  .lead{color:var(--soft);font-size:18px;max-width:60em;margin-bottom:14px}
+  .lead b{color:var(--ink)}
 
-/* ---------- level windows ---------- */
-.level{background:var(--card); border:1px solid var(--edge); border-radius:var(--radius); margin:1.7rem 0; box-shadow:0 6px 22px rgba(32,26,46,.08); overflow:hidden; scroll-margin-top:1rem}
-.titlebar{display:flex; align-items:center; gap:.7rem; padding:.55rem .9rem; background:linear-gradient(90deg,var(--vs-deep),var(--vs)); color:#fff}
-.level.done .titlebar{background:linear-gradient(90deg,#0c5d0c,var(--go))}
-.titlebar .lvl{display:grid; place-items:center; min-width:1.7rem; height:1.7rem; border-radius:7px; background:rgba(255,255,255,.18); font-weight:800; font-size:.9rem}
-.titlebar h2{flex:1; margin:0; font-size:1.06rem; font-weight:700}
-.titlebar .emo{font-size:1.15rem}
-.tbtns{display:flex; gap:.45rem; font-size:.8rem; opacity:.85; letter-spacing:.1em}
-.body{padding:1.15rem 1.25rem 1.35rem}
-.body>p:first-child{margin-top:.2rem}
-.level ol{padding-left:1.25rem; margin:.7rem 0}
-.level ol li{margin:.45rem 0}
-.level ul{padding-left:1.2rem}
-.level ul li{margin:.4rem 0}
-kbd{background:#eceaf6; border:1px solid #cfcbe6; border-bottom-width:2px; border-radius:6px; padding:.08rem .42rem; font-size:.85em}
-.small{font-size:.87rem; color:var(--muted)}
+  .bubble{border-radius:18px;padding:16px 20px;margin:16px 0;font-size:16.5px;border:2.5px solid}
+  .bubble.tip{background:#fff7e0;border-color:var(--sun);color:#7a5b00}
+  .bubble.win{background:#e9fbf0;border-color:var(--teal);color:#0c6b5d;font-weight:600}
+  .bubble.win b{font-size:18px}
+  .bubble.alert{background:#ffeef0;border-color:var(--coral);color:#8f1d2a}
 
-/* checkpoint + medal + tip */
-.check{border-left:4px solid var(--go); background:#f0f8f0; border-radius:0 8px 8px 0; padding:.7rem .9rem; margin:1rem 0}
-.medal{border:1.5px solid #e6c34a; background:#fdf7e3; border-radius:8px; padding:.75rem .95rem; margin:1rem 0; font-size:.95rem}
-.tip{border-left:4px solid var(--win); background:#eef6fd; border-radius:0 8px 8px 0; padding:.7rem .9rem; margin:1rem 0; font-size:.93rem}
-.danger{border-left:4px solid var(--warn); background:#fdefef; border-radius:0 8px 8px 0; padding:.7rem .9rem; margin:1rem 0; font-size:.93rem}
+  ol.steps{margin:10px 0 10px 6px;counter-reset:st;list-style:none}
+  ol.steps li{position:relative;padding:8px 0 8px 44px;counter-increment:st;font-size:17.5px}
+  ol.steps li::before{content:counter(st);position:absolute;left:0;top:6px;width:30px;height:30px;border-radius:50%;background:var(--c,var(--purple));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px}
+  ul.dots{margin:10px 0 10px 24px}
+  ul.dots li{margin-bottom:8px;font-size:17px}
 
-/* explainer accordions */
-details{border:1px solid var(--edge); border-radius:8px; margin:.8rem 0; background:#faf9fd; overflow:hidden}
-details summary{cursor:pointer; padding:.65rem .9rem; font-weight:700; font-size:.95rem; list-style:none; position:relative; padding-right:2.2rem}
-details summary::after{content:"+"; position:absolute; right:.9rem; top:.5rem; font-size:1.15rem; color:var(--vs); transition:transform .2s}
-details[open] summary::after{transform:rotate(45deg)}
-details .dbody{padding:0 .95rem .85rem; font-size:.95rem}
-details summary::-webkit-details-marker{display:none}
+  .kbd{font-family:var(--mono);background:#2d2436;color:#fff;border-radius:8px;padding:3px 10px;font-size:14.5px;white-space:nowrap;box-shadow:0 3px 0 #000}
+  code.inline{font-family:var(--mono);background:#f3ebff;color:var(--purple-d);padding:2px 8px;border-radius:8px;font-size:.88em;font-weight:700}
 
-/* mark complete */
-.markwrap{margin-top:1.2rem; display:flex; justify-content:flex-end}
-.mark{appearance:none; border:1.5px solid var(--vs); background:#fff; color:var(--vs); font:inherit; font-weight:700; font-size:.92rem; border-radius:8px; padding:.5rem 1.05rem; cursor:pointer; transition:all .15s}
-.mark:hover{background:#f4effb}
-.level.done .mark{background:var(--go); border-color:var(--go); color:#fff}
-.mark:focus-visible,.task:focus-visible,.copy:focus-visible{outline:3px solid var(--win); outline-offset:2px}
+  .donebtn{display:inline-flex;align-items:center;gap:8px;background:var(--lime);color:#2c4404;border:3px solid var(--ink);border-radius:16px;padding:10px 22px;font-family:var(--disp);font-weight:800;font-size:17px;cursor:pointer;box-shadow:4px 4px 0 rgba(45,36,54,.25);margin-top:14px}
+  .donebtn:hover{transform:translate(-1px,-1px)}
+  .donebtn.on{background:#d9f99d}
+  .donebtn.on::after{content:" ✓ done!"}
 
-/* ---------- code blocks ---------- */
-.codewrap{position:relative; margin:.9rem 0}
-.codehead{display:flex; align-items:center; justify-content:space-between; background:var(--ide3); color:#cfcfd6; border-radius:8px 8px 0 0; padding:.4rem .8rem; font-size:.8rem}
-.copy{appearance:none; border:1px solid #55555e; background:#2a2a30; color:#e8e8ee; border-radius:6px; padding:.18rem .65rem; font:inherit; font-size:.78rem; cursor:pointer}
-.copy:hover{background:#3a3a44}
-pre.code{margin:0; background:var(--ide); color:var(--ide-t); border-radius:0 0 8px 8px; padding:.9rem 1rem; overflow-x:auto; font-size:.86rem; line-height:1.55}
-.k{color:var(--code-k)} .s{color:var(--code-s)} .c{color:var(--code-c)} .t{color:var(--code-t)} .m{color:var(--code-m)} .n{color:var(--code-n)}
+  /* ============ FIGURES ============ */
+  figure{margin:18px 0}
+  figcaption{font-size:14.5px;color:var(--soft);margin-top:9px}
+  figcaption b{color:var(--purple)}
+  .shot{border:3px solid var(--ink);border-radius:16px;overflow:hidden;box-shadow:7px 7px 0 rgba(45,36,54,.2)}
+  .winbar{background:linear-gradient(#4b4b52,#3a3a40);padding:8px 12px;display:flex;align-items:center;gap:8px;color:#ddd;font-size:13px;font-weight:600}
+  .winbar .sq{margin-left:auto;letter-spacing:5px;font-family:var(--mono);color:#aaa}
+  .dark{background:#1e1e1e;font-family:var(--mono);font-size:13.5px;line-height:1.75;color:#d4d4d4}
+  .darkpad{padding:14px 18px;overflow-x:auto}
+  .k{color:#569cd6}.t{color:#4ec9b0}.s{color:#ce9178}.c{color:#6a9955}.m{color:#dcdcaa}.n{color:#b5cea8}.p{color:#d4d4d4}.x{color:#808080}.at{color:#9cdcfe}
+  .cl{display:flex;white-space:pre}
+  .cl .ln{width:34px;color:#5a5a5a;text-align:right;padding-right:16px;flex:0 0 auto;user-select:none}
 
-/* ---------- IDE figure mockups ---------- */
-.fig{margin:1rem 0}
-.fig figcaption{font-size:.85rem; color:var(--muted); margin-top:.45rem}
-.ide{background:var(--ide); border-radius:10px; overflow:hidden; border:1px solid #101012; font-size:.8rem; color:var(--ide-t); box-shadow:0 8px 24px rgba(0,0,0,.25)}
-.ide .cap{background:var(--ide3); padding:.42rem .8rem; display:flex; align-items:center; gap:.6rem; color:#d8d8de}
-.ide .cap .dots{letter-spacing:.15em; opacity:.7; font-size:.75rem; margin-left:auto}
-.ide .row{display:flex; min-height:150px}
-.ide .pane{padding:.6rem .7rem}
-.ide .side{background:var(--ide2); flex:0 0 27%; border-right:1px solid #111; min-width:0}
-.ide .main{flex:1; min-width:0}
-.ide .side h4,.ide .main h4{margin:.1rem 0 .4rem; font-size:.72rem; font-weight:600; color:var(--ide-dim); letter-spacing:.06em}
-.ide .item{padding:.14rem .3rem; border-radius:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-.ide .item.sel{background:#094771; color:#fff}
-.ide .status{background:var(--vs-deep); color:#efe7fa; padding:.3rem .8rem; font-size:.72rem; display:flex; gap:1rem}
-.ide .status.run{background:#8B3A00}
-.ide pre{margin:0; font-size:.8rem; line-height:1.55; overflow-x:auto}
+  /* command palette mock */
+  .palette{background:#252526;padding:26px 20px 34px;display:flex;justify-content:center}
+  .palbox{width:min(560px,100%);background:#303031;border:1px solid #4a4a4a;border-radius:8px;box-shadow:0 14px 40px rgba(0,0,0,.5);overflow:hidden;font-family:var(--body)}
+  .palbox .pin{background:#3c3c3c;color:#eee;padding:9px 13px;font-size:14px;font-family:var(--mono)}
+  .palbox .prow{padding:8px 13px;color:#ccc;font-size:13.5px;display:flex;justify-content:space-between}
+  .palbox .prow.sel{background:#04395e;color:#fff}
+  .palbox .prow small{color:#8a8a8a}
 
-/* running app window mockup */
-.winapp{background:#F3F3F3; color:#111; border:1px solid #b9b9c2; border-radius:8px; overflow:hidden; max-width:430px; margin:.4rem auto; box-shadow:0 14px 30px rgba(32,26,46,.22); font-size:.88rem}
-.winapp .wtitle{display:flex; align-items:center; background:#fff; border-bottom:1px solid #e2e2e8; padding:.4rem .7rem; gap:.5rem}
-.winapp .wtitle .t{flex:1; font-size:.82rem}
-.winapp .wtitle .wb{color:#444; letter-spacing:.35em; font-size:.8rem}
-.winapp .wbody{padding:1rem .95rem 1.15rem; display:flex; flex-direction:column; gap:.65rem}
-.wf-label{font-size:.92rem}
-.wf-text{background:#fff; border:1px solid #7a7a7a; border-radius:2px; padding:.3rem .5rem; font-size:.9rem; color:#333}
-.wf-btn{display:inline-block; background:#E1E1E1; border:1px solid #ADADAD; padding:.32rem .95rem; font-size:.88rem; border-radius:2px; width:max-content}
-.wf-btn.primary{background:#0078D4; border-color:#005A9E; color:#fff}
-.wf-result{font-weight:700; font-size:1.02rem; color:#0B5394}
-.msgbox{background:#fff; border:1px solid #9aa; border-radius:6px; max-width:300px; margin:.6rem auto 0; box-shadow:0 10px 24px rgba(0,0,0,.28); overflow:hidden}
-.msgbox .mt{background:#fff; border-bottom:1px solid #eee; font-size:.78rem; padding:.3rem .6rem; display:flex}
-.msgbox .mt span:last-child{margin-left:auto; color:#555}
-.msgbox .mb{padding:.8rem .8rem .2rem; font-size:.9rem}
-.msgbox .mf{padding:.5rem .6rem .6rem; display:flex; justify-content:flex-end; background:#F0F0F0; margin-top:.6rem}
+  /* avalonia window mock */
+  .avwin{width:min(430px,100%);background:#fff;border:1px solid #999;border-radius:8px;box-shadow:0 10px 26px rgba(0,0,0,.45);overflow:hidden;margin:0 auto}
+  .avwin .avtitle{background:#f3f3f3;border-bottom:1px solid #ddd;color:#222;font-size:12.5px;padding:7px 12px;display:flex;justify-content:space-between}
+  .avwin .avtitle .btns{color:#666;font-family:var(--mono);letter-spacing:2px}
+  .avwin .avbody{padding:20px;display:flex;flex-direction:column;gap:12px;background:#fff}
+  .avwin .avbody.mint{background:#f5fffa}
+  .avwin .avh{font-size:20px;color:#4b3a8f;font-weight:700}
+  .avwin .avtxt{background:#fff;border:1px solid #a9a9b3;border-radius:4px;color:#333;font-size:13.5px;padding:7px 10px}
+  .avwin .avbtn{background:#e8e8ee;border:1px solid #a9a9b3;border-radius:4px;color:#222;font-size:13.5px;padding:7px 0;text-align:center;width:110px}
+  .avwin .avgreet{font-size:16px;color:#0c6b5d;font-weight:700}
 
-/* start-window template cards */
-.tcards{display:grid; gap:.5rem; padding:.2rem 0}
-.tcard{border:1px solid #3c3c44; border-radius:6px; padding:.5rem .65rem; background:#2b2b31}
-.tcard.sel{border-color:var(--win); background:#0e2a3f}
-.tcard b{display:block; font-size:.82rem; color:#fff}
-.tcard span{font-size:.72rem; color:var(--ide-dim)}
-.tags{margin-top:.25rem; display:flex; gap:.35rem}
-.tags i{font-style:normal; font-size:.66rem; border:1px solid #4a4a55; border-radius:4px; padding:.05rem .4rem; color:#c9c9d2}
+  /* copy blocks */
+  .copyblock{position:relative;background:#1e1e1e;border:3px solid var(--ink);border-radius:16px;margin:14px 0;box-shadow:7px 7px 0 rgba(45,36,54,.2)}
+  .copyblock .cbbar{background:#2d2d30;color:#bbb;font-size:13px;padding:8px 14px;border-radius:13px 13px 0 0;font-weight:700;font-family:var(--body)}
+  .copyblock pre{padding:14px 52px 16px 16px;overflow-x:auto;color:#e8e8e8;line-height:1.7;font-family:var(--mono);font-size:14px}
+  .copybtn{position:absolute;top:44px;right:12px;background:var(--sun);color:#5c4300;border:2.5px solid var(--ink);border-radius:10px;padding:6px 14px;font-size:13px;font-weight:800;cursor:pointer;font-family:var(--body)}
+  .copybtn.ok{background:var(--lime);color:#2c4404}
 
-/* properties grid mockup */
-.propgrid{display:grid; grid-template-columns:1fr 1.2fr; font-size:.78rem}
-.propgrid div{padding:.22rem .5rem; border-bottom:1px solid #2c2c31; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-.propgrid .pv{color:#9CDCFE}
-.propgrid .hl{background:#094771; color:#fff}
+  details.why{background:#f6f0ff;border:2.5px solid #d9c6ff;border-radius:16px;margin:10px 0;overflow:hidden}
+  details.why summary{cursor:pointer;padding:13px 18px;color:var(--purple-d);font-weight:800;font-size:16.5px;list-style:none;font-family:var(--disp)}
+  details.why summary::before{content:"🤔 "}
+  details.why[open] summary::before{content:"💡 "}
+  details.why .body{padding:0 20px 14px;font-size:16.5px}
+  details.why .body p{margin-bottom:10px}
 
-/* ---------- completion overlay ---------- */
-.overlay{position:fixed; inset:0; background:rgba(24,16,40,.82); display:none; place-items:center; z-index:50; padding:1rem}
-.overlay.show{display:grid}
-.trophycard{background:var(--card); border-radius:16px; max-width:480px; width:100%; text-align:center; padding:2.2rem 1.6rem; box-shadow:0 30px 80px rgba(0,0,0,.45); border-top:8px solid var(--vs)}
-.trophycard .big{font-size:3.6rem}
-.trophycard h3{font-size:1.6rem; margin:.5rem 0 .4rem}
-.trophycard p{color:var(--muted); margin:.2rem 0 1.2rem}
-.trophycard button{appearance:none; border:none; background:var(--vs); color:#fff; font:inherit; font-weight:700; border-radius:9px; padding:.65rem 1.5rem; cursor:pointer}
-.trophycard button:hover{background:var(--vs-deep)}
+  /* celebration */
+  #party{position:fixed;inset:0;pointer-events:none;z-index:100;overflow:hidden}
+  .confetto{position:absolute;top:-30px;font-size:26px;animation:fall linear forwards}
+  @keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+  #trophy{position:fixed;left:50%;top:38%;transform:translate(-50%,-50%) scale(.6);background:#fff;border:4px solid var(--ink);border-radius:26px;padding:30px 40px;text-align:center;z-index:101;box-shadow:12px 12px 0 rgba(45,36,54,.25);display:none}
+  #trophy.show{display:block;animation:pop .45s cubic-bezier(.2,1.6,.4,1) forwards}
+  @keyframes pop{to{transform:translate(-50%,-50%) scale(1)}}
+  #trophy .big{font-size:64px}
+  #trophy h3{font-family:var(--disp);font-size:28px;margin:6px 0}
+  #trophy p{color:var(--soft);font-size:16px}
+  #trophy button{margin-top:14px;background:var(--purple);color:#fff;border:3px solid var(--ink);border-radius:14px;padding:9px 24px;font-family:var(--disp);font-weight:800;font-size:16px;cursor:pointer}
 
-footer{position:relative; z-index:1; text-align:center; color:var(--muted); font-size:.83rem; padding:1.5rem 1.2rem 2.5rem; max-width:860px; margin:0 auto}
-@media (max-width:560px){
-  .ide .row{flex-direction:column}
-  .ide .side{flex:none; border-right:none; border-bottom:1px solid #111}
-}
+  footer{max-width:1180px;margin:0 auto;padding:0 24px 60px;color:var(--soft);font-size:15px}
+
+  @media print{
+    #scrollbar,#quest,.copybtn,.donebtn,#party,#trophy{display:none!important}
+    body{background:#fff}
+    #hero{background:#7c3aed!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    #wrap{grid-template-columns:1fr;margin-top:0}
+    section.level{box-shadow:none;break-inside:avoid-page}
+    .shot,.copyblock{box-shadow:none}
+  }
 </style>
 </head>
 <body>
+<div id="scrollbar"></div>
+<div id="party"></div>
+<div id="trophy"><div class="big">🏆</div><h3>PROJECT: BORN!</h3><p>All 12 levels complete — you created a C# project from nothing,<br>grew a window piece by piece in pure C#, and submitted it on Brightspace.<br>This app will grow with you until December.</p><button onclick="document.getElementById('trophy').classList.remove('show')">Ship it! 🚀</button></div>
 
-<div class="glyphs" aria-hidden="true">
-  <span style="left:6%; font-size:3.2rem; animation-delay:-3s">▢</span>
-  <span style="left:22%; font-size:2.4rem; animation-delay:-11s">{ }</span>
-  <span style="left:41%; font-size:3rem; animation-delay:-7s">+=</span>
-  <span style="left:60%; font-size:2.6rem; animation-delay:-16s">▶</span>
-  <span style="left:76%; font-size:3rem; animation-delay:-1s">C#</span>
-  <span style="left:90%; font-size:2.2rem; animation-delay:-20s">;</span>
-</div>
-
-<div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="ovTitle">
-  <div class="trophycard">
-    <div class="big">🏆</div>
-    <h3 id="ovTitle">PROJECT: BORN!</h3>
-    <p>All 10 levels complete — your semester repo exists, your first window runs in <b>pure C#</b>, and it's all pushed safely to GitHub. This app will grow with you until December.</p>
-    <button id="ovClose">Ship it! 🚀</button>
-  </div>
-</div>
-
-<header class="hero">
-  <div class="wrap">
-    <span class="kicker">MAC 109 · In-class studio practical #1 · B-209 lab machines · VS Code + Avalonia</span>
-    <h1>Today your project is born 🪟</h1>
-    <p class="lead">One session, ten small levels. You'll claim your <b>semester repository</b>, clone it, and build your first cross-platform window in <b>one language — C#</b>. No terminal, no markup, no drag-and-drop: just objects, properties, and one very important <code style="font-family:'Cascadia Code',monospace">+=</code>.</p>
-    <div class="chips">
-      <span class="chip">🏫 In-class · B-209</span>
-      <span class="chip">🎯 Builds Milestone 1</span>
-      <span class="chip">⏱️ ~75–90 minutes</span>
-      <span class="chip">🖱️ Click-only workflow</span>
-      <span class="chip">☁️ Push &amp; sign out before leaving!</span>
+<!-- ================= HERO ================= -->
+<header id="hero">
+  <span class="float" style="left:6%;top:18%;font-size:44px;--r:-12deg">▢</span>
+  <span class="float" style="right:10%;top:12%;font-size:38px;--r:9deg;animation-delay:1s">{ }</span>
+  <span class="float" style="right:22%;bottom:14%;font-size:46px;--r:-7deg;animation-delay:2s">+=</span>
+  <span class="float" style="left:20%;bottom:10%;font-size:34px;--r:14deg;animation-delay:.5s">▶</span>
+  <span class="float" style="left:46%;top:6%;font-size:30px;--r:-5deg;animation-delay:1.5s">C#</span>
+  <span class="float" style="left:70%;bottom:8%;font-size:40px;--r:6deg;animation-delay:2.4s">;</span>
+  <div class="in">
+    <span class="badge">MAC 109 · IN-CLASS STUDIO PRACTICAL #1 · B-209 LAB MACHINES · VS CODE + AVALONIA</span>
+    <h1>Today your project<br>is born 🪟</h1>
+    <p class="tag">One session, twelve tiny levels, <b>one new piece at a time</b>. You'll create a C# project from absolutely nothing, then grow it — an empty frame, then a title, then text, then a button, then a text box, then your first click event — pressing <b>▶ after every single step</b> so you always see what your code just did.</p>
+    <div class="meta">
+      <span class="chip"><span>🏫</span>In-class · B-209</span>
+      <span class="chip"><span>🎯</span>Builds Weekly Lab 1</span>
+      <span class="chip"><span>🐢</span>Slow on purpose — one piece per level</span>
+      <span class="chip"><span>🖱️</span>Click-only workflow</span>
+      <span class="chip"><span>📦</span>ZIP &amp; submit on Brightspace before leaving!</span>
     </div>
   </div>
 </header>
 
+<div id="wrap">
+<!-- ================= QUEST MAP ================= -->
+<nav id="quest">
+  <h3>🗺️ Quest map</h3>
+  <p class="sub">Tick off levels as you go — finish all 12 for a surprise.</p>
+  <div id="questBar"><div id="questFill"></div></div>
+  <span id="questPct">0% complete</span>
+  <a class="qitem" href="#L1" data-q="L1"><span class="dot">1</span>Launch VS Code</a>
+  <a class="qitem" href="#L2" data-q="L2"><span class="dot">2</span>Create the project — from zero</a>
+  <a class="qitem" href="#L3" data-q="L3"><span class="dot">3</span>Add the Avalonia ingredients</a>
+  <a class="qitem" href="#L4" data-q="L4"><span class="dot">4</span>Meet the cockpit</a>
+  <a class="qitem" href="#L5" data-q="L5"><span class="dot">5</span>The engine + the empty frame</a>
+  <a class="qitem" href="#L6" data-q="L6"><span class="dot">6</span>Press ▶ — a window is born</a>
+  <a class="qitem" href="#L7" data-q="L7"><span class="dot">7</span>Give it a title &amp; a size</a>
+  <a class="qitem" href="#L8" data-q="L8"><span class="dot">8</span>Paint it &amp; put text inside</a>
+  <a class="qitem" href="#L9" data-q="L9"><span class="dot">9</span>Add a button</a>
+  <a class="qitem" href="#L10" data-q="L10"><span class="dot">10</span>Text box + first event ⚡</a>
+  <a class="qitem" href="#L11" data-q="L11"><span class="dot">11</span>Clear button + break it 😈</a>
+  <a class="qitem" href="#L12" data-q="L12"><span class="dot">12</span>ZIP &amp; submit on Brightspace</a>
+</nav>
+
 <main>
 
-<section class="map" id="map">
-  <h2>🗺️ Quest map</h2>
-  <p>Tick off levels as you go — your progress is saved on this browser. Finish all 10 for a surprise.</p>
-  <div class="bar"><i id="barfill"></i></div>
-  <div class="pct" id="pct">0% complete</div>
-  <nav class="taskbar" aria-label="Levels">
-    <a class="task" href="#L1" data-l="1"><span class="n" data-n="1"></span>Launch VS Code</a>
-    <a class="task" href="#L2" data-l="2"><span class="n" data-n="2"></span>Claim your repo</a>
-    <a class="task" href="#L3" data-l="3"><span class="n" data-n="3"></span>Clone it — one folder</a>
-    <a class="task" href="#L4" data-l="4"><span class="n" data-n="4"></span>Meet the cockpit</a>
-    <a class="task" href="#L5" data-l="5"><span class="n" data-n="5"></span>Press ▶ — first run</a>
-    <a class="task" href="#L6" data-l="6"><span class="n" data-n="6"></span>Make the window yours</a>
-    <a class="task" href="#L7" data-l="7"><span class="n" data-n="7"></span>Build the Greeter 💬</a>
-    <a class="task" href="#L8" data-l="8"><span class="n" data-n="8"></span>Add a Clear button</a>
-    <a class="task" href="#L9" data-l="9"><span class="n" data-n="9"></span>Try to break it 😈</a>
-    <a class="task" href="#L10" data-l="10"><span class="n" data-n="10"></span>Push, then sign out</a>
-  </nav>
+<!-- ============ LEVEL 1 ============ -->
+<section class="level" id="L1" style="--c:#7c3aed;--shadow:rgba(124,58,237,.18)">
+  <div class="lvhead"><div class="lvnum">1</div><h2>Log in &amp; launch VS Code</h2><span class="emoji">🚀</span></div>
+  <p class="lead">The lab machines already have the whole free stack installed — the <b>.NET SDK</b>, <b>Visual Studio Code</b>, and the <b>C# Dev Kit</b> extension. (At home, the Week 1 practice page walks you through installing the identical stack on your own Windows, Mac, or Linux machine.)</p>
+  <ol class="steps">
+    <li>Log into the lab machine, press the <span class="kbd">⊞ Windows</span> key, type <b>code</b>, and open <b>Visual Studio Code</b> — the <b>blue</b> icon. (If a purple ∞ "Visual Studio" also appears, that's a different, Windows-only app — not ours.)</li>
+    <li>Also open a browser and sign into <b>Brightspace</b> — you'll submit there at Level 12.</li>
+    <li>Quick check: in VS Code, click the Extensions icon (four squares) and confirm <b>C# Dev Kit</b> is under Installed. Missing? Search it, click Install by <b>Microsoft</b> — two minutes.</li>
+  </ol>
+  <div class="bubble alert">🧠 <b>Lab-machine reality check:</b> these computers can be wiped between classes. Anything that only lives on this machine can vanish tonight. That's why Level 12 — ZIPping your project and uploading it to Brightspace (plus keeping your own copy) — is not optional today. You've been warned (lovingly).</div>
+  <details class="why"><summary>What exactly is installed here?</summary><div class="body">
+    <p>Three things, all free: the <b>.NET SDK</b> (the engine — C#'s compiler and runtime), <b>VS Code</b> (the workshop), and <b>C# Dev Kit</b> (the extension that teaches VS Code to speak C#: colors, IntelliSense, error squiggles, and the ▶ Run button). The fourth ingredient, <b>Avalonia</b> — the box of GUI parts — isn't installed on the machine at all: in Level 3 <i>you</i> will add it to your project, and it downloads itself on first run. Nothing hidden, nothing magic.</p>
+  </div></details>
+  <button class="donebtn" data-lv="L1">Mark level complete</button>
 </section>
 
-<!-- ============ LEVEL 1 ============ -->
-<article class="level" id="L1" data-level="1">
-  <div class="titlebar"><span class="lvl">1</span><h2>Log in &amp; launch VS Code</h2><span class="emo">🚀</span><span class="tbtns">— ▢ ✕</span></div>
-  <div class="body">
-    <p>The lab machines already have the whole free stack installed — the <b>.NET SDK</b>, <b>Visual Studio Code</b>, and the <b>C# Dev Kit</b> extension. (At home, the Week 1 practice page walks you through installing the identical stack on your own Windows, Mac, or Linux machine.)</p>
-    <ol>
-      <li>Log into the lab machine, press the <kbd>⊞ Windows</kbd> key, type <b>code</b>, and open <b>Visual Studio Code</b> — the <b>blue</b> icon. (If a purple ∞ "Visual Studio" also appears, that's a different, Windows-only app — not ours.)</li>
-      <li>Also open a browser — you'll need <b>github.com</b> and <b>Brightspace</b> in the next level.</li>
-      <li>Quick check: in VS Code, click the Extensions icon (four squares) and confirm <b>C# Dev Kit</b> is under Installed. Missing? Search it, click Install by <b>Microsoft</b> — two minutes.</li>
-    </ol>
-    <div class="danger">🧠 <b>Lab-machine reality check:</b> these computers can be wiped between classes. Anything that only lives on this machine can vanish tonight. That's why Level 10 — pushing to GitHub and signing out — is not optional today. You've been warned (lovingly).</div>
-    <details><summary>What exactly is installed here?</summary><div class="dbody">Three things, all free: the <b>.NET SDK</b> (the engine — C#'s compiler and runtime), <b>VS Code</b> (the workshop), and <b>C# Dev Kit</b> (the extension that teaches VS Code to speak C#: colors, IntelliSense, error squiggles, and the ▶ Run button). The fourth ingredient, <b>Avalonia</b> — the box of GUI parts — isn't installed on the machine at all: it travels <i>inside your project</i> and downloads itself on first run. You'll see it happen in Level 5.</div></details>
-    <div class="markwrap"><button class="mark" type="button">Mark level complete</button></div>
-  </div>
-</article>
-
 <!-- ============ LEVEL 2 ============ -->
-<article class="level" id="L2" data-level="2">
-  <div class="titlebar"><span class="lvl">2</span><h2>Claim your repo — the Use this template button</h2><span class="emo">⑂</span><span class="tbtns">— ▢ ✕</span></div>
-  <div class="body">
-    <p>The studio model in one sentence: <b>your whole semester lives in one repository</b> that you own, grow weekly, and push as your milestone. Let's mint it.</p>
-    <ol>
-      <li>On <b>github.com</b>: sign in — or create a free account right now (any email; pick a professional username, it goes on your résumé 😉).</li>
-      <li>Open the course starter link from <b>Brightspace</b>: <code>github.com/Kassou-MEC/mac109-starter</code>.</li>
-      <li>Click the green <b>Use this template</b> button ▸ <b>Create a new repository</b>.</li>
-      <li>Repository name: <code>mac109-project</code> · keep it <b>Public</b> · click <b>Create repository</b>.</li>
-      <li>You land on <b>your</b> new repo's page. 🎉 Leave this tab open — Level 3 needs it.</li>
-    </ol>
-    <figure class="fig">
-      <div class="winapp" style="max-width:520px">
-        <div class="wtitle"><span class="t">github.com/Kassou-MEC/mac109-starter</span><span class="wb">— ▢ ✕</span></div>
-        <div class="wbody" style="gap:.8rem">
-          <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap">
-            <b style="font-size:1rem">Kassou-MEC / mac109-starter</b>
-            <span style="border:1px solid #b5b5c0;border-radius:999px;padding:.05rem .55rem;font-size:.72rem;color:#555">Public template</span>
-          </div>
-          <div style="display:flex;gap:.5rem;flex-wrap:wrap">
-            <span class="wf-btn" style="background:#1F883D;border-color:#166B2E;color:#fff;font-weight:600">Use this template ▾</span>
-            <span class="wf-btn">⭐ Star</span>
-          </div>
-          <span class="small" style="color:#555">▸ Create a new repository &nbsp;←&nbsp; choose this</span>
-        </div>
+<section class="level" id="L2" style="--c:#ec4899;--shadow:rgba(236,72,153,.18)">
+  <div class="lvhead"><div class="lvnum">2</div><h2>Create the project — from absolutely zero</h2><span class="emoji">🐣</span></div>
+  <p class="lead">A C# <b>project</b> is a folder with two kinds of things inside: your <b>code files</b> (.cs) and a <b>recipe card</b> (.csproj) that tells the SDK how to build them. You're about to have the SDK generate one, using only clicks. Watch every step — creating projects is a skill you'll repeat all semester.</p>
+  <ol class="steps">
+    <li>In VS Code, choose <b>File ▸ Close Folder</b> if any old project is open — start from the empty Welcome window.</li>
+    <li>Press <span class="kbd">Ctrl</span>+<span class="kbd">Shift</span>+<span class="kbd">P</span>. The <b>Command Palette</b> drops down from the top — VS Code's magic box that can do anything.</li>
+    <li>Type <b>new project</b> and choose <b>“.NET: New Project…”</b> (from C# Dev Kit).</li>
+    <li>A list of <b>templates</b> appears — ready-made project shapes. Type <b>console</b> and pick <b>Console App</b>. (Yes, console — we'll upgrade it into a GUI ourselves. That's the point: you'll see exactly what makes a GUI app a GUI app.)</li>
+    <li>Name the project exactly: <code class="inline">MyStudioApp</code> — then press <span class="kbd">Enter</span>.</li>
+    <li>For the location, click <b>Choose folder</b> ▸ open <b>Documents</b> ▸ click <b>New folder</b> ▸ name it <code class="inline">MAC109</code> ▸ press <b>Select Folder</b>. (Documents. Not Downloads, not Desktop — Documents.)</li>
+    <li>The palette shows a summary line — press <span class="kbd">Enter</span> on <b>Create project</b>.</li>
+    <li>When VS Code asks, click <b>Open</b> — and if a blue box asks "Do you trust the authors of the files in this folder?", click <b>Yes, I trust the authors</b>. The author is <i>you</i>.</li>
+  </ol>
+  <figure><div class="shot">
+    <div class="winbar">Visual Studio Code<span class="sq">— ▢ ✕</span></div>
+    <div class="palette">
+      <div class="palbox">
+        <div class="pin">&gt; new project</div>
+        <div class="prow sel"><span>.NET: New Project…</span><small>C# Dev Kit</small></div>
+        <div class="prow"><span>.NET: Open Solution</span><small>C# Dev Kit</small></div>
+        <div class="prow"><span>File: New Untitled Text File</span><small>Ctrl+N</small></div>
       </div>
-      <figcaption><b>Figure 1.</b> The green button that starts your semester. It mints a copy that <i>you</i> own — name it <code>mac109-project</code>.</figcaption>
-    </figure>
-    <details><summary>Why not just clone the professor's repo?</summary><div class="dbody">Cloning the course starter directly would give you a copy you <b>can't push to</b> — like borrowing a library book and trying to write in it. <b>Use this template</b> creates a brand-new repository under <i>your</i> account. That matters because in this course <b>pushing IS submitting</b>: every weekly milestone is you pushing to this one repo, from now until your final presentation.</div></details>
-    <div class="markwrap"><button class="mark" type="button">Mark level complete</button></div>
-  </div>
-</article>
+    </div>
+  </div><figcaption><b>Figure 1.</b> The Command Palette (Ctrl+Shift+P) — type a few letters, pick the highlighted entry, Enter. Then: template ▸ name ▸ folder ▸ Create.</figcaption></figure>
+  <figure><div class="shot">
+    <div class="winbar">Choose a template<span class="sq">— ▢ ✕</span></div>
+    <div class="palette" style="padding-top:20px;padding-bottom:26px">
+      <div class="palbox">
+        <div class="pin">console</div>
+        <div class="prow sel"><span>Console App</span><small>A project for a command-line application · C#</small></div>
+        <div class="prow"><span>Class Library</span><small>C#</small></div>
+        <div class="prow"><span>xUnit Test Project</span><small>C#</small></div>
+      </div>
+    </div>
+  </div><figcaption><b>Figure 2.</b> Templates are project shapes. <b>Console App</b> is the simplest complete C# program — our seed. 🌱</figcaption></figure>
+  <details class="why"><summary>What did the SDK just generate for me?</summary><div class="body">
+    <p>Open the Explorer (top icon, left bar) and look: a folder <b>MyStudioApp</b> containing <b>Program.cs</b> (one line of code: <code class="inline">Console.WriteLine("Hello, World!");</code>) and <b>MyStudioApp.csproj</b> (the recipe card — which .NET version, what kind of app). That's a complete, runnable program. Everything we build this semester grows from a seed exactly like this one — there is no other magic.</p>
+  </div></details>
+  <button class="donebtn" data-lv="L2">Mark level complete</button>
+</section>
 
 <!-- ============ LEVEL 3 ============ -->
-<article class="level" id="L3" data-level="3">
-  <div class="titlebar"><span class="lvl">3</span><h2>Clone it — one folder, buttons only</h2><span class="emo">🔽</span><span class="tbtns">— ▢ ✕</span></div>
-  <div class="body">
-    <ol>
-      <li>On <b>your</b> repo page, click the green <b>Code</b> button ▸ press the 📋 icon to copy the HTTPS link.</li>
-      <li>In VS Code, click the <b>Source Control</b> icon in the left bar (the branching lines) ▸ <b>Clone Repository</b>.</li>
-      <li>Paste the link ▸ <kbd>Enter</kbd>.</li>
-      <li>Location: <b>Documents</b> ▸ <b>New Folder</b> ▸ <code>MAC109</code> ▸ Select. (Not Downloads, not Desktop — Documents.)</li>
-      <li>Click <b>Open</b> when asked, then <b>Yes, I trust the authors</b> — the author is you now.</li>
-    </ol>
-    <figure class="fig">
-      <div class="ide">
-        <div class="cap">Visual Studio Code<span class="dots">— ▢ ✕</span></div>
-        <div class="row">
-          <div class="pane main">
-            <h4>&gt;&nbsp; git clone</h4>
-            <div class="item sel">Git: Clone &nbsp;&nbsp;— paste your repo link next</div>
-            <div class="item">Git: Clone (Recursive)</div>
-          </div>
-        </div>
-        <div class="status"><span>Same move, no mouse: Ctrl+Shift+P ▸ type "clone"</span></div>
-      </div>
-      <figcaption><b>Figure 2.</b> Source Control ▸ Clone Repository, or the Command Palette. Either way: paste, pick Documents ▸ MAC109, Open.</figcaption>
-    </figure>
-    <div class="tip">🎥 Want to see it on camera first? The Week 1 practice page (home edition) embeds a two-minute clone walkthrough video at Level 4 — same buttons.</div>
-    <div class="markwrap"><button class="mark" type="button">Mark level complete</button></div>
-  </div>
-</article>
+<section class="level" id="L3" style="--c:#3b82f6;--shadow:rgba(59,130,246,.18)">
+  <div class="lvhead"><div class="lvnum">3</div><h2>Add the Avalonia ingredients</h2><span class="emoji">🧂</span></div>
+  <p class="lead">A console app talks in text. To draw <b>windows and buttons</b>, we add <b>Avalonia</b> — a free box of cross-platform GUI parts — using <b>NuGet</b>, the app store for code libraries. Two packages, all clicks:</p>
+  <ol class="steps">
+    <li><span class="kbd">Ctrl</span>+<span class="kbd">Shift</span>+<span class="kbd">P</span> ▸ type <b>nuget add</b> ▸ choose <b>“NuGet: Add NuGet Package…”</b>. (If it asks which project: <b>MyStudioApp</b>.)</li>
+    <li>Search <code class="inline">Avalonia.Desktop</code> ▸ select it ▸ pick the <b>latest stable version</b> (the top one, no "-preview" in the name).</li>
+    <li>Repeat: palette ▸ NuGet: Add NuGet Package… ▸ search <code class="inline">Avalonia.Themes.Fluent</code> ▸ latest stable. This one makes your controls look modern instead of 1995.</li>
+    <li>Now open <b>MyStudioApp.csproj</b> from the Explorer and <i>read</i> your recipe card — the two packages you just added are right there as <code class="inline">&lt;PackageReference&gt;</code> lines.</li>
+    <li>One tiny edit while you're here: change <code class="inline">&lt;OutputType&gt;Exe&lt;/OutputType&gt;</code> to <code class="inline">&lt;OutputType&gt;<b>WinExe</b>&lt;/OutputType&gt;</code> and save (<span class="kbd">Ctrl</span>+<span class="kbd">S</span>). That tells Windows "this app has a window — don't open a black console behind it."</li>
+  </ol>
+  <figure><div class="shot">
+    <div class="winbar">MyStudioApp.csproj — mac109 — Visual Studio Code<span class="sq">— ▢ ✕</span></div>
+    <div class="dark darkpad">
+<span class="cl"><span class="ln">1</span><span class="x">&lt;</span><span class="t">Project</span> <span class="at">Sdk</span><span class="x">=</span><span class="s">"Microsoft.NET.Sdk"</span><span class="x">&gt;</span></span>
+<span class="cl"><span class="ln">2</span><span class="p">  </span><span class="x">&lt;</span><span class="t">PropertyGroup</span><span class="x">&gt;</span></span>
+<span class="cl"><span class="ln">3</span><span class="p">    </span><span class="x">&lt;</span><span class="t">OutputType</span><span class="x">&gt;</span><span class="p">WinExe</span><span class="x">&lt;/</span><span class="t">OutputType</span><span class="x">&gt;</span><span class="c">   ← you changed this</span></span>
+<span class="cl"><span class="ln">4</span><span class="p">    </span><span class="x">&lt;</span><span class="t">TargetFramework</span><span class="x">&gt;</span><span class="p">net8.0</span><span class="x">&lt;/</span><span class="t">TargetFramework</span><span class="x">&gt;</span></span>
+<span class="cl"><span class="ln">5</span><span class="p">  </span><span class="x">&lt;/</span><span class="t">PropertyGroup</span><span class="x">&gt;</span></span>
+<span class="cl"><span class="ln">6</span><span class="p">  </span><span class="x">&lt;</span><span class="t">ItemGroup</span><span class="x">&gt;</span></span>
+<span class="cl"><span class="ln">7</span><span class="p">    </span><span class="x">&lt;</span><span class="t">PackageReference</span> <span class="at">Include</span><span class="x">=</span><span class="s">"Avalonia.Desktop"</span> <span class="at">Version</span><span class="x">=</span><span class="s">"11.x.x"</span> <span class="x">/&gt;</span></span>
+<span class="cl"><span class="ln">8</span><span class="p">    </span><span class="x">&lt;</span><span class="t">PackageReference</span> <span class="at">Include</span><span class="x">=</span><span class="s">"Avalonia.Themes.Fluent"</span> <span class="at">Version</span><span class="x">=</span><span class="s">"11.x.x"</span> <span class="x">/&gt;</span></span>
+<span class="cl"><span class="ln">9</span><span class="p">  </span><span class="x">&lt;/</span><span class="t">ItemGroup</span><span class="x">&gt;</span></span>
+<span class="cl"><span class="ln">10</span><span class="x">&lt;/</span><span class="t">Project</span><span class="x">&gt;</span></span>
+    </div>
+  </div><figcaption><b>Figure 3.</b> Your recipe card after Level 3 (your version numbers will differ — that's fine). Nothing in this file is mystery text anymore: output type, .NET version, and the two ingredients you chose.</figcaption></figure>
+  <details class="why"><summary>What is NuGet, really — and where does Avalonia "live"?</summary><div class="body">
+    <p><b>NuGet</b> is the package manager for .NET: a giant free library of code other people wrote, versioned and downloadable. Adding a package writes one line into your .csproj — the actual code downloads into your project the first time you build (you'll watch it happen in Level 6 as "Restoring…"). That's why Avalonia isn't "installed on the machine": it <b>travels inside your project</b>. Anyone who opens your project on any OS gets the same ingredients automatically.</p>
+  </div></details>
+  <button class="donebtn" data-lv="L3">Mark level complete</button>
+</section>
 
 <!-- ============ LEVEL 4 ============ -->
-<article class="level" id="L4" data-level="4">
-  <div class="titlebar"><span class="lvl">4</span><h2>Meet the cockpit</h2><span class="emo">🛩️</span><span class="tbtns">— ▢ ✕</span></div>
-  <div class="body">
-    <p>Your project is open. Four areas of VS Code do almost everything this semester — find each one before touching anything:</p>
-    <figure class="fig">
-      <div class="ide">
-        <div class="cap">MainWindow.cs — mac109-project — Visual Studio Code<span class="dots">— ▢ ✕</span></div>
-        <div class="row">
-          <div class="pane side">
-            <h4>EXPLORER</h4>
-            <div class="item">▾ MAC109-PROJECT</div>
-            <div class="item">&nbsp;▾ 📁 MyStudioApp</div>
-            <div class="item sel">&nbsp;&nbsp;&nbsp;C# MainWindow.cs</div>
-            <div class="item">&nbsp;&nbsp;&nbsp;C# Program.cs</div>
-            <div class="item">&nbsp;&nbsp;&nbsp;⚙ MyStudioApp.csproj</div>
-            <div class="item">&nbsp;&nbsp;📄 README.md</div>
-          </div>
-          <div class="pane main">
-            <h4>MainWindow.cs</h4>
-            <pre><span class="k">public class</span> <span class="t">MainWindow</span> : <span class="t">Window</span>
-{
-    <span class="k">public</span> <span class="m">MainWindow</span>()
-    {
-        <span class="c">// your window is built right here…</span></pre>
-          </div>
-          <div class="pane side" style="border-left:1px solid #111; border-right:none">
-            <h4>LEFT BAR, TOP → BOTTOM</h4>
-            <div class="item">🗂 Explorer — your files</div>
-            <div class="item">🔍 Search</div>
-            <div class="item">⎇ Source Control — Git</div>
-            <div class="item">▶ Run &amp; Debug</div>
-            <div class="item">▤ Extensions</div>
-            <h4 style="margin-top:.7rem">PANEL (BOTTOM)</h4>
-            <div class="item">Problems — errors, by line</div>
-          </div>
-        </div>
-        <div class="status"><span>Ready</span><span>main ⎇</span></div>
+<section class="level" id="L4" style="--c:#06b6a4;--shadow:rgba(6,182,164,.18)">
+  <div class="lvhead"><div class="lvnum">4</div><h2>Meet the cockpit</h2><span class="emoji">🛩️</span></div>
+  <p class="lead">Before writing the real code, learn your instruments. Four areas of VS Code do almost everything this semester — find each one on your screen:</p>
+  <figure><div class="shot">
+    <div class="winbar">Program.cs — MyStudioApp — Visual Studio Code<span class="sq">— ▢ ✕</span></div>
+    <div style="display:grid;grid-template-columns:210px 1fr;background:#1e1e1e" class="cockgrid">
+      <div style="background:#252526;border-right:1px solid #111;padding:12px 0;font-size:13px;color:#bbb;font-family:var(--body)">
+        <div style="font-size:11px;letter-spacing:.1em;color:#8a8a8a;padding:0 14px 8px;font-weight:800">EXPLORER · MAC109</div>
+        <div style="padding:3px 14px">▾ 📁 MyStudioApp</div>
+        <div style="padding:3px 14px 3px 26px;background:#37373d;color:#fff">C#&nbsp; Program.cs</div>
+        <div style="padding:3px 14px 3px 26px">⚙&nbsp; MyStudioApp.csproj</div>
+        <div style="padding:3px 14px 3px 26px;color:#7c7c7c">▸ bin · obj (robot folders)</div>
       </div>
-      <figcaption><b>Figure 3.</b> The cockpit. <b>Explorer</b> holds your files, the <b>editor</b> holds your C#, <b>Problems</b> names every error with its line, and <b>Source Control</b> is how milestones get submitted.</figcaption>
-    </figure>
-    <ul>
-      <li><b>MainWindow.cs</b> 💙 — <b>your window</b>: interface and logic, one C# file. You'll live here for weeks.</li>
-      <li><b>Program.cs</b> — the ignition: starts the app, shows MainWindow. Look, don't touch.</li>
-      <li><b>MyStudioApp.csproj</b> — the recipe card: which .NET, which packages — including <b>Avalonia</b> itself.</li>
-      <li><b>README.md</b> — your repo's front page. You'll edit it in Level 10.</li>
-    </ul>
-    <details><summary>Where's the design file? Where's the drag-and-drop?</summary><div class="dbody">There isn't one — on purpose. In this course, <b>the UI is C# objects</b>: every button is <code>new</code>-ed, every setting is a property, every click is an event subscription. One file, one language, nothing hidden. When Week 5's classes-and-objects lecture arrives, it will be naming things you've already done for a month.</div></details>
-    <div class="markwrap"><button class="mark" type="button">Mark level complete</button></div>
-  </div>
-</article>
+      <div>
+        <div style="background:#252526;display:flex;border-bottom:1px solid #111"><div style="background:#1e1e1e;color:#fff;font-size:13px;padding:8px 18px;border-top:2px solid #7c3aed;font-family:var(--body)">Program.cs</div></div>
+        <div class="dark darkpad">
+<span class="cl"><span class="ln">1</span><span class="c">// See https://aka.ms/new-console-template…</span></span>
+<span class="cl"><span class="ln">2</span><span class="t">Console</span><span class="p">.</span><span class="m">WriteLine</span><span class="p">(</span><span class="s">"Hello, World!"</span><span class="p">);</span></span>
+        </div>
+        <div style="background:#1b1b1b;color:#9a9a9a;font-size:11.5px;letter-spacing:.08em;padding:7px 16px;font-family:var(--body);border-top:1px solid #111"><b style="color:#fff;border-bottom:2px solid #7c3aed;padding-bottom:5px;margin-right:16px">PROBLEMS</b> OUTPUT &nbsp; TERMINAL</div>
+      </div>
+    </div>
+  </div><figcaption><b>Figure 4.</b> The cockpit. <b>Explorer</b> (left) holds your files; the <b>editor</b> holds your C#; the <b>Problems</b> panel (bottom) names every error with its line; the <b>▶ Run</b> comes from the top menu or F5.</figcaption></figure>
+  <ul class="dots">
+    <li><b>Program.cs</b> 💜 — code. In Level 5 it becomes your app's engine.</li>
+    <li><b>MyStudioApp.csproj</b> — the recipe card you already edited. Look, rarely touch.</li>
+    <li><b>bin</b> &amp; <b>obj</b> — robot-made folders where compiled output and downloaded packages land. Never edit — and in Level 12 you'll <i>exclude</i> them from your submission.</li>
+    <li><b>Problems panel</b> — your best friend. Every compile error, named, with a file and line. Click an entry and the cursor jumps straight to the crime scene.</li>
+  </ul>
+  <details class="why"><summary>Where's the design file? Where's the drag-and-drop?</summary><div class="body">
+    <p>There isn't one — on purpose. In this course, <b>the UI is C# objects</b>: every button is <code class="inline">new</code>-ed, every setting is a property, every click is an event subscription. One file, one language, nothing hidden. When Week 5's classes-and-objects lecture arrives, it will be naming things you've already done for a month.</p>
+  </div></details>
+  <button class="donebtn" data-lv="L4">Mark level complete</button>
+</section>
 
 <!-- ============ LEVEL 5 ============ -->
-<article class="level" id="L5" data-level="5">
-  <div class="titlebar"><span class="lvl">5</span><h2>Press ▶ — your first run</h2><span class="emo">🎬</span><span class="tbtns">— ▢ ✕</span></div>
-  <div class="body">
-    <ol>
-      <li>Open <code>MainWindow.cs</code> from the Explorer.</li>
-      <li>Press <kbd>F5</kbd> — or menu <b>Run ▸ Start Debugging</b>. If VS Code asks what kind of project, pick <b>C#</b>.</li>
-      <li>First run only: the status bar says <b>Restoring…</b> — that's <b>Avalonia downloading itself</b> into the project (one time), then <b>Building…</b></li>
-      <li>…and a real window appears. Move it. Resize it. Maximize it. Close it with ✕ (that also stops the run).</li>
-    </ol>
-    <figure class="fig">
-      <div class="winapp">
-        <div class="wtitle"><span class="t">My Studio App</span><span class="wb">— ▢ ✕</span></div>
-        <div class="wbody">
-          <span class="wf-result" style="font-size:1.15rem;color:#111">Welcome to MAC 109!</span>
-          <span class="small">…the starter shell: one TextBlock, waiting for the rest of today.</span>
-        </div>
-      </div>
-      <figcaption><b>Figure 4.</b> Your first run. A classmate pressing F5 at home on a Mac or a Linux laptop gets this <i>pixel-identical</i> window — that's our whole stack's superpower.</figcaption>
-    </figure>
-    <div class="check">✅ <b>Checkpoint:</b> a window opened, and you typed <b>zero</b> code. Resizing, minimizing, the ✕ button — all inherited free from Avalonia's <code>Window</code> class (that's the <code>: Window</code> on line 1 of your file). Ten seconds of celebration, then onward.</div>
-    <details><summary>What did F5 actually do?</summary><div class="dbody">The whole Week 1 pipeline, for real: the <b>compiler</b> read your entire project and checked its grammar, translated it to universal <b>IL</b>, the <b>.NET runtime</b> JIT-translated that for this exact CPU, and the machine ran it. The same IL runs on Windows, macOS, and Linux — which is why your app is cross-platform without you doing anything.</div></details>
-    <div class="markwrap"><button class="mark" type="button">Mark level complete</button></div>
-  </div>
-</article>
+<section class="level" id="L5" style="--c:#ffb703;--shadow:rgba(255,183,3,.22)">
+  <div class="lvhead"><div class="lvnum">5</div><h2>The engine + the empty frame</h2><span class="emoji">🔧</span></div>
+  <p class="lead">Every GUI app in this course is exactly <b>two files with two jobs</b>:</p>
+  <ul class="dots">
+    <li>⚙️ <b>Program.cs — the engine.</b> Starts Avalonia and opens your window. You paste it <b>once</b> and never touch it again all semester. If you're editing Program.cs, something went wrong. 😄</li>
+    <li>🪟 <b>MainWindow.cs — YOUR file.</b> Everything you build, today and every week until December, happens here. And today it starts almost <b>empty</b> — on purpose.</li>
+  </ul>
+  <ol class="steps">
+    <li>In the Explorer, hover over the <b>MyStudioApp</b> folder — small icons appear. Click the <b>New File…</b> icon (📄+), name it exactly <code class="inline">MainWindow.cs</code>, press <span class="kbd">Enter</span>.</li>
+    <li>Copy in the tiny MainWindow below — read it, it's four lines of ideas — and save (<span class="kbd">Ctrl</span>+<span class="kbd">S</span>).</li>
+    <li>Open <b>Program.cs</b>, select all (<span class="kbd">Ctrl</span>+<span class="kbd">A</span>), delete, paste the engine below, save. Done — you will not open this file again.</li>
+  </ol>
+  <div class="copyblock"><div class="cbbar">MainWindow.cs — YOUR file (new). This is the whole thing.</div><button class="copybtn">Copy</button><pre>using Avalonia.Controls;
+
+namespace MyStudioApp;
+
+public class MainWindow : Window
+{
+    public MainWindow()
+    {
+        // Your app is built right here — one line at a time,
+        // starting in Level 7. Empty for now, on purpose!
+    }
+}</pre></div>
+  <div class="copyblock"><div class="cbbar">Program.cs — the engine (replace everything). Copy once, never touch.</div><button class="copybtn">Copy</button><pre>using System;
+using Avalonia;
+using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Themes.Fluent;
+
+namespace MyStudioApp;
+
+// PART 1 — The launcher. Starts Avalonia.
+class Program
+{
+    [STAThread]
+    public static void Main(string[] args)
+    {
+        AppBuilder.Configure&lt;App&gt;()
+                  .UsePlatformDetect()
+                  .StartWithClassicDesktopLifetime(args);
+    }
+}
+
+// PART 2 — The app. Loads the modern theme, opens your window.
+public class App : Application
+{
+    public override void OnFrameworkInitializationCompleted()
+    {
+        Styles.Add(new FluentTheme());
+
+        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            desktop.MainWindow = new MainWindow();   // ← opens YOUR file
+        }
+
+        base.OnFrameworkInitializationCompleted();
+    }
+}</pre></div>
+  <details class="why" open><summary>What do I need to understand today? (Honest answer: 4 lines)</summary><div class="body">
+    <p>Only <b>MainWindow.cs</b>, and it says exactly four things: my window <b>is a</b> <code class="inline">Window</code> (that's the <code class="inline">: Window</code> — it inherits everything a window can do); it lives in my project (<code class="inline">namespace</code>); and when it's created (<code class="inline">public MainWindow()</code> — the <b>constructor</b>), it does… nothing yet. The empty <code class="inline">{ }</code> is your workshop.</p>
+    <p><b>Program.cs</b> is the engine: launcher starts Avalonia, app loads the theme and opens your window. The only line worth pointing at is <code class="inline">desktop.MainWindow = new MainWindow();</code> — the handshake between the engine and <i>your</i> file. Everything else: copy, wave politely, move on.</p>
+  </div></details>
+  <button class="donebtn" data-lv="L5">Mark level complete</button>
+</section>
 
 <!-- ============ LEVEL 6 ============ -->
-<article class="level" id="L6" data-level="6">
-  <div class="titlebar"><span class="lvl">6</span><h2>Make the window yours</h2><span class="emo">🪟</span><span class="tbtns">— ▢ ✕</span></div>
-  <div class="body">
-    <p>Time to edit real C#. Everything about the window is a <b>property</b> — change three of them:</p>
-    <div class="codewrap">
-      <div class="codehead"><span>MainWindow.cs — inside the constructor</span><button class="copy" type="button">Copy</button></div>
-      <pre class="code">Title = <span class="s">"My Studio App — YOUR NAME"</span>;
-<span class="m">Width</span> = <span class="n">500</span>; <span class="m">Height</span> = <span class="n">350</span>;
-<span class="m">Background</span> = <span class="t">Brushes</span>.<span class="m">MintCream</span>;   <span class="c">// pick any: LightYellow, Lavender, Honeydew…</span></pre>
+<section class="level" id="L6" style="--c:#7c3aed;--shadow:rgba(124,58,237,.18)">
+  <div class="lvhead"><div class="lvnum">6</div><h2>Press ▶ — a window is born</h2><span class="emoji">🎬</span></div>
+  <ol class="steps">
+    <li>With <code class="inline">MainWindow.cs</code> open, press <span class="kbd">F5</span> — or menu <b>Run ▸ Start Debugging</b>. If VS Code asks what kind of project, pick <b>C#</b>, then <b>MyStudioApp</b>.</li>
+    <li>First run only: the status bar says <b>Restoring…</b> — that's <b>Avalonia downloading itself</b> into the project (the NuGet lines from Level 3, coming to life) — then <b>Building…</b></li>
+    <li>…and a window appears. Completely blank. Untitled. <b>Perfect.</b></li>
+  </ol>
+  <figure><div class="shot" style="background:#3f3f46;padding:26px 12px">
+    <div class="avwin">
+      <div class="avtitle"><span style="color:#999">Window</span><span class="btns">— ▢ ✕</span></div>
+      <div class="avbody" style="min-height:130px"></div>
     </div>
-    <ol>
-      <li>Put <b>your name</b> in the <code>Title</code> string — keep the quotes!</li>
-      <li>Add the <code>Background</code> line. When you type <code>Brushes.</code> and pause, <b>IntelliSense</b> lists every color it knows — arrow through the menu and pick one. (If <code>Brushes</code> is squiggly red, add <code>using Avalonia.Media;</code> at the top with the other <code>using</code> lines.)</li>
-      <li>Change the welcome <code>Text</code> to a greeting of your own, then <kbd>F5</kbd>.</li>
-    </ol>
-    <div class="check">✅ <b>Checkpoint:</b> your name in a title bar, your color behind it. Notice what just happened: even <i>colors</i> are objects with names, and the editor taught them to you via IntelliSense. That menu is your best friend all semester.</div>
-    <div class="markwrap"><button class="mark" type="button">Mark level complete</button></div>
-  </div>
-</article>
+  </div><figcaption><b>Figure 5.</b> An empty window with a default everything — because your constructor is empty. Move it, resize it, maximize it, close it with ✕ (that stops the run too). All of that behavior came <b>free</b> from the <code style="font-family:var(--mono)">: Window</code> inheritance.</figcaption></figure>
+  <div class="bubble win">✅ <b>Checkpoint — and the whole teaching trick of today:</b> the window is blank because <i>you haven't said anything yet</i>. From this moment on, <b>every single line you add will visibly change this window</b>. One line, one F5, one change you can see. That's how we learn GUI: slowly, and with proof.</div>
+  <details class="why"><summary>What did F5 actually do?</summary><div class="body">
+    <p>The whole Week 1 pipeline, for real: the <b>compiler</b> read your entire project and checked its grammar, translated it to universal <b>IL</b>, the <b>.NET runtime</b> JIT-translated that for this exact CPU, and the machine ran it. The same IL runs on Windows, macOS, and Linux — which is why your app is cross-platform without you doing anything.</p>
+  </div></details>
+  <button class="donebtn" data-lv="L6">Mark level complete</button>
+</section>
 
 <!-- ============ LEVEL 7 ============ -->
-<article class="level" id="L7" data-level="7">
-  <div class="titlebar"><span class="lvl">7</span><h2>Build the Greeter 💬</h2><span class="emo">🗣️</span><span class="tbtns">— ▢ ✕</span></div>
-  <div class="body">
-    <p>The heart of Milestone 1: a button that <b>answers</b>. You'll add two <b>fields</b>, a <b>Button</b>, one <code>+=</code>, and a handler — turning the shell into the full program from the lecture's <b>First Code</b> tab:</p>
-    <div class="codewrap">
-      <div class="codehead"><span>MainWindow.cs — the complete Greeter (your target)</span><button class="copy" type="button">Copy</button></div>
-      <pre class="code"><span class="k">using</span> Avalonia;
-<span class="k">using</span> Avalonia.Controls;
-<span class="k">using</span> Avalonia.Interactivity;
-<span class="k">using</span> Avalonia.Media;
-
-<span class="k">namespace</span> MyStudioApp;
-
-<span class="k">public class</span> <span class="t">MainWindow</span> : <span class="t">Window</span>
-{
-    <span class="t">TextBox</span> txtName = <span class="k">new</span> <span class="t">TextBox</span> { <span class="m">Watermark</span> = <span class="s">"Type your name…"</span> };
-    <span class="t">TextBlock</span> lblGreeting = <span class="k">new</span> <span class="t">TextBlock</span> { <span class="m">FontSize</span> = <span class="n">18</span> };
-
-    <span class="k">public</span> <span class="m">MainWindow</span>()
-    {
-        Title = <span class="s">"My Studio App — Maria"</span>;
-        <span class="m">Width</span> = <span class="n">500</span>; <span class="m">Height</span> = <span class="n">350</span>;
-
-        <span class="k">var</span> lblWelcome = <span class="k">new</span> <span class="t">TextBlock</span> { <span class="m">Text</span> = <span class="s">"Welcome to MAC 109!"</span>, <span class="m">FontSize</span> = <span class="n">22</span> };
-        <span class="k">var</span> btnGreet = <span class="k">new</span> <span class="t">Button</span> { <span class="m">Content</span> = <span class="s">"Say Hello"</span> };
-        btnGreet.<span class="m">Click</span> += <span class="m">BtnGreet_Click</span>;
-
-        <span class="m">Content</span> = <span class="k">new</span> <span class="t">StackPanel</span>
-        {
-            <span class="m">Margin</span> = <span class="k">new</span> <span class="t">Thickness</span>(<span class="n">20</span>), <span class="m">Spacing</span> = <span class="n">12</span>,
-            <span class="m">Children</span> = { lblWelcome, txtName, btnGreet, lblGreeting }
-        };
-    }
-
-    <span class="k">void</span> <span class="m">BtnGreet_Click</span>(<span class="k">object</span> sender, <span class="t">RoutedEventArgs</span> e)
-    {
-        lblGreeting.<span class="m">Text</span> = <span class="s">"Hello, "</span> + txtName.<span class="m">Text</span> + <span class="s">"!"</span>;
-    }
-}</pre>
+<section class="level" id="L7" style="--c:#3b82f6;--shadow:rgba(59,130,246,.18)">
+  <div class="lvhead"><div class="lvnum">7</div><h2>Give it a title &amp; a size</h2><span class="emoji">🏷️</span></div>
+  <p class="lead">Your first real GUI code: <b>three properties</b>, typed inside the constructor's <code class="inline">{ }</code>. Type them — don't paste — and watch IntelliSense suggest as you go:</p>
+  <div class="copyblock"><div class="cbbar">MainWindow.cs — inside public MainWindow() { … }</div><button class="copybtn">Copy</button><pre>Title = "My Studio App — YOUR NAME";
+Width = 500;
+Height = 350;</pre></div>
+  <ol class="steps">
+    <li>Type <code class="inline">Ti</code> and pause — IntelliSense offers <b>Title</b>. Press <span class="kbd">Tab</span> to accept. Finish the line with <b>your actual name</b> inside the quotes, and end with a semicolon.</li>
+    <li>Add <code class="inline">Width</code> and <code class="inline">Height</code> the same way. Numbers don't get quotes.</li>
+    <li><span class="kbd">Ctrl</span>+<span class="kbd">S</span>, then <span class="kbd">F5</span>. 👀 Your name is in the title bar, and the window opens at exactly 500×350.</li>
+    <li>Play scientist: change Height to 600, run. Change it back. <i>Cause, effect, proof.</i></li>
+  </ol>
+  <figure><div class="shot" style="background:#3f3f46;padding:26px 12px">
+    <div class="avwin">
+      <div class="avtitle"><span>My Studio App — Maria</span><span class="btns">— ▢ ✕</span></div>
+      <div class="avbody" style="min-height:120px"></div>
     </div>
-    <ol>
-      <li><b>Type</b> (don't paste) the two field lines above the constructor — feel IntelliSense appear after every <code>new</code> and every dot.</li>
-      <li>Add <code>btnGreet</code> and the <code>Click +=</code> line inside the constructor.</li>
-      <li>Grow the <code>Children</code> list to all four controls, in top-to-bottom order.</li>
-      <li>Add the <code>BtnGreet_Click</code> method after the constructor.</li>
-      <li><kbd>F5</kbd> ▸ type your name ▸ click <b>Say Hello</b>.</li>
-    </ol>
-    <figure class="fig">
-      <div class="winapp">
-        <div class="wtitle"><span class="t">My Studio App — Maria</span><span class="wb">— ▢ ✕</span></div>
-        <div class="wbody">
-          <span class="wf-result" style="font-size:1.1rem;color:#111">Welcome to MAC 109!</span>
-          <span class="wf-text">Maria</span>
-          <span class="wf-btn">Say Hello</span>
-          <span class="wf-result">Hello, Maria!</span>
-        </div>
-      </div>
-      <figcaption><b>Figure 5.</b> The greeting appears <i>on the window itself</i> — no pop-up needed. Click again after changing the name; the handler runs every time.</figcaption>
-    </figure>
-    <details><summary>The three ideas hiding in this file</summary><div class="dbody"><b>(1) Fields vs var:</b> <code>txtName</code> and <code>lblGreeting</code> live at class level so the handler can reach them later; <code>lblWelcome</code> and <code>btnGreet</code> are <code>var</code> locals nobody needs after setup. <b>(2) The += subscription:</b> "when this button is clicked, run that method" — your program now <i>waits</i> for the user. That's event-driven programming, and it's the single most important line in GUI code. <b>(3) Read → glue → write:</b> read <code>txtName.Text</code>, glue with <code>+</code>, write <code>lblGreeting.Text</code>. That rhythm is 90% of what GUI code does.</div></details>
-    <div class="medal">🏅 <b>DELIVERABLE — Milestone 1 core, DONE!</b> A window ✓ four controls built as C# objects ✓ a wired Click event ✓ personalized output on the window ✓. Show a neighbor — first-GUI energy is contagious.</div>
-    <div class="markwrap"><button class="mark" type="button">Mark level complete</button></div>
-  </div>
-</article>
+  </div><figcaption><b>Figure 6.</b> Still empty inside — but now it's <i>your</i> window: your title, your size. Two levels ago this project printed text in a console.</figcaption></figure>
+  <details class="why"><summary>What is a "property," exactly?</summary><div class="body">
+    <p>Your window is an <b>object</b>, and objects carry <b>properties</b> — named settings you can read or change: <code class="inline">Title</code>, <code class="inline">Width</code>, <code class="inline">Height</code>… Setting one is just <code class="inline">Name = value;</code>. Notice the types matching: Title takes a <b>string</b> (quotes), Width takes a <b>number</b> (no quotes). Every control you meet from here — buttons, text boxes, all of them — works exactly this way. Learn this level, and you've learned half of GUI programming.</p>
+  </div></details>
+  <button class="donebtn" data-lv="L7">Mark level complete</button>
+</section>
 
 <!-- ============ LEVEL 8 ============ -->
-<article class="level" id="L8" data-level="8">
-  <div class="titlebar"><span class="lvl">8</span><h2>Add a Clear button</h2><span class="emo">✨</span><span class="tbtns">— ▢ ✕</span></div>
-  <div class="body">
-    <p>Real apps reset. Add a second button with its <b>own</b> event — proof that every control carries its own personality:</p>
-    <div class="codewrap">
-      <div class="codehead"><span>MainWindow.cs — three additions</span><button class="copy" type="button">Copy</button></div>
-      <pre class="code"><span class="c">// 1 · in the constructor, next to btnGreet:</span>
-<span class="k">var</span> btnClear = <span class="k">new</span> <span class="t">Button</span> { <span class="m">Content</span> = <span class="s">"Clear"</span> };
-btnClear.<span class="m">Click</span> += <span class="m">BtnClear_Click</span>;
-
-<span class="c">// 2 · grow the Children list:</span>
-<span class="m">Children</span> = { lblWelcome, txtName, btnGreet, btnClear, lblGreeting }
-
-<span class="c">// 3 · after BtnGreet_Click, its sibling:</span>
-<span class="k">void</span> <span class="m">BtnClear_Click</span>(<span class="k">object</span> sender, <span class="t">RoutedEventArgs</span> e)
+<section class="level" id="L8" style="--c:#06b6a4;--shadow:rgba(6,182,164,.18)">
+  <div class="lvhead"><div class="lvnum">8</div><h2>Paint it &amp; put text inside</h2><span class="emoji">🎨</span></div>
+  <p class="lead">Two more moves: a background color (another property), and your first <b>control</b> — a <code class="inline">TextBlock</code> — placed inside the window.</p>
+  <p class="lead"><b>Move 1 — paint.</b> Add this line under Height:</p>
+  <div class="copyblock"><div class="cbbar">MainWindow.cs — inside the constructor</div><button class="copybtn">Copy</button><pre>Background = Brushes.MintCream;   // pick any: LightYellow, Lavender, Honeydew…</pre></div>
+  <div class="bubble tip">🩹 <b>Red squiggle under Brushes?</b> That's a missing <code class="inline">using</code> — colors live in the <code class="inline">Avalonia.Media</code> toolbox. Click the squiggle, press <span class="kbd">Ctrl</span>+<span class="kbd">.</span> (the <b>Quick Fix</b> menu), and accept <b>using Avalonia.Media;</b> — VS Code adds the line at the top for you. This trick fixes every "type not found" error you'll ever meet. After that, type <code class="inline">Brushes.</code> and pause: IntelliSense lists <i>every color it knows</i>. Shop around.</div>
+  <p class="lead"><b>Move 2 — text inside.</b> The window can hold content — give it a text object:</p>
+  <div class="copyblock"><div class="cbbar">MainWindow.cs — under the Background line</div><button class="copybtn">Copy</button><pre>Content = new TextBlock
 {
-    txtName.<span class="m">Text</span> = <span class="s">""</span>;        <span class="c">// empty the box</span>
-    lblGreeting.<span class="m">Text</span> = <span class="s">""</span>;    <span class="c">// hide the greeting</span>
-    txtName.<span class="m">Focus</span>();          <span class="c">// cursor back home, ready for the next name</span>
-}</pre>
+    Text = "Welcome to MAC 109!",
+    FontSize = 22,
+    Foreground = Brushes.DarkSlateBlue,   // Foreground = the TEXT's color
+    Margin = new Thickness(20)
+};</pre></div>
+  <ol class="steps">
+    <li>Read it before running: <code class="inline">new TextBlock { … }</code> <b>creates an object</b> and sets its properties in one go — Text, FontSize, Foreground (its color), Margin (breathing room). Same property idea as Level 7, new object.</li>
+    <li><code class="inline">Content =</code> hands that object to the window. (If <code class="inline">Thickness</code> gets a squiggle: <span class="kbd">Ctrl</span>+<span class="kbd">.</span> ▸ <b>using Avalonia;</b> — same trick.)</li>
+    <li><span class="kbd">F5</span> — painted window, message inside. Change the Text, the FontSize, both colors. Run after each change.</li>
+  </ol>
+  <figure><div class="shot" style="background:#3f3f46;padding:26px 12px">
+    <div class="avwin">
+      <div class="avtitle"><span>My Studio App — Maria</span><span class="btns">— ▢ ✕</span></div>
+      <div class="avbody mint" style="min-height:110px"><div class="avh">Welcome to MAC 109!</div></div>
     </div>
-    <p><kbd>F5</kbd>. Greet ▸ the label lights up. Clear ▸ everything resets and the cursor jumps home. Two buttons, two subscriptions, two handlers — the pattern scales to every feature you'll ever add.</p>
-    <div class="check">✅ <b>Checkpoint:</b> both buttons behave. Bonus experiment: reorder the names inside <code>Children</code> and press F5 — the window rearranges. The list <i>is</i> the layout.</div>
-    <div class="markwrap"><button class="mark" type="button">Mark level complete</button></div>
-  </div>
-</article>
+  </div><figcaption><b>Figure 7.</b> Exactly what your code says: mint window, dark-blue 22-point text, 20 pixels of margin. Every pixel on screen maps to a line you wrote.</figcaption></figure>
+  <div class="bubble win">✅ <b>Checkpoint:</b> you now know the two verbs of GUI programming — <b>set a property</b> (Level 7) and <b>create an object</b> (this level). Everything else is combinations.</div>
+  <button class="donebtn" data-lv="L8">Mark level complete</button>
+</section>
 
 <!-- ============ LEVEL 9 ============ -->
-<article class="level" id="L9" data-level="9">
-  <div class="titlebar"><span class="lvl">9</span><h2>Try to break it 😈</h2><span class="emo">🔨</span><span class="tbtns">— ▢ ✕</span></div>
-  <div class="body">
-    <p>Professionals sabotage on purpose. After each experiment, <kbd>Ctrl</kbd>+<kbd>Z</kbd> and confirm <kbd>F5</kbd> still works:</p>
-    <ul>
-      <li>🔡 Change <code>TextBlock</code> to <code>textBlock</code> — instant red squiggle, and the <b>Problems</b> panel reports the type can't be found, with the exact line. Case-sensitivity, Rule 2.</li>
-      <li>✂️ Delete the semicolon after the <code>Title</code> line — <b>; expected</b>, again with the line number.</li>
-      <li>💥 Delete one closing quote from <code>"Say Hello"</code> — suddenly <i>many</i> errors. One missing quote confuses everything after it. Pro ritual: <b>fix the FIRST error first</b>; the rest usually vanish.</li>
-      <li>🕳️ All fixed? One last test, no code broken: run, leave the box empty, click <b>Say Hello</b>. "Hello, !" — slightly tragic. Nothing crashed, but it isn't smart either. Week 3's <code>if</code> statement fixes exactly this. Remember this moment.</li>
-    </ul>
-    <figure class="fig">
-      <div class="ide">
-        <div class="cap">mac109-project — Visual Studio Code<span class="dots">— ▢ ✕</span></div>
-        <div class="row">
-          <div class="pane main">
-            <h4>PROBLEMS · 1</h4>
-            <pre><span style="color:#f48771">✗</span> The type or namespace name <span class="s">'textBlock'</span> could not be found   <span class="c">MainWindow.cs [Ln 17]</span></pre>
-          </div>
-        </div>
-        <div class="status"><span>⊗ 1 error — click it to jump to the line</span></div>
-      </div>
-      <figcaption><b>Figure 6.</b> The Problems panel: every error, named, with a file and line. Click an entry and the cursor jumps straight to the crime scene.</figcaption>
-    </figure>
-    <details><summary>Why celebrate errors?</summary><div class="dbody">These are <b>compile-time errors</b> — caught <i>before</i> anything ran, each with a reason and a line number. That's a gift, and it's why we use a compiled language: mistakes surface immediately instead of hiding until the worst moment. Reading errors calmly, top to bottom, first one first, is the most valuable habit you'll build this semester.</div></details>
-    <div class="markwrap"><button class="mark" type="button">Mark level complete</button></div>
-  </div>
-</article>
+<section class="level" id="L9" style="--c:#ec4899;--shadow:rgba(236,72,153,.18)">
+  <div class="lvhead"><div class="lvnum">9</div><h2>Add a button</h2><span class="emoji">🔘</span></div>
+  <p class="lead">A button is just another object — but there's a puzzle first: <code class="inline">Content</code> holds <b>ONE</b> thing, and we now want two (text <i>and</i> button). The answer is a <b>StackPanel</b> — a shelf that stacks its children top to bottom. Replace your whole <code class="inline">Content = …</code> block with:</p>
+  <div class="copyblock"><div class="cbbar">MainWindow.cs — replace the Content block</div><button class="copybtn">Copy</button><pre>var lblWelcome = new TextBlock
+{
+    Text = "Welcome to MAC 109!",
+    FontSize = 22,
+    Foreground = Brushes.DarkSlateBlue
+};
+
+var btnGreet = new Button { Content = "Say Hello" };
+
+Content = new StackPanel
+{
+    Margin = new Thickness(20),
+    Spacing = 12,
+    Children = { lblWelcome, btnGreet }
+};</pre></div>
+  <ol class="steps">
+    <li>Notice the small refactor: the TextBlock now gets a <b>name</b> (<code class="inline">lblWelcome</code>, via <code class="inline">var</code>) so the shelf can refer to it. Naming convention all semester: <b>lbl</b>Text, <b>btn</b>Buttons, <b>txt</b>TextBoxes.</li>
+    <li>The button is one line: <code class="inline">new Button { Content = "Say Hello" }</code> — create the object, set its property. Level 8's two verbs, again.</li>
+    <li>The StackPanel takes the Margin (the shelf carries the spacing now) and lists its <code class="inline">Children</code> in top-to-bottom order.</li>
+    <li><span class="kbd">F5</span> — there's your button. Now <b>click it.</b></li>
+  </ol>
+  <figure><div class="shot" style="background:#3f3f46;padding:26px 12px">
+    <div class="avwin">
+      <div class="avtitle"><span>My Studio App — Maria</span><span class="btns">— ▢ ✕</span></div>
+      <div class="avbody mint"><div class="avh">Welcome to MAC 109!</div><div class="avbtn">Say Hello</div></div>
+    </div>
+  </div><figcaption><b>Figure 8.</b> A real button that presses down beautifully and does… <b>absolutely nothing</b>. 😄</figcaption></figure>
+  <div class="bubble tip">🤫 <b>Why nothing?</b> The button works — it's just <i>deaf</i>. Nobody told it what clicking should <b>mean</b>. Teaching a control to respond is called an <b>event</b>, it takes exactly one <code class="inline">+=</code>, and it's the whole next level. Best cliffhanger in programming.</div>
+  <button class="donebtn" data-lv="L9">Mark level complete</button>
+</section>
 
 <!-- ============ LEVEL 10 ============ -->
-<article class="level" id="L10" data-level="10">
-  <div class="titlebar"><span class="lvl">10</span><h2>Push, then sign out ☁️</h2><span class="emo">🚀</span><span class="tbtns">— ▢ ✕</span></div>
-  <div class="body">
-    <p>This machine will forget you tonight. GitHub won't. In this course, <b>pushing IS submitting</b>:</p>
-    <ol>
-      <li>Open <code>README.md</code> ▸ make it yours: your <b>name</b>, the course, and — decision time! — your <b>semester domain app</b>: Student Management, Library, Restaurant Ordering, Hotel Reservation, Banking, or Inventory. This choice is part of Milestone 1. Save with <kbd>Ctrl</kbd>+<kbd>S</kbd>.</li>
-      <li>Click the <b>Source Control</b> icon — your edited files appear under <b>Changes</b>.</li>
-      <li>Message box: <code>Milestone 1: working GUI shell</code> ▸ click <b>✓ Commit</b> ▸ <b>Yes</b> if asked about staging.</li>
-      <li>Click <b>Sync Changes</b> ▸ a browser opens ▸ <b>Sign in with GitHub</b> ▸ <b>Authorize</b>.</li>
-      <li>Refresh your repo on <b>github.com</b> — code and README are live. That page's URL is your submission: paste it on <b>Brightspace</b>.</li>
-    </ol>
-    <div class="danger">🚪 <b>Before you leave B-209 — the exit checklist:</b><br>① Push verified on <b>github.com</b> (not just in VS Code) &nbsp;② Sign <b>out</b> of GitHub in the browser &nbsp;③ In VS Code, click the <b>Accounts</b> icon (bottom-left, the person) ▸ your GitHub name ▸ <b>Sign Out</b>. Shared machines, shared risks — protect your account like your MetroCard.</div>
-    <details><summary>Commit vs push — 15-second refresher</summary><div class="dbody"><b>Commit</b> = a labeled snapshot 📸 of your code on <i>this</i> machine. <b>Push</b> (inside Sync Changes) = uploading your snapshots to GitHub, where they survive lab-machine amnesia and reach your professor. On a classroom computer, a commit without a push is a photo saved on a camera you're about to hand back.</div></details>
-    <p>📬 <b>Final move:</b> submit your repo link on Brightspace. Then look around the room: ninety minutes ago, none of these apps existed — and every one of them will keep growing until December. 🪟✨</p>
-    <div class="markwrap"><button class="mark" type="button">Mark level complete</button></div>
-  </div>
-</article>
+<section class="level" id="L10" style="--c:#ffb703;--shadow:rgba(255,183,3,.22)">
+  <div class="lvhead"><div class="lvnum">10</div><h2>Text box + your first event ⚡</h2><span class="emoji">💬</span></div>
+  <p class="lead">The finale of the build: a <b>TextBox</b> to type into, a <b>TextBlock</b> to answer in, and the <code class="inline">+=</code> that wires the button's Click to a method of yours. Three additions:</p>
+  <p class="lead"><b>Addition 1 —</b> two controls that must survive <i>after</i> the constructor finishes, so they live at <b>class level</b> (right above <code class="inline">public MainWindow()</code>):</p>
+  <div class="copyblock"><div class="cbbar">MainWindow.cs — above the constructor (fields)</div><button class="copybtn">Copy</button><pre>TextBox txtName = new TextBox { Watermark = "Type your name…" };
+TextBlock lblGreeting = new TextBlock { FontSize = 18, Foreground = Brushes.SeaGreen };</pre></div>
+  <p class="lead"><b>Addition 2 —</b> subscribe the button and grow the shelf (inside the constructor):</p>
+  <div class="copyblock"><div class="cbbar">MainWindow.cs — in the constructor</div><button class="copybtn">Copy</button><pre>btnGreet.Click += BtnGreet_Click;   // "when clicked, run my method"
+
+Content = new StackPanel
+{
+    Margin = new Thickness(20),
+    Spacing = 12,
+    Children = { lblWelcome, txtName, btnGreet, lblGreeting }
+};</pre></div>
+  <p class="lead"><b>Addition 3 —</b> the method itself, <i>after</i> the constructor, still inside the class:</p>
+  <div class="copyblock"><div class="cbbar">MainWindow.cs — after the constructor</div><button class="copybtn">Copy</button><pre>void BtnGreet_Click(object sender, RoutedEventArgs e)
+{
+    lblGreeting.Text = "Hello, " + txtName.Text + "!";
+}</pre></div>
+  <ol class="steps">
+    <li>Squiggle on <code class="inline">RoutedEventArgs</code>? You know the ritual: <span class="kbd">Ctrl</span>+<span class="kbd">.</span> ▸ <b>using Avalonia.Interactivity;</b></li>
+    <li><span class="kbd">F5</span> ▸ type your name ▸ click <b>Say Hello</b>. The greeting appears <i>on the window</i>. Click again with a different name. Every click re-runs your method.</li>
+  </ol>
+  <figure><div class="shot" style="background:#3f3f46;padding:26px 12px">
+    <div class="avwin">
+      <div class="avtitle"><span>My Studio App — Maria</span><span class="btns">— ▢ ✕</span></div>
+      <div class="avbody mint">
+        <div class="avh">Welcome to MAC 109!</div>
+        <div class="avtxt">Maria</div>
+        <div class="avbtn">Say Hello</div>
+        <div class="avgreet">Hello, Maria!</div>
+      </div>
+    </div>
+  </div><figcaption><b>Figure 9.</b> The deaf button hears. Read the handler out loud: "read the box's Text, glue it into a sentence, write it into the label's Text." That read → glue → write rhythm is 90% of GUI code.</figcaption></figure>
+  <details class="why"><summary>Why do txtName and lblGreeting live ABOVE the constructor?</summary><div class="body">
+    <p>Because <b>two different moments</b> need them: the constructor (to put them on the shelf, at startup) and BtnGreet_Click (to read and write them — possibly minutes later, every time the user clicks). Variables declared <i>inside</i> the constructor evaporate when it finishes. Declared at class level — as <b>fields</b> — they live as long as the window does. Rule of thumb: <i>if the handler needs it, it's a field.</i> lblWelcome and btnGreet stay as <code class="inline">var</code> locals because after setup, nobody needs to talk to them again… until next week, when we make btnGreet's Content change too. 😉</p>
+  </div></details>
+  <div class="bubble win">🏅 <b>DELIVERABLE — Weekly Lab 1 core, DONE!</b> A window built one piece at a time ✓ properties ✓ objects ✓ a StackPanel layout ✓ a wired Click event ✓ personalized output ✓. Show a neighbor — first-GUI energy is contagious.</div>
+  <button class="donebtn" data-lv="L10">Mark level complete</button>
+</section>
+
+<!-- ============ LEVEL 11 ============ -->
+<section class="level" id="L11" style="--c:#06b6a4;--shadow:rgba(6,182,164,.18)">
+  <div class="lvhead"><div class="lvnum">11</div><h2>Add a Clear button — then break everything 😈</h2><span class="emoji">✨</span></div>
+  <p class="lead">Real apps reset. Add a second button with its <b>own</b> event — same pattern, zero new ideas, pure confidence:</p>
+  <div class="copyblock"><div class="cbbar">MainWindow.cs — three additions</div><button class="copybtn">Copy</button><pre>// 1 · in the constructor, next to btnGreet:
+var btnClear = new Button { Content = "Clear" };
+btnClear.Click += BtnClear_Click;
+
+// 2 · grow the Children list:
+Children = { lblWelcome, txtName, btnGreet, btnClear, lblGreeting }
+
+// 3 · after BtnGreet_Click, its sibling:
+void BtnClear_Click(object sender, RoutedEventArgs e)
+{
+    txtName.Text = "";        // empty the box
+    lblGreeting.Text = "";    // hide the greeting
+    txtName.Focus();          // cursor back home, ready for the next name
+}</pre></div>
+  <p class="lead"><span class="kbd">F5</span>. Greet ▸ the label lights up. Clear ▸ everything resets and the cursor jumps home. Two buttons, two subscriptions, two handlers — the pattern scales to every feature you'll ever add.</p>
+  <p class="lead">Now, professionals sabotage on purpose. After each experiment, <span class="kbd">Ctrl</span>+<span class="kbd">Z</span> and confirm <span class="kbd">F5</span> still works:</p>
+  <ul class="dots">
+    <li>🔡 Change <code class="inline">TextBlock</code> to <code class="inline">textBlock</code> — instant red squiggle, and the <b>Problems</b> panel reports the type can't be found, with the exact line. Case-sensitivity!</li>
+    <li>✂️ Delete the semicolon after the <code class="inline">Title</code> line — <b>; expected</b>, again with the line number.</li>
+    <li>💥 Delete one closing quote from <code class="inline">"Say Hello"</code> — suddenly <i>many</i> errors. One missing quote confuses everything after it. Pro ritual: <b>fix the FIRST error first</b>; the rest usually vanish.</li>
+    <li>🕳️ All fixed? One last test, no code broken: run, leave the box empty, click <b>Say Hello</b>. "Hello, !" — slightly tragic. Nothing crashed, but it isn't smart either. Week 3's <code class="inline">if</code> statement fixes exactly this. Remember this moment.</li>
+  </ul>
+  <details class="why"><summary>Why celebrate errors?</summary><div class="body">
+    <p>These are <b>compile-time errors</b> — caught <i>before</i> anything ran, each with a reason and a line number. That's a gift, and it's why we use a compiled language: mistakes surface immediately instead of hiding until the worst moment. Reading errors calmly, top to bottom, first one first, is the most valuable habit you'll build this semester.</p>
+  </div></details>
+  <button class="donebtn" data-lv="L11">Mark level complete</button>
+</section>
+
+<!-- ============ LEVEL 12 ============ -->
+<section class="level" id="L12" style="--c:#7c3aed;--shadow:rgba(124,58,237,.18)">
+  <div class="lvhead"><div class="lvnum">12</div><h2>ZIP it &amp; submit on Brightspace 📦</h2><span class="emoji">🚀</span></div>
+  <p class="lead">This machine will forget you tonight. Brightspace won't. In this course, <b>uploading IS submitting</b> — here's the exact ritual you'll repeat every week:</p>
+  <ol class="steps">
+    <li>Decision time! At the top of <b>MainWindow.cs</b>, add a comment header — this choice is part of Weekly Lab 1:
+      <div class="copyblock" style="margin-top:10px"><div class="cbbar">top of MainWindow.cs</div><button class="copybtn">Copy</button><pre>// MAC 109 — Weekly Lab 1
+// Name: YOUR NAME
+// Semester domain app: Library System   ← choose: Student Management, Library,
+//    Restaurant Ordering, Hotel Reservation, Banking, or Inventory</pre></div>
+      Save with <span class="kbd">Ctrl</span>+<span class="kbd">S</span>, run once more to confirm everything still works.</li>
+    <li>Close VS Code (so no file is locked), then open <b>File Explorer</b> ▸ <b>Documents</b> ▸ <b>MAC109</b> ▸ <b>MyStudioApp</b>.</li>
+    <li>Housekeeping: <b>delete the <code class="inline">bin</code> and <code class="inline">obj</code> folders</b> inside MyStudioApp. They're robot-made build output — hundreds of files you don't need to submit, and they regenerate on the next F5. (Your .cs files and .csproj are the actual project.)</li>
+    <li>Go back up to the MAC109 folder, <b>right-click MyStudioApp ▸ Compress to ZIP file</b> (older Windows: Send to ▸ Compressed folder). Rename the ZIP: <code class="inline">Lab1_YourLastName.zip</code>.</li>
+    <li>In the browser: <b>Brightspace ▸ MAC 109 ▸ Assignments ▸ Weekly Lab 1</b> ▸ upload the ZIP ▸ <b>Submit</b> ▸ wait for the confirmation screen (screenshot it if you're the careful type — good instinct).</li>
+    <li>Keep your own copy: email the ZIP to yourself, or drop it on your OneDrive or a USB drive. Next week starts from this exact project.</li>
+  </ol>
+  <div class="bubble alert">🚪 <b>Before you leave B-209 — the exit checklist:</b><br>① Confirmation screen seen on <b>Brightspace</b> (not just "I clicked upload") &nbsp;② A personal copy of the ZIP is off this machine &nbsp;③ Sign <b>out</b> of Brightspace and any accounts in the browser. Shared machines, shared risks — protect your accounts like your MetroCard.</div>
+  <details class="why"><summary>Why delete bin and obj? And why keep my own copy?</summary><div class="body">
+    <p><b>bin/obj</b> hold compiled output plus the downloaded Avalonia packages — often 100+ MB of files your recipe card can regenerate anywhere in seconds (that's what "Restoring…" was). Submitting them is like mailing someone a cake <i>and</i> the dirty mixing bowls. <b>Your own copy</b> matters because lab machines are wiped: next Friday you'll download your latest ZIP (from your email/OneDrive or your own Brightspace submission), unzip it into Documents\MAC109, open it in VS Code, and keep building. That download-work-ZIP-upload loop is the weekly heartbeat of this course.</p>
+  </div></details>
+  <p class="lead" style="margin-top:14px">📬 <b>Final move done?</b> Then look around the room: ninety minutes ago, none of these apps existed — and every one of them grew here, one visible line at a time. They'll keep growing until December. 🪟✨</p>
+  <button class="donebtn" data-lv="L12">Mark level complete</button>
+</section>
 
 </main>
+</div>
 
-<footer>
-  MAC 109 · Introduction to Visual C# Programming · LaGuardia Community College (CUNY) · Prof. K. Kassou — In-class studio practical #1: claim, clone, build, push.<br>
-  🏠 At home, every step works identically on <b>your</b> Windows, Mac, or Linux machine — the Week 1 practice page adds the one-time installs (with videos) and repeats this whole flow at your own pace.
-</footer>
+<footer>MAC 109 · Introduction to Visual C# Programming · LaGuardia Community College (CUNY) · Prof. K. Kassou — In-class studio practical #1: create, build one piece at a time, run after every step, submit. 🏠 At home, every step works identically on <b>your</b> Windows, Mac, or Linux machine — the Week 1 practice page adds the one-time installs and repeats this whole flow at your own pace.</footer>
 
 <script>
 (function(){
-  var TOTAL = 10, KEY = "mac109_studio1_progress";
-  var done = {};
-  try { done = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch(e) { done = {}; }
+  "use strict";
 
-  var levels = document.querySelectorAll(".level");
-  var tasks = document.querySelectorAll(".task");
-  var barfill = document.getElementById("barfill");
-  var pct = document.getElementById("pct");
-  var overlay = document.getElementById("overlay");
-  var celebrated = false;
-
-  function save(){ try { localStorage.setItem(KEY, JSON.stringify(done)); } catch(e){} }
-
-  function refresh(){
-    var count = 0;
-    levels.forEach(function(lv){
-      var n = lv.getAttribute("data-level");
-      var isDone = !!done[n];
-      lv.classList.toggle("done", isDone);
-      var btn = lv.querySelector(".mark");
-      if (btn) btn.textContent = isDone ? "✓ Level complete — tap to undo" : "Mark level complete";
-      if (isDone) count++;
-    });
-    tasks.forEach(function(t){
-      t.classList.toggle("done", !!done[t.getAttribute("data-l")]);
-    });
-    var p = Math.round(count / TOTAL * 100);
-    barfill.style.width = p + "%";
-    pct.textContent = p + "% complete" + (count === TOTAL ? " — 🏆 all levels!" : "");
-    if (count === TOTAL && !celebrated){ celebrated = true; overlay.classList.add("show"); }
-    if (count < TOTAL) celebrated = false;
+  /* scroll progress */
+  var bar=document.getElementById('scrollbar');
+  function onScroll(){
+    var h=document.documentElement;
+    var p=h.scrollTop/(h.scrollHeight-h.clientHeight);
+    bar.style.width=(p*100)+'%';
   }
+  document.addEventListener('scroll',onScroll,{passive:true});
+  onScroll();
 
-  levels.forEach(function(lv){
-    var btn = lv.querySelector(".mark");
-    if (!btn) return;
-    btn.addEventListener("click", function(){
-      var n = lv.getAttribute("data-level");
-      if (done[n]) delete done[n]; else done[n] = true;
-      save(); refresh();
-    });
-  });
-
-  document.getElementById("ovClose").addEventListener("click", function(){
-    overlay.classList.remove("show");
-  });
-
-  document.querySelectorAll(".copy").forEach(function(btn){
-    btn.addEventListener("click", function(){
-      var pre = btn.closest(".codewrap").querySelector("pre.code");
-      var text = pre ? pre.innerText : "";
-      function flash(){ btn.textContent = "Copied ✓"; setTimeout(function(){ btn.textContent = "Copy"; }, 1600); }
-      if (navigator.clipboard && navigator.clipboard.writeText){
-        navigator.clipboard.writeText(text).then(flash, flash);
-      } else {
-        var ta = document.createElement("textarea");
-        ta.value = text; document.body.appendChild(ta); ta.select();
-        try { document.execCommand("copy"); } catch(e){}
-        document.body.removeChild(ta); flash();
+  /* copy buttons */
+  document.querySelectorAll('.copyblock').forEach(function(block){
+    var btn=block.querySelector('.copybtn');
+    var pre=block.querySelector('pre');
+    btn.addEventListener('click',function(){
+      function done(ok){
+        btn.textContent=ok?'Copied! ✓':'Select & copy';
+        btn.classList.toggle('ok',ok);
+        setTimeout(function(){btn.textContent='Copy';btn.classList.remove('ok');},1800);
+      }
+      if(navigator.clipboard&&navigator.clipboard.writeText){
+        navigator.clipboard.writeText(pre.textContent).then(function(){done(true);},function(){done(false);});
+      }else{
+        var r=document.createRange();r.selectNodeContents(pre);
+        var s=window.getSelection();s.removeAllRanges();s.addRange(r);
+        done(false);
       }
     });
   });
 
-  refresh();
+  /* quest tracking + confetti */
+  var total=12,doneSet={},partied=false;
+  function refresh(){
+    var n=Object.keys(doneSet).length;
+    document.getElementById('questFill').style.width=(n/total*100)+'%';
+    document.getElementById('questPct').textContent=Math.round(n/total*100)+'% complete'+(n===total?' 🎉':'');
+    if(n===total)celebrate();
+  }
+  document.querySelectorAll('.donebtn').forEach(function(b){
+    b.addEventListener('click',function(){
+      var lv=b.dataset.lv;
+      if(doneSet[lv]){delete doneSet[lv];b.classList.remove('on');b.textContent='Mark level complete';}
+      else{doneSet[lv]=1;b.classList.add('on');b.textContent='Level complete';miniBurst(b);}
+      var q=document.querySelector('.qitem[data-q="'+lv+'"]');
+      if(q)q.classList.toggle('done',!!doneSet[lv]);
+      refresh();
+    });
+  });
+  var party=document.getElementById('party');
+  var EMO=['🎉','⭐','💜','🚀','✨','🧡','🎊','🪟'];
+  function drop(x,delay,dur){
+    var c=document.createElement('span');
+    c.className='confetto';
+    c.textContent=EMO[Math.floor(Math.random()*EMO.length)];
+    c.style.left=x+'%';c.style.animationDuration=dur+'s';c.style.animationDelay=delay+'s';
+    party.appendChild(c);
+    setTimeout(function(){party.removeChild(c);},(dur+delay)*1000+200);
+  }
+  function miniBurst(el){
+    if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+    var r=el.getBoundingClientRect();
+    var x=(r.left+r.width/2)/window.innerWidth*100;
+    for(var i=0;i<8;i++)drop(x+(Math.random()*8-4),Math.random()*.2,1.6+Math.random());
+  }
+  function celebrate(){
+    if(partied)return;partied=true;
+    document.getElementById('trophy').classList.add('show');
+    if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+    for(var i=0;i<70;i++)drop(Math.random()*100,Math.random()*1.6,2.2+Math.random()*1.6);
+  }
 })();
 </script>
 </body>
