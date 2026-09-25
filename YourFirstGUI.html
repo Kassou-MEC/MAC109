@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="color-scheme" content="dark">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MAC 109 · Week 3: Your First GUI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1220; --surface:#181c2e; --surface2:#222840; --border:#2f3654;
+    --ink:#eef0f8; --ink2:#c3c9dd; --muted:#9098b4;
+    --brand:#6d63ff; --brand2:#a45cff; --brand-soft:#2a2d55; --brand-ink:#c9c5ff;
+    --good:#22c58b; --good-soft:#12352b; --bad:#f06a60; --bad-soft:#3d1f23; --warn:#f5b83d; --warn-soft:#352b12;
+    --code-bg:#0a0d18; --code-bar:#151a2c; --code-border:#2a3150; --code-text:#e6e9f2; --code-ln:#5b627a;
+    --kw:#7aa2f7; --type:#2ac3de; --str:#e0af68; --com:#7f8aa8; --met:#c0caf5; --num:#ff9e64; --hl:#2c3350; --pin:#3b4a7a;
+    --sans:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+    --mono:'JetBrains Mono','Cascadia Code',Consolas,Menlo,monospace;
+    --radius:14px; --shadow:0 10px 30px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16.5px;line-height:1.55;overflow:hidden;-webkit-font-smoothing:antialiased}
+  button{font-family:var(--sans)}
+  b{font-weight:700}
+
+  /* ---------- app frame ---------- */
+  #app{display:flex;flex-direction:column;height:100vh}
+  #top{background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;padding:10px 22px;flex:0 0 auto}
+  #top .logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;font-family:var(--mono);font-weight:700;display:flex;align-items:center;justify-content:center;font-size:15px;flex:0 0 auto}
+  #top .ttl{font-weight:700;font-size:15px}
+  #top .ttl small{display:block;color:var(--muted);font-weight:500;font-size:12.5px}
+  #top .right{margin-left:auto;color:var(--muted);font-size:12.5px;display:flex;align-items:center;gap:14px}
+  #progressWrap{width:140px;height:6px;background:var(--surface2);border-radius:3px;overflow:hidden}
+  #progressBar{height:100%;background:linear-gradient(90deg,var(--brand),var(--brand2));width:0;transition:width .3s}
+
+  #tabstrip{background:var(--surface);display:flex;overflow-x:auto;flex:0 0 auto;border-bottom:1px solid var(--border);padding:0 14px;scrollbar-width:thin;gap:2px}
+  .tab{background:transparent;color:var(--ink2);border:none;border-bottom:3px solid transparent;padding:10px 13px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:7px}
+  .tab .dot{width:8px;height:8px;border-radius:50%;background:var(--border)}
+  .tab:hover{color:var(--brand-ink)}
+  .tab.active{color:var(--brand);border-bottom-color:var(--brand)}
+  .tab.active .dot{background:var(--brand)}
+  .tab.done .dot{background:var(--good)}
+  .tab:focus-visible{outline:2px solid var(--brand);outline-offset:-2px;border-radius:6px}
+
+  #stage{flex:1 1 auto;overflow:hidden;position:relative}
+  .slide{position:absolute;inset:0;overflow-y:auto;padding:34px max(40px,calc((100% - 1180px)/2)) 110px;display:none;animation:slidein .3s ease}
+  .slide.active{display:block}
+  .cl .src{white-space:pre;flex:1 1 auto}
+  @keyframes slidein{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){.slide{animation:none}*{transition:none!important}}
+
+  #bottom{background:var(--surface);border-top:1px solid var(--border);display:flex;align-items:center;gap:12px;padding:10px 22px;flex:0 0 auto}
+  #bottom button{background:var(--brand);color:#fff;border:none;padding:9px 18px;border-radius:10px;cursor:pointer;font-size:13.5px;font-weight:600}
+  #bottom button.ghost{background:var(--surface2);color:var(--ink)}
+  #bottom button:hover{filter:brightness(1.07)}
+  #bottom button:disabled{opacity:.35;cursor:default;filter:none}
+  #bottom .where{color:var(--muted);font-size:13px;margin-left:6px}
+  #bottom .grow{flex:1}
+  #bottom .hint{color:var(--muted);font-size:12.5px}
+  @media(max-width:700px){#bottom .hint,#top .right,#top .ttl small,.codewin .bar .tag,.codewin .bar .dots{display:none}#top .ttl{font-size:13.5px}#top{padding:8px 14px}#bottom{padding:8px 14px}.cl .ln{width:34px;padding-right:10px}.codewin pre{font-size:12.5px}}
+
+  /* ---------- typography & cards ---------- */
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--brand);margin-bottom:10px;font-weight:600}
+  h1{font-size:clamp(30px,4.2vw,46px);font-weight:800;line-height:1.12;margin-bottom:14px;letter-spacing:-.02em}
+  h2{font-size:clamp(24px,3vw,32px);font-weight:800;margin-bottom:6px;letter-spacing:-.015em}
+  h3{font-size:17px;font-weight:700}
+  .sub{color:var(--ink2);max-width:76ch;font-size:16.5px;margin-bottom:22px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  @media(max-width:1000px){.grid4{grid-template-columns:1fr 1fr}}
+  @media(max-width:860px){.grid2,.grid3,.grid4{grid-template-columns:1fr}.slide{padding:22px 16px 110px}}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow)}
+  .card p{color:var(--ink2);font-size:15px;margin-top:8px}
+  .pill{display:inline-block;font-family:var(--mono);font-size:11.5px;background:var(--brand-soft);color:var(--brand-ink);border-radius:20px;padding:3px 11px;margin-bottom:10px;font-weight:600}
+  .pill.g{background:var(--good-soft);color:#7ff0c3}.pill.w{background:var(--warn-soft);color:#fcd67a}.pill.r{background:var(--bad-soft);color:#ffb3ac}
+  code.inline{font-family:var(--mono);background:var(--surface2);border:1px solid var(--border);padding:1px 6px;border-radius:6px;font-size:.88em;color:var(--brand-ink)}
+  .note{background:var(--warn-soft);border:1px solid #5c4a1a;border-radius:12px;padding:12px 16px;color:#fbe3a6;font-size:14px;margin-top:16px}
+  .tip{background:var(--good-soft);border:1px solid #235e4a;border-radius:12px;padding:12px 16px;color:#bff5dd;font-size:14px;margin-top:16px}
+  .rule{display:flex;gap:14px;align-items:flex-start}
+  .rule .num{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;flex:0 0 auto;font-family:var(--mono)}
+  .objlist li{list-style:none;padding:7px 0 7px 30px;position:relative;font-size:15.5px}
+  .objlist li::before{content:"▸";position:absolute;left:8px;color:var(--brand);font-weight:700}
+  .checklist li{list-style:none;padding:9px 0 9px 32px;position:relative;font-size:15px;border-bottom:1px dashed var(--border)}
+  .checklist li::before{content:"✓";position:absolute;left:4px;color:var(--good);font-weight:800}
+  .kbd{font-family:var(--mono);background:var(--surface2);border:1px solid var(--border);border-bottom-width:2px;border-radius:5px;padding:1px 7px;font-size:12.5px}
+
+  /* ---------- hover-explain code examples ---------- */
+  .ex{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(280px,1fr);gap:16px;align-items:start;margin:16px 0 26px}
+  @media(max-width:900px){.ex{grid-template-columns:1fr}}
+  .codewin{background:var(--code-bg);border:1px solid var(--code-border);border-radius:var(--radius);overflow:hidden;box-shadow:0 14px 34px rgba(27,31,46,.18)}
+  .codewin .bar{background:var(--code-bar);padding:9px 14px;font-family:var(--mono);font-size:12px;color:#aab1c8;display:flex;gap:8px;align-items:center;border-bottom:1px solid var(--code-border)}
+  .codewin .bar .dots i{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:5px}
+  .codewin .bar .fname{font-weight:700;color:#e6e9f2}
+  .codewin .bar .tag{font-size:10.5px;background:#2f3650;color:#c0caf5;border-radius:20px;padding:2px 9px;font-family:var(--sans);font-weight:600}
+  .codewin .bar .btns{margin-left:auto;display:flex;gap:6px}
+  .codewin .bar button{background:#2f3650;border:1px solid #3d4661;color:#e6e9f2;border-radius:7px;padding:3px 11px;font-size:11.5px;cursor:pointer;font-weight:600}
+  .codewin .bar button:hover{background:#3b4463}
+  .codewin .bar button.run{background:var(--good);border-color:var(--good);color:#fff}
+  .codewin pre{padding:10px 0 12px;font-family:var(--mono);font-size:14px;line-height:1.7;overflow-x:auto;color:var(--code-text)}
+  .cl{display:flex;padding:0 14px 0 0;white-space:pre;border-left:3px solid transparent;cursor:default}
+  .cl .ln{width:44px;color:var(--code-ln);text-align:right;padding-right:16px;flex:0 0 auto;user-select:none}
+  .cl.explain{cursor:pointer}
+  .cl.explain:hover,.cl.explain.hot{background:var(--hl);border-left-color:var(--brand)}
+  .cl.explain.pinned{background:var(--pin);border-left-color:#ffd166}
+  .cl.explain:focus-visible{outline:none;background:var(--hl);border-left-color:var(--brand)}
+  .k{color:var(--kw)}.t{color:var(--type)}.s{color:var(--str)}.c{color:var(--com);font-style:italic}.m{color:var(--met)}.n{color:var(--num)}.p{color:var(--code-text)}
+
+  .explain-panel{position:sticky;top:6px}
+  .expl{background:var(--surface);border:1px solid var(--border);border-left:5px solid var(--brand);border-radius:var(--radius);padding:16px 18px;min-height:150px;box-shadow:var(--shadow);transition:border-color .2s}
+  .expl.pinned{border-left-color:#e0a800}
+  .expl .lbl{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;display:flex;align-items:center;gap:8px}
+  .expl .lbl .pinbadge{display:none;background:var(--warn-soft);color:#fcd67a;border-radius:20px;padding:1px 8px;letter-spacing:0;text-transform:none;font-family:var(--sans);font-weight:600}
+  .expl.pinned .lbl .pinbadge{display:inline-block}
+  .expl .codeq{font-family:var(--mono);font-size:13px;color:var(--brand-ink);background:var(--brand-soft);border-radius:8px;padding:6px 10px;margin-bottom:10px;white-space:pre-wrap;word-break:break-word}
+  .expl .why{font-size:15.5px;color:var(--ink);line-height:1.65}
+  .expl .why b{color:var(--brand-ink)}
+  .expl .why code{font-family:var(--mono);font-size:12.8px;background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:0 5px;color:var(--brand-ink)}
+  .expl.idle .codeq{display:none}
+  .expl.idle .why{color:var(--muted)}
+  .term{background:#0e1017;border:1px solid #2a2f44;border-radius:var(--radius);padding:12px 16px 14px;font-family:var(--mono);font-size:13.5px;line-height:1.8;color:#d8dcea;margin-top:12px;min-height:82px;box-shadow:0 10px 26px rgba(0,0,0,.25)}
+  .term .thead{font-size:10.5px;letter-spacing:.12em;color:#6b7390;font-weight:700;margin-bottom:4px;display:flex;justify-content:space-between}
+  .term .tline{white-space:pre-wrap}
+  .term .tline.typing{animation:pop .25s ease}
+  .term .placeholder{color:#5f6785;font-style:italic}
+  .term .prompt{color:#6b7390}
+  @keyframes pop{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:none}}
+  .exnote{font-size:14px;color:var(--ink2);margin:-12px 0 20px 4px}
+
+  /* ---------- flip cards ---------- */
+  .flip{perspective:900px;cursor:pointer;min-height:170px}
+  .flip .inner{position:relative;width:100%;height:100%;min-height:170px;transition:transform .5s;transform-style:preserve-3d}
+  .flip.flipped .inner{transform:rotateY(180deg)}
+  .face{position:absolute;inset:0;backface-visibility:hidden;border-radius:var(--radius);border:1px solid var(--border);padding:20px;display:flex;flex-direction:column;justify-content:center;box-shadow:var(--shadow)}
+  .face.front{background:var(--surface)}
+  .face.front .big{font-family:var(--mono);font-size:28px;font-weight:700;color:var(--brand-ink)}
+  .face.front small{color:var(--muted);margin-top:8px;font-size:12.5px}
+  .face.back{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;transform:rotateY(180deg);border:none}
+  .face.back p{font-size:14px;line-height:1.55}
+
+  /* ---------- pipeline ---------- */
+  .pipe{display:flex;align-items:stretch;flex-wrap:wrap;margin:18px 0 14px;gap:0}
+  .pnode{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px;text-align:center;flex:1;min-width:120px;cursor:pointer;box-shadow:var(--shadow)}
+  .pnode b{display:block;font-size:14px}
+  .pnode span{color:var(--muted);font-size:12px}
+  .pnode:hover,.pnode.hot{border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft)}
+  .parrow{display:flex;align-items:center;color:var(--brand);font-size:22px;padding:0 8px}
+
+  /* ---------- bug hunt ---------- */
+  .cl.bugline{cursor:pointer}
+  .cl.bugline:hover{background:var(--hl)}
+  .cl.bugline.found{background:#3a1f22;border-left-color:var(--bad)}
+  .cl.bugline.wrongpick{background:#1e3a2c;border-left-color:var(--good)}
+  .buglabel{margin-left:14px;font-family:var(--sans);font-size:12px;border-radius:5px;padding:1px 8px;white-space:normal}
+  .buglabel.err{background:var(--bad);color:#fff}
+  .buglabel.ok{background:var(--good);color:#fff}
+
+  /* ---------- quiz ---------- */
+  .q{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;margin-bottom:14px;box-shadow:var(--shadow)}
+  .q h3{margin-bottom:12px;font-size:16px}
+  .q .opt{display:block;width:100%;text-align:left;background:var(--surface2);color:var(--ink);border:1px solid var(--border);border-radius:9px;padding:10px 14px;margin-bottom:8px;cursor:pointer;font-size:14.5px;font-family:var(--sans)}
+  .q .opt code{font-family:var(--mono);font-size:13px}
+  .q .opt:hover:not(:disabled){border-color:var(--brand);background:var(--brand-soft)}
+  .q .opt.right{border-color:var(--good);background:var(--good-soft);color:#bff5dd;font-weight:600}
+  .q .opt.wrong{border-color:var(--bad);background:var(--bad-soft);color:#ffc9c4}
+  .q .why{margin-top:10px;font-size:13.5px;color:var(--ink2);display:none}
+  .q .why.show{display:block}
+  #quizScore{font-family:var(--mono);color:var(--brand-ink);font-size:15px;margin-top:6px;font-weight:600}
+
+  /* ---------- bridge table ---------- */
+  .bridge{width:100%;border-collapse:separate;border-spacing:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);font-size:14px}
+  .bridge th{background:var(--surface2);text-align:left;padding:11px 14px;font-size:12.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2)}
+  .bridge td{padding:11px 14px;border-top:1px solid var(--border);vertical-align:top}
+  .bridge td code{font-family:var(--mono);font-size:12.8px;background:var(--surface2);border-radius:6px;padding:2px 7px;color:var(--brand-ink);white-space:nowrap}
+  .bridge td.arrow{color:var(--brand);font-weight:800;text-align:center;width:40px}
+  .cheat{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  @media(max-width:1000px){.cheat{grid-template-columns:1fr 1fr}}
+  @media(max-width:700px){.cheat{grid-template-columns:1fr}}
+  .cheat .card{padding:14px 16px}
+  .cheat .card h3{font-size:14px;margin-bottom:6px}
+  .cheat .card code{display:block;font-family:var(--mono);font-size:12.5px;color:var(--brand-ink);background:var(--brand-soft);border-radius:8px;padding:8px 10px;white-space:pre-wrap;margin-top:6px}
+  .hero{display:grid;grid-template-columns:1.1fr 1fr;gap:28px;align-items:start}
+  @media(max-width:900px){.hero{grid-template-columns:1fr}}
+
+  .grad{background:linear-gradient(90deg,#8b83ff,#c77dff);-webkit-background-clip:text;background-clip:text;color:transparent}
+  code.inline.big-inline{font-size:.8em;padding:2px 8px}
+  .hero{display:grid;grid-template-columns:1.15fr 1fr;gap:28px;align-items:start}
+  @media(max-width:900px){.hero{grid-template-columns:1fr}}
+  .score{font-family:var(--mono);color:var(--brand-ink);font-weight:600}
+  /* IPO */
+  .ipo{display:flex;align-items:stretch;gap:0;flex-wrap:wrap;margin:8px 0 16px}
+  .ipo-box{flex:1;min-width:200px;border-radius:16px;padding:18px;text-align:center;cursor:pointer;border:1px solid var(--border);background:var(--surface);box-shadow:var(--shadow);transition:transform .15s,box-shadow .15s}
+  .ipo-box:hover,.ipo-box.hot{transform:translateY(-3px)}
+  .ipo-box .ico{font-size:30px;margin-bottom:4px}
+  .ipo-box b{display:block;font-size:18px;letter-spacing:.08em}
+  .ipo-box span{display:block;color:var(--ink2);font-size:13.5px;margin:2px 0 8px}
+  .ipo-box code{font-family:var(--mono);font-size:12.5px;background:var(--code-bg);border-radius:8px;padding:4px 8px;color:var(--code-text);display:inline-block}
+  .ipo-box.in{border-top:4px solid #2ac3de}.ipo-box.in.hot{box-shadow:0 0 0 3px rgba(42,195,222,.35)}
+  .ipo-box.pr{border-top:4px solid #f5b83d}.ipo-box.pr.hot{box-shadow:0 0 0 3px rgba(245,184,61,.35)}
+  .ipo-box.out{border-top:4px solid #22c58b}.ipo-box.out.hot{box-shadow:0 0 0 3px rgba(34,197,139,.35)}
+  .ipo-arrow{display:flex;align-items:center;font-size:28px;color:var(--brand);padding:0 12px}
+  @media(max-width:860px){.ipo-arrow{width:100%;justify-content:center;transform:rotate(90deg);padding:4px 0}}
+  /* ladder */
+  .ladder{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin:4px 0 18px}
+  .rung{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:8px 14px;font-family:var(--mono);font-weight:700;color:var(--brand-ink);text-align:center;box-shadow:var(--shadow)}
+  .rung:nth-child(1){font-size:13px}.rung:nth-child(3){font-size:15px}.rung:nth-child(5){font-size:17px}.rung:nth-child(7){font-size:19px}
+  .ladnote{flex-basis:100%;color:var(--muted);font-size:13px;margin-top:4px}.rung:nth-child(9){font-size:19px}
+  .rung small{display:block;font-family:var(--sans);font-weight:500;color:var(--muted);font-size:11px}
+  .rarrow{color:var(--good);font-weight:800;font-size:20px}
+  /* mini tables & code blocks */
+  table.mini{width:100%;border-collapse:collapse;margin-top:10px;font-size:14px}
+  table.mini td{padding:6px 8px;border-top:1px solid var(--border);color:var(--ink2)}
+  table.mini td:first-child{white-space:nowrap}
+  table.mini code,code.block,.bridge td code{font-family:var(--mono);font-size:12.8px;background:var(--surface2);border-radius:6px;padding:2px 7px;color:var(--brand-ink)}
+  code.block{display:block;white-space:pre;padding:8px 10px;margin-top:8px;overflow-x:auto}
+  .q h3 code,.q .opt code,.expl .why code,.fwhy code{font-family:var(--mono);font-size:.88em;background:var(--surface2);border-radius:5px;padding:0 5px;color:var(--brand-ink)}
+  /* terminal (live) */
+  .term .tbody{min-height:40px}
+  .term .tsample{margin-top:10px;padding-top:8px;border-top:1px dashed #2a2f44;font-family:var(--sans);font-size:12px;color:#8a92ad}
+  .term .tsample code{font-family:var(--mono);color:#e0af68;background:#1a1e2e;border-radius:5px;padding:1px 6px}
+  .term .tsample span{color:#6b7390}
+  .tin{background:transparent;border:none;border-bottom:1px dashed #6d63ff;color:#7ee7ff;font-family:var(--mono);font-size:13.5px;outline:none;min-width:120px;width:45%;padding:0 2px;caret-color:#7ee7ff}
+  .tin::placeholder{color:#4d5575;font-style:italic}
+  .techo{color:#7ee7ff;font-weight:600}
+  .terr{color:#ff8a80;font-weight:600;white-space:pre-wrap}
+  .tdone{color:#5f6785;font-style:italic;font-family:var(--sans);font-size:12px;margin-top:4px}
+  .tdone.bad{color:#ff8a80;font-style:normal}
+  .term .tline{white-space:pre-wrap;tab-size:8;min-height:1.8em}
+  /* window mockup */
+  .wm-cap{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;color:var(--muted);font-weight:700;margin-bottom:6px}
+  .wm{background:#f3f4f8;border:1px solid #b8bdcf;border-radius:8px;box-shadow:0 10px 26px rgba(0,0,0,.35);overflow:hidden;max-width:300px}
+  .wm-title{background:linear-gradient(#fefefe,#e9eaf0);border-bottom:1px solid #c9cddc;padding:5px 10px;font-size:12px;color:#1b1f2e;display:flex;justify-content:space-between}
+  .wm-title span:last-child{color:#777;letter-spacing:2px;font-family:var(--mono)}
+  .wm-body{padding:14px;display:flex;flex-direction:column;gap:10px}
+  .wm-tb{background:#fff;border:1px solid #9aa0b4;border-radius:4px;padding:6px 8px;color:#1b1f2e;font-size:12.5px}
+  .wm-btn{display:inline-block;background:linear-gradient(#fdfdfd,#e4e6ee);border:1px solid #a9afc3;border-radius:4px;padding:5px 14px;color:#1b1f2e;font-size:12.5px}
+  .wm-lbl{color:#1b1f2e;font-size:13px;font-weight:600}
+  /* finder */
+  .finder .frow{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .finder label{font-weight:600;color:var(--ink2);font-size:14px;display:flex;align-items:center;gap:8px}
+  .finder select{background:var(--surface2);color:var(--ink);border:1px solid var(--border);border-radius:9px;padding:7px 10px;font-family:var(--mono);font-size:14px}
+  .farrow{color:var(--brand);font-size:22px;font-weight:800}
+  .fres{margin-top:14px}
+  .fbadge{display:inline-block;border-radius:20px;padding:3px 12px;font-size:12.5px;font-weight:700;background:var(--brand-soft);color:var(--brand-ink)}
+  .fbadge.g{background:var(--good-soft);color:#7ff0c3}.fbadge.w{background:var(--warn-soft);color:#fcd67a}.fbadge.r{background:var(--bad-soft);color:#ffb3ac}
+  .fcode{display:block;white-space:pre;font-family:var(--mono);font-size:14px;background:var(--code-bg);color:var(--code-text);border:1px solid var(--code-border);border-radius:10px;padding:10px 14px;margin:10px 0;overflow-x:auto}
+  .fwhy{color:var(--ink2);font-size:15px}
+  .fwhy b{color:var(--ink)}
+  /* practice */
+  .apph{font-size:19px;margin:24px 0 2px}
+  .challenge{background:var(--brand-soft);border:1px solid #3d4280;border-radius:12px;padding:11px 15px;color:var(--ink);font-size:14.5px;margin:-10px 0 18px}
+  details.sol{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px;box-shadow:var(--shadow)}
+  details.sol summary{cursor:pointer;padding:14px 18px;font-size:15px;color:var(--ink2);list-style:none}
+  details.sol summary::-webkit-details-marker{display:none}
+  details.sol summary::before{content:"▸  ";color:var(--brand);font-weight:800}
+  details.sol[open] summary::before{content:"▾  "}
+  details.sol summary::after{content:"show solution";float:right;font-size:12px;color:var(--brand-ink);background:var(--brand-soft);border-radius:20px;padding:2px 10px}
+  details.sol[open] summary::after{content:"hide"}
+  details.sol .ex{padding:0 16px;margin-top:4px}
+  .steplist{margin:6px 0 0 20px;columns:2;column-gap:24px;font-size:14.5px;color:var(--ink2)}
+  .steplist li{padding:3px 0;break-inside:avoid}
+  .steplist li b{color:var(--ink)}
+  @media(max-width:700px){.steplist{columns:1}}
+  /* anatomy */
+  .anat{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,1fr);gap:18px;align-items:start}
+  @media(max-width:900px){.anat{grid-template-columns:1fr}}
+  .anat-win{background:#f3f3f3;border-radius:10px;overflow:hidden;box-shadow:0 18px 40px rgba(0,0,0,.45);max-width:460px;font-family:'Segoe UI',Inter,system-ui,sans-serif}
+  .aw-title{display:flex;justify-content:space-between;padding:8px 12px;background:#eeeeee;color:#1b1b1b;font-size:13px;border-bottom:1px solid #ddd}
+  .aw-btns{letter-spacing:10px;color:#555}
+  .aw-body{background:AliceBlue;padding:20px;display:flex;flex-direction:column;gap:8px}
+  .aw-h1{font-size:24px;font-weight:700;color:DarkSlateBlue}
+  .aw-sub{font-size:14px;color:SlateGray}
+  .aw-box{background:#fff;border:1px solid #c8c8c8;border-bottom:2px solid #0067c0;border-radius:4px;padding:6px 10px;color:#1b1b1b;font-size:14px}
+  .aw-row{display:flex;gap:10px}
+  .aw-btn{background:#fdfdfd;border:1px solid #d0d0d0;border-radius:4px;padding:5px 12px;color:#1b1b1b;font-size:14px}
+  .aw-res{font-size:18px;color:SeaGreen}
+  .hotpart{cursor:pointer;outline:2px dashed transparent;outline-offset:3px;transition:outline-color .15s}
+  .hotpart:hover{outline-color:rgba(109,99,255,.55)}
+  .hotpart.sel{outline:3px solid #ffb020;outline-offset:3px}
+  /* setup */
+  .setup{display:flex;flex-direction:column;gap:12px}
+  .sstep{display:flex;gap:14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow);transition:border-color .2s,opacity .2s}
+  .sstep.done{border-color:#22c58b;opacity:.75}
+  .scheck{position:relative;flex:0 0 auto;cursor:pointer}
+  .scheck input{position:absolute;opacity:0;width:38px;height:38px;cursor:pointer;margin:0}
+  .snum{width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;font-family:var(--mono)}
+  .sstep.done .snum{background:#22c58b;font-size:0}
+  .sstep.done .snum::after{content:"✓";font-size:20px}
+  .sbody{flex:1;min-width:0}
+  .sbody h3{margin:6px 0 6px}
+  .sbody p,.sbody li{color:var(--ink2);font-size:15px}
+  .sbody ol{margin:4px 0 0 20px}
+  .sbody li{padding:2px 0}
+  .mock{background:#1f2233;border:1px solid #343a55;border-radius:10px;max-width:520px;margin-top:10px;font-size:13px;overflow:hidden;font-family:var(--sans)}
+  .mock-bar{background:#282c40;color:#9aa2c0;padding:6px 12px;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase}
+  .mock-in{padding:8px 12px;color:#e6e9f2;font-family:var(--mono);border-bottom:1px solid #343a55}
+  .mock-row{display:flex;justify-content:space-between;padding:6px 12px;color:#c3c9dd}
+  .mock-row span{color:#7a82a0;font-size:12px}
+  .mock-row.sel{background:#34407a;color:#fff}
+  .mock.tree>div:not(.mock-bar){padding:4px 12px;color:#c3c9dd;font-family:var(--mono);font-size:12.5px}
+  .mock.tree .ind{padding-left:30px!important}
+  .mock.tree .sel{background:#34407a;color:#fff}
+  .mock.tree .dim{color:#6b7390}
+  .tn{font-family:var(--sans);color:#8a92ad;font-size:11.5px;margin-left:8px}
+  pre.csproj{background:var(--code-bg);border:1px solid var(--code-border);border-radius:12px;padding:12px 14px;font-family:var(--mono);font-size:12.5px;color:#c9cfe6;overflow-x:auto;margin-top:10px;line-height:1.6}
+  pre.csproj .hi{color:#7ff0c3}
+  pre.csproj .c{color:#7f8aa8}
+  .loop{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px;margin:22px 0 4px}
+  .lp{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:10px 14px;text-align:center;font-weight:700;box-shadow:var(--shadow)}
+  .lp small{color:var(--muted);font-weight:500}
+  .la{color:var(--brand);font-size:20px;font-weight:800}
+  .trouble{padding:4px 18px 14px}
+  .trouble p{color:var(--ink2);font-size:14.5px;margin:8px 0}
+  /* engine two files */
+  .twofiles{display:flex;align-items:stretch;gap:0;flex-wrap:wrap;margin:10px 0 18px}
+  .tf{flex:1;min-width:220px;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px;text-align:center;box-shadow:var(--shadow)}
+  .tf.engine{border-top:4px solid #7f8aa8}.tf.yours{border-top:4px solid #22c58b}
+  .tf-ico{font-size:30px}
+  .tf b{display:block;font-family:var(--mono);font-size:17px;margin:4px 0}
+  .tf span{display:block;color:var(--ink2);font-size:14px}
+  .tf em{display:inline-block;margin-top:8px;font-style:normal;font-size:12px;background:var(--surface2);border-radius:20px;padding:2px 10px;color:var(--brand-ink)}
+  .tf-arrow{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 14px;color:var(--brand)}
+  .tf-arrow code{font-family:var(--mono);font-size:12px;background:var(--code-bg);border-radius:6px;padding:3px 8px;color:#e0af68}
+  .tf-arrow span{font-size:26px;font-weight:800}
+  /* build stepper */
+  .bhead{display:flex;align-items:center;gap:16px;flex-wrap:wrap;justify-content:space-between}
+  .bnav{display:flex;align-items:center;gap:10px;font-family:var(--mono);color:var(--muted)}
+  .ghostbtn{background:var(--surface2);color:var(--ink);border:1px solid var(--border);border-radius:9px;padding:7px 14px;cursor:pointer;font-weight:600;font-size:13px}
+  .ghostbtn:disabled{opacity:.35;cursor:default}
+  .chips{display:flex;gap:6px;overflow-x:auto;padding:10px 0 12px;scrollbar-width:thin}
+  .chip{flex:0 0 auto;display:flex;align-items:center;gap:7px;background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:5px 12px 5px 6px;cursor:pointer;color:var(--ink2);font-size:12.5px;font-weight:600}
+  .chip b{width:22px;height:22px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:11.5px;color:var(--ink)}
+  .chip.past b{background:#12352b;color:#7ff0c3}
+  .chip.active{border-color:var(--brand);color:var(--ink);box-shadow:0 0 0 3px var(--brand-soft)}
+  .chip.active b{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff}
+  .bcard{background:var(--surface);border:1px solid var(--border);border-left:5px solid #22c58b;border-radius:var(--radius);padding:14px 18px;box-shadow:var(--shadow);display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:18px}
+  @media(max-width:900px){.bcard{grid-template-columns:1fr}}
+  .bgoal p{font-size:16px;color:var(--ink);margin-top:2px}
+  .btodo{margin:0 0 0 20px;color:var(--ink2);font-size:14.5px}
+  .btodo li{padding:3px 0}
+  .legend{font-size:12.5px;color:var(--muted);margin:12px 0 -4px}
+  .lg-new{background:#12352b;color:#7ff0c3;border-radius:5px;padding:1px 7px;font-weight:700;font-family:var(--mono);font-size:11px;margin-right:4px}
+  .cl.isnew{background:rgba(34,197,139,.10);border-left-color:#22c58b}
+  .cl.isnew.hot,.cl.isnew:hover{background:var(--hl)}
+  .newtag{margin-left:auto;padding-left:12px;font-family:var(--sans);font-size:10px;font-weight:800;color:#7ff0c3;letter-spacing:.06em;align-self:center}
+  .codewin pre{max-height:620px}
+  /* window preview */
+  .prevbox{margin-top:12px}
+  .prevcap-top{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;color:var(--muted);font-weight:700;margin-bottom:6px}
+  .prevholder{width:100%}
+  .prevcap{font-size:13.5px;color:var(--ink2);margin-top:6px}
+  .wv-wrap{position:relative;width:100%;overflow:visible}
+  .wv{transform-origin:top left;border-radius:9px;overflow:hidden;box-shadow:0 18px 40px rgba(0,0,0,.5);font-family:'Segoe UI',Inter,system-ui,sans-serif;border:1px solid #9aa0b4}
+  .wv-title{height:32px;display:flex;align-items:center;gap:8px;padding:0 0 0 10px;background:#eeeeee;color:#1b1b1b;font-size:12.5px;border-bottom:1px solid #dcdcdc}
+  .wv-tt{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .wv-btns{display:flex;height:100%}
+  .wv-btns i{font-style:normal;width:40px;display:flex;align-items:center;justify-content:center;color:#444;font-size:12px}
+  .wv-btns i.x:hover{background:#c42b1c;color:#fff}
+  .wv-body{overflow:hidden;color:#1b1b1b;font-size:14px}
+  .wv-text{line-height:1.3;white-space:pre-wrap}
+  .wv-stack{display:flex;flex-direction:column;align-items:stretch}
+  .wv-stack.h{flex-direction:row;align-items:flex-start}
+  .wv-stack:not(.h)>.wv-btn{align-self:flex-start}
+  .wv-btn{background:#fdfdfd;border:1px solid #d0d0d0;border-bottom-color:#bcbcbc;border-radius:4px;padding:5px 11px;font-size:14px;color:#1b1b1b;cursor:pointer;font-family:inherit}
+  .wv-btn:hover{background:#f3f3f3}
+  .wv-btn:active{background:#e8e8e8;color:#5d5d5d}
+  .wv-btn.deaf{animation:shake .4s}
+  @keyframes shake{25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}
+  .wv-box{background:#fff;border:1px solid #c8c8c8;border-bottom:1px solid #8a8a8a;border-radius:4px;padding:6px 10px;font-size:14px;color:#1b1b1b;font-family:inherit;outline:none;width:100%}
+  .wv-box:focus{border-bottom:2px solid #0067c0}
+  .wv-box::placeholder{color:#8d8d8d}
+  /* playground */
+  .pg{display:grid;grid-template-columns:300px minmax(0,1fr);gap:18px;align-items:start}
+  @media(max-width:900px){.pg{grid-template-columns:1fr}}
+  .pg-controls{display:flex;flex-direction:column;gap:10px}
+  .pg-controls label{display:flex;flex-direction:column;gap:4px;font-size:12.5px;font-weight:700;color:var(--ink2);font-family:var(--mono)}
+  .pg-controls .val{position:absolute;right:0}
+  .pg-controls label{position:relative}
+  .pg-controls input[type=text],.pg-controls input:not([type]),.pg-controls select{background:var(--surface2);color:var(--ink);border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-size:14px;font-family:var(--sans)}
+  .pg-controls input[type=range]{accent-color:#8b83ff}
+  /* events */
+  .flow{display:flex;align-items:stretch;flex-wrap:wrap;gap:0;margin:8px 0 12px}
+  .fl{flex:1;min-width:140px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px;text-align:center;cursor:pointer;box-shadow:var(--shadow);transition:all .25s}
+  .fl-ico{font-size:26px}
+  .fl b{display:block;font-size:14px;margin:4px 0 2px}
+  .fl span{font-family:var(--mono);font-size:11.5px;color:var(--muted)}
+  .fl.past{border-color:#235e4a}
+  .fl.hot{border-color:#ffb020;box-shadow:0 0 0 3px rgba(255,176,32,.35);transform:translateY(-4px)}
+  .fa{display:flex;align-items:center;color:var(--brand);font-size:22px;padding:0 6px}
+  .flowctl{margin-bottom:12px}
+  .flowctl .run{background:var(--good);color:#fff;border:none;border-radius:10px;padding:8px 18px;font-weight:700;cursor:pointer}
+  .anat-line{font-family:var(--mono);font-size:clamp(18px,3vw,30px);background:var(--code-bg);border:1px solid var(--code-border);border-radius:14px;padding:18px 22px;display:flex;flex-wrap:wrap;align-items:center;gap:2px;color:var(--code-text)}
+  .al[data-t]{cursor:help;border-bottom:3px solid transparent;padding:0 4px;border-radius:5px}
+  .al.a1{color:#c0caf5;border-color:#7aa2f7}.al.a2{color:#2ac3de;border-color:#2ac3de}.al.a3{color:#ffb020;border-color:#ffb020}.al.a4{color:#9ece6a;border-color:#9ece6a}
+  .al.on{background:#262c48}
+  .anat-why{color:var(--ink2);font-size:15.5px;margin-top:10px;min-height:48px}
+  .errtab td:first-child{width:34%}
+  /* practice */
+  .prac{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;margin-bottom:16px;box-shadow:var(--shadow)}
+  .prac-head{display:flex;gap:14px;align-items:flex-start}
+  .prac-n{width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;flex:0 0 auto;font-family:var(--mono)}
+  .prac-head p{color:var(--ink2);font-size:15px;margin-top:4px}
+  .prac-prev{max-width:420px;margin:6px 0 12px 52px}
+  @media(max-width:700px){.prac-prev{margin-left:0}}
+  .prac details.sol{box-shadow:none;background:var(--surface2)}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="top">
+    <div class="logo">C#</div>
+    <div class="ttl">MAC 109 · Week 3: Your First GUI<small>LaGuardia Community College · MEC Department · Prof. K. Kassou · VS Code + Avalonia</small></div>
+    <div class="right"><span>Hover code to read it · click the live windows</span><div id="progressWrap" aria-hidden="true"><div id="progressBar"></div></div></div>
+  </div>
+  <nav id="tabstrip" aria-label="Sections"></nav>
+  <main id="stage"></main>
+  <div id="bottom">
+    <button id="prevBtn" class="ghost" aria-label="Back">◀ Back</button>
+    <button id="nextBtn" aria-label="Next">Next ▶</button>
+    <span class="where" id="where"></span>
+    <div class="grow"></div>
+    <span class="hint">← → keys move forward and back (in Build It: step by step)</span>
+  </div>
+</div>
+
+<template id="slides">
+
+<!-- Start -->
+<section data-tab="Start">
+  <p class="eyebrow">Week 3 · Lecture</p>
+  <h1>Your first GUI:<br>from an <span class="grad">empty window</span> to a working app</h1>
+  <div class="hero">
+    <div>
+      <p class="sub">For two weeks your programs lived in a black terminal. Today they get a <b>window</b>: a title bar, colors, text, buttons, and a box to type in. We'll build it <b>one small piece at a time</b>. Every step adds a single idea, and you press ▶ after each one, so you always see exactly what your code just did.</p>
+      <p class="pill">By the end of today you can</p>
+      <ul class="objlist">
+        <li>Create a C# GUI project in VS Code <b>from nothing</b>, using clicks only</li>
+        <li>Explain the two files of every app: <b>Program.cs</b> (engine) and <b>MainWindow.cs</b> (yours)</li>
+        <li>Set window <b>properties</b>: Title, Width, Height, Background</li>
+        <li>Create <b>controls</b> with <code class="inline">new</code>: TextBlock, Button, TextBox</li>
+        <li>Arrange them with a <b>StackPanel</b> (vertical and horizontal)</li>
+        <li>Make a button work with an <b>event</b>: <code class="inline">Click += …</code></li>
+        <li>Read numbers from a TextBox with Week 2's <b>TryParse</b></li>
+      </ul>
+    </div>
+    <div>
+      <div class="card">
+        <span class="pill g">The 12-step build (Build It tab)</span>
+        <ol class="steplist">
+          <li><b>Empty window</b></li><li><b>+ Title</b></li><li>+ Size &amp; position</li><li>+ Background color</li>
+          <li>+ Text inside</li><li>+ Styled text</li><li>+ StackPanel (2 texts)</li><li>+ Button</li>
+          <li>+ TextBox &amp; result label</li><li>+ First event ⚡</li><li>+ Clear button, side by side</li><li>+ Numbers (TryParse)</li>
+        </ol>
+      </div>
+      <div class="tip">🧭 <b>Golden rule for today:</b> change a little → <b>Ctrl+S</b> → <b>F5</b> → look. If something breaks, you know it was the line you just added.</div>
+    </div>
+  </div>
+</section>
+
+<!-- Vocabulary -->
+<section data-tab="GUI Words">
+  <p class="eyebrow">01 · The vocabulary of every GUI</p>
+  <h2>Six words, and you can talk about <span class="grad">any window on Earth</span></h2>
+  <p class="sub">A <b>G</b>raphical <b>U</b>ser <b>I</b>nterface is a program you use with windows, buttons and boxes instead of typed commands. Click any part of the window below to learn its name and the line of C# that creates it.</p>
+  <div class="anat">
+    <div class="anat-win">
+      <div class="aw-title hotpart" data-p="0"><span>My First GUI</span><span class="aw-btns">— ▢ ✕</span></div>
+      <div class="aw-body hotpart" data-p="1">
+        <div class="aw-h1 hotpart" data-p="2">Hello, GUI world!</div>
+        <div class="aw-sub hotpart" data-p="2">My first window, built one line at a time.</div>
+        <div class="aw-box hotpart" data-p="3">Maria</div>
+        <div class="aw-row hotpart" data-p="4"><span class="aw-btn hotpart" data-p="5">Say Hello</span><span class="aw-btn">Clear</span></div>
+        <div class="aw-res hotpart" data-p="6">Hello, Maria!</div>
+      </div>
+    </div>
+    <div class="expl" id="anatInfo"><div class="lbl" id="anatLbl">Click a part of the window ←</div><div class="codeq" id="anatCode" style="display:none"></div><div class="why" id="anatText">Every visible thing in a window is an <b>object</b> made from a class, and everything about how it looks is a <b>property</b>.</div></div>
+  </div>
+  <div class="grid3" style="margin-top:20px">
+    <div class="card"><span class="pill">Window</span><p>The frame: title bar, size, background. Ours is <b>MainWindow</b>, a class that <b>is a</b> Window.</p></div>
+    <div class="card"><span class="pill">Control</span><p>A visible building block you create with <code class="inline">new</code>: <b>TextBlock</b> (shows text), <b>Button</b> (clickable), <b>TextBox</b> (typing).</p></div>
+    <div class="card"><span class="pill">Property</span><p>A setting of an object: <code class="inline">Title</code>, <code class="inline">Width</code>, <code class="inline">Text</code>, <code class="inline">FontSize</code>. Set it with <code class="inline">Name = value;</code></p></div>
+    <div class="card"><span class="pill">Content</span><p>What the window shows inside. It holds exactly <b>one</b> thing, usually a panel.</p></div>
+    <div class="card"><span class="pill">Layout panel</span><p>A container that arranges many controls. <b>StackPanel</b> stacks its <b>Children</b> top-to-bottom (or left-to-right).</p></div>
+    <div class="card"><span class="pill">Event</span><p>Something that <i>happens</i>, like a <b>Click</b>. You connect a method to it with <code class="inline">+=</code>; that method is the <b>event handler</b>.</p></div>
+  </div>
+  <table class="bridge" style="margin-top:18px">
+    <thead><tr><th>Console (Weeks 1–2)</th><th></th><th>GUI (today)</th></tr></thead>
+    <tbody>
+      <tr><td>Runs top to bottom, then ends</td><td class="arrow">→</td><td>Opens a window and <b>waits</b> for the user (event-driven)</td></tr>
+      <tr><td>Input: <code>Console.ReadLine()</code></td><td class="arrow">→</td><td>Input: a <b>TextBox</b>'s <code>.Text</code></td></tr>
+      <tr><td>Output: <code>Console.WriteLine(…)</code></td><td class="arrow">→</td><td>Output: set a <b>TextBlock</b>'s <code>.Text = …</code></td></tr>
+      <tr><td>Pressing Enter moves things along</td><td class="arrow">→</td><td>Clicking a <b>Button</b> runs a method</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- Setup -->
+<section data-tab="Create Project">
+  <p class="eyebrow">02 · Create the project from zero (clicks only)</p>
+  <h2>Seven steps from an empty VS Code to a <span class="grad">running window</span></h2>
+  <p class="sub">You'll do this once today, and again every time you start a new app. Tick each step as you finish it. Mac users: read <span class="kbd">Ctrl</span> as <span class="kbd">⌘ Cmd</span>.</p>
+  <div class="setup">
+    <div class="sstep"><label class="scheck"><input type="checkbox"><span class="snum">1</span></label><div class="sbody">
+      <h3>Open VS Code and check your tools</h3>
+      <p>Lab machine: press the <b>⊞ Windows</b> key, type <b>code</b>, open <b>Visual Studio Code</b> (the blue icon, not the purple "Visual Studio"). Click the <b>Extensions</b> icon (four squares) and make sure <b>C# Dev Kit</b> is installed. At home you also need the free <b>.NET 8 SDK</b>.</p>
+    </div></div>
+    <div class="sstep"><label class="scheck"><input type="checkbox"><span class="snum">2</span></label><div class="sbody">
+      <h3>Create a Console App named MyStudioApp</h3>
+      <ol>
+        <li><b>File ▸ Close Folder</b> if anything is open.</li>
+        <li>Press <span class="kbd">Ctrl</span>+<span class="kbd">Shift</span>+<span class="kbd">P</span> to open the <b>Command Palette</b>. Type <b>new project</b> and choose <b>.NET: New Project…</b></li>
+        <li>Pick the template <b>Console App</b>. (Yes, console: we'll turn it into a GUI ourselves, so nothing is hidden.)</li>
+        <li>Name it exactly <b>MyStudioApp</b>. For the location choose <b>Documents</b> ▸ new folder <b>MAC109</b>.</li>
+        <li>Press Enter on <b>Create project</b>, click <b>Open</b>, and answer <b>Yes, I trust the authors</b>. (The author is you.)</li>
+      </ol>
+      <div class="mock"><div class="mock-bar">Command Palette</div><div class="mock-in">&gt; new project</div><div class="mock-row sel"><b>.NET: New Project…</b><span>C# Dev Kit</span></div><div class="mock-row">.NET: Open Solution<span>C# Dev Kit</span></div><div class="mock-row">File: New Untitled Text File<span>Ctrl+N</span></div></div>
+    </div></div>
+    <div class="sstep"><label class="scheck"><input type="checkbox"><span class="snum">3</span></label><div class="sbody">
+      <h3>Add the two Avalonia packages (the box of GUI parts)</h3>
+      <ol>
+        <li><span class="kbd">Ctrl</span>+<span class="kbd">Shift</span>+<span class="kbd">P</span> ▸ type <b>nuget add</b> ▸ <b>NuGet: Add NuGet Package…</b></li>
+        <li>Search <b>Avalonia.Desktop</b> ▸ pick the newest stable <b>11.x</b> version (no "-preview" or "-beta").</li>
+        <li>Repeat for <b>Avalonia.Themes.Fluent</b>, choosing the <b>same version number</b>.</li>
+      </ol>
+      <div class="mock"><div class="mock-bar">NuGet: Add NuGet Package…</div><div class="mock-in">Avalonia.Desktop</div><div class="mock-row sel"><b>Avalonia.Desktop</b><span>11.x.x · latest stable</span></div><div class="mock-row">Avalonia.Desktop<span>…-preview (skip!)</span></div></div>
+      <div class="note">📦 <b>NuGet</b> is the app store for code libraries. Adding a package writes one line into your project file; the actual code downloads the first time you run ("Restoring…").</div>
+    </div></div>
+    <div class="sstep"><label class="scheck"><input type="checkbox"><span class="snum">4</span></label><div class="sbody">
+      <h3>Tell the project it's a window app</h3>
+      <p>Open <b>MyStudioApp.csproj</b> from the Explorer. Change <code class="inline">&lt;OutputType&gt;Exe&lt;/OutputType&gt;</code> to <code class="inline">&lt;OutputType&gt;WinExe&lt;/OutputType&gt;</code> and save (<span class="kbd">Ctrl</span>+<span class="kbd">S</span>). That stops a black console window from opening behind your app.</p>
+      <pre class="csproj"><span class="c">&lt;!-- MyStudioApp.csproj: your project's recipe card --&gt;</span>
+&lt;Project Sdk="Microsoft.NET.Sdk"&gt;
+  &lt;PropertyGroup&gt;
+    &lt;OutputType&gt;<b class="hi">WinExe</b>&lt;/OutputType&gt;          <span class="c">← you change this</span>
+    &lt;TargetFramework&gt;net8.0&lt;/TargetFramework&gt;
+    &lt;ImplicitUsings&gt;enable&lt;/ImplicitUsings&gt;
+    &lt;Nullable&gt;enable&lt;/Nullable&gt;
+  &lt;/PropertyGroup&gt;
+  &lt;ItemGroup&gt;
+    &lt;PackageReference Include="<b class="hi">Avalonia.Desktop</b>" Version="11.x.x" /&gt;       <span class="c">← step 3 added these</span>
+    &lt;PackageReference Include="<b class="hi">Avalonia.Themes.Fluent</b>" Version="11.x.x" /&gt;
+  &lt;/ItemGroup&gt;
+&lt;/Project&gt;</pre>
+    </div></div>
+    <div class="sstep"><label class="scheck"><input type="checkbox"><span class="snum">5</span></label><div class="sbody">
+      <h3>Replace Program.cs with the engine</h3>
+      <p>Open <b>Program.cs</b>, select all (<span class="kbd">Ctrl</span>+<span class="kbd">A</span>), delete, paste the engine from the <b>Engine</b> tab, and save. You won't touch this file again all semester.</p>
+    </div></div>
+    <div class="sstep"><label class="scheck"><input type="checkbox"><span class="snum">6</span></label><div class="sbody">
+      <h3>Create MainWindow.cs, your file</h3>
+      <p>In the <b>Explorer</b>, hover over the <b>MyStudioApp</b> folder and click the <b>New File</b> icon (📄+). Name it exactly <b>MainWindow.cs</b>. Paste <b>Step 1</b> from the <b>Build It</b> tab and save.</p>
+      <div class="mock tree"><div class="mock-bar">EXPLORER · MAC109</div><div>▾ 📁 MyStudioApp</div><div class="ind">⚙ MyStudioApp.csproj <span class="tn">recipe card</span></div><div class="ind">C# Program.cs <span class="tn">engine: never touch</span></div><div class="ind sel">C# MainWindow.cs <span class="tn">YOUR file ★</span></div><div class="ind dim">▸ bin · obj <span class="tn">robot folders: never edit</span></div></div>
+    </div></div>
+    <div class="sstep"><label class="scheck"><input type="checkbox"><span class="snum">7</span></label><div class="sbody">
+      <h3>Press F5: a window is born</h3>
+      <p>Press <span class="kbd">F5</span> (or <b>Run ▸ Start Debugging</b>). If VS Code asks, choose <b>C#</b>, then <b>MyStudioApp</b>. The first run says <b>Restoring…</b> (Avalonia downloading itself), then <b>Building…</b>, and then an empty window appears. Closing the window with ✕ stops the program.</p>
+    </div></div>
+  </div>
+  <div class="loop">
+    <div class="lp">✏️ Edit<br><small>MainWindow.cs</small></div><div class="la">→</div>
+    <div class="lp">💾 Save<br><small>Ctrl+S</small></div><div class="la">→</div>
+    <div class="lp">▶ Run<br><small>F5</small></div><div class="la">→</div>
+    <div class="lp">👀 Look<br><small>did it change?</small></div><div class="la">→</div>
+    <div class="lp">✕ Close<br><small>the window</small></div>
+  </div>
+  <p class="sub" style="margin:4px 0 10px;text-align:center">The loop you'll repeat about 50 times today.</p>
+  <details class="sol"><summary><b>Troubleshooting</b>: when something doesn't work</summary><div class="trouble">
+    <p><b>"New Project" isn't in the Command Palette</b> → C# Dev Kit isn't installed or is still loading. Install it from Extensions, wait 30 seconds, try again.</p>
+    <p><b>Red squiggles everywhere right after adding packages</b> → the packages haven't downloaded yet. Press F5 once (it restores them), or close and reopen the folder.</p>
+    <p><b>F5 asks "Select debugger"</b> → choose <b>C#</b>, then your project. It remembers next time.</p>
+    <p><b>The build works but no window appears</b> → check that Program.cs has <code class="inline">desktop.MainWindow = new MainWindow();</code> and that both files say <code class="inline">namespace MyStudioApp;</code></p>
+    <p><b>"The type or namespace 'MainWindow' could not be found"</b> → the file name or class name is misspelled. It must be <b>MainWindow</b> (capital M, capital W) in both places.</p>
+    <p><b>F5 is greyed out / "a build is already running"</b> → an old window is still open. Close it (✕) or press the red ■ Stop button.</p>
+  </div></details>
+</section>
+
+<!-- Engine -->
+<section data-tab="The Engine">
+  <p class="eyebrow">03 · Two files, two jobs</p>
+  <h2>Program.cs is the <span class="grad">engine</span>. MainWindow.cs is <span class="grad">yours</span>.</h2>
+  <div class="twofiles">
+    <div class="tf engine"><div class="tf-ico">⚙️</div><b>Program.cs</b><span>starts Avalonia, loads the theme, opens your window</span><em>copy once · never touch</em></div>
+    <div class="tf-arrow"><code>new MainWindow()</code><span>→</span></div>
+    <div class="tf yours"><div class="tf-ico">🪟</div><b>MainWindow.cs</b><span>everything you see and click, built in C#</span><em>all your work, all semester</em></div>
+  </div>
+  <p class="sub">You don't need to understand every line of the engine today. Hover to peek; the only line worth remembering is line 28, the handshake that opens <b>your</b> window.</p>
+  <div class="ex" data-ex="engine"></div>
+</section>
+
+<!-- Build -->
+<section data-tab="★ Build It" data-build="1">
+  <p class="eyebrow">04 · Build it, one step at a time</p>
+  <div class="bhead">
+    <h2 id="bTitle"></h2>
+    <div class="bnav"><button type="button" class="ghostbtn" id="bPrev">◀ Step</button><span id="bCount"></span><button type="button" class="ghostbtn" id="bNext">Step ▶</button></div>
+  </div>
+  <div class="chips" id="bChips"></div>
+  <div class="bcard">
+    <div class="bgoal"><span class="pill" id="bIdea"></span><p id="bGoal"></p></div>
+    <ol class="btodo" id="bTodo"></ol>
+  </div>
+  <div class="legend"><span class="lg-new">+ NEW</span> lines added or changed in this step · hover any line for its explanation · <b>Copy</b> gives the complete MainWindow.cs</div>
+  <div class="ex" id="bEx"></div>
+</section>
+
+<!-- Playground -->
+<section data-tab="Playground">
+  <p class="eyebrow">05 · Property playground</p>
+  <h2>Change a property, <span class="grad">watch the window and the code</span> change together</h2>
+  <p class="sub">Every control on the left is one C# property. Move a slider or pick a color: the window updates, and so does the complete MainWindow.cs underneath. Copy it into VS Code and it runs exactly like the preview.</p>
+  <div class="pg">
+    <div class="card pg-controls">
+      <label>Title <input id="pgTitle" value="My Playground"></label>
+      <label>Background <select id="pgBg"></select></label>
+      <label>Text <input id="pgText" value="Hello, GUI world!"></label>
+      <label>FontSize <span class="val" id="pgSizeV">26</span><input type="range" id="pgSize" min="10" max="48" value="26"></label>
+      <label>FontWeight <select id="pgWeight"><option>Normal</option><option selected>Bold</option><option>Light</option></select></label>
+      <label>Foreground <select id="pgFg"></select></label>
+      <label>Margin <span class="val" id="pgMarginV">20</span><input type="range" id="pgMargin" min="0" max="60" value="20"></label>
+      <label>Button caption <input id="pgBtn" value="Click me"></label>
+    </div>
+    <div class="pg-preview" id="pgPreview"></div>
+  </div>
+  <div class="ex" id="pgEx" style="margin-top:18px"></div>
+</section>
+
+<!-- Events -->
+<section data-tab="Events">
+  <p class="eyebrow">06 · How a click becomes a change on screen</p>
+  <h2>Events: your code <span class="grad">waits</span>, then reacts</h2>
+  <p class="sub">A console program runs top to bottom and ends. A GUI program sets everything up in the constructor and then <b>waits</b>. When the user clicks, the button raises its <b>Click event</b>, and every method subscribed with <code class="inline">+=</code> runs. Press ▶ Play to watch it happen.</p>
+  <div class="flow" id="flow">
+    <div class="fl" data-i="0"><div class="fl-ico">🖱️</div><b>User clicks</b><span>"Say Hello"</span></div><div class="fa">→</div>
+    <div class="fl" data-i="1"><div class="fl-ico">🔔</div><b>Click event fires</b><span>btnGreet.Click</span></div><div class="fa">→</div>
+    <div class="fl" data-i="2"><div class="fl-ico">🔌</div><b>+= calls your method</b><span>BtnGreet_Click</span></div><div class="fa">→</div>
+    <div class="fl" data-i="3"><div class="fl-ico">📖</div><b>Read → glue → write</b><span>lblResult.Text = …</span></div><div class="fa">→</div>
+    <div class="fl" data-i="4"><div class="fl-ico">✨</div><b>Screen updates</b><span>"Hello, Maria!"</span></div>
+  </div>
+  <div class="flowctl"><button type="button" class="run" id="flowPlay">▶ Play</button></div>
+  <div class="expl" id="flowInfo"><div class="lbl">Step by step</div><div class="why" id="flowText">Press ▶ Play, or click any box.</div></div>
+  <h3 style="margin:24px 0 10px">Anatomy of the wiring line</h3>
+  <div class="anat-line"><span class="al a1" data-t="The object: the button you created with new Button.">btnGreet</span><span class="al">.</span><span class="al a2" data-t="The event: Click. Buttons also have other events, but Click is the one you'll use 95% of the time.">Click</span> <span class="al a3" data-t="+= means subscribe: add this method to the list that runs on every click. (= alone is not allowed for events.)">+=</span> <span class="al a4" data-t="The method to call later. No parentheses! BtnGreet_Click() would call it right now, once, which is not what we want.">BtnGreet_Click</span><span class="al">;</span></div>
+  <p class="anat-why" id="alWhy">Hover each part of the line above.</p>
+  <div class="grid2" style="margin-top:18px">
+    <div class="card"><span class="pill w">Why are txtName and lblResult ABOVE the constructor?</span><p>Two different moments need them: the <b>constructor</b> (to put them on the shelf at startup) and the <b>click method</b> (to read and write them later, on every click). A variable declared <i>inside</i> the constructor disappears when the constructor finishes. Declared at class level, as a <b>field</b>, it lives as long as the window does.</p></div>
+    <div class="card"><span class="pill g">Rule of thumb</span><p><b>If a click method needs it, make it a field.</b> Controls that nobody talks to after setup (lblTitle, the buttons) can stay as <code class="inline">var</code> inside the constructor. The Fix-It tab shows the exact error you get when you forget this.</p></div>
+  </div>
+</section>
+
+<!-- Fix it -->
+<section data-tab="Fix-It">
+  <p class="eyebrow">07 · Errors are messages, not disasters</p>
+  <h2>The 7 errors every beginner meets, <span class="grad">and the 1-minute fix</span></h2>
+  <table class="bridge errtab">
+    <thead><tr><th>You see…</th><th>Why</th><th>Fix</th></tr></thead>
+    <tbody>
+      <tr><td>Red squiggle on <code>Brushes</code>, <code>Thickness</code>, <code>RoutedEventArgs</code>, <code>Orientation</code></td><td>A missing <b>using</b> line (the toolbox isn't open)</td><td>Click it ▸ <b>Ctrl+.</b> ▸ accept the <code>using …;</code> suggestion</td></tr>
+      <tr><td><code>; expected</code></td><td>A statement is missing its semicolon</td><td>Add <code>;</code> at the end of the line the Problems panel names (or the line above it)</td></tr>
+      <tr><td>Cannot convert <code>string</code> to <code>double</code></td><td><code>Width = "400";</code> Quotes turn a number into text</td><td>Numbers without quotes: <code>Width = 400;</code></td></tr>
+      <tr><td>The name <code>My</code> does not exist…</td><td><code>Title = My App;</code> Text without quotes</td><td><code>Title = "My App";</code></td></tr>
+      <tr><td>Only the LAST thing shows in the window</td><td>Two <code>Content = …</code> lines: the second replaces the first</td><td>One Content holding a <b>StackPanel</b> with both in <b>Children</b></td></tr>
+      <tr><td>Button clicks do nothing</td><td>The <code>+=</code> line is missing (or wired to the wrong method)</td><td><code>btnX.Click += BtnX_Click;</code> in the constructor</td></tr>
+      <tr><td>The name <code>lblOut</code> does not exist in the current context</td><td>Declared with <code>var</code> inside the constructor, used in a click method</td><td>Move it above the constructor as a <b>field</b></td></tr>
+    </tbody>
+  </table>
+  <h3 style="margin:26px 0 6px">🐞 Bug hunt: 4 errors in one small window</h3>
+  <p class="sub" style="margin-bottom:10px">Hover to inspect, click the lines you think are broken. In VS Code these errors appear <b>in waves</b>: fix the first and the next one shows up. That's normal. <span id="bugScore" class="score">Found: 0 / 4</span></p>
+  <div class="ex">
+    <div class="codewin"><div class="bar"><span class="dots"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i></span><span class="fname">MainWindow.cs</span><span class="tag">4 errors hiding</span></div><pre id="bugCode"></pre></div>
+    <div class="explain-panel"><div class="expl idle" id="bugExpl"><div class="lbl">Bug hunt</div><div class="codeq"></div><div class="why">Use the table above as your field guide.</div></div></div>
+  </div>
+  <h3 style="margin-bottom:4px">✅ Fixed and running</h3>
+  <div class="ex" data-ex="bugfixed"></div>
+</section>
+
+<!-- Quiz -->
+<section data-tab="Quiz">
+  <p class="eyebrow">08 · Knowledge check</p>
+  <h2>Prove it to yourself</h2>
+  <p class="sub">Predict, then click. The explanations are where the learning happens.</p>
+  <div id="quizHost"></div>
+  <p id="quizScore">Score: 0 / 10</p>
+</section>
+
+<!-- Practice -->
+<section data-tab="Practice">
+  <p class="eyebrow">09 · Your turn</p>
+  <h2>Three windows to build, <span class="grad">easy → harder</span></h2>
+  <p class="sub">Create a <b>new</b> project for each (or replace MainWindow.cs in MyStudioApp). Try it yourself first; the live preview shows what you're aiming for. Open the solution only when you're stuck or finished.</p>
+  <div id="practiceHost"></div>
+</section>
+
+<!-- Wrap -->
+<section data-tab="Wrap-Up">
+  <p class="eyebrow">10 · Before you leave</p>
+  <h2>Week 3: cheat sheet</h2>
+  <div class="cheat" style="margin-bottom:18px">
+    <div class="card"><h3>Window properties</h3><code>Title = "My App";
+Width = 420;
+Height = 300;
+Background = Brushes.AliceBlue;
+WindowStartupLocation =
+  WindowStartupLocation.CenterScreen;</code></div>
+    <div class="card"><h3>Text (TextBlock)</h3><code>var lblHi = new TextBlock
+{
+    Text = "Hello!",
+    FontSize = 24,
+    FontWeight = FontWeight.Bold,
+    Foreground = Brushes.Navy
+};</code></div>
+    <div class="card"><h3>Layout (StackPanel)</h3><code>Content = new StackPanel
+{
+    Margin = new Thickness(20),
+    Spacing = 8,
+    Children = { lblHi, btnGo }
+};
+// Orientation = Orientation.Horizontal</code></div>
+    <div class="card"><h3>Button + event</h3><code>var btnGo = new Button { Content = "Go" };
+btnGo.Click += BtnGo_Click;
+
+void BtnGo_Click(object? sender,
+                 RoutedEventArgs e)
+{
+    // runs on every click
+}</code></div>
+    <div class="card"><h3>Input &amp; output</h3><code>// fields, above the constructor:
+TextBox txtName = new TextBox();
+TextBlock lblOut = new TextBlock();
+
+// in a click method:
+lblOut.Text = "Hi, " + txtName.Text;</code></div>
+    <div class="card"><h3>Numbers from a TextBox</h3><code>int.TryParse(txtAge.Text,
+             out int age);
+lblOut.Text = $"Next year: {age + 1}";</code></div>
+    <div class="card"><h3>The usings</h3><code>using Avalonia;              // Thickness
+using Avalonia.Controls;     // controls
+using Avalonia.Media;        // Brushes
+using Avalonia.Interactivity; // events
+using Avalonia.Layout;       // Orientation</code></div>
+    <div class="card"><h3>Magic keys</h3><code>Ctrl+Shift+P  Command Palette
+Ctrl+.        Quick Fix (adds usings)
+Ctrl+Space    IntelliSense
+Ctrl+S        Save
+F5            Run</code></div>
+    <div class="card"><h3>Names</h3><code>lblSomething  → TextBlock
+btnSomething  → Button
+txtSomething  → TextBox
+BtnX_Click    → click handler</code></div>
+  </div>
+  <div class="grid2">
+    <div><ul class="checklist">
+      <li>Create a Console App, add <b>Avalonia.Desktop</b> + <b>Avalonia.Themes.Fluent</b>, set <b>WinExe</b>.</li>
+      <li>Explain Program.cs (engine) vs MainWindow.cs (yours), and the <code class="inline">: Window</code> + constructor.</li>
+      <li>Set Title, Width, Height, Background, and fix a missing <b>using</b> with <b>Ctrl+.</b></li>
+      <li>Create TextBlock, Button, TextBox with <code class="inline">new</code> and arrange them with a StackPanel.</li>
+      <li>Wire a button with <code class="inline">+=</code> and write a handler that reads → glues → writes.</li>
+      <li>Explain why a control used in a handler must be a <b>field</b>.</li>
+    </ul></div>
+    <div class="card"><span class="pill">Save your work</span><h3>Before you leave the lab</h3><p>Close VS Code, delete the <b>bin</b> and <b>obj</b> folders inside MyStudioApp (they're rebuilt automatically), right-click the <b>MyStudioApp</b> folder ▸ <b>Compress to ZIP</b>, and keep a copy (email, OneDrive, USB). Submit on <b>Brightspace</b> when your lab asks for it.</p>
+      <p style="margin-top:10px;color:var(--brand-ink)"><b>Coming next:</b> click "Say Hello" with an empty box and you get "Hello, !". Next we learn <code class="inline">if</code>, so the app can check its input and respond intelligently.</p></div>
+  </div>
+</section>
+
+</template>
+
+<script>
+var CODE={"s01": "using Avalonia.Controls;\n\nnamespace MyStudioApp;\n\npublic class MainWindow : Window\n{\n    public MainWindow()\n    {\n        // Empty on purpose: the window uses all its default settings.\n    }\n}", "s02": "using Avalonia.Controls;\n\nnamespace MyStudioApp;\n\npublic class MainWindow : Window\n{\n    public MainWindow()\n    {\n        Title = \"My First GUI\";\n    }\n}", "s03": "using Avalonia.Controls;\n\nnamespace MyStudioApp;\n\npublic class MainWindow : Window\n{\n    public MainWindow()\n    {\n        Title = \"My First GUI\";\n        Width = 420;\n        Height = 300;\n        WindowStartupLocation = WindowStartupLocation.CenterScreen;\n    }\n}", "s04": "using Avalonia.Controls;\nusing Avalonia.Media;\n\nnamespace MyStudioApp;\n\npublic class MainWindow : Window\n{\n    public MainWindow()\n    {\n        Title = \"My First GUI\";\n        Width = 420;\n        Height = 300;\n        WindowStartupLocation = WindowStartupLocation.CenterScreen;\n        Background = Brushes.AliceBlue;\n    }\n}", "s05": "using Avalonia.Controls;\nusing Avalonia.Media;\n\nnamespace MyStudioApp;\n\npublic class MainWindow : Window\n{\n    public MainWindow()\n    {\n        Title = \"My First GUI\";\n        Width = 420;\n        Height = 300;\n        WindowStartupLocation = WindowStartupLocation.CenterScreen;\n        Background = Brushes.AliceBlue;\n\n        Content = new TextBlock { Text = \"Hello, GUI world!\" };\n    }\n}", "s06": "using Avalonia;\nusing Avalonia.Controls;\nusing Avalonia.Media;\n\nnamespace MyStudioApp;\n\npublic class MainWindow : Window\n{\n    public MainWindow()\n    {\n        Title = \"My First GUI\";\n        Width = 420;\n        Height = 300;\n        WindowStartupLocation = WindowStartupLocation.CenterScreen;\n        Background = Brushes.AliceBlue;\n\n        Content = new TextBlock\n        {\n            Text = \"Hello, GUI world!\",\n            FontSize = 26,\n            FontWeight = FontWeight.Bold,\n            Foreground = Brushes.DarkSlateBlue,\n            Margin = new Thickness(20)\n        };\n    }\n}", "s07": "using Avalonia;\nusing Avalonia.Controls;\nusing Avalonia.Media;\n\nnamespace MyStudioApp;\n\npublic class MainWindow : Window\n{\n    public MainWindow()\n    {\n        Title = \"My First GUI\";\n        Width = 420;\n        Height = 300;\n        WindowStartupLocation = WindowStartupLocation.CenterScreen;\n        Background = Brushes.AliceBlue;\n\n        var lblTitle = new TextBlock\n        {\n            Text = \"Hello, GUI world!\",\n            FontSize = 26,\n            FontWeight = FontWeight.Bold,\n            Foreground = Brushes.DarkSlateBlue\n        };\n\n        var lblSubtitle = new TextBlock\n        {\n            Text = \"My first window, built one line at a time.\",\n            FontSize = 14,\n            Foreground = Brushes.SlateGray\n        };\n\n        Content = new StackPanel\n        {\n            Margin = new Thickness(20),\n            Spacing = 8,\n            Children = { lblTitle, lblSubtitle }\n        };\n    }\n}", "s08": "using Avalonia;\nusing Avalonia.Controls;\nusing Avalonia.Media;\n\nnamespace MyStudioApp;\n\npublic class MainWindow : Window\n{\n    public MainWindow()\n    {\n        Title = \"My First GUI\";\n        Width = 420;\n        Height = 300;\n        WindowStartupLocation = WindowStartupLocation.CenterScreen;\n        Background = Brushes.AliceBlue;\n\n        var lblTitle = new TextBlock\n        {\n            Text = \"Hello, GUI world!\",\n            FontSize = 26,\n            FontWeight = FontWeight.Bold,\n            Foreground = Brushes.DarkSlateBlue\n        };\n\n        var lblSubtitle = new TextBlock\n        {\n            Text = \"My first window, built one line at a time.\",\n            FontSize = 14,\n            Foreground = Brushes.SlateGray\n        };\n\n        var btnGreet = new Button { Content = \"Say Hello\" };\n\n        Content = new StackPanel\n        {\n            Margin = new Thickness(20),\n            Spacing = 8,\n            Children = { lblTitle, lblSubtitle, btnGreet }\n        };\n    }\n}", "s09": "using Avalonia;\nusing Avalonia.Controls;\nusing Avalonia.Media;\n\nnamespace MyStudioApp;\n\npublic class MainWindow : Window\n{\n    TextBox txtName = new TextBox { Watermark = \"Type your name...\" };\n    TextBlock lblResult = new TextBlock { Text = \"Your greeting will appear here.\", FontSize = 18, Foreground = Brushes.SeaGreen };\n\n    public MainWindow()\n    {\n        Title = \"My First GUI\";\n        Width = 420;\n        Height = 300;\n        WindowStartupLocation = WindowStartupLocation.CenterScreen;\n        Background = Brushes.AliceBlue;\n\n        var lblTitle = new TextBlock\n        {\n            Text = \"Hello, GUI world!\",\n            FontSize = 26,\n            FontWeight = FontWeight.Bold,\n            Foreground = Brushes.DarkSlateBlue\n        };\n\n        var lblSubtitle = new TextBlock\n        {\n            Text = \"My first window, built one line at a time.\",\n            FontSize = 14,\n            Foreground = Brushes.SlateGray\n        };\n\n        var btnGreet = new Button { Content = \"Say Hello\" };\n\n        Content = new StackPanel\n        {\n            Margin = new Thickness(20),\n            Spacing = 8,\n            Children = { lblTitle, lblSubtitle, txtName, btnGreet, lblResult }\n        };\n    }\n}", "s10": "using Avalonia;\nusing Avalonia.Controls;\nusing Avalonia.Interactivity;\nusing Avalonia.Media;\n\nnamespace MyStudioApp;\n\npublic class MainWindow : Window\n{\n    TextBox txtName = new TextBox { Watermark = \"Type your name...\" };\n    TextBlock lblResult = new TextBlock { Text = \"Your greeting will appear here.\", FontSize = 18, Foreground = Brushes.SeaGreen };\n\n    public MainWindow()\n    {\n        Title = \"My First GUI\";\n        Width = 420;\n        Height = 300;\n        WindowStartupLocation = WindowStartupLocation.CenterScreen;\n        Background = Brushes.AliceBlue;\n\n        var lblTitle = new TextBlock\n        {\n            Text = \"Hello, GUI world!\",\n            FontSize = 26,\n            FontWeight = FontWeight.Bold,\n            Foreground = Brushes.DarkSlateBlue\n        };\n\n        var lblSubtitle = new TextBlock\n        {\n            Text = \"My first window, built one line at a time.\",\n            FontSize = 14,\n            Foreground = Brushes.SlateGray\n        };\n\n        var btnGreet = new Button { Content = \"Say Hello\" };\n        btnGreet.Click += BtnGreet_Click;\n\n        Content = new StackPanel\n        {\n            Margin = new Thickness(20),\n            Spacing = 8,\n            Children = { lblTitle, lblSubtitle, txtName, btnGreet, lblResult }\n        };\n    }\n\n    void BtnGreet_Click(object? sender, RoutedEventArgs e)\n    {\n        lblResult.Text = \"Hello, \" + txtName.Text + \"!\";\n    }\n}", "s11": "using Avalonia;\nusing Avalonia.Controls;\nusing Avalonia.Interactivity;\nusing Avalonia.Layout;\nusing Avalonia.Media;\n\nnamespace MyStudioApp;\n\npublic class MainWindow : Window\n{\n    TextBox txtName = new TextBox { Watermark = \"Type your name...\" };\n    TextBlock lblResult = new TextBlock { Text = \"Your greeting will appear here.\", FontSize = 18, Foreground = Brushes.SeaGreen };\n\n    public MainWindow()\n    {\n        Title = \"My First GUI\";\n        Width = 420;\n        Height = 300;\n        WindowStartupLocation = WindowStartupLocation.CenterScreen;\n        Background = Brushes.AliceBlue;\n\n        var lblTitle = new TextBlock\n        {\n            Text = \"Hello, GUI world!\",\n            FontSize = 26,\n            FontWeight = FontWeight.Bold,\n            Foreground = Brushes.DarkSlateBlue\n        };\n\n        var lblSubtitle = new TextBlock\n        {\n            Text = \"My first window, built one line at a time.\",\n            FontSize = 14,\n            Foreground = Brushes.SlateGray\n        };\n\n        var btnGreet = new Button { Content = \"Say Hello\" };\n        btnGreet.Click += BtnGreet_Click;\n\n        var btnClear = new Button { Content = \"Clear\" };\n        btnClear.Click += BtnClear_Click;\n\n        var buttonRow = new StackPanel\n        {\n            Orientation = Orientation.Horizontal,\n            Spacing = 10,\n            Children = { btnGreet, btnClear }\n        };\n\n        Content = new StackPanel\n        {\n            Margin = new Thickness(20),\n            Spacing = 8,\n            Children = { lblTitle, lblSubtitle, txtName, buttonRow, lblResult }\n        };\n    }\n\n    void BtnGreet_Click(object? sender, RoutedEventArgs e)\n    {\n        lblResult.Text = \"Hello, \" + txtName.Text + \"!\";\n    }\n\n    void BtnClear_Click(object? sender, RoutedEventArgs e)\n    {\n        txtName.Text = \"\";\n        lblResult.Text = \"Your greeting will appear here.\";\n        txtName.Focus();\n    }\n}", "s12": "using Avalonia;\nusing Avalonia.Controls;\nusing Avalonia.Interactivity;\nusing Avalonia.Layout;\nusing Avalonia.Media;\n\nnamespace MyStudioApp;\n\npublic class MainWindow : Window\n{\n    TextBox txtName = new TextBox { Watermark = \"Type your name...\" };\n    TextBox txtAge = new TextBox { Watermark = \"Type your age...\" };\n    TextBlock lblResult = new TextBlock { Text = \"Your greeting will appear here.\", FontSize = 18, Foreground = Brushes.SeaGreen };\n\n    public MainWindow()\n    {\n        Title = \"My First GUI\";\n        Width = 420;\n        Height = 340;\n        WindowStartupLocation = WindowStartupLocation.CenterScreen;\n        Background = Brushes.AliceBlue;\n\n        var lblTitle = new TextBlock\n        {\n            Text = \"Hello, GUI world!\",\n            FontSize = 26,\n            FontWeight = FontWeight.Bold,\n            Foreground = Brushes.DarkSlateBlue\n        };\n\n        var lblSubtitle = new TextBlock\n        {\n            Text = \"My first window, built one line at a time.\",\n            FontSize = 14,\n            Foreground = Brushes.SlateGray\n        };\n\n        var btnGreet = new Button { Content = \"Say Hello\" };\n        btnGreet.Click += BtnGreet_Click;\n\n        var btnClear = new Button { Content = \"Clear\" };\n        btnClear.Click += BtnClear_Click;\n\n        var buttonRow = new StackPanel\n        {\n            Orientation = Orientation.Horizontal,\n            Spacing = 10,\n            Children = { btnGreet, btnClear }\n        };\n\n        Content = new StackPanel\n        {\n            Margin = new Thickness(20),\n            Spacing = 8,\n            Children = { lblTitle, lblSubtitle, txtName, txtAge, buttonRow, lblResult }\n        };\n    }\n\n    void BtnGreet_Click(object? sender, RoutedEventArgs e)\n    {\n        int.TryParse(txtAge.Text, out int age);\n        lblResult.Text = $\"Hello, {txtName.Text}! Next year you will be {age + 1}.\";\n    }\n\n    void BtnClear_Click(object? sender, RoutedEventArgs e)\n    {\n        txtName.Text = \"\";\n        txtAge.Text = \"\";\n        lblResult.Text = \"Your greeting will appear here.\";\n        txtName.Focus();\n    }\n}", "p_card": "using Avalonia;\nusing Avalonia.Controls;\nusing Avalonia.Media;\n\nnamespace MyStudioApp;\n\npublic class MainWindow : Window\n{\n    public MainWindow()\n    {\n        Title = \"My Business Card\";\n        Width = 380;\n        Height = 220;\n        WindowStartupLocation = WindowStartupLocation.CenterScreen;\n        Background = Brushes.Beige;\n\n        var lblName = new TextBlock\n        {\n            Text = \"Maria Lopez\",\n            FontSize = 28,\n            FontWeight = FontWeight.Bold,\n            Foreground = Brushes.Navy\n        };\n\n        var lblJob = new TextBlock\n        {\n            Text = \"Software Developer in training\",\n            FontSize = 16,\n            Foreground = Brushes.DimGray\n        };\n\n        var lblEmail = new TextBlock\n        {\n            Text = \"maria.lopez@example.com\",\n            FontSize = 14,\n            Foreground = Brushes.SteelBlue\n        };\n\n        Content = new StackPanel\n        {\n            Margin = new Thickness(24),\n            Spacing = 6,\n            Children = { lblName, lblJob, lblEmail }\n        };\n    }\n}", "p_counter": "using Avalonia;\nusing Avalonia.Controls;\nusing Avalonia.Interactivity;\nusing Avalonia.Media;\n\nnamespace MyStudioApp;\n\npublic class MainWindow : Window\n{\n    int count = 0;\n    TextBlock lblCount = new TextBlock { Text = \"Clicks: 0\", FontSize = 32, FontWeight = FontWeight.Bold };\n\n    public MainWindow()\n    {\n        Title = \"Click Counter\";\n        Width = 300;\n        Height = 200;\n        WindowStartupLocation = WindowStartupLocation.CenterScreen;\n\n        var btnClick = new Button { Content = \"Click me!\" };\n        btnClick.Click += BtnClick_Click;\n\n        var btnReset = new Button { Content = \"Reset\" };\n        btnReset.Click += BtnReset_Click;\n\n        Content = new StackPanel\n        {\n            Margin = new Thickness(24),\n            Spacing = 12,\n            Children = { lblCount, btnClick, btnReset }\n        };\n    }\n\n    void BtnClick_Click(object? sender, RoutedEventArgs e)\n    {\n        count = count + 1;\n        lblCount.Text = $\"Clicks: {count}\";\n    }\n\n    void BtnReset_Click(object? sender, RoutedEventArgs e)\n    {\n        count = 0;\n        lblCount.Text = \"Clicks: 0\";\n    }\n}", "p_temp": "using Avalonia;\nusing Avalonia.Controls;\nusing Avalonia.Interactivity;\nusing Avalonia.Media;\n\nnamespace MyStudioApp;\n\npublic class MainWindow : Window\n{\n    TextBox txtFahrenheit = new TextBox { Watermark = \"Temperature in F\" };\n    TextBlock lblCelsius = new TextBlock { Text = \"\", FontSize = 20, Foreground = Brushes.Teal };\n\n    public MainWindow()\n    {\n        Title = \"Temperature Converter\";\n        Width = 340;\n        Height = 230;\n        WindowStartupLocation = WindowStartupLocation.CenterScreen;\n\n        var lblTitle = new TextBlock { Text = \"Fahrenheit to Celsius\", FontSize = 20, FontWeight = FontWeight.Bold };\n\n        var btnConvert = new Button { Content = \"Convert\" };\n        btnConvert.Click += BtnConvert_Click;\n\n        Content = new StackPanel\n        {\n            Margin = new Thickness(20),\n            Spacing = 10,\n            Children = { lblTitle, txtFahrenheit, btnConvert, lblCelsius }\n        };\n    }\n\n    void BtnConvert_Click(object? sender, RoutedEventArgs e)\n    {\n        double.TryParse(txtFahrenheit.Text, out double fahrenheit);\n        double celsius = (fahrenheit - 32) * 5 / 9;\n        lblCelsius.Text = $\"{fahrenheit} F = {celsius:F1} C\";\n    }\n}", "bug": "using Avalonia.Controls;\n\nnamespace MyStudioApp;\n\npublic class MainWindow : Window\n{\n    public MainWindow()\n    {\n        Title = My Greeter;\n        Width = \"400\";\n\n        var btnGo = new Button { Content = \"Go\" };\n        var lblOut = new TextBlock { Text = \"Waiting...\" };\n        btnGo.Click += BtnGo_Click;\n\n        Content = new StackPanel { Children = { btnGo, lblOut } };\n    }\n\n    void BtnGo_Click(object? sender, RoutedEventArgs e)\n    {\n        lblOut.Text = \"Clicked!\";\n    }\n}", "bugfixed": "using Avalonia.Controls;\nusing Avalonia.Interactivity;\n\nnamespace MyStudioApp;\n\npublic class MainWindow : Window\n{\n    TextBlock lblOut = new TextBlock { Text = \"Waiting...\" };\n\n    public MainWindow()\n    {\n        Title = \"My Greeter\";\n        Width = 400;\n\n        var btnGo = new Button { Content = \"Go\" };\n        btnGo.Click += BtnGo_Click;\n\n        Content = new StackPanel { Children = { btnGo, lblOut } };\n    }\n\n    void BtnGo_Click(object? sender, RoutedEventArgs e)\n    {\n        lblOut.Text = \"Clicked!\";\n    }\n}", "engine": "using System;\nusing Avalonia;\nusing Avalonia.Controls.ApplicationLifetimes;\nusing Avalonia.Themes.Fluent;\n\nnamespace MyStudioApp;\n\n// PART 1: The launcher. Starts Avalonia.\nclass Program\n{\n    [STAThread]\n    public static void Main(string[] args)\n    {\n        AppBuilder.Configure<App>()\n                  .UsePlatformDetect()\n                  .StartWithClassicDesktopLifetime(args);\n    }\n}\n\n// PART 2: The app. Loads the modern theme, opens your window.\npublic class App : Application\n{\n    public override void OnFrameworkInitializationCompleted()\n    {\n        Styles.Add(new FluentTheme());\n        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)\n        {\n            desktop.MainWindow = new MainWindow();   // <- opens YOUR file\n        }\n        base.OnFrameworkInitializationCompleted();\n    }\n}"};
+/* ================= line explanations (shared by every step) ================= */
+var EXACT={
+  'using Avalonia.Controls;':'<b>Toolbox #1: the controls.</b> Gives this file access to <b>Window</b>, <b>TextBlock</b>, <b>Button</b>, <b>TextBox</b>, <b>StackPanel</b>. Same idea as <code>using System;</code> for Console.',
+  'using Avalonia.Media;':'<b>Toolbox for looks:</b> colors (<b>Brushes</b>) and font styles (<b>FontWeight</b>). If you forget it, <code>Brushes</code> gets a red squiggle. Click it and press <b>Ctrl+.</b> to add this line automatically.',
+  'using Avalonia;':'<b>Toolbox for the basics</b>, including <b>Thickness</b> (used for Margin). Missing? Red squiggle on Thickness, then <b>Ctrl+.</b>',
+  'using Avalonia.Interactivity;':'<b>Toolbox for events:</b> it holds <b>RoutedEventArgs</b>, the second parameter of every click handler.',
+  'using Avalonia.Layout;':'<b>Toolbox for layout:</b> <b>Orientation</b> (Horizontal/Vertical) and alignment settings live here.',
+  'using System;':'The standard toolbox (needed for <b>[STAThread]</b>).',
+  'using Avalonia.Controls.ApplicationLifetimes;':'Engine part: describes how a desktop app starts and stops.',
+  'using Avalonia.Themes.Fluent;':'Engine part: the modern <b>Fluent</b> look (Windows 11 style) for every control.',
+  'namespace MyStudioApp;':'<b>Your project’s name tag.</b> Every file in the project starts with the same namespace, so MainWindow.cs and Program.cs can find each other.',
+  'public class MainWindow : Window':'<b>Your window class.</b> Read <b>: Window</b> as "<b>is a</b> Window": MainWindow <b>inherits</b> everything a window already knows how to do (title bar, move, resize, close) without you writing any of it.',
+  'public MainWindow()':'<b>The constructor.</b> Same name as the class, no return type. It runs <b>once</b>, at the moment the window is created. Think of it as the window’s <b>Main</b>: every setting you write inside its braces is applied before the window appears.',
+  '// Empty on purpose: the window uses all its default settings.':'A comment. The constructor is empty, so the window keeps every default: default title, default size, white and empty inside.',
+  'WindowStartupLocation = WindowStartupLocation.CenterScreen;':'Opens the window in the <b>middle of the screen</b> instead of wherever the OS likes. The value is an <b>enum</b>, a fixed list of choices (Manual, CenterScreen, CenterOwner). Type <code>WindowStartupLocation.</code> and IntelliSense shows them all.',
+  'Content = new TextBlock { Text = "Hello, GUI world!" };':'<b>Two ideas in one line.</b> (1) <b>new TextBlock { … }</b> creates a text object and sets its Text property. (2) <b>Content =</b> puts that object <b>inside</b> the window. A window’s Content holds exactly <b>one</b> thing. That’s important in step 7.',
+  'Content = new TextBlock':'Same as step 5: create a TextBlock and make it the window’s Content. The <b>{</b> on the next line starts an <b>object initializer</b> spread over several lines, one property per line. Much easier to read.',
+  'FontWeight = FontWeight.Bold,':'<b>Bold</b> text. FontWeight is an enum: try <code>FontWeight.Light</code> or <code>FontWeight.Black</code>. Notice the <b>comma</b>: inside an initializer, properties are separated by commas, not semicolons.',
+  'Content = new StackPanel':'<b>The shelf.</b> A window’s Content holds only ONE thing, so we give it a <b>StackPanel</b>: one object that holds many children and stacks them <b>top to bottom</b>.',
+  'var buttonRow = new StackPanel':'<b>A second shelf</b>, this one just for the two buttons. Panels can go inside panels: the whole window is one big vertical StackPanel, and this horizontal one sits inside it.',
+  'Orientation = Orientation.Horizontal,':'Makes this StackPanel stack its children <b>left to right</b> instead of top to bottom. Needs <code>using Avalonia.Layout;</code>.',
+  'txtName.Focus();':'Puts the typing cursor back into the name box, so the user can type the next name right away. Small touch, professional feel.',
+  'int.TryParse(txtAge.Text, out int age);':'<b>Week 2 skills, inside a GUI!</b> txtAge.Text is a <b>string</b> (exactly like Console.ReadLine). TryParse turns it into the int <b>age</b>, safely: if the box has letters or is empty, age becomes <b>0</b> and nothing crashes. (Checking the true/false result needs <b>if</b>, coming soon.)',
+  'lblResult.Text = "Hello, " + txtName.Text + "!";':'<b>The rhythm of every GUI: read → glue → write.</b> <b>Read</b> what the user typed (txtName.Text), <b>glue</b> it into a sentence with +, <b>write</b> the result into the label’s Text property. The window updates instantly.',
+  'lblResult.Text = $"Hello, {txtName.Text}! Next year you will be {age + 1}.";':'A <b>$-string</b> (Week 2) builds the message: the name from one TextBox, math on the number from the other. Output goes to the label instead of Console.WriteLine.',
+  'lblResult.Text = "Your greeting will appear here.";':'Puts the label back to its starting message.',
+  'int count = 0;':'<b>A field that remembers.</b> Declared at class level, so its value <b>survives between clicks</b>. A variable inside the handler would restart at 0 every time.',
+  'count = count + 1;':'Add one to the remembered count (Week 1: read the right side, store into the left).',
+  'count = 0;':'Reset the remembered number.',
+  'lblCount.Text = $"Clicks: {count}";':'Show the new count on the label. The label needs text, so the $-string turns the number into a string.',
+  'lblCount.Text = "Clicks: 0";':'Show zero again.',
+  'double.TryParse(txtFahrenheit.Text, out double fahrenheit);':'Read the TextBox (a string) and convert it safely to a double. Letters or an empty box give 0.',
+  'double celsius = (fahrenheit - 32) * 5 / 9;':'The same formula as Week 2’s console converter. The <b>Process</b> step never changes between console and GUI.',
+  'lblCelsius.Text = $"{fahrenheit} F = {celsius:F1} C";':'Output to the label, formatted with <b>:F1</b> (one decimal), exactly like Week 2.',
+  'Content = new StackPanel { Children = { btnGo, lblOut } };':'A one-line shelf with two children.',
+  'lblOut.Text = "Clicked!";':'Writes into the label, which only works because lblOut is a <b>field</b> now (see the Fix-It tab).',
+  'class Program':'<b>Part 1, the launcher.</b> The same <b>class Program</b> + <b>Main</b> you know from console apps: .NET still starts here.',
+  '[STAThread]':'A tag that desktop GUI apps need on Main (it sets up the thread the window runs on). Copy it, don’t worry about it.',
+  'public static void Main(string[] args)':'The starting point, as always. <b>string[] args</b> holds command-line extras. We never use them.',
+  'AppBuilder.Configure<App>()':'"Build an Avalonia app using the <b>App</b> class below"…',
+  '.UsePlatformDetect()':'…"detect whether we’re on Windows, macOS or Linux and use the right drawing system"…',
+  '.StartWithClassicDesktopLifetime(args);':'…"start it as a normal desktop app that stays open until the last window closes." Three lines, one long statement: note the single <b>;</b> at the very end.',
+  'public class App : Application':'<b>Part 2, the app.</b> App <b>is an</b> Application (inheritance again).',
+  'public override void OnFrameworkInitializationCompleted()':'A method Avalonia calls automatically once it’s ready. We use it to load the theme and open our window.',
+  'Styles.Add(new FluentTheme());':'Loads the modern Fluent theme. Without it, controls would be almost invisible.',
+  'if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)':'"If this is a normal desktop app…" (It always is, for us.)',
+  'desktop.MainWindow = new MainWindow();   // <- opens YOUR file':'<b>The handshake.</b> The engine creates <b>your</b> MainWindow with <b>new</b> (which runs your constructor) and shows it. This is the only line in Program.cs worth remembering.',
+  'base.OnFrameworkInitializationCompleted();':'Lets Avalonia finish its own startup work.',
+  '// PART 1: The launcher. Starts Avalonia.':'A comment labeling the first half of the engine.',
+  '// PART 2: The app. Loads the modern theme, opens your window.':'A comment labeling the second half.'
+};
+var RULES=[
+  [/^Title = "(.*)";$/,function(m){return '<b>Your first property!</b> <b>Title</b> is the text in the window’s title bar. It’s a <b>string</b>, so the value wears quotes. Read it as: "this window’s Title gets “'+m[1]+'”". No dot in front, because we’re <i>inside</i> the window: it means <i>my own</i> Title.';}],
+  [/^Width = (\d+);$/,function(m){return '<b>Width</b> in pixels: '+m[1]+'. It’s a <b>number</b>, so no quotes. <code>Width = "'+m[1]+'";</code> would be an error: text doesn’t fit in a number property.';}],
+  [/^Height = (\d+);$/,function(m){return '<b>Height</b> in pixels: '+m[1]+'. Change it, press F5, see the difference. Cause and effect.';}],
+  [/^Background = Brushes\.(\w+);$/,function(m){return '<b>Background</b> paints the window. <b>Brushes.'+m[1]+'</b> is one of ~140 named colors. Type <code>Brushes.</code> and pause: IntelliSense lists them all. Needs <code>using Avalonia.Media;</code> (squiggle? <b>Ctrl+.</b>).';}],
+  [/^Text = "(.*)",?$/,function(m){return 'The <b>Text</b> property: what this TextBlock displays: “'+m[1]+'”. Ends with a comma because more properties follow inside the { }.';}],
+  [/^FontSize = (\d+),?$/,function(m){return '<b>FontSize</b> '+m[1]+' (the default is 14). A number: no quotes.';}],
+  [/^Foreground = Brushes\.(\w+),?$/,function(m){return '<b>Foreground</b> is the <b>text color</b> (Background is the area behind it). Here: '+m[1]+'.'+(/,$/.test(m[0])?'':' No comma: it’s the last property in this initializer.');}],
+  [/^Margin = new Thickness\((\d+)\),?$/,function(m){return '<b>Margin</b> = empty space <i>around</i> the control, '+m[1]+' pixels on all four sides. A <b>Thickness</b> is a small object (left, top, right, bottom), so it’s created with <b>new</b>. Needs <code>using Avalonia;</code>.';}],
+  [/^Spacing = (\d+),?$/,function(m){return '<b>Spacing</b>: '+m[1]+' pixels of gap <i>between</i> the children on this shelf.';}],
+  [/^Children = \{ (.*) \}$/,function(m){return '<b>Children</b> lists what goes on the shelf, <b>in order</b>: '+m[1].split(', ').map(function(x){return '<b>'+x+'</b>';}).join(' → ')+'. Change the order here and the window changes to match. Each name must be a variable you created above.';}],
+  [/^var (lbl\w+) = new TextBlock$/,function(m){return 'Create a TextBlock and give it a <b>name</b>: <b>'+m[1]+'</b>. <b>var</b> lets C# figure out the type (TextBlock). Naming habit for the whole semester: <b>lbl</b>… for labels, <b>btn</b>… for buttons, <b>txt</b>… for text boxes.';}],
+  [/^var (lbl\w+) = new TextBlock \{ (.*) \};$/,function(m){return 'A whole TextBlock in one line: create it, name it <b>'+m[1]+'</b>, set its properties. Short initializers fit on one line. Long ones read better spread out.';}],
+  [/^var (btn\w+) = new Button \{ Content = "(.*)" \};$/,function(m){return '<b>A button is just another object.</b> Create it with <b>new Button</b>, name it <b>'+m[1]+'</b>, and set its <b>Content</b> (the caption) to “'+m[2]+'”. By itself it does nothing when clicked. It needs an <b>event</b>.';}],
+  [/^(btn\w+)\.Click \+= (\w+);$/,function(m){return '<b>The wire.</b> "When <b>'+m[1]+'</b> is clicked, run the method <b>'+m[2]+'</b>." <b>+=</b> means <i>subscribe</i>: add this method to the list of things to run on every click. No parentheses after the method name: we’re not calling it now, we’re telling the button which method to call <i>later</i>.';}],
+  [/^TextBox (txt\w+) = new TextBox \{ Watermark = "(.*)" \};$/,function(m){return '<b>A TextBox: input from the user.</b> It’s a <b>field</b> (declared above the constructor, not inside it) because the click method needs to read it later. <b>Watermark</b> is the grey hint “'+m[2]+'” that disappears when the user types.';}],
+  [/^TextBlock (lbl\w+) = new TextBlock \{(.*)\};$/,function(m){return '<b>A label for output</b>, declared as a <b>field</b>: it lives as long as the window, so a click method can write into it later. Its properties are set right here in one initializer.';}],
+  [/^void (Btn\w+_Click)\(object\? sender, RoutedEventArgs e\)$/,function(m){return '<b>The event handler</b>: an ordinary method (Week 1) that runs on every click. <b>void</b> = returns nothing. The two parameters are required by Click: <b>sender</b> = which control was clicked, <b>e</b> = details about the click. (The <b>?</b> just says sender could be empty; it keeps VS Code free of warnings.) Name pattern: <b>ControlName_Event</b>.';}],
+  [/^(txt\w+)\.Text = "";$/,function(m){return 'Empty the <b>'+m[1]+'</b> box by setting its Text to an empty string.';}]
+];
+function noteFor(line){
+  var t=line.trim();
+  if(t==='')return 'A blank line: breathing room for human eyes. The compiler ignores it.';
+  if(t==='{')return 'Opens a block (or an object initializer). Every { needs its }.';
+  if(t==='}')return 'Closes a block.';
+  if(t==='};')return 'Closes the object initializer. The <b>;</b> ends the whole statement that began with <b>new</b>.';
+  if(EXACT[t])return EXACT[t];
+  for(var i=0;i<RULES.length;i++){var m=t.match(RULES[i][0]);if(m)return RULES[i][1](m);}
+  return null;
+}
+
+/* ================= window preview specs ================= */
+function TB(text,o){o=o||{};return {t:'text',text:text,size:o.size||14,weight:o.weight||400,color:o.color||'#1b1b1b',margin:o.margin||0,id:o.id};}
+function BTN(text,id){return {t:'button',text:text,id:id};}
+function BOX(ph,id){return {t:'textbox',ph:ph,id:id};}
+function STACK(children,o){o=o||{};return {t:'stack',children:children,margin:o.margin||0,spacing:o.spacing||0,horiz:!!o.horiz};}
+var TITLE=function(){return TB('Hello, GUI world!',{size:26,weight:700,color:'DarkSlateBlue'});};
+var SUB=function(){return TB('My first window, built one line at a time.',{color:'SlateGray'});};
+var RESULT=function(){return TB('Your greeting will appear here.',{size:18,color:'SeaGreen',id:'lblResult'});};
+
+var STEPS=[
+ {key:'s01',title:'An empty window',idea:': Window + constructor',
+  goal:'Prove the engine works: press ▶ and get a real window, with nothing in it yet.',
+  todo:['Create <b>MainWindow.cs</b> (Explorer ▸ New File) and paste this code.','Paste the engine into <b>Program.cs</b> (see the Engine tab).','Press <b>F5</b>. A blank window appears: move it, resize it, close it.'],
+  win:{title:'Window',w:440,h:260,bg:'#ffffff',content:null,cap:'Default title, default size, empty inside. All of that behavior came free from <b>: Window</b>.'}},
+ {key:'s02',title:'Give it a title',idea:'your first property',
+  goal:'One line of code, one visible change: the title bar shows your text.',
+  todo:['Inside the constructor’s <b>{ }</b>, type <code>Ti</code> and pause: IntelliSense offers <b>Title</b>. Press <b>Tab</b>.','Finish the line: <code>Title = "My First GUI";</code> (quotes: it’s text!)','<b>Ctrl+S</b>, then <b>F5</b>. Look at the title bar.'],
+  win:{title:'My First GUI',w:440,h:260,bg:'#ffffff',content:null,cap:'Same empty window, but now it has <b>your</b> title. A property is just <code>Name = value;</code>'}},
+ {key:'s03',title:'Size & position',idea:'number properties + an enum',
+  goal:'Control exactly how big the window is and where it opens.',
+  todo:['Add <code>Width = 420;</code> and <code>Height = 300;</code> (numbers, no quotes).','Add the <b>WindowStartupLocation</b> line so it opens centered.','F5. Then play scientist: change Height to 500, run, change it back.'],
+  win:{title:'My First GUI',w:420,h:300,bg:'#ffffff',content:null,cap:'Exactly 420 × 300 pixels, opened in the center of the screen.'}},
+ {key:'s04',title:'Paint the background',idea:'Brushes + your first "using" fix',
+  goal:'Give the window a color, and learn the fix for every "type not found" squiggle.',
+  todo:['Type <code>Background = Brushes.AliceBlue;</code>. <b>Brushes</b> gets a red squiggle!','Click the squiggle, press <b>Ctrl+.</b> (Mac: <b>⌘+.</b>) and choose <code>using Avalonia.Media;</code>','F5. Then try other colors: type <code>Brushes.</code> and browse the list.'],
+  win:{title:'My First GUI',w:420,h:300,bg:'AliceBlue',content:null,cap:'Painted. The <code>using Avalonia.Media;</code> line was added at the top by the Quick Fix.'}},
+ {key:'s05',title:'Put text inside',idea:'Content + new TextBlock',
+  goal:'Place your first control inside the window.',
+  todo:['Add a blank line, then <code>Content = new TextBlock { Text = "Hello, GUI world!" };</code>','F5. Notice where the text lands: tiny and stuck in the corner. Next step fixes that.'],
+  win:{title:'My First GUI',w:420,h:300,bg:'AliceBlue',content:TB('Hello, GUI world!'),cap:'Text inside the window! Default font size (14), no margin, so it hugs the top-left corner.'}},
+ {key:'s06',title:'Style the text',idea:'multi-line initializer + Margin',
+  goal:'Make the text big, bold, colored, and give it breathing room.',
+  todo:['Replace the one-line Content with the multi-line version: <b>one property per line, commas between them</b>.','<b>Thickness</b> gets a squiggle: <b>Ctrl+.</b> ▸ <code>using Avalonia;</code>','F5. Then change FontSize and Foreground and run after each change.'],
+  win:{title:'My First GUI',w:420,h:300,bg:'AliceBlue',content:TB('Hello, GUI world!',{size:26,weight:700,color:'DarkSlateBlue',margin:20}),cap:'Same TextBlock, four more properties. Every pixel maps to a line you wrote.'}},
+ {key:'s07',title:'Two things? Use a StackPanel',idea:'layout: a shelf with Children',
+  goal:'Content holds only ONE thing. To show two texts, put them on a shelf.',
+  todo:['Give each TextBlock a name with <b>var</b>: <b>lblTitle</b> and <b>lblSubtitle</b>.','Set <b>Content</b> to a <b>StackPanel</b> and list both in <b>Children</b>.','F5. Then swap the order in Children and run again.'],
+  win:{title:'My First GUI',w:420,h:300,bg:'AliceBlue',content:STACK([TITLE(),SUB()],{margin:20,spacing:8}),cap:'Two TextBlocks stacked top to bottom, 8 pixels apart. The Margin moved to the shelf.'}},
+ {key:'s08',title:'Add a button',idea:'new Button { Content }',
+  goal:'Add a real, clickable button, and discover that it does nothing yet.',
+  todo:['Add the <b>btnGreet</b> line under the TextBlocks.','Add <b>btnGreet</b> to the end of Children.','F5 and click it. It animates beautifully… and does <b>nothing</b>. Why? Step 10.'],
+  win:{title:'My First GUI',w:420,h:300,bg:'AliceBlue',content:STACK([TITLE(),SUB(),BTN('Say Hello','deaf')],{margin:20,spacing:8}),cap:'A real button. Click it in this preview: nothing happens, because nobody told it what a click means.'}},
+ {key:'s09',title:'A TextBox for input + a label for output',idea:'fields (above the constructor)',
+  goal:'Add a place to type (input) and a place to answer (output).',
+  todo:['Above <code>public MainWindow()</code>, add the two <b>field</b> lines: <b>txtName</b> and <b>lblResult</b>.','Add them to Children: txtName before the button, lblResult after it.','F5. You can type in the box, but the button still does nothing.'],
+  win:{title:'My First GUI',w:420,h:300,bg:'AliceBlue',content:STACK([TITLE(),SUB(),BOX('Type your name...','txtName'),BTN('Say Hello','deaf'),RESULT()],{margin:20,spacing:8}),cap:'Input (TextBox) and output (label) are in place. Type in the box. It works! The button still ignores you.'}},
+ {key:'s10',title:'Make it work: your first event ⚡',idea:'Click += handler',
+  goal:'Connect the button to a method: read the TextBox, write the label.',
+  todo:['Under the btnGreet line, add <code>btnGreet.Click += BtnGreet_Click;</code>','After the constructor (still inside the class), add the <b>BtnGreet_Click</b> method.','<b>RoutedEventArgs</b> squiggle? <b>Ctrl+.</b> ▸ <code>using Avalonia.Interactivity;</code>','F5, type your name, click <b>Say Hello</b>. Try it in the preview →'],
+  win:{title:'My First GUI',w:420,h:300,bg:'AliceBlue',content:STACK([TITLE(),SUB(),BOX('Type your name...','txtName'),BTN('Say Hello','greet'),RESULT()],{margin:20,spacing:8}),cap:'<b>Live preview:</b> type a name and click Say Hello. This runs the same read → glue → write logic as the C# handler.',
+   on:{greet:function(s){s.set('lblResult','Hello, '+s.get('txtName')+'!');}}}},
+ {key:'s11',title:'A Clear button, side by side',idea:'second event + horizontal StackPanel',
+  goal:'Same pattern, second time: new button, new +=, new handler. Plus a row layout.',
+  todo:['Add <b>btnClear</b> and its <b>+=</b> line.','Create <b>buttonRow</b>, a horizontal StackPanel holding both buttons (squiggle on Orientation: <b>Ctrl+.</b> ▸ <code>using Avalonia.Layout;</code>).','In the main Children, replace btnGreet with <b>buttonRow</b>.','Add the <b>BtnClear_Click</b> method. F5, greet, then clear.'],
+  win:{title:'My First GUI',w:420,h:300,bg:'AliceBlue',content:STACK([TITLE(),SUB(),BOX('Type your name...','txtName'),STACK([BTN('Say Hello','greet'),BTN('Clear','clear')],{spacing:10,horiz:true}),RESULT()],{margin:20,spacing:8}),cap:'<b>Live preview:</b> greet, then Clear. Two buttons, two subscriptions, two handlers. The pattern scales to every feature you’ll ever add.',
+   on:{greet:function(s){s.set('lblResult','Hello, '+s.get('txtName')+'!');},clear:function(s){s.setBox('txtName','');s.set('lblResult','Your greeting will appear here.');s.focus('txtName');}}}},
+ {key:'s12',title:'Numbers from a TextBox (Week 2 skills!)',idea:'TryParse inside a click handler',
+  goal:'Read a number from the window, not the console. Same Parse skills, new home.',
+  todo:['Add the <b>txtAge</b> field and put it in Children after txtName. Make the window a little taller (340).','In <b>BtnGreet_Click</b>, add the <b>int.TryParse</b> line and update the message.','In <b>BtnClear_Click</b>, also clear txtAge.','F5. Try a real age, then try typing "abc". No crash!'],
+  win:{title:'My First GUI',w:420,h:340,bg:'AliceBlue',content:STACK([TITLE(),SUB(),BOX('Type your name...','txtName'),BOX('Type your age...','txtAge'),STACK([BTN('Say Hello','greet'),BTN('Clear','clear')],{spacing:10,horiz:true}),RESULT()],{margin:20,spacing:8}),cap:'<b>Live preview:</b> type a name and an age, then click. Type letters as the age: TryParse gives 0, so no crash (just a silly answer; <b>if</b> will fix that).',
+   on:{greet:function(s){var a=cs_tryInt(s.get('txtAge'));s.set('lblResult','Hello, '+s.get('txtName')+'! Next year you will be '+(a+1)+'.');},clear:function(s){s.setBox('txtName','');s.setBox('txtAge','');s.set('lblResult','Your greeting will appear here.');s.focus('txtName');}}}}
+];
+
+var PRACTICE=[
+ {key:'p_card',title:'Business Card',task:'Build a window that looks like a business card: your name (big and bold), a job title, and an email, each in its own color. <b>No events</b>: properties and layout only.',
+  win:{title:'My Business Card',w:380,h:220,bg:'Beige',content:STACK([TB('Maria Lopez',{size:28,weight:700,color:'Navy'}),TB('Software Developer in training',{size:16,color:'DimGray'}),TB('maria.lopez@example.com',{color:'SteelBlue'})],{margin:24,spacing:6}),cap:'Steps 1–7 only: title, size, color, TextBlocks on a StackPanel.'}},
+ {key:'p_counter',title:'Click Counter',task:'A big number and two buttons. <b>Click me!</b> adds one; <b>Reset</b> goes back to 0. Hint: the count must be a <b>field</b> so it survives between clicks.',
+  win:{title:'Click Counter',w:300,h:200,bg:'#ffffff',content:STACK([TB('Clicks: 0',{size:32,weight:700,id:'lblCount'}),BTN('Click me!','inc'),BTN('Reset','reset')],{margin:24,spacing:12}),cap:'<b>Live:</b> click away.',
+   on:{inc:function(s){s.n=(s.n||0)+1;s.set('lblCount','Clicks: '+s.n);},reset:function(s){s.n=0;s.set('lblCount','Clicks: 0');}}}},
+ {key:'p_temp',title:'Temperature Converter (GUI)',task:'Week 2’s console converter, reborn as a window: a TextBox for Fahrenheit, a <b>Convert</b> button, and a label that shows Celsius with one decimal.',
+  win:{title:'Temperature Converter',w:340,h:230,bg:'#ffffff',content:STACK([TB('Fahrenheit to Celsius',{size:20,weight:700}),BOX('Temperature in F','txtF'),BTN('Convert','conv'),TB('',{size:20,color:'Teal',id:'lblC'})],{margin:20,spacing:10}),cap:'<b>Live:</b> type 98.6 and click Convert.',
+   on:{conv:function(s){var f=cs_tryDbl(s.get('txtF'));var c=(f-32)*5/9;s.set('lblC',fmtD(f)+' F = '+c.toFixed(1)+' C');}}}}
+];
+
+function cs_tryInt(t){t=String(t).trim();if(!/^[+-]?\d+$/.test(t))return 0;var v=Number(t);return (v>2147483647||v<-2147483648)?0:v;}
+function cs_tryDbl(t){t=String(t).trim();if(!/^[+-]?(\d[\d,]*(\.\d*)?|\.\d+)([eE][+-]?\d+)?$/.test(t))return 0;return Number(t.replace(/,/g,''));}
+function fmtD(x){if(x===0)return '0';return String(x);}
+
+(function(){
+  "use strict";
+  var KW=/^(using|class|static|void|int|double|string|bool|var|new|return|public|private|override|base|namespace|if|is|else|out|true|false|object)$/;
+  function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function hl(line){
+    var out='',i=0,n=line.length;
+    while(i<n){
+      var ch=line[i];
+      if(ch==='/'&&line[i+1]==='/'){out+='<span class="c">'+esc(line.slice(i))+'</span>';break;}
+      if(ch==='"'||(ch==='$'&&line[i+1]==='"')){var j=i+(ch==='$'?2:1);while(j<n&&line[j]!=='"'){if(line[j]==='\\')j++;j++;}j++;out+='<span class="s">'+esc(line.slice(i,j))+'</span>';i=j;continue;}
+      if(/[A-Za-z_]/.test(ch)){
+        var j2=i;while(j2<n&&/[A-Za-z0-9_]/.test(line[j2]))j2++;
+        var w=line.slice(i,j2),rest=line.slice(j2);
+        var cls=KW.test(w)?'k':/new\s+$/.test(line.slice(0,i))?'t':/^\s*[(<]/.test(rest)?'m':/^[A-Z]/.test(w)?'t':'p';
+        out+='<span class="'+cls+'">'+esc(w)+'</span>';i=j2;continue;
+      }
+      if(/[0-9]/.test(ch)){var j3=i;while(j3<n&&/[0-9.]/.test(line[j3]))j3++;out+='<span class="n">'+line.slice(i,j3)+'</span>';i=j3;continue;}
+      out+=esc(ch);i++;
+    }
+    return out;
+  }
+
+  /* ================= window preview renderer ================= */
+  function renderWin(spec,host){
+    var state={boxes:{},labels:{},n:0};
+    var wrap=document.createElement('div');wrap.className='wv-wrap';
+    var win=document.createElement('div');win.className='wv';win.style.width=spec.w+'px';
+    var tb=document.createElement('div');tb.className='wv-title';
+    tb.innerHTML='<span class="wv-ico">🪟</span><span class="wv-tt">'+esc(spec.title)+'</span><span class="wv-btns"><i>—</i><i>▢</i><i class="x">✕</i></span>';
+    var body=document.createElement('div');body.className='wv-body';body.style.height=spec.h+'px';body.style.background=spec.bg;
+    win.appendChild(tb);win.appendChild(body);
+    function node(nd){
+      var el;
+      if(nd.t==='text'){el=document.createElement('div');el.className='wv-text';el.textContent=nd.text;el.style.fontSize=nd.size+'px';el.style.fontWeight=nd.weight;el.style.color=nd.color;el.style.margin=nd.margin+'px';if(nd.id)state.labels[nd.id]=el;}
+      else if(nd.t==='button'){el=document.createElement('button');el.type='button';el.className='wv-btn';el.textContent=nd.text;
+        el.addEventListener('click',function(){if(spec.on&&spec.on[nd.id]){spec.on[nd.id](api);}else{el.classList.add('deaf');setTimeout(function(){el.classList.remove('deaf');},450);}});}
+      else if(nd.t==='textbox'){el=document.createElement('input');el.className='wv-box';el.placeholder=nd.ph;el.spellcheck=false;state.boxes[nd.id]=el;
+        el.addEventListener('keydown',function(e){e.stopPropagation();});}
+      else if(nd.t==='stack'){el=document.createElement('div');el.className='wv-stack'+(nd.horiz?' h':'');el.style.padding=nd.margin+'px';el.style.gap=nd.spacing+'px';nd.children.forEach(function(c){el.appendChild(node(c));});}
+      return el;
+    }
+    if(spec.content)body.appendChild(node(spec.content));
+    var api={get:function(id){return state.boxes[id]?state.boxes[id].value:'';},set:function(id,v){if(state.labels[id])state.labels[id].textContent=v;},
+      setBox:function(id,v){if(state.boxes[id])state.boxes[id].value=v;},focus:function(id){if(state.boxes[id])try{state.boxes[id].focus({preventScroll:true});}catch(e){}},n:0};
+    wrap.appendChild(win);host.appendChild(wrap);
+    function fit(){var avail=host.clientWidth||spec.w;var sc=Math.min(1,(avail-4)/(spec.w+2));win.style.transform='scale('+sc+')';wrap.style.height=((spec.h+34)*sc+4)+'px';}
+    fit();if(window.ResizeObserver){new ResizeObserver(fit).observe(host);}
+    return {el:wrap,fit:fit};
+  }
+
+  /* ================= code viewer with hover notes ================= */
+  function codeView(host,o){
+    var lines=o.code.split('\n');
+    var win=document.createElement('div');win.className='codewin';
+    var bar=document.createElement('div');bar.className='bar';
+    bar.innerHTML='<span class="dots"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i></span><span class="fname">'+esc(o.file||'MainWindow.cs')+'</span>'+(o.tag?'<span class="tag">'+esc(o.tag)+'</span>':'')+'<span class="btns"></span>';
+    var copy=document.createElement('button');copy.type='button';copy.textContent='Copy';bar.querySelector('.btns').appendChild(copy);
+    win.appendChild(bar);var pre=document.createElement('pre');win.appendChild(pre);
+    var panel=document.createElement('div');panel.className='explain-panel';
+    var expl=document.createElement('div');expl.className='expl idle';
+    expl.innerHTML='<div class="lbl"><span>Explanation</span><span class="pinbadge">📌 pinned: click again to unpin</span></div><div class="codeq"></div><div class="why">'+(o.idle||'Hover any line of the code to read what it does. Click a line to pin it.')+'</div>';
+    panel.appendChild(expl);
+    var codeq=expl.querySelector('.codeq'),why=expl.querySelector('.why'),lbl=expl.querySelector('.lbl span');
+    if(o.extra)panel.appendChild(o.extra);
+    var pinned=null,rows=[];
+    function show(i){expl.classList.remove('idle');lbl.textContent='Line '+(i+1)+(o.newSet&&o.newSet[i]?' · NEW in this step':'');codeq.textContent=lines[i].trim()||'(blank line)';why.innerHTML=o.note(lines[i])||'';}
+    function idle(){if(pinned!==null){show(pinned);return;}expl.classList.add('idle');lbl.textContent='Explanation';why.innerHTML=o.idle||'Hover any line of the code to read what it does. Click a line to pin it.';}
+    lines.forEach(function(L,i){
+      var row=document.createElement('span');row.className='cl explain'+(o.newSet&&o.newSet[i]?' isnew':'');row.tabIndex=0;row.setAttribute('role','button');
+      row.setAttribute('aria-label','Line '+(i+1)+': '+(L.trim()||'blank'));
+      row.innerHTML='<span class="ln">'+(i+1)+'</span><span class="src">'+(hl(L)||' ')+'</span>'+(o.newSet&&o.newSet[i]&&L.trim()?'<span class="newtag">NEW</span>':'');
+      row.addEventListener('mouseenter',function(){if(pinned===null){rows.forEach(function(r){r.classList.remove('hot');});row.classList.add('hot');show(i);}});
+      row.addEventListener('mouseleave',function(){if(pinned===null){row.classList.remove('hot');idle();}});
+      row.addEventListener('focus',function(){if(pinned===null)show(i);});
+      row.addEventListener('click',function(){
+        if(pinned===i){pinned=null;row.classList.remove('pinned');expl.classList.remove('pinned');show(i);return;}
+        rows.forEach(function(r){r.classList.remove('pinned','hot');});pinned=i;row.classList.add('pinned');expl.classList.add('pinned');show(i);
+      });
+      row.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();row.click();}});
+      pre.appendChild(row);rows.push(row);
+    });
+    copy.addEventListener('click',function(){
+      function ok(){copy.textContent='Copied ✓';setTimeout(function(){copy.textContent='Copy';},1600);}
+      if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(o.code).then(ok,ok);}
+      else{var ta=document.createElement('textarea');ta.value=o.code;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');}catch(e){}document.body.removeChild(ta);ok();}
+    });
+    host.innerHTML='';host.appendChild(win);host.appendChild(panel);
+    if(o.scrollTo!=null&&rows[o.scrollTo]){var r=rows[o.scrollTo];setTimeout(function(){pre.scrollTop=Math.max(0,r.offsetTop-80);},0);}
+    return {rows:rows};
+  }
+  function previewBox(spec){
+    var box=document.createElement('div');box.className='prevbox';
+    box.innerHTML='<div class="prevcap-top">▶ RUN → YOUR WINDOW</div>';
+    var holder=document.createElement('div');holder.className='prevholder';box.appendChild(holder);
+    var cap=document.createElement('div');cap.className='prevcap';cap.innerHTML=spec.cap||'';box.appendChild(cap);
+    setTimeout(function(){renderWin(spec,holder);},0);
+    return box;
+  }
+
+  /* ================= slides & nav ================= */
+  var tpl=document.getElementById('slides'),stage=document.getElementById('stage'),strip=document.getElementById('tabstrip');
+  var secs=tpl.content.querySelectorAll('section'),slides=[],tabs=[],visited={},buildIdx=-1;
+  secs.forEach(function(sec,i){
+    var s=sec.cloneNode(true);s.classList.add('slide');stage.appendChild(s);slides.push(s);
+    if(sec.dataset.build)buildIdx=i;
+    var t=document.createElement('button');t.className='tab';t.type='button';t.innerHTML='<span class="dot"></span>'+sec.dataset.tab;
+    t.addEventListener('click',function(){go(i);});strip.appendChild(t);tabs.push(t);
+  });
+  var cur=0,prevBtn=document.getElementById('prevBtn'),nextBtn=document.getElementById('nextBtn');
+  function go(i,fromEnd){
+    if(i<0||i>=slides.length)return;
+    slides[cur].classList.remove('active');tabs[cur].classList.remove('active');
+    if(visited[cur])tabs[cur].classList.add('done');visited[cur]=true;cur=i;
+    slides[cur].classList.add('active');tabs[cur].classList.add('active');
+    tabs[cur].scrollIntoView({inline:'nearest',block:'nearest'});slides[cur].scrollTop=0;
+    if(cur===buildIdx&&fromEnd)showStep(STEPS.length-1);
+    updNav();
+    slides[cur].querySelectorAll('.wv-wrap').forEach(function(){});
+    window.dispatchEvent(new Event('resize'));
+  }
+  function updNav(){
+    prevBtn.disabled=(cur===0&&true);nextBtn.disabled=(cur===slides.length-1);
+    document.getElementById('progressBar').style.width=(cur/(slides.length-1)*100)+'%';
+    document.getElementById('where').textContent=(cur+1)+' / '+slides.length+' · '+secs[cur].dataset.tab+(cur===buildIdx?' · step '+(step+1)+' of '+STEPS.length:'');
+  }
+  function fwd(){if(cur===buildIdx&&step<STEPS.length-1){showStep(step+1);return;}go(cur+1);}
+  function back(){if(cur===buildIdx&&step>0){showStep(step-1);return;}go(cur-1,true);}
+  prevBtn.addEventListener('click',back);nextBtn.addEventListener('click',fwd);
+  document.addEventListener('keydown',function(e){
+    var tg=e.target.tagName;if(tg==='INPUT'||tg==='TEXTAREA'||tg==='SELECT')return;
+    if(e.key==='ArrowRight')fwd();if(e.key==='ArrowLeft')back();
+  });
+
+  /* ================= anatomy ================= */
+  var ANAT=[
+    ['Window + Title','Title = "My First GUI";','The <b>Window</b> is the frame. The text in its title bar is the <b>Title</b> property. Everything inside the frame is the window’s <b>Content</b>.'],
+    ['Content: a StackPanel','Content = new StackPanel { … };','The window’s <b>Content</b> holds exactly one thing: here a <b>StackPanel</b>, an invisible shelf that stacks its <b>Children</b> top to bottom, with <b>Spacing</b> between them and a <b>Margin</b> around them. The blue background is the window’s <b>Background</b> property.'],
+    ['TextBlock (shows text)','var lblTitle = new TextBlock { Text = "…" };','A <b>TextBlock</b> displays text the user can read but not edit. Its looks are properties: <b>Text</b>, <b>FontSize</b>, <b>FontWeight</b>, <b>Foreground</b> (text color).'],
+    ['TextBox (input)','TextBox txtName = new TextBox { Watermark = "…" };','A <b>TextBox</b> is where the user types: the GUI version of <b>Console.ReadLine()</b>. What they typed is in its <b>Text</b> property, and it’s always a <b>string</b>.'],
+    ['A horizontal StackPanel','Orientation = Orientation.Horizontal,','Panels can live inside panels. This row is a second StackPanel with <b>Orientation.Horizontal</b>, so its two buttons sit side by side.'],
+    ['Button (+ Click event)','var btnGreet = new Button { Content = "Say Hello" };','A <b>Button</b>’s caption is its <b>Content</b>. On its own it does nothing; the line <code>btnGreet.Click += BtnGreet_Click;</code> connects its <b>Click event</b> to your method.'],
+    ['TextBlock used for output','lblResult.Text = "Hello, " + txtName.Text + "!";','The result label is a TextBlock whose <b>Text</b> is changed by the click method: the GUI version of <b>Console.WriteLine</b>.']
+  ];
+  var anatParts=stage.querySelectorAll('.hotpart');
+  anatParts.forEach(function(p){
+    p.addEventListener('click',function(e){e.stopPropagation();anatParts.forEach(function(x){x.classList.remove('sel');});
+      stage.querySelectorAll('.hotpart[data-p="'+p.dataset.p+'"]').forEach(function(x){x.classList.add('sel');});
+      var a=ANAT[+p.dataset.p];document.getElementById('anatLbl').textContent=a[0];var c=document.getElementById('anatCode');c.style.display='block';c.textContent=a[1];document.getElementById('anatText').innerHTML=a[2];});
+  });
+
+  /* ================= engine & bugfixed ================= */
+  function mount(key,host,extra){
+    var o={code:CODE[key],note:noteFor};
+    if(key==='engine'){o.file='Program.cs';o.tag='the engine · copy once, never touch';}
+    if(key==='bugfixed'){o.tag='fixed · compiles';o.extra=previewBox({title:'My Greeter',w:400,h:150,bg:'#ffffff',content:STACK([BTN('Go','go'),TB('Waiting...',{id:'o'})],{}),cap:'<b>Live:</b> click Go.',on:{go:function(s){s.set('o','Clicked!');}}});}
+    codeView(host,o);
+  }
+  stage.querySelectorAll('.ex[data-ex]').forEach(function(h){mount(h.dataset.ex,h);});
+
+  /* ================= build stepper ================= */
+  var step=0;
+  var chips=document.getElementById('bChips');
+  STEPS.forEach(function(S,i){var c=document.createElement('button');c.type='button';c.className='chip';c.innerHTML='<b>'+(i+1)+'</b><span>'+esc(S.title.replace(/ ⚡| \(Week 2 skills!\)/,''))+'</span>';c.addEventListener('click',function(){showStep(i);});chips.appendChild(c);});
+  function newLines(i){
+    var cur=CODE[STEPS[i].key].split('\n');if(i===0)return null;
+    var prev=CODE[STEPS[i-1].key].split('\n').map(function(l){return l.trim();});
+    var bag={};prev.forEach(function(l){bag[l]=(bag[l]||0)+1;});
+    var set={};cur.forEach(function(l,k){var t=l.trim();if(t==='')return;if(bag[t]>0){bag[t]--;}else set[k]=true;});
+    return set;
+  }
+  function showStep(i){
+    step=i;var S=STEPS[i];
+    document.getElementById('bTitle').innerHTML='Step '+(i+1)+': '+esc(S.title);
+    document.getElementById('bCount').textContent=(i+1)+' / '+STEPS.length;
+    document.getElementById('bIdea').textContent='New idea: '+S.idea;
+    document.getElementById('bGoal').innerHTML=S.goal;
+    document.getElementById('bTodo').innerHTML=S.todo.map(function(t){return '<li>'+t+'</li>';}).join('');
+    chips.querySelectorAll('.chip').forEach(function(c,k){c.classList.toggle('active',k===i);c.classList.toggle('past',k<i);});
+    chips.children[i].scrollIntoView({inline:'nearest',block:'nearest'});
+    var ns=newLines(i);var first=null;if(ns){for(var k in ns){first=+k;break;}}
+    codeView(document.getElementById('bEx'),{code:CODE[S.key],note:noteFor,newSet:ns,tag:'complete file · step '+(i+1),extra:previewBox(S.win),scrollTo:first,
+      idle:ns?'Lines marked <b>NEW</b> are what this step adds. Hover any line to read what it does.':'This is the whole file for step 1. Hover each line.'});
+    document.getElementById('bPrev').disabled=(i===0);document.getElementById('bNext').disabled=(i===STEPS.length-1);
+    if(cur===buildIdx)updNav();
+  }
+  document.getElementById('bPrev').addEventListener('click',function(){if(step>0)showStep(step-1);});
+  document.getElementById('bNext').addEventListener('click',function(){if(step<STEPS.length-1)showStep(step+1);});
+  showStep(0);
+
+  /* ================= playground ================= */
+  var BG=['White','AliceBlue','MintCream','Lavender','LightYellow','Honeydew','Beige','LightBlue'];
+  var FG=['DarkSlateBlue','Navy','Black','Crimson','SeaGreen','Teal','DarkOrange','Indigo','Tomato'];
+  var pgBg=document.getElementById('pgBg'),pgFg=document.getElementById('pgFg');
+  BG.forEach(function(c){pgBg.add(new Option(c,c));});FG.forEach(function(c){pgFg.add(new Option(c,c));});pgBg.value='AliceBlue';
+  function csq(s){return String(s).replace(/\\/g,'\\\\').replace(/"/g,'\\"');}
+  function pgCode(v){
+    return ['using Avalonia;','using Avalonia.Controls;','using Avalonia.Media;','','namespace MyStudioApp;','','public class MainWindow : Window','{','    public MainWindow()','    {',
+      '        Title = "'+csq(v.title)+'";','        Width = 420;','        Height = 300;','        Background = Brushes.'+v.bg+';','',
+      '        var lblMessage = new TextBlock','        {','            Text = "'+csq(v.text)+'",','            FontSize = '+v.size+',','            FontWeight = FontWeight.'+v.weight+',','            Foreground = Brushes.'+v.fg,'        };','',
+      '        var btnAction = new Button { Content = "'+csq(v.btn)+'" };','','        Content = new StackPanel','        {','            Margin = new Thickness('+v.margin+'),','            Spacing = 10,','            Children = { lblMessage, btnAction }','        };','    }','}'].join('\n');
+  }
+  var pgPrevCode=null;
+  function pg(){
+    var v={title:document.getElementById('pgTitle').value,bg:pgBg.value,text:document.getElementById('pgText').value,size:+document.getElementById('pgSize').value,
+      weight:document.getElementById('pgWeight').value,fg:pgFg.value,margin:+document.getElementById('pgMargin').value,btn:document.getElementById('pgBtn').value};
+    document.getElementById('pgSizeV').textContent=v.size;document.getElementById('pgMarginV').textContent=v.margin;
+    var W={Normal:400,Bold:700,Light:300}[v.weight];
+    var host=document.getElementById('pgPreview');host.innerHTML='';
+    renderWin({title:v.title,w:420,h:300,bg:v.bg,content:STACK([TB(v.text,{size:v.size,weight:W,color:v.fg}),BTN(v.btn,'pgb')],{margin:v.margin,spacing:10})},host);
+    var code=pgCode(v);var ns=null;
+    if(pgPrevCode){var a=pgPrevCode.split('\n'),b=code.split('\n');ns={};b.forEach(function(l,k){if(a[k]!==l)ns[k]=true;});}
+    pgPrevCode=code;CODE.playground=code;
+    codeView(document.getElementById('pgEx'),{code:code,note:noteFor,newSet:ns,tag:'complete file · generated live',idle:'Lines marked <b>NEW</b> are the ones your last change rewrote.'});
+  }
+  ['pgTitle','pgText','pgBtn'].forEach(function(id){document.getElementById(id).addEventListener('input',pg);});
+  ['pgBg','pgWeight','pgFg','pgSize','pgMargin'].forEach(function(id){document.getElementById(id).addEventListener('input',pg);document.getElementById(id).addEventListener('change',pg);});
+  pg();
+
+  /* ================= event flow ================= */
+  var FLOW=['The user moves the mouse over <b>Say Hello</b> and clicks. Until this moment your program was simply <b>waiting</b>. No code of yours was running.',
+    'The Button notices the click and raises its <b>Click event</b>: "Hey, I was clicked! Who wants to know?"',
+    'In the constructor you wrote <code>btnGreet.Click += BtnGreet_Click;</code>, so your method is on the list. Avalonia calls <b>BtnGreet_Click</b> for you.',
+    'Your method runs its lines: <b>read</b> <code>txtName.Text</code>, <b>glue</b> it into "Hello, …!", <b>write</b> it into <code>lblResult.Text</code>.',
+    'Changing a property is all it takes: the label redraws itself with the new text. Then the program goes back to <b>waiting</b> for the next click.'];
+  var fls=stage.querySelectorAll('#flow .fl'),ftimer=null;
+  function flSel(i){fls.forEach(function(x,k){x.classList.toggle('hot',k===i);x.classList.toggle('past',k<i);});document.getElementById('flowText').innerHTML='<b>'+(i+1)+'.</b> '+FLOW[i];}
+  fls.forEach(function(f){f.addEventListener('click',function(){clearInterval(ftimer);flSel(+f.dataset.i);});});
+  document.getElementById('flowPlay').addEventListener('click',function(){clearInterval(ftimer);var i=0;flSel(0);ftimer=setInterval(function(){i++;if(i>=fls.length){clearInterval(ftimer);return;}flSel(i);},1900);});
+  stage.querySelectorAll('.anat-line .al[data-t]').forEach(function(a){a.addEventListener('mouseenter',function(){stage.querySelectorAll('.anat-line .al').forEach(function(x){x.classList.remove('on');});a.classList.add('on');document.getElementById('alWhy').innerHTML=a.dataset.t;});});
+
+  /* ================= bug hunt ================= */
+  var BUG={9:[true,'<b>Bug:</b> text without quotes. C# thinks <b>My</b> and <b>Greeter</b> are variable names. Fix: <code>Title = "My Greeter";</code>'],
+    10:[true,'<b>Bug:</b> Width is a <b>number</b> (double), but "400" in quotes is <b>text</b>. <i>Cannot implicitly convert type \'string\' to \'double\'</i>. Fix: <code>Width = 400;</code>'],
+    13:[false,'Looks innocent, and it compiles. But because lblOut is declared <b>inside</b> the constructor, the click method can’t see it. The error shows up on line 21. Fix: make it a <b>field</b> above the constructor.'],
+    19:[true,'<b>Bug:</b> <b>RoutedEventArgs</b> is unknown: the events toolbox isn’t open. Fix: click it ▸ <b>Ctrl+.</b> ▸ <code>using Avalonia.Interactivity;</code>'],
+    21:[true,'<b>Bug:</b> <i>The name \'lblOut\' does not exist in the current context.</i> lblOut was a <b>var</b> inside the constructor, and it vanished when the constructor finished. Fix: declare it as a field: <code>TextBlock lblOut = new TextBlock { … };</code> above <code>public MainWindow()</code>.']};
+  var bl=CODE.bug.split('\n'),bpre=document.getElementById('bugCode'),bex=document.getElementById('bugExpl'),found=0;
+  var bq=bex.querySelector('.codeq'),bw=bex.querySelector('.why');
+  bl.forEach(function(L,i){
+    var info=BUG[i+1]||[false,'Correct: '+(noteFor(L)||'this line is fine.')];
+    var d=document.createElement('span');d.className='cl explain bugline';d.tabIndex=0;
+    d.innerHTML='<span class="ln">'+(i+1)+'</span><span class="src">'+(hl(L)||' ')+'</span>';
+    d.addEventListener('mouseenter',function(){bex.classList.remove('idle');bq.style.display='block';bq.textContent=L.trim()||'(blank line)';bw.innerHTML=d.dataset.done?info[1]:'Line '+(i+1)+'. Broken or fine? <b>Click to decide.</b>';});
+    d.addEventListener('click',function(){if(d.dataset.done)return;d.dataset.done='1';var tag=document.createElement('span');
+      if(info[0]){d.classList.add('found');found++;document.getElementById('bugScore').textContent='Found: '+found+' / 4'+(found===4?'  🎉 Bug slayer!':'');tag.className='buglabel err';tag.textContent='✗ bug';}
+      else{d.classList.add('wrongpick');tag.className='buglabel ok';tag.textContent='✓ compiles';}
+      d.querySelector('.src').appendChild(tag);bw.innerHTML=info[1];});
+    d.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();d.click();}});
+    bpre.appendChild(d);
+  });
+
+  /* ================= practice ================= */
+  var ph=document.getElementById('practiceHost');
+  PRACTICE.forEach(function(P,i){
+    var card=document.createElement('div');card.className='prac';
+    card.innerHTML='<div class="prac-head"><span class="prac-n">'+(i+1)+'</span><div><h3>'+esc(P.title)+'</h3><p>'+P.task+'</p></div></div><div class="prac-body"><div class="prac-prev"></div></div>';
+    var pv=card.querySelector('.prac-prev');pv.appendChild(previewBox(P.win));
+    var det=document.createElement('details');det.className='sol';det.innerHTML='<summary><b>Solution</b>: complete MainWindow.cs with line-by-line explanations</summary><div class="ex"></div>';
+    card.querySelector('.prac-body').appendChild(det);
+    var built=false;det.addEventListener('toggle',function(){if(det.open&&!built){built=true;codeView(det.querySelector('.ex'),{code:CODE[P.key],note:noteFor,tag:'solution'});}});
+    ph.appendChild(card);
+  });
+
+  /* ================= quiz ================= */
+  var quiz=[
+    {q:'In our projects, which file do you edit every week?',opts:['Program.cs','MainWindow.cs','MyStudioApp.csproj','the bin folder'],a:1,why:'MainWindow.cs is yours. Program.cs is the engine you paste once and never touch.'},
+    {q:'What does <code>: Window</code> mean in <code>public class MainWindow : Window</code>?',opts:['MainWindow contains a Window','MainWindow <b>is a</b> Window and inherits everything a window can do','MainWindow creates a new window each second','It’s a comment'],a:1,why:'Inheritance: moving, resizing, closing and the title bar all come free from Window.'},
+    {q:'When does the constructor <code>public MainWindow()</code> run?',opts:['Every time the user clicks','Once, when the window is created','Never, unless you call it','Every second'],a:1,why:'Program.cs runs <code>new MainWindow()</code> once; that runs your constructor, which sets everything up before the window appears.'},
+    {q:'Which line is correct?',opts:['<code>Title = My App;</code>','<code>Width = "400";</code>','<code>Title = "My App";</code>','<code>Height = 300</code>'],a:2,why:'Title is text → quotes. Width/Height are numbers → no quotes. Every statement ends with a semicolon.'},
+    {q:'<b>Brushes</b> has a red squiggle. What’s the fastest fix?',opts:['Delete the line','Restart the computer','Click it, press Ctrl+. and add <code>using Avalonia.Media;</code>','Rename it to Colors'],a:2,why:'"Type not found" almost always means a missing using. The Quick Fix menu (Ctrl+.) adds it for you.'},
+    {q:'You write <code>Content = lblTitle;</code> and then <code>Content = btnGo;</code>. What does the window show?',opts:['Both, stacked','Only the button','Only the title','A compile error'],a:1,why:'Content holds ONE thing; the second assignment replaces the first. To show both, use a StackPanel with both in Children.'},
+    {q:'What does <code>Orientation = Orientation.Horizontal</code> do to a StackPanel?',opts:['Rotates the text','Stacks its children left to right','Centers the window','Makes it scroll'],a:1,why:'StackPanels stack vertically by default; Horizontal puts children side by side, like our two buttons.'},
+    {q:'A button appears but clicking it does nothing. The most likely cause?',opts:['The Title is missing','The <code>btn.Click += Handler;</code> line is missing','FontSize is too small','Program.cs is wrong'],a:1,why:'A button with no subscribed method is "deaf". The += line connects the click to your method.'},
+    {q:'Why is <code>txtName</code> declared ABOVE the constructor (as a field)?',opts:['Fields load faster','So the click method can use it later, after the constructor has finished','TextBoxes must always be first','It’s required by Avalonia'],a:1,why:'Locals inside the constructor disappear when it ends. The click handler needs txtName on every click, so it must live as long as the window.'},
+    {q:'<code>txtAge.Text</code> contains "19". Which line gives you the number 20?',opts:['<code>txtAge.Text + 1</code>','<code>int.TryParse(txtAge.Text, out int age);</code> then <code>age + 1</code>','<code>(int)txtAge.Text + 1</code>','<code>txtAge + 1</code>'],a:1,why:'A TextBox’s Text is always a string (like ReadLine). Convert it first. "19" + 1 would glue to "191", and you can’t cast a string.'}
+  ];
+  var qh=document.getElementById('quizHost'),score=0,answered=0;
+  quiz.forEach(function(Q,qi){
+    var box=document.createElement('div');box.className='q';
+    var h=document.createElement('h3');h.innerHTML=(qi+1)+'. '+Q.q;box.appendChild(h);
+    var why=document.createElement('p');why.className='why';why.innerHTML=Q.why;
+    Q.opts.forEach(function(o,oi){var b=document.createElement('button');b.className='opt';b.type='button';b.innerHTML=o;
+      b.addEventListener('click',function(){if(box.dataset.done)return;box.dataset.done='1';answered++;
+        box.querySelectorAll('.opt').forEach(function(x,xi){x.disabled=true;if(xi===Q.a)x.classList.add('right');});
+        if(oi===Q.a)score++;else b.classList.add('wrong');why.classList.add('show');
+        document.getElementById('quizScore').textContent='Score: '+score+' / '+quiz.length+(answered===quiz.length?(score===quiz.length?'  🏆 Perfect!':'  · review the explanations, then build the practice windows.'):'');});
+      box.appendChild(b);});
+    box.appendChild(why);qh.appendChild(box);
+  });
+
+  /* ================= setup checkboxes ================= */
+  stage.querySelectorAll('.sstep input[type=checkbox]').forEach(function(c){c.addEventListener('change',function(){c.closest('.sstep').classList.toggle('done',c.checked);});});
+
+  slides[0].classList.add('active');tabs[0].classList.add('active');prevBtn.disabled=true;updNav();
+})();
+</script>
+</body>
+</html>
