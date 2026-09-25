@@ -1,0 +1,1268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="color-scheme" content="dark">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MAC 109 · Week 1 — C# Syntax: Your Tools for Building GUIs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1220; --surface:#181c2e; --surface2:#222840; --border:#2f3654;
+    --ink:#eef0f8; --ink2:#c3c9dd; --muted:#9098b4;
+    --brand:#6d63ff; --brand2:#a45cff; --brand-soft:#2a2d55; --brand-ink:#c9c5ff;
+    --good:#22c58b; --good-soft:#12352b; --bad:#f06a60; --bad-soft:#3d1f23; --warn:#f5b83d; --warn-soft:#352b12;
+    --code-bg:#0a0d18; --code-bar:#151a2c; --code-border:#2a3150; --code-text:#e6e9f2; --code-ln:#5b627a;
+    --kw:#7aa2f7; --type:#2ac3de; --str:#e0af68; --com:#7f8aa8; --met:#c0caf5; --num:#ff9e64; --hl:#2c3350; --pin:#3b4a7a;
+    --sans:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+    --mono:'JetBrains Mono','Cascadia Code',Consolas,Menlo,monospace;
+    --radius:14px; --shadow:0 10px 30px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16.5px;line-height:1.55;overflow:hidden;-webkit-font-smoothing:antialiased}
+  button{font-family:var(--sans)}
+  b{font-weight:700}
+
+  /* ---------- app frame ---------- */
+  #app{display:flex;flex-direction:column;height:100vh}
+  #top{background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;padding:10px 22px;flex:0 0 auto}
+  #top .logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;font-family:var(--mono);font-weight:700;display:flex;align-items:center;justify-content:center;font-size:15px;flex:0 0 auto}
+  #top .ttl{font-weight:700;font-size:15px}
+  #top .ttl small{display:block;color:var(--muted);font-weight:500;font-size:12.5px}
+  #top .right{margin-left:auto;color:var(--muted);font-size:12.5px;display:flex;align-items:center;gap:14px}
+  #progressWrap{width:140px;height:6px;background:var(--surface2);border-radius:3px;overflow:hidden}
+  #progressBar{height:100%;background:linear-gradient(90deg,var(--brand),var(--brand2));width:0;transition:width .3s}
+
+  #tabstrip{background:var(--surface);display:flex;overflow-x:auto;flex:0 0 auto;border-bottom:1px solid var(--border);padding:0 14px;scrollbar-width:thin;gap:2px}
+  .tab{background:transparent;color:var(--ink2);border:none;border-bottom:3px solid transparent;padding:10px 13px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:7px}
+  .tab .dot{width:8px;height:8px;border-radius:50%;background:var(--border)}
+  .tab:hover{color:var(--brand-ink)}
+  .tab.active{color:var(--brand);border-bottom-color:var(--brand)}
+  .tab.active .dot{background:var(--brand)}
+  .tab.done .dot{background:var(--good)}
+  .tab:focus-visible{outline:2px solid var(--brand);outline-offset:-2px;border-radius:6px}
+
+  #stage{flex:1 1 auto;overflow:hidden;position:relative}
+  .slide{position:absolute;inset:0;overflow-y:auto;padding:34px max(40px,calc((100% - 1180px)/2)) 110px;display:none;animation:slidein .3s ease}
+  .slide.active{display:block}
+  .cl .src{white-space:pre;flex:1 1 auto}
+  @keyframes slidein{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){.slide{animation:none}*{transition:none!important}}
+
+  #bottom{background:var(--surface);border-top:1px solid var(--border);display:flex;align-items:center;gap:12px;padding:10px 22px;flex:0 0 auto}
+  #bottom button{background:var(--brand);color:#fff;border:none;padding:9px 18px;border-radius:10px;cursor:pointer;font-size:13.5px;font-weight:600}
+  #bottom button.ghost{background:var(--surface2);color:var(--ink)}
+  #bottom button:hover{filter:brightness(1.07)}
+  #bottom button:disabled{opacity:.35;cursor:default;filter:none}
+  #bottom .where{color:var(--muted);font-size:13px;margin-left:6px}
+  #bottom .grow{flex:1}
+  #bottom .hint{color:var(--muted);font-size:12.5px}
+  @media(max-width:700px){#bottom .hint,#top .right,#top .ttl small,.codewin .bar .tag,.codewin .bar .dots{display:none}#top .ttl{font-size:13.5px}#top{padding:8px 14px}#bottom{padding:8px 14px}.cl .ln{width:34px;padding-right:10px}.codewin pre{font-size:12.5px}}
+
+  /* ---------- typography & cards ---------- */
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--brand);margin-bottom:10px;font-weight:600}
+  h1{font-size:clamp(30px,4.2vw,46px);font-weight:800;line-height:1.12;margin-bottom:14px;letter-spacing:-.02em}
+  h2{font-size:clamp(24px,3vw,32px);font-weight:800;margin-bottom:6px;letter-spacing:-.015em}
+  h3{font-size:17px;font-weight:700}
+  .sub{color:var(--ink2);max-width:76ch;font-size:16.5px;margin-bottom:22px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  @media(max-width:1000px){.grid4{grid-template-columns:1fr 1fr}}
+  @media(max-width:860px){.grid2,.grid3,.grid4{grid-template-columns:1fr}.slide{padding:22px 16px 110px}}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow)}
+  .card p{color:var(--ink2);font-size:15px;margin-top:8px}
+  .pill{display:inline-block;font-family:var(--mono);font-size:11.5px;background:var(--brand-soft);color:var(--brand-ink);border-radius:20px;padding:3px 11px;margin-bottom:10px;font-weight:600}
+  .pill.g{background:var(--good-soft);color:#7ff0c3}.pill.w{background:var(--warn-soft);color:#fcd67a}.pill.r{background:var(--bad-soft);color:#ffb3ac}
+  code.inline{font-family:var(--mono);background:var(--surface2);border:1px solid var(--border);padding:1px 6px;border-radius:6px;font-size:.88em;color:var(--brand-ink)}
+  .note{background:var(--warn-soft);border:1px solid #5c4a1a;border-radius:12px;padding:12px 16px;color:#fbe3a6;font-size:14px;margin-top:16px}
+  .tip{background:var(--good-soft);border:1px solid #235e4a;border-radius:12px;padding:12px 16px;color:#bff5dd;font-size:14px;margin-top:16px}
+  .rule{display:flex;gap:14px;align-items:flex-start}
+  .rule .num{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;flex:0 0 auto;font-family:var(--mono)}
+  .objlist li{list-style:none;padding:7px 0 7px 30px;position:relative;font-size:15.5px}
+  .objlist li::before{content:"▸";position:absolute;left:8px;color:var(--brand);font-weight:700}
+  .checklist li{list-style:none;padding:9px 0 9px 32px;position:relative;font-size:15px;border-bottom:1px dashed var(--border)}
+  .checklist li::before{content:"✓";position:absolute;left:4px;color:var(--good);font-weight:800}
+  .kbd{font-family:var(--mono);background:var(--surface2);border:1px solid var(--border);border-bottom-width:2px;border-radius:5px;padding:1px 7px;font-size:12.5px}
+
+  /* ---------- hover-explain code examples ---------- */
+  .ex{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(280px,1fr);gap:16px;align-items:start;margin:16px 0 26px}
+  @media(max-width:900px){.ex{grid-template-columns:1fr}}
+  .codewin{background:var(--code-bg);border:1px solid var(--code-border);border-radius:var(--radius);overflow:hidden;box-shadow:0 14px 34px rgba(27,31,46,.18)}
+  .codewin .bar{background:var(--code-bar);padding:9px 14px;font-family:var(--mono);font-size:12px;color:#aab1c8;display:flex;gap:8px;align-items:center;border-bottom:1px solid var(--code-border)}
+  .codewin .bar .dots i{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:5px}
+  .codewin .bar .fname{font-weight:700;color:#e6e9f2}
+  .codewin .bar .tag{font-size:10.5px;background:#2f3650;color:#c0caf5;border-radius:20px;padding:2px 9px;font-family:var(--sans);font-weight:600}
+  .codewin .bar .btns{margin-left:auto;display:flex;gap:6px}
+  .codewin .bar button{background:#2f3650;border:1px solid #3d4661;color:#e6e9f2;border-radius:7px;padding:3px 11px;font-size:11.5px;cursor:pointer;font-weight:600}
+  .codewin .bar button:hover{background:#3b4463}
+  .codewin .bar button.run{background:var(--good);border-color:var(--good);color:#fff}
+  .codewin pre{padding:10px 0 12px;font-family:var(--mono);font-size:14px;line-height:1.7;overflow-x:auto;color:var(--code-text)}
+  .cl{display:flex;padding:0 14px 0 0;white-space:pre;border-left:3px solid transparent;cursor:default}
+  .cl .ln{width:44px;color:var(--code-ln);text-align:right;padding-right:16px;flex:0 0 auto;user-select:none}
+  .cl.explain{cursor:pointer}
+  .cl.explain:hover,.cl.explain.hot{background:var(--hl);border-left-color:var(--brand)}
+  .cl.explain.pinned{background:var(--pin);border-left-color:#ffd166}
+  .cl.explain:focus-visible{outline:none;background:var(--hl);border-left-color:var(--brand)}
+  .k{color:var(--kw)}.t{color:var(--type)}.s{color:var(--str)}.c{color:var(--com);font-style:italic}.m{color:var(--met)}.n{color:var(--num)}.p{color:var(--code-text)}
+
+  .explain-panel{position:sticky;top:6px}
+  .expl{background:var(--surface);border:1px solid var(--border);border-left:5px solid var(--brand);border-radius:var(--radius);padding:16px 18px;min-height:150px;box-shadow:var(--shadow);transition:border-color .2s}
+  .expl.pinned{border-left-color:#e0a800}
+  .expl .lbl{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;display:flex;align-items:center;gap:8px}
+  .expl .lbl .pinbadge{display:none;background:var(--warn-soft);color:#fcd67a;border-radius:20px;padding:1px 8px;letter-spacing:0;text-transform:none;font-family:var(--sans);font-weight:600}
+  .expl.pinned .lbl .pinbadge{display:inline-block}
+  .expl .codeq{font-family:var(--mono);font-size:13px;color:var(--brand-ink);background:var(--brand-soft);border-radius:8px;padding:6px 10px;margin-bottom:10px;white-space:pre-wrap;word-break:break-word}
+  .expl .why{font-size:15.5px;color:var(--ink);line-height:1.65}
+  .expl .why b{color:var(--brand-ink)}
+  .expl .why code{font-family:var(--mono);font-size:12.8px;background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:0 5px;color:var(--brand-ink)}
+  .expl.idle .codeq{display:none}
+  .expl.idle .why{color:var(--muted)}
+  .term{background:#0e1017;border:1px solid #2a2f44;border-radius:var(--radius);padding:12px 16px 14px;font-family:var(--mono);font-size:13.5px;line-height:1.8;color:#d8dcea;margin-top:12px;min-height:82px;box-shadow:0 10px 26px rgba(0,0,0,.25)}
+  .term .thead{font-size:10.5px;letter-spacing:.12em;color:#6b7390;font-weight:700;margin-bottom:4px;display:flex;justify-content:space-between}
+  .term .tline{white-space:pre-wrap}
+  .term .tline.typing{animation:pop .25s ease}
+  .term .placeholder{color:#5f6785;font-style:italic}
+  .term .prompt{color:#6b7390}
+  @keyframes pop{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:none}}
+  .exnote{font-size:14px;color:var(--ink2);margin:-12px 0 20px 4px}
+
+  /* ---------- flip cards ---------- */
+  .flip{perspective:900px;cursor:pointer;min-height:170px}
+  .flip .inner{position:relative;width:100%;height:100%;min-height:170px;transition:transform .5s;transform-style:preserve-3d}
+  .flip.flipped .inner{transform:rotateY(180deg)}
+  .face{position:absolute;inset:0;backface-visibility:hidden;border-radius:var(--radius);border:1px solid var(--border);padding:20px;display:flex;flex-direction:column;justify-content:center;box-shadow:var(--shadow)}
+  .face.front{background:var(--surface)}
+  .face.front .big{font-family:var(--mono);font-size:28px;font-weight:700;color:var(--brand-ink)}
+  .face.front small{color:var(--muted);margin-top:8px;font-size:12.5px}
+  .face.back{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;transform:rotateY(180deg);border:none}
+  .face.back p{font-size:14px;line-height:1.55}
+
+  /* ---------- pipeline ---------- */
+  .pipe{display:flex;align-items:stretch;flex-wrap:wrap;margin:18px 0 14px;gap:0}
+  .pnode{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px;text-align:center;flex:1;min-width:120px;cursor:pointer;box-shadow:var(--shadow)}
+  .pnode b{display:block;font-size:14px}
+  .pnode span{color:var(--muted);font-size:12px}
+  .pnode:hover,.pnode.hot{border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft)}
+  .parrow{display:flex;align-items:center;color:var(--brand);font-size:22px;padding:0 8px}
+
+  /* ---------- bug hunt ---------- */
+  .cl.bugline{cursor:pointer}
+  .cl.bugline:hover{background:var(--hl)}
+  .cl.bugline.found{background:#3a1f22;border-left-color:var(--bad)}
+  .cl.bugline.wrongpick{background:#1e3a2c;border-left-color:var(--good)}
+  .buglabel{margin-left:14px;font-family:var(--sans);font-size:12px;border-radius:5px;padding:1px 8px;white-space:normal}
+  .buglabel.err{background:var(--bad);color:#fff}
+  .buglabel.ok{background:var(--good);color:#fff}
+
+  /* ---------- quiz ---------- */
+  .q{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;margin-bottom:14px;box-shadow:var(--shadow)}
+  .q h3{margin-bottom:12px;font-size:16px}
+  .q .opt{display:block;width:100%;text-align:left;background:var(--surface2);color:var(--ink);border:1px solid var(--border);border-radius:9px;padding:10px 14px;margin-bottom:8px;cursor:pointer;font-size:14.5px;font-family:var(--sans)}
+  .q .opt code{font-family:var(--mono);font-size:13px}
+  .q .opt:hover:not(:disabled){border-color:var(--brand);background:var(--brand-soft)}
+  .q .opt.right{border-color:var(--good);background:var(--good-soft);color:#bff5dd;font-weight:600}
+  .q .opt.wrong{border-color:var(--bad);background:var(--bad-soft);color:#ffc9c4}
+  .q .why{margin-top:10px;font-size:13.5px;color:var(--ink2);display:none}
+  .q .why.show{display:block}
+  #quizScore{font-family:var(--mono);color:var(--brand-ink);font-size:15px;margin-top:6px;font-weight:600}
+
+  /* ---------- bridge table ---------- */
+  .bridge{width:100%;border-collapse:separate;border-spacing:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);font-size:14px}
+  .bridge th{background:var(--surface2);text-align:left;padding:11px 14px;font-size:12.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2)}
+  .bridge td{padding:11px 14px;border-top:1px solid var(--border);vertical-align:top}
+  .bridge td code{font-family:var(--mono);font-size:12.8px;background:var(--surface2);border-radius:6px;padding:2px 7px;color:var(--brand-ink);white-space:nowrap}
+  .bridge td.arrow{color:var(--brand);font-weight:800;text-align:center;width:40px}
+  .cheat{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  @media(max-width:1000px){.cheat{grid-template-columns:1fr 1fr}}
+  @media(max-width:700px){.cheat{grid-template-columns:1fr}}
+  .cheat .card{padding:14px 16px}
+  .cheat .card h3{font-size:14px;margin-bottom:6px}
+  .cheat .card code{display:block;font-family:var(--mono);font-size:12.5px;color:var(--brand-ink);background:var(--brand-soft);border-radius:8px;padding:8px 10px;white-space:pre-wrap;margin-top:6px}
+  .hero{display:grid;grid-template-columns:1.1fr 1fr;gap:28px;align-items:start}
+  @media(max-width:900px){.hero{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="top">
+    <div class="logo">C#</div>
+    <div class="ttl">MAC 109 · Week 1 — C# Syntax: your tools for building GUIs<small>LaGuardia Community College · MEC Department · Prof. K. Kassou</small></div>
+    <div class="right"><span>Hover any code line to read it</span><div id="progressWrap" aria-hidden="true"><div id="progressBar"></div></div></div>
+  </div>
+  <nav id="tabstrip" aria-label="Sections"></nav>
+  <main id="stage"></main>
+  <div id="bottom">
+    <button id="prevBtn" class="ghost" aria-label="Previous section">◀ Back</button>
+    <button id="nextBtn" aria-label="Next section">Next ▶</button>
+    <span class="where" id="where"></span>
+    <div class="grow"></div>
+    <span class="hint">← → keys move between sections · click a code line to pin its explanation</span>
+  </div>
+</div>
+
+<template id="slides">
+
+<!-- 1 ▸ Start -->
+<section data-tab="Start">
+  <p class="eyebrow">Week 1 · Lecture</p>
+  <h1>C# Syntax — the tools you'll use<br>to build every window this semester</h1>
+  <div class="hero">
+    <div>
+      <p class="sub">In MAC 109 you build real desktop apps, and <b>everything</b> — the buttons, the text boxes, the logic — is written in one language: <b>C#</b>. Before we draw a single window, you need to <em>read</em> C# fluently. Today is that day: small, complete programs, each one explained line by line.</p>
+      <p class="pill">By the end of today you can</p>
+      <ul class="objlist">
+        <li>Recognize the <b>fixed skeleton</b> of every C# program and know which lines are yours</li>
+        <li>Write <b>statements</b>, <b>variables</b>, <b>strings</b>, and <b>math</b> that compile the first time</li>
+        <li>Choose the right <b>data type</b> (int, double, decimal, char, string, bool…) and <b>convert</b> between types — text from a TextBox into a number and back</li>
+        <li>Define and call <b>methods</b> — the shape of every button-click handler</li>
+        <li>Create <b>objects</b> with <code class="inline">new</code>, set their <b>properties</b>, call their methods — the exact shape of every GUI control</li>
+        <li>Spot the 4 classic syntax errors before the compiler does</li>
+      </ul>
+      <div class="tip">🖱️ <b>How this page works:</b> every code box is a <b>complete program</b>. Move your mouse over any line and its explanation appears on the right. Click a line to pin it. Press <b>▶ Run</b> to see what the program prints, and <b>Copy</b> to paste it into VS Code or any online C# compiler.</div>
+    </div>
+    <div>
+      <div class="card">
+        <span class="pill g">Why syntax first?</span>
+        <h3>Next week you'll write this — and understand every word</h3>
+        <p>A window in our course is just C# objects: <code class="inline">new Button { Content = "Say Hello" }</code>. That line uses <b>new</b>, an <b>object</b>, a <b>property</b>, and a <b>string</b> — four things you learn today. Learn the shapes now; next week we only swap the words.</p>
+      </div>
+      <div class="card" style="margin-top:14px">
+        <span class="pill">Your 3 tools</span>
+        <p><b>C#</b> — the language you write.<br><b>.NET</b> — the engine + library that runs it.<br><b>VS Code</b> (+ C# Dev Kit) — the workshop where you type and press Run.<br><span style="color:var(--muted)">Next week adds a 4th: <b>Avalonia</b>, the box of GUI parts.</span></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 2 ▸ Big picture -->
+<section data-tab="Big Picture">
+  <p class="eyebrow">01 · The big picture — 5 minutes</p>
+  <h2>What happens when you press ▶ Run</h2>
+  <p class="sub">Flip each card, then click each stage of the pipeline. You don't need to memorize the internals — you need to know <b>why the compiler complains</b> when a semicolon is missing.</p>
+  <div class="grid3">
+    <div class="flip" tabindex="0" role="button" aria-label="Flip card: C#"><div class="inner">
+      <div class="face front"><span class="big">C#</span><small>"C-Sharp" — the language ▸ click to flip</small></div>
+      <div class="face back"><p><b>C#</b> is a modern, object-oriented language created by Microsoft. It is the vocabulary and grammar we use to give the computer instructions — for desktop apps, games (Unity), web, and mobile.</p></div>
+    </div></div>
+    <div class="flip" tabindex="0" role="button" aria-label="Flip card: .NET"><div class="inner">
+      <div class="face front"><span class="big">.NET</span><small>"dot-net" — the platform ▸ click to flip</small></div>
+      <div class="face back"><p><b>.NET</b> is the world your C# lives in: a huge library of ready-made code (<code>Console</code>, <code>Math</code>, windows, files…) plus the engine that runs your program on Windows, macOS, and Linux.</p></div>
+    </div></div>
+    <div class="flip" tabindex="0" role="button" aria-label="Flip card: Compiler"><div class="inner">
+      <div class="face front"><span class="big">Compiler</span><small>the strict proofreader ▸ click to flip</small></div>
+      <div class="face back"><p>The <b>compiler</b> reads your <em>whole</em> program before anything runs. One missing semicolon, one wrong capital letter, and it stops and tells you the exact file and line. Strict — but it never lets a typo reach your users.</p></div>
+    </div></div>
+  </div>
+  <div class="pipe" id="pipeline">
+    <div class="pnode" data-i="0"><b>Your C# code</b><span>Program.cs</span></div><div class="parrow">→</div>
+    <div class="pnode" data-i="1"><b>Compiler</b><span>checks + translates</span></div><div class="parrow">→</div>
+    <div class="pnode" data-i="2"><b>IL code</b><span>universal instructions</span></div><div class="parrow">→</div>
+    <div class="pnode" data-i="3"><b>.NET runtime</b><span>translates for YOUR CPU</span></div><div class="parrow">→</div>
+    <div class="pnode" data-i="4"><b>It runs 🚀</b><span>text appears / window opens</span></div>
+  </div>
+  <div class="expl" id="pipeInfo"><div class="lbl">Pipeline</div><div class="why" id="pipeText">Click a stage above ↑ to see what happens there.</div></div>
+</section>
+
+<!-- 3 ▸ The skeleton -->
+<section data-tab="The Skeleton">
+  <p class="eyebrow">02 · Every C# program wears the same suit</p>
+  <h2>The skeleton: 9 lines, 1 is yours</h2>
+  <p class="sub">Every program you write this semester starts from this exact shape. Lines 1–6 and 8–9 are the <b>suit</b> — always the same. Line 7 is the only line that is truly yours. <b>Hover each line</b> and read it; nothing here should feel like magic when you leave.</p>
+  <div class="ex" data-ex="skeleton"></div>
+  <div class="grid4">
+    <div class="card"><span class="pill">using</span><h3>Borrow a toolbox</h3><p><code class="inline">using System;</code> = "this file uses the System toolbox" — where <code class="inline">Console</code> lives.</p></div>
+    <div class="card"><span class="pill">class</span><h3>The labeled box</h3><p>All C# code lives inside a <code class="inline">class</code>. For now: a box with a name. Real meaning: the Objects tab.</p></div>
+    <div class="card"><span class="pill">Main</span><h3>The starting line</h3><p>The computer looks for <code class="inline">Main</code> and runs its lines top to bottom. No Main, no program.</p></div>
+    <div class="card"><span class="pill">{ }</span><h3>Containers</h3><p>Every <code class="inline">{</code> must meet its <code class="inline">}</code>. Click next to a brace in VS Code and it highlights its partner.</p></div>
+  </div>
+</section>
+
+<!-- 4 ▸ Statements & output -->
+<section data-tab="Output">
+  <p class="eyebrow">03 · Statements, order &amp; comments</p>
+  <h2>A program is a recipe: one statement at a time, top to bottom</h2>
+  <p class="sub">A <b>statement</b> is one complete instruction ending in <code class="inline">;</code>. The computer never improvises: it runs line 1, then line 2, then line 3. <code class="inline">Console.WriteLine</code> prints and moves to a new line; <code class="inline">Console.Write</code> prints and stays. Anything after <code class="inline">//</code> is a note for humans.</p>
+  <div class="ex" data-ex="output"></div>
+  <p class="exnote"><b>Anatomy to memorize:</b> <code class="inline">Console</code> = the screen · <code class="inline">.</code> = "look inside" · <code class="inline">WriteLine</code> = the action · <code class="inline">( … )</code> = what to print · <code class="inline">" "</code> = it's text · <code class="inline">;</code> = end of sentence.</p>
+  <div class="tip">🧪 <b>Try it:</b> copy the program, swap two WriteLine lines, run again. Then change one <code class="inline">WriteLine</code> to <code class="inline">Write</code>. Predict the output <em>before</em> you press Run.</div>
+</section>
+
+<!-- 5 ▸ Variables -->
+<section data-tab="Variables">
+  <p class="eyebrow">04 · Variables — labeled boxes</p>
+  <h2>Variables: labeled boxes that hold a value</h2>
+  <p class="sub">A variable has a <b>type</b> (what kind of thing fits inside), a <b>name</b> (you choose it), and a <b>value</b>. Declare it once — <code class="inline">int age = 19;</code> — then use the name anywhere. The four types you'll use most — the next tab covers all of them in depth:</p>
+  <div class="grid4" style="margin-bottom:6px">
+    <div class="card"><span class="pill">string</span><h3>Text</h3><p>Anything in quotes: <code class="inline">"Maria"</code>, <code class="inline">"Say Hello"</code>. Every label and button caption in your GUI is a string.</p></div>
+    <div class="card"><span class="pill">int</span><h3>Whole number</h3><p><code class="inline">19</code>, <code class="inline">-3</code>, <code class="inline">2026</code>. Counting things, ages, scores.</p></div>
+    <div class="card"><span class="pill">double</span><h3>Decimal number</h3><p><code class="inline">3.75</code>, <code class="inline">9.99</code>. Prices, GPA, measurements.</p></div>
+    <div class="card"><span class="pill">bool</span><h3>true / false</h3><p>A yes-or-no switch: <code class="inline">true</code> or <code class="inline">false</code>. "Is the box checked?"</p></div>
+  </div>
+  <div class="ex" data-ex="variables"></div>
+  <div class="note">📛 <b>Naming rules:</b> letters, digits, underscore; no spaces; cannot start with a digit; <b>case matters</b> (<code class="inline">age</code> and <code class="inline">Age</code> are different). Convention: <code class="inline">camelCase</code> for variables (<code class="inline">firstName</code>, <code class="inline">totalPrice</code>). Next week in the lab: <code class="inline">btnSave</code>, <code class="inline">txtName</code>, <code class="inline">lblResult</code>.</div>
+</section>
+
+<!-- ▸ Data types -->
+<section data-tab="Data Types">
+  <p class="eyebrow">05 · Data types in depth</p>
+  <h2>Data types: every value in C# has a type, and the type decides everything</h2>
+  <p class="sub">A value’s <b>type</b> decides three things: <b>what it can hold</b>, <b>how much memory</b> it uses, and <b>what you can do with it</b> (you can multiply two ints, but not two strings). C# is <b>strongly typed</b>: once a variable has a type, it keeps it forever, and the compiler checks every assignment before the program runs.</p>
+  <table class="bridge" style="margin-bottom:18px">
+    <thead><tr><th>Type</th><th>Holds</th><th>Size</th><th>Range / precision</th><th>Write it like</th><th>Use it for</th></tr></thead>
+    <tbody>
+      <tr><td><code>byte</code></td><td>whole number, no negatives</td><td>1 byte</td><td>0 to 255</td><td><code>255</code></td><td>colors, small counters</td></tr>
+      <tr><td><code>int</code> ★</td><td>whole number</td><td>4 bytes</td><td>about ±2.1 billion</td><td><code>32</code></td><td>counts, ages, scores — <b>the default</b></td></tr>
+      <tr><td><code>long</code></td><td>big whole number</td><td>8 bytes</td><td>about ±9.2 quintillion</td><td><code>8100000000L</code></td><td>populations, file sizes</td></tr>
+      <tr><td><code>float</code></td><td>decimal number</td><td>4 bytes</td><td>~7 digits</td><td><code>72.5f</code></td><td>graphics, games</td></tr>
+      <tr><td><code>double</code> ★</td><td>decimal number</td><td>8 bytes</td><td>~15–16 digits</td><td><code>3.75</code></td><td>measurements, GPA — <b>the default</b></td></tr>
+      <tr><td><code>decimal</code></td><td>exact decimal</td><td>16 bytes</td><td>28–29 exact digits</td><td><code>19.99m</code></td><td><b>money</b></td></tr>
+      <tr><td><code>char</code></td><td>ONE character</td><td>2 bytes</td><td>any single letter/symbol</td><td><code>'A'</code></td><td>grades, initials</td></tr>
+      <tr><td><code>string</code> ★</td><td>text (0 or more chars)</td><td>varies</td><td>as long as you need</td><td><code>"MAC 109"</code></td><td>names, every GUI label</td></tr>
+      <tr><td><code>bool</code> ★</td><td>true or false</td><td>1 byte</td><td>2 values</td><td><code>true</code></td><td>yes/no, checkboxes, decisions</td></tr>
+    </tbody>
+  </table>
+  <p class="sub" style="margin-bottom:6px">★ = the four you’ll use 90% of the time. Hover the program below — it declares one of each and prints them.</p>
+  <div class="ex" data-ex="types"></div>
+  <div class="grid3">
+    <div class="card"><span class="pill">Suffixes</span><h3>Tell C# the literal’s type</h3><p><code class="inline">3.75</code> is a double by default; <code class="inline">72.5f</code> is a float; <code class="inline">19.99m</code> is a decimal; <code class="inline">8100000000L</code> is a long. Forget the <code class="inline">f</code> or <code class="inline">m</code> and the compiler refuses.</p></div>
+    <div class="card"><span class="pill">Quotes matter</span><h3><code class="inline">'A'</code> vs <code class="inline">"A"</code> vs <code class="inline">A</code></h3><p>Single quotes = a <b>char</b>. Double quotes = a <b>string</b>. No quotes = the name of a <b>variable</b>. Three different things that look almost the same.</p></div>
+    <div class="card"><span class="pill w">Default values</span><h3>What a fresh variable holds</h3><p>Numbers start at <code class="inline">0</code>, bool at <code class="inline">false</code>, char at <code class="inline">'\0'</code>, string at <code class="inline">null</code> (nothing). That’s why our Student class wrote <code class="inline">= ""</code> for Name.</p></div>
+  </div>
+
+  <h3 style="margin:30px 0 4px;font-size:21px">Converting between types — the skill every GUI needs</h3>
+  <p class="sub" style="margin-bottom:6px">Whatever a user types in a TextBox arrives as a <b>string</b> — even "25". To do math you must <b>convert</b> it; to show a result on a label you convert back. Four tools:</p>
+  <div class="grid4" style="margin-bottom:4px">
+    <div class="card"><span class="pill g">Implicit</span><h3>Automatic</h3><p>Small → big, nothing lost: <code class="inline">double d = 7;</code></p></div>
+    <div class="card"><span class="pill w">Cast</span><h3><code class="inline">(int)</code></h3><p>Big → small, may lose data. Chops decimals: <code class="inline">(int)3.99</code> → <code class="inline">3</code></p></div>
+    <div class="card"><span class="pill">Parse</span><h3>Text → number</h3><p><code class="inline">int.Parse("25")</code> · <code class="inline">double.Parse("4.5")</code></p></div>
+    <div class="card"><span class="pill">ToString</span><h3>Anything → text</h3><p><code class="inline">age.ToString()</code> — or <code class="inline">Convert.ToString(age)</code></p></div>
+  </div>
+  <div class="ex" data-ex="convert"></div>
+  <div class="note">⚠ <b>Coming next week:</b> <code class="inline">int.Parse("hello")</code> crashes — the text isn’t a number. In the GUI we’ll meet its safe sibling <code class="inline">int.TryParse</code>, which answers with a <b>bool</b>: "did it work?"</div>
+</section>
+
+<!-- 6 ▸ Strings -->
+<section data-tab="Strings">
+  <p class="eyebrow">06 · Working with text</p>
+  <h2>Strings: gluing, filling in blanks, and asking questions</h2>
+  <p class="sub">Your GUI will constantly build text: <i>"Hello, Maria!"</i>, <i>"Total: $12.50"</i>. Two ways to build it — <code class="inline">+</code> glues pieces together; <code class="inline">$"…{name}…"</code> fills in blanks. And a string is an object: it can answer questions like <code class="inline">.Length</code> and do things like <code class="inline">.ToUpper()</code>.</p>
+  <div class="ex" data-ex="strings"></div>
+  <div class="grid2">
+    <div class="card"><span class="pill w">⚠ The plot twist</span><h3><code class="inline">+</code> has two personalities</h3><p>With two <b>numbers</b>, <code class="inline">+</code> adds: <code class="inline">7 + 3</code> → <code class="inline">10</code>. With any <b>text</b> involved, <code class="inline">+</code> glues: <code class="inline">"" + 7 + 3</code> → <code class="inline">"73"</code>. This is the #1 surprise in Week 2 when we read numbers typed into a TextBox.</p></div>
+    <div class="card"><span class="pill g">✓ Prefer $-strings</span><h3>Cleaner, fewer bugs</h3><p><code class="inline">$"Hello, {first}!"</code> reads like the sentence it prints. Inside <code class="inline">{ }</code> you can put any variable — even math: <code class="inline">$"Total: {price * 3}"</code>.</p></div>
+  </div>
+</section>
+
+<!-- 7 ▸ Math -->
+<section data-tab="Math">
+  <p class="eyebrow">07 · Arithmetic</p>
+  <h2>Math: five operators and one famous trap</h2>
+  <p class="sub"><code class="inline">+ − * /</code> do what you expect — with one trap: when <b>both</b> sides are <code class="inline">int</code>, division <b>drops the remainder</b>. <code class="inline">%</code> gives you that remainder. Add one decimal (<code class="inline">2.0</code>) and division becomes exact.</p>
+  <div class="ex" data-ex="math"></div>
+  <div class="grid3">
+    <div class="card"><span class="pill">Order of operations</span><p>Same as school math: <code class="inline">* / %</code> before <code class="inline">+ −</code>, left to right. Use parentheses to be explicit: <code class="inline">(a + b) / 2</code>.</p></div>
+    <div class="card"><span class="pill">Shortcuts you'll see</span><p><code class="inline">count = count + 1;</code> can be written <code class="inline">count += 1;</code> or <code class="inline">count++;</code>. All three mean "add one".</p></div>
+    <div class="card"><span class="pill">Math toolbox</span><p><code class="inline">Math.Round(3.456, 2)</code> → 3.46 · <code class="inline">Math.Max(4, 9)</code> → 9 · <code class="inline">Math.Sqrt(16)</code> → 4. Same dot pattern as <code class="inline">Console.WriteLine</code>.</p></div>
+  </div>
+</section>
+
+<!-- 8 ▸ Methods -->
+<section data-tab="Methods">
+  <p class="eyebrow">08 · Methods — named blocks of code</p>
+  <h2>Methods: write it once, call it by name</h2>
+  <p class="sub">A <b>method</b> is a named block of statements. You <b>define</b> it once (outside Main, inside the class) and <b>call</b> it as many times as you like. Methods can take <b>parameters</b> (values sent in) and <b>return</b> a value (sent back). <code class="inline">Main</code> itself is a method — the one .NET calls for you. Next week, every button click calls a method you wrote.</p>
+  <div class="ex" data-ex="methods"></div>
+  <div class="grid3">
+    <div class="card"><span class="pill">Shape of a definition</span><code class="inline" style="display:block;padding:8px 10px;white-space:pre">static  void  Greet(string name)
+  ↑       ↑      ↑        ↑
+ suit  returns  name  parameter
+       nothing</code><p>Read <code class="inline">void</code> as "gives nothing back"; <code class="inline">int</code> in its place means "gives back an int".</p></div>
+    <div class="card"><span class="pill">Define vs. call</span><p>Defining a method does <b>nothing</b> by itself — it's a recipe on a shelf. The line <code class="inline">Greet("Maria");</code> is what actually runs it. Two calls, two runs.</p></div>
+    <div class="card"><span class="pill">Why it matters for GUIs</span><p>A button-click handler is just a method: <code class="inline">void BtnSave_Click(...) { … }</code>. The difference: <b>you</b> don't call it — the window calls it when the user clicks. Same shape, different caller.</p></div>
+  </div>
+</section>
+
+<!-- 9 ▸ Objects -->
+<section data-tab="Objects">
+  <p class="eyebrow">09 · Objects, properties &amp; new — the heart of GUI code</p>
+  <h2>Objects: a class is a blueprint, <code class="inline">new</code> builds one</h2>
+  <p class="sub">A <b>class</b> describes a kind of thing — its <b>properties</b> (data it holds) and its <b>methods</b> (things it can do). <code class="inline">new</code> builds one real <b>object</b> from that blueprint. You then talk to the object with a dot: <code class="inline">s1.Name = "Maria";</code> sets a property; <code class="inline">s1.Introduce();</code> calls a method. <b>This is exactly how a Button, a TextBox, and a Window work.</b></p>
+  <div class="ex" data-ex="objects"></div>
+  <div class="grid3">
+    <div class="card"><span class="pill">Blueprint → object</span><p><code class="inline">class Student</code> is the blueprint (one). <code class="inline">new Student()</code> is a real student (as many as you want). Each object keeps its <b>own</b> values: s1 is Maria, s2 is Ahmed.</p></div>
+    <div class="card"><span class="pill">Object initializer</span><p><code class="inline">new Student { Name = "Ahmed", Age = 21 }</code> builds <b>and</b> sets properties in one statement. Memorize this shape — you'll write <code class="inline">new Button { Content = "Save" }</code> a hundred times.</p></div>
+    <div class="card"><span class="pill">Reading with the dot</span><p><code class="inline">s2.Age</code> reads the value; <code class="inline">s2.Age = 22;</code> changes it. Next week: <code class="inline">txtName.Text</code> reads what the user typed; <code class="inline">lblResult.Text = "Hi!";</code> shows an answer on screen.</p></div>
+  </div>
+</section>
+
+<!-- 10 ▸ Syntax rules + bug hunt -->
+<section data-tab="Bug Hunt">
+  <p class="eyebrow">10 · The four rules of C# grammar</p>
+  <h2>Nearly every error you'll make this month breaks one of these</h2>
+  <div class="grid4" style="margin-bottom:22px">
+    <div class="card rule"><div class="num">1</div><div><h3>Statements end with <code class="inline">;</code></h3><p>The semicolon is C#'s period. Forget it and the compiler says <b>; expected</b> and points at the line.</p></div></div>
+    <div class="card rule"><div class="num">2</div><div><h3>Case matters</h3><p><code class="inline">Console</code> exists; <code class="inline">console</code> does not. <code class="inline">Main</code> starts the program; <code class="inline">main</code> never runs.</p></div></div>
+    <div class="card rule"><div class="num">3</div><div><h3>Text wears quotes</h3><p><code class="inline">WriteLine(Hello)</code> asks for a variable named Hello — which doesn't exist. Words for humans go inside <code class="inline">" "</code>.</p></div></div>
+    <div class="card rule"><div class="num">4</div><div><h3>Every <code class="inline">{</code> needs a <code class="inline">}</code></h3><p>The class wears a pair, Main wears a pair. Lose one and the errors cascade — fix the first error first.</p></div></div>
+  </div>
+  <h3 style="margin-bottom:6px">🐞 Bug hunt — find the 4 errors</h3>
+  <p class="sub" style="margin-bottom:10px">A complete program that will <b>not</b> compile. Hover to read each line; <b>click</b> the ones you think are broken. <span id="bugScore" style="font-family:var(--mono);color:var(--brand-ink);font-weight:600">Found: 0 / 4</span></p>
+  <div class="ex">
+    <div class="codewin"><div class="bar"><span class="dots"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i></span><span class="fname">Program.cs</span><span class="tag">4 errors hiding</span></div><pre id="bugCode"></pre></div>
+    <div class="explain-panel"><div class="expl idle" id="bugExpl"><div class="lbl">Bug hunt</div><div class="codeq"></div><div class="why">Hover a line to inspect it. Click to make your call. Use the four rules as your field guide.</div></div>
+      <div class="note" style="margin-top:12px">🔍 <b>The professional ritual:</b> open the <b>Problems</b> panel in VS Code, read top to bottom, fix the <b>first</b> error first — later errors are often echoes of it.</div>
+    </div>
+  </div>
+  <div class="ex" data-ex="bugfixed"></div>
+</section>
+
+<!-- 11 ▸ Quiz -->
+<section data-tab="Quiz">
+  <p class="eyebrow">11 · Knowledge check</p>
+  <h2>Prove it to yourself</h2>
+  <p class="sub">Answer honestly — a wrong answer with an explanation teaches more than a lucky guess.</p>
+  <div id="quizHost"></div>
+  <p id="quizScore">Score: 0 / 12</p>
+</section>
+
+<!-- 12 ▸ Bridge to GUI -->
+<section data-tab="→ GUI Next">
+  <p class="eyebrow">12 · The bridge — where today's syntax goes next week</p>
+  <h2>Same shapes, new words: from console to window</h2>
+  <p class="sub">Nothing new is needed to read GUI code — only the <b>names</b> change. A window is a class; a button is an object built with <code class="inline">new</code>; its caption is a property; a click runs a method. Below: today's line on the left, next week's line on the right.</p>
+  <table class="bridge">
+    <thead><tr><th>Today (console)</th><th></th><th>Next week (GUI window)</th><th>Same idea</th></tr></thead>
+    <tbody>
+      <tr><td><code>Student s1 = new Student();</code></td><td class="arrow">→</td><td><code>Button btnSave = new Button();</code></td><td><b>new</b> builds an object from a class</td></tr>
+      <tr><td><code>new Student { Name = "Ahmed", Age = 21 }</code></td><td class="arrow">→</td><td><code>new Button { Content = "Save", Width = 120 }</code></td><td>object initializer sets properties</td></tr>
+      <tr><td><code>s2.Age = s2.Age + 1;</code></td><td class="arrow">→</td><td><code>lblResult.Text = "Saved!";</code></td><td>dot + <code>=</code> changes a property</td></tr>
+      <tr><td><code>string full = first + " " + last;</code></td><td class="arrow">→</td><td><code>string msg = "Hello, " + txtName.Text;</code></td><td>read a property, glue text</td></tr>
+      <tr><td><code>static void Greet(string name) { … }</code></td><td class="arrow">→</td><td><code>void BtnSave_Click(object sender, RoutedEventArgs e) { … }</code></td><td>a method with parameters</td></tr>
+      <tr><td><code>Greet("Maria");</code> — <i>you</i> call it</td><td class="arrow">→</td><td><code>btnSave.Click += BtnSave_Click;</code> — the <i>window</i> calls it</td><td>who runs the method</td></tr>
+    </tbody>
+  </table>
+  <p class="sub" style="margin-top:22px;margin-bottom:8px"><b>Read-only preview</b> — you'll type this in next week's lab, one piece at a time. Hover: you can already explain every line.</p>
+  <div class="ex" data-ex="guipreview"></div>
+  <div class="tip">🎯 <b>Test yourself:</b> in the preview, find (1) a <code class="inline">new</code>, (2) an object initializer, (3) a property being set with a dot, (4) a method definition, (5) a string built with <code class="inline">+</code>. All five are things you learned today.</div>
+</section>
+
+<!-- 13 ▸ Wrap up -->
+<section data-tab="Wrap-Up">
+  <p class="eyebrow">13 · Before you leave</p>
+  <h2>Week 1 — cheat sheet &amp; practice</h2>
+  <div class="cheat" style="margin-bottom:18px">
+    <div class="card"><h3>The suit</h3><code>using System;
+class Program
+{
+    static void Main()
+    {
+        // your code
+    }
+}</code></div>
+    <div class="card"><h3>Print</h3><code>Console.WriteLine("Hi");   // + new line
+Console.Write("Hi");       // stays on line
+// a comment</code></div>
+    <div class="card"><h3>Variables</h3><code>string name = "Maria";
+int age = 19;
+double gpa = 3.75;
+bool ok = true;</code></div>
+    <div class="card"><h3>Data types &amp; conversion</h3><code>byte  int  long        // whole
+float 2.5f  double 2.5  decimal 2.5m
+char 'A'   string "A"   bool true
+(int)3.99          → 3
+int.Parse("25")    → 25
+25.ToString()      → "25"</code></div>
+    <div class="card"><h3>Strings</h3><code>first + " " + last
+$"Hello, {name}!"
+name.Length   name.ToUpper()</code></div>
+    <div class="card"><h3>Math</h3><code>+  -  *  /  %
+7 / 2  → 3      7 % 2 → 1
+7 / 2.0 → 3.5</code></div>
+    <div class="card"><h3>Methods</h3><code>static int Add(int a, int b)
+{
+    return a + b;
+}
+int s = Add(2, 3);</code></div>
+    <div class="card"><h3>Class &amp; object</h3><code>class Student
+{
+    public string Name { get; set; } = "";
+    public void Introduce() { … }
+}</code></div>
+    <div class="card"><h3>new + properties</h3><code>Student s = new Student { Name = "Ana" };
+s.Name = "Ana";
+s.Introduce();</code></div>
+    <div class="card"><h3>4 rules</h3><code>1  end with ;
+2  Case Matters
+3  "text in quotes"
+4  every { has a }</code></div>
+  </div>
+  <div class="grid2">
+    <div>
+      <ul class="checklist">
+        <li>Write the 9-line skeleton from memory and know which line is yours.</li>
+        <li>Print with <code class="inline">WriteLine</code>/<code class="inline">Write</code>, use comments, predict output order.</li>
+        <li>Declare <code class="inline">string</code>, <code class="inline">int</code>, <code class="inline">double</code>, <code class="inline">bool</code> variables and change them.</li>
+        <li>Pick the right type from the nine in the table (suffixes <code class="inline">f m L</code>, <code class="inline">'c'</code> vs <code class="inline">"text"</code>) and convert with a cast, <code class="inline">int.Parse</code>, and <code class="inline">ToString()</code>.</li>
+        <li>Build text with <code class="inline">+</code> and <code class="inline">$"…{x}…"</code>; explain why <code class="inline">"" + 7 + 3</code> is <code class="inline">73</code>.</li>
+        <li>Explain why <code class="inline">7 / 2</code> is <code class="inline">3</code> and how to get <code class="inline">3.5</code>.</li>
+        <li>Define and call a method with parameters and a return value.</li>
+        <li>Create an object with <code class="inline">new</code>, set properties, call its method — and say how a Button is the same thing.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <span class="pill">Practice before next week</span>
+      <h3>Five tiny programs (keep the suit, change the inside)</h3>
+      <p>1. Print your name, your school, and your favorite emoji on three lines.<br><br>
+      2. Store your first and last name in two <code class="inline">string</code> variables; print them glued with <code class="inline">+</code>, then with a <code class="inline">$</code>-string.<br><br>
+      3. Store a price and a quantity; print the total with <code class="inline">$"Total: {…}"</code>. Try <code class="inline">int</code> then <code class="inline">double</code>.<br><br>
+      4. Write a method <code class="inline">Square(int n)</code> that returns n × n; call it three times.<br><br>
+      5. Write a <code class="inline">Book</code> class with <code class="inline">Title</code> and <code class="inline">Pages</code>; create two books with an object initializer and print them.</p>
+      <p style="margin-top:12px;color:var(--brand-ink)"><b>Where to run them:</b> VS Code (Ctrl/⌘+Shift+P → <b>.NET: New Project</b> → Console App → paste → F5) — or any online C# compiler. Every program on this page compiles as-is.</p>
+    </div>
+  </div>
+  <div class="note">📅 <b>Next week — your first window:</b> we open VS Code, and the very first line you write is <code class="inline">Title = "My App";</code> — a property, set with a dot. Then <code class="inline">new Button { Content = "Say Hello" }</code>. You already know how to read both.</div>
+</section>
+
+</template>
+
+<script>
+(function(){
+  "use strict";
+
+  /* =====================================================================
+     EXAMPLES — every one is a COMPLETE program (using System; class Program; static void Main()).
+     `code` is the exact text the Copy button copies. `notes[i]` explains line i+1.
+     ===================================================================== */
+  var EX={};
+
+  EX.skeleton={
+    file:'Program.cs', tag:'complete program',
+    code:
+'using System;\n'+
+'\n'+
+'class Program\n'+
+'{\n'+
+'    static void Main()\n'+
+'    {\n'+
+'        Console.WriteLine("Hello, MAC 109!");\n'+
+'    }\n'+
+'}',
+    out:['Hello, MAC 109!'],
+    notes:[
+      'The <b>import line</b>: "this file uses tools from the <b>System</b> toolbox." Console lives in System. Modern projects sometimes add this automatically, but we always write it so our code pastes and runs anywhere.',
+      'A blank line. The compiler ignores it completely — blank lines are paragraph breaks for humans.',
+      'The <b>container</b>. Every piece of C# lives inside a <b>class</b>. For today: a labeled box named <b>Program</b>. What classes really are is the Objects tab.',
+      'Opens the class body. Rule 4: every <b>{</b> must eventually meet its <b>}</b>. This one’s partner is the very last line.',
+      'THE starting point. When you press Run, .NET finds <b>Main</b> and starts executing its lines top to bottom. No Main, no program. <b>static void</b> and <b>()</b> are part of the suit — read the whole line as "execution starts here."',
+      'Opens Main’s body. Everything between this brace and its partner runs, in order. <b>This is where your code lives.</b>',
+      'THE statement of Week 1. <b>Console</b> = the screen · <b>.</b> = look inside it · <b>WriteLine</b> = the action "write one line" · <b>( )</b> = what to write · <b>" "</b> = it is text · <b>;</b> = end of sentence.',
+      'Closes Main. No more statements to run, so the program ends here — politely, having printed one line.',
+      'Closes the class — partner of line 4’s brace. Two opens, two closes, perfectly matched. Nine lines: eight of suit, one that was truly yours.'
+    ]
+  };
+
+  EX.output={
+    file:'Program.cs', tag:'complete program',
+    code:
+'using System;\n'+
+'\n'+
+'class Program\n'+
+'{\n'+
+'    static void Main()\n'+
+'    {\n'+
+'        // Statements run top to bottom, one at a time.\n'+
+'        Console.WriteLine("First, wake up.");\n'+
+'        Console.WriteLine("Second, coffee.");\n'+
+'        Console.Write("Third, ");\n'+
+'        Console.WriteLine("write C#.");\n'+
+'\n'+
+'        // Console.WriteLine("I am switched off");\n'+
+'        Console.WriteLine("Done!");\n'+
+'    }\n'+
+'}',
+    out:['First, wake up.','Second, coffee.','Third, write C#.','Done!'],
+    notes:[
+      'Toolbox line — same as always.','Blank line, ignored.','The container class.','Opens the class.','Execution starts here.','Opens Main.',
+      'A <b>comment</b>. Everything after <b>//</b> is invisible to the compiler — a note for humans. Good comments say <i>why</i>, not <i>what</i>.',
+      'Statement 1. Prints the text and then moves the cursor to a <b>new line</b>. That’s the "Line" in WriteLine.',
+      'Statement 2 — runs only after statement 1 finished. Order in the code IS order on the screen.',
+      '<b>Write</b> (no "Line"): prints <i>Third, </i> and <b>stays on the same line</b>. Notice the space inside the quotes — the computer adds nothing you didn’t type.',
+      'Continues on that same line, then ends it. Together lines 10–11 print one line: <i>Third, write C#.</i>',
+      'Blank line — free, and it makes the program easier to read.',
+      'A real statement that is <b>switched off</b>: because it starts with //, the compiler skips it. "Commenting out" is how programmers disable a line without deleting it.',
+      'Prints <i>Done!</i> — the last statement, so it prints last.',
+      'Closes Main.','Closes the class.'
+    ]
+  };
+
+  EX.variables={
+    file:'Program.cs', tag:'complete program',
+    code:
+'using System;\n'+
+'\n'+
+'class Program\n'+
+'{\n'+
+'    static void Main()\n'+
+'    {\n'+
+'        string name = "Maria";      // text\n'+
+'        int age = 19;               // whole number\n'+
+'        double gpa = 3.75;          // decimal number\n'+
+'        bool isEnrolled = true;     // yes / no\n'+
+'\n'+
+'        Console.WriteLine(name);\n'+
+'        Console.WriteLine(age);\n'+
+'        Console.WriteLine(gpa);\n'+
+'        Console.WriteLine(isEnrolled);\n'+
+'\n'+
+'        age = age + 1;              // a variable can change\n'+
+'        Console.WriteLine(age);\n'+
+'\n'+
+'        var city = "Queens";        // var = "C#, figure out the type"\n'+
+'        Console.WriteLine(city);\n'+
+'    }\n'+
+'}',
+    out:['Maria','19','3.75','True','20','Queens'],
+    notes:[
+      'Toolbox line.','Blank line.','The container class.','Opens the class.','Execution starts here.','Opens Main.',
+      '<b>Declaration + assignment.</b> Type <b>string</b>, name <b>name</b>, value <b>"Maria"</b>. Read <b>=</b> as "gets" (store the right side into the left), never as "equals".',
+      'An <b>int</b> holds a whole number. No quotes — quotes would make it text! <b>19</b> is a number you can do math with; <b>"19"</b> is just two characters.',
+      'A <b>double</b> holds a decimal number. Use it for prices, GPAs, measurements.',
+      'A <b>bool</b> is a switch: only <b>true</b> or <b>false</b>. Naming tip: start with <i>is</i>/<i>has</i> so it reads like a question.',
+      'Blank line for readability.',
+      'Print the variable. <b>No quotes</b> around <b>name</b> — we want its <i>value</i> (Maria), not the word "name".',
+      'Numbers print without quotes too. WriteLine happily prints any type.',
+      'Prints <b>3.75</b>.',
+      'Prints <b>True</b> — C# shows booleans with a capital letter.',
+      'Blank line.',
+      '<b>A variable can change.</b> Read right to left: take age (19), add 1, store the result (20) back into age. The old value is gone.',
+      'Prints the new value: <b>20</b>.',
+      'Blank line.',
+      '<b>var</b> asks C# to figure out the type from the value — here a string. You’ll see <b>var</b> everywhere in GUI code: <code>var btn = new Button { … }</code>. Same rules: the type is fixed once chosen.',
+      'Prints <b>Queens</b>.',
+      'Closes Main.','Closes the class.'
+    ]
+  };
+
+  EX.types={
+    file:'Program.cs', tag:'complete program',
+    code:"using System;\n\nclass Program\n{\n    static void Main()\n    {\n        // Whole numbers\n        byte level = 255;\n        int students = 32;\n        long population = 8100000000L;\n\n        // Numbers with decimals\n        float temperature = 72.5f;\n        double distance = 3.75;\n        decimal price = 19.99m;\n\n        // One character, text, and true/false\n        char grade = 'A';\n        string course = \"MAC 109\";\n        bool isOpen = true;\n\n        Console.WriteLine($\"byte    {level}\");\n        Console.WriteLine($\"int     {students}\");\n        Console.WriteLine($\"long    {population}\");\n        Console.WriteLine($\"float   {temperature}\");\n        Console.WriteLine($\"double  {distance}\");\n        Console.WriteLine($\"decimal {price}\");\n        Console.WriteLine($\"char    {grade}\");\n        Console.WriteLine($\"string  {course}\");\n        Console.WriteLine($\"bool    {isOpen}\");\n\n        Console.WriteLine(students.GetType());\n        Console.WriteLine($\"int holds {int.MinValue} to {int.MaxValue}\");\n    }\n}",
+    out:["byte    255", "int     32", "long    8100000000", "float   72.5", "double  3.75", "decimal 19.99", "char    A", "string  MAC 109", "bool    True", "System.Int32", "int holds -2147483648 to 2147483647"],
+    notes:["Toolbox line.", "Blank line.", "The container class.", "Opens the class.", "Execution starts here.", "Opens Main.", "A comment labeling the group: the <b>integer</b> types hold whole numbers only — no decimal point, ever.", "<b>byte</b> — the smallest: 1 byte of memory, values <b>0 to 255</b>. Try 256 and the compiler refuses. You’ll meet it in colors (red, green, blue are each a byte).", "<b>int</b> — THE default whole number: 4 bytes, about <b>±2.1 billion</b>. Counting, ages, scores, list positions. When in doubt, use int.", "<b>long</b> — 8 bytes, about <b>±9 quintillion</b>, for numbers too big for int (8.1 billion people won’t fit in an int!). The <b>L</b> at the end marks the literal as a long.", "Blank line.", "The <b>floating-point</b> types hold numbers with a decimal part.", "<b>float</b> — 4 bytes, about 7 digits of precision. The <b>f</b> suffix is <b>required</b>: without it, 72.5 is a double and C# refuses to squeeze it into a float. Rare in this course.", "<b>double</b> — 8 bytes, about 15–16 digits. THE default decimal type: a plain <b>3.75</b> is a double. Measurements, averages, GPA, BMI.", "<b>decimal</b> — 16 bytes, 28–29 exact digits, built for <b>money</b>. The <b>m</b> suffix (think \"money\") is required. Why? double stores 0.1 approximately, so 0.1 + 0.2 gives 0.30000000000000004; decimal gives exactly 0.3.", "Blank line.", "The last three are not numbers at all.", "<b>char</b> — exactly <b>one</b> character in <b>single quotes</b>: 'A', '7', '?'. Single quotes = char, double quotes = string. 'AB' is an error.", "<b>string</b> — any amount of text in <b>double quotes</b>, even zero characters (\"\"). The most-used type in GUI code: every Text and Content property is a string.", "<b>bool</b> — only <b>true</b> or <b>false</b> (lowercase, no quotes). Checkboxes, \"is the form valid?\", every if-statement you’ll write.", "Blank line.", "Prints the byte. The spaces inside the $-string just line the output up in columns.", "Prints the int: <b>32</b>.", "Prints the long: <b>8100000000</b> — the L suffix is not printed; it only told the compiler the type.", "Prints <b>72.5</b> — the f suffix is not printed either.", "Prints <b>3.75</b>.", "Prints <b>19.99</b>.", "Prints <b>A</b> — without the quotes; quotes are only how you <i>write</i> a char in code.", "Prints <b>MAC 109</b>.", "Prints <b>True</b> — C# capitalizes it when printing.", "Blank line.", "<b>.GetType()</b> asks any value \"what type are you?\". It answers <b>System.Int32</b> — <b>int</b> is C#’s nickname for .NET’s Int32 (32 bits = 4 bytes). Likewise string = System.String, double = System.Double.", "<b>int.MinValue</b> and <b>int.MaxValue</b> are built-in properties holding the smallest and largest int. Every numeric type has them: byte.MaxValue is 255.", "Closes Main.", "Closes the class."]
+  };
+
+  EX.convert={
+    file:'Program.cs', tag:'complete program',
+    code:"using System;\n\nclass Program\n{\n    static void Main()\n    {\n        // 1) Implicit: small type into a bigger one - automatic\n        int whole = 7;\n        double wide = whole;\n        Console.WriteLine(wide);\n\n        // 2) Explicit cast: bigger into smaller - you must ask\n        double gpa = 3.99;\n        int chopped = (int)gpa;\n        Console.WriteLine(chopped);\n\n        // 3) Text into a number - what every TextBox needs\n        string typed = \"25\";\n        int age = int.Parse(typed);\n        Console.WriteLine(age + 1);\n        Console.WriteLine(typed + 1);\n\n        // 4) Number into text\n        string label = age.ToString();\n        Console.WriteLine(label + \" years\");\n\n        // 5) The Convert toolbox does the same jobs\n        double hours = Convert.ToDouble(\"4.5\");\n        Console.WriteLine(hours * 2);\n    }\n}",
+    out:["7", "3", "26", "251", "25 years", "9"],
+    notes:["Toolbox line.", "Blank line.", "The container class.", "Opens the class.", "Execution starts here.", "Opens Main.", "<b>Implicit conversion</b> (\"widening\"): moving a value into a type that can hold everything the old one could. Nothing can be lost, so C# does it silently.", "An int holding 7.", "An int goes into a double with no special syntax — every int fits in a double. Like pouring a cup into a bucket.", "Prints <b>7</b>. It is a double now, but a double with no fraction prints without \".0\".", "Blank line.", "<b>Explicit conversion</b> (\"casting\" / \"narrowing\"): going into a smaller type <i>can</i> lose information, so C# makes you say so.", "A double holding 3.99.", "<b>(int)</b> in front is the <b>cast</b>: \"I know, convert anyway.\" It <b>chops off</b> the decimals — it does NOT round. Without (int), the compiler says: cannot implicitly convert double to int.", "Prints <b>3</b>, not 4. Truncation, not rounding. (Math.Round is how you round.)", "Blank line.", "<b>The GUI bridge.</b> A TextBox only ever gives you a <b>string</b> — even if the user typed digits.", "\"25\" in quotes is text — two characters, '2' and '5'. You cannot do math with it yet.", "<b>int.Parse</b> reads text and builds the number it describes: \"25\" → 25. Next week: <code>int age = int.Parse(txtAge.Text);</code>. If the text isn’t a number (\"hello\"), Parse crashes the program — we handle that safely in a later week.", "age is a real int, so + <b>adds</b>: prints <b>26</b>.", "<b>The trap from the Strings tab.</b> typed is text, so + <b>glues</b>: \"25\" + 1 → <b>251</b>. This is exactly the bug students hit when they forget int.Parse on a TextBox.", "Blank line.", "Going the other way: number → text.", "<b>.ToString()</b> works on every value in C#. Needed whenever a string is required — e.g. <code>lblResult.Text = total.ToString();</code> (a label’s Text cannot hold an int).", "Glues the text \"25\" with \" years\" → prints <b>25 years</b>.", "Blank line.", "<b>Convert</b> is a .NET toolbox (like Console and Math) with a method for every direction: Convert.ToInt32, Convert.ToDouble, Convert.ToString, Convert.ToBoolean…", "Text \"4.5\" → the double 4.5. Same job as double.Parse(\"4.5\").", "Now it’s a real number, so 4.5 × 2 prints <b>9</b>.", "Closes Main.", "Closes the class."]
+  };
+
+  EX.strings={
+    file:'Program.cs', tag:'complete program',
+    code:
+'using System;\n'+
+'\n'+
+'class Program\n'+
+'{\n'+
+'    static void Main()\n'+
+'    {\n'+
+'        string first = "Maria";\n'+
+'        string last = "Lopez";\n'+
+'\n'+
+'        string full = first + " " + last;          // + glues text\n'+
+'        Console.WriteLine(full);\n'+
+'\n'+
+'        Console.WriteLine($"Hello, {first}!");      // $ fills in the blanks\n'+
+'        Console.WriteLine($"Letters: {full.Length}");\n'+
+'        Console.WriteLine(full.ToUpper());\n'+
+'\n'+
+'        int a = 7;\n'+
+'        int b = 3;\n'+
+'        Console.WriteLine(a + b);                   // numbers: + adds\n'+
+'        Console.WriteLine("" + a + b);              // text involved: + glues\n'+
+'    }\n'+
+'}',
+    out:['Maria Lopez','Hello, Maria!','Letters: 11','MARIA LOPEZ','10','73'],
+    notes:[
+      'Toolbox line.','Blank line.','The container class.','Opens the class.','Execution starts here.','Opens Main.',
+      'A string variable holding <b>Maria</b>.',
+      'A second string holding <b>Lopez</b>.',
+      'Blank line.',
+      '<b>Concatenation.</b> With text, <b>+</b> means GLUE: "Maria" + " " + "Lopez" becomes one new string "Maria Lopez". The middle piece is a single space inside quotes — forget it and you get <i>MariaLopez</i>.',
+      'Prints <b>Maria Lopez</b>.',
+      'Blank line.',
+      '<b>Interpolated string.</b> The <b>$</b> before the opening quote switches on fill-in-the-blanks mode: every <b>{ }</b> inside is replaced with the variable’s value. Reads exactly like the sentence it prints.',
+      '<b>.Length</b> asks the string a question: how many characters? "Maria Lopez" has 11 (the space counts). Notice: <b>Length</b> has no parentheses — it’s a <b>property</b> (a value the object holds), not an action.',
+      '<b>.ToUpper()</b> is a <b>method</b> — an action, so it has parentheses. It returns a new shouting copy; <b>full</b> itself is unchanged.',
+      'Blank line.',
+      'An int holding 7.','An int holding 3.',
+      'Two <b>numbers</b>: + means ADD. Prints <b>10</b>.',
+      '<b>The trap.</b> The first piece is text (empty quotes), so C# switches + to GLUE mode for the whole line: "" + 7 → "7", then "7" + 3 → "73". Same operator, different personality. Remember this when reading a number from a TextBox!',
+      'Closes Main.','Closes the class.'
+    ]
+  };
+
+  EX.math={
+    file:'Program.cs', tag:'complete program',
+    code:
+'using System;\n'+
+'\n'+
+'class Program\n'+
+'{\n'+
+'    static void Main()\n'+
+'    {\n'+
+'        int apples = 7;\n'+
+'        int people = 2;\n'+
+'\n'+
+'        Console.WriteLine(apples + people);   // 9\n'+
+'        Console.WriteLine(apples - people);   // 5\n'+
+'        Console.WriteLine(apples * people);   // 14\n'+
+'        Console.WriteLine(apples / people);   // 3  (int / int drops the remainder!)\n'+
+'        Console.WriteLine(apples % people);   // 1  (% = the remainder)\n'+
+'\n'+
+'        double share = apples / 2.0;          // 3.5 (a decimal makes it exact)\n'+
+'        Console.WriteLine(share);\n'+
+'\n'+
+'        double price = 4.25;\n'+
+'        int quantity = 3;\n'+
+'        double total = price * quantity;\n'+
+'        Console.WriteLine($"Total: {total} dollars");\n'+
+'    }\n'+
+'}',
+    out:['9','5','14','3','1','3.5','Total: 12.75 dollars'],
+    notes:[
+      'Toolbox line.','Blank line.','The container class.','Opens the class.','Execution starts here.','Opens Main.',
+      'An int: 7 apples.','An int: 2 people.','Blank line.',
+      'The math happens <b>inside</b> the parentheses first, then the result (9) is printed. You can put any expression where a value is expected.',
+      'Subtraction → <b>5</b>.',
+      '<b>*</b> is multiply (there is no × key) → <b>14</b>.',
+      '<b>The famous trap.</b> int ÷ int gives an int: 7 / 2 is <b>3</b>, not 3.5 — the remainder is thrown away. This bites everyone once. Now it won’t bite you.',
+      '<b>%</b> ("modulo") gives the <b>remainder</b>: 7 % 2 = 1. Handy for "is it even?" (x % 2 == 0) and for cycling through things.',
+      'Blank line.',
+      'One side is a decimal (<b>2.0</b>), so C# does decimal division: <b>3.5</b>. The result must be stored in a <b>double</b> — an int box can’t hold 3.5.',
+      'Prints <b>3.5</b>.','Blank line.',
+      'A decimal price.','A whole-number quantity.',
+      'double × int gives a double: 4.25 × 3 = <b>12.75</b>. C# automatically widens the int to fit.',
+      'A $-string with a calculation’s result inside the braces. Prints <b>Total: 12.75 dollars</b>. Next week: this becomes the text of a label on your window.',
+      'Closes Main.','Closes the class.'
+    ]
+  };
+
+  EX.methods={
+    file:'Program.cs', tag:'complete program',
+    code:
+'using System;\n'+
+'\n'+
+'class Program\n'+
+'{\n'+
+'    static void Main()\n'+
+'    {\n'+
+'        SayHello();                 // call = run the method\n'+
+'        SayHello();\n'+
+'\n'+
+'        Greet("Maria");             // send a value in\n'+
+'        Greet("Ahmed");\n'+
+'\n'+
+'        int sum = Add(2, 3);        // get a value back\n'+
+'        Console.WriteLine(sum);\n'+
+'        Console.WriteLine(Add(10, 20));\n'+
+'    }\n'+
+'\n'+
+'    static void SayHello()\n'+
+'    {\n'+
+'        Console.WriteLine("Hello from a method!");\n'+
+'    }\n'+
+'\n'+
+'    static void Greet(string name)\n'+
+'    {\n'+
+'        Console.WriteLine("Welcome, " + name + "!");\n'+
+'    }\n'+
+'\n'+
+'    static int Add(int a, int b)\n'+
+'    {\n'+
+'        return a + b;\n'+
+'    }\n'+
+'}',
+    out:['Hello from a method!','Hello from a method!','Welcome, Maria!','Welcome, Ahmed!','5','30'],
+    notes:[
+      'Toolbox line.','Blank line.','The container class — it now holds <b>four</b> methods: Main, SayHello, Greet, Add.','Opens the class.','Execution starts here — always in Main, no matter where Main sits in the file.','Opens Main.',
+      'A <b>method call</b>: the name plus <b>()</b>. Execution jumps down to line 18, runs its body, and comes back here. The parentheses are empty because SayHello needs no information.',
+      'Call it again — it runs again. Write once, use many times.',
+      'Blank line.',
+      'A call with an <b>argument</b>: the value "Maria" is sent into the method and lands in its parameter <b>name</b> (line 23).',
+      'Same method, different argument — different output. That’s the power of parameters.',
+      'Blank line.',
+      '<b>Add</b> sends a value <b>back</b> (it <i>returns</i> an int). Read right to left: call Add with 2 and 3, receive 5, store it in <b>sum</b>.',
+      'Prints <b>5</b>.',
+      'You can put the call directly where a value is expected: Add(10, 20) becomes 30, and WriteLine prints it.',
+      'Closes Main. Main is done — but the file continues with the definitions Main used.',
+      'Blank line.',
+      '<b>A method definition.</b> <b>static</b> = part of the suit for now · <b>void</b> = gives nothing back · <b>SayHello</b> = the name you chose · <b>()</b> = no parameters. Defining it does NOT run it.',
+      'Opens the method body.',
+      'The body: what happens each time SayHello is called.',
+      'Closes SayHello.','Blank line.',
+      'A method with one <b>parameter</b>: <b>string name</b> is a variable that exists only inside Greet and receives whatever the caller sends.',
+      'Opens the method body.',
+      'Uses the parameter like any variable. "Welcome, " + name + "!" glues the greeting.',
+      'Closes Greet.','Blank line.',
+      '<b>int</b> instead of void: this method promises to <b>return an int</b>. Two parameters, separated by a comma, each with its own type.',
+      'Opens the method body.',
+      '<b>return</b> sends the result back to the caller and ends the method immediately. Whatever follows a return would never run.',
+      'Closes Add.','Closes the class.'
+    ]
+  };
+
+  EX.objects={
+    file:'Program.cs', tag:'complete program',
+    code:
+'using System;\n'+
+'\n'+
+'class Student\n'+
+'{\n'+
+'    public string Name { get; set; } = "";\n'+
+'    public int Age { get; set; }\n'+
+'\n'+
+'    public void Introduce()\n'+
+'    {\n'+
+'        Console.WriteLine($"Hi, I am {Name} and I am {Age}.");\n'+
+'    }\n'+
+'}\n'+
+'\n'+
+'class Program\n'+
+'{\n'+
+'    static void Main()\n'+
+'    {\n'+
+'        Student s1 = new Student();        // build an object\n'+
+'        s1.Name = "Maria";                 // set a property\n'+
+'        s1.Age = 19;\n'+
+'        s1.Introduce();                    // call its method\n'+
+'\n'+
+'        Student s2 = new Student { Name = "Ahmed", Age = 21 };   // build + set at once\n'+
+'        s2.Introduce();\n'+
+'\n'+
+'        s2.Age = s2.Age + 1;               // change it later\n'+
+'        s2.Introduce();\n'+
+'\n'+
+'        Console.WriteLine(s1.Name + " and " + s2.Name);\n'+
+'    }\n'+
+'}',
+    out:['Hi, I am Maria and I am 19.','Hi, I am Ahmed and I am 21.','Hi, I am Ahmed and I am 22.','Maria and Ahmed'],
+    notes:[
+      'Toolbox line.','Blank line.',
+      '<b>A blueprint.</b> This class describes what every Student has and can do. It is NOT a student — it’s the plan for making one. One file can hold several classes.',
+      'Opens the Student class.',
+      '<b>A property.</b> <b>public</b> = visible from outside · <b>string</b> = its type · <b>Name</b> = its name · <b>{ get; set; }</b> = it can be read and changed · <b>= ""</b> = starts empty. Every Button has properties exactly like this (Content, Width…).',
+      'A second property, an int. No starter value needed — numbers start at 0.',
+      'Blank line.',
+      '<b>A method that belongs to the object.</b> No <b>static</b> this time: you call it <i>on</i> a specific student (s1.Introduce()), and inside it, <b>Name</b> and <b>Age</b> mean <i>that</i> student’s values.',
+      'Opens the method body.',
+      'Uses the object’s own properties in a $-string. Which name prints depends on which student you called it on.',
+      'Closes Introduce.',
+      'Closes the Student class.',
+      'Blank line.',
+      'The familiar Program class — still the container for Main.',
+      'Opens Program.',
+      'Execution starts here (not in Student — Student is just a plan until someone builds one).',
+      'Opens Main.',
+      '<b>new builds an object.</b> Type <b>Student</b>, name <b>s1</b>, value: a brand-new Student made by <b>new Student()</b>. Name is "" and Age is 0 until we set them.',
+      '<b>The dot sets a property.</b> Read: "s1’s Name gets Maria". Next week: <code>lblResult.Text = "Hello!";</code> — identical shape.',
+      'Set the other property. s1 is now Maria, 19.',
+      '<b>The dot calls a method.</b> Parentheses = action. Introduce runs with s1’s values: prints <i>Hi, I am Maria and I am 19.</i>',
+      'Blank line.',
+      '<b>Object initializer — the GUI shape.</b> new Student { … } builds AND sets properties in one statement, comma-separated, no semicolons inside the braces. Memorize it: <code>new Button { Content = "Save", Width = 120 }</code> is the same thing.',
+      'Each object keeps its <b>own</b> values: this prints Ahmed, 21 — s1 is untouched.',
+      'Blank line.',
+      '<b>Read, then write.</b> Right side reads s2.Age (21) and adds 1; left side stores 22 back into s2.Age. Same pattern as age = age + 1, just with a dot.',
+      'Prints the updated Ahmed: <i>…and I am 22.</i>',
+      'Blank line.',
+      'Reading properties from two different objects and gluing them. Prints <i>Maria and Ahmed</i>.',
+      'Closes Main.','Closes Program.'
+    ]
+  };
+
+  EX.bugfixed={
+    file:'Program.cs', tag:'the FIXED version — compiles',
+    code:
+'using System;\n'+
+'\n'+
+'class Program\n'+
+'{\n'+
+'    static void Main()\n'+
+'    {\n'+
+'        string course = "MAC 109";\n'+
+'        Console.WriteLine("Welcome to " + course + "!");\n'+
+'        Console.WriteLine("C# is fun!");\n'+
+'        Console.WriteLine("Almost there");\n'+
+'        Console.WriteLine("See you Friday!");\n'+
+'        Console.WriteLine("Bye!");\n'+
+'    }\n'+
+'}',
+    out:['Welcome to MAC 109!','C# is fun!','Almost there','See you Friday!','Bye!'],
+    notes:[
+      'Toolbox line.','Blank line.','The container class.','Opens the class.','Execution starts here.','Opens Main.',
+      'A string variable, declared with its type. (The broken version declared it as <b>int</b> — a number box can’t hold text.)',
+      'Glue text + variable + text. All four rules obeyed.',
+      'Capital-C <b>Console</b> — Rule 2 fixed.',
+      'Semicolon present — Rule 1 fixed.',
+      'Quotes around the text — Rule 3 fixed.',
+      'This one was always fine.',
+      'Closes Main.','Closes the class.'
+    ]
+  };
+
+  EX.guipreview={
+    file:'MainWindow.cs', tag:'READ-ONLY preview · next week',
+    code:
+'// PREVIEW ONLY — next week you build this piece by piece in the lab.\n'+
+'// Do not paste it into a Console App; it needs the Avalonia starter project.\n'+
+'using Avalonia.Controls;\n'+
+'using Avalonia.Interactivity;\n'+
+'\n'+
+'class MainWindow : Window\n'+
+'{\n'+
+'    TextBox txtName = new TextBox { Watermark = "Type your name" };\n'+
+'    TextBlock lblResult = new TextBlock { Text = "" };\n'+
+'    Button btnGreet = new Button { Content = "Say Hello" };\n'+
+'\n'+
+'    public MainWindow()\n'+
+'    {\n'+
+'        Title = "My First Window";\n'+
+'        Width = 360;\n'+
+'        btnGreet.Click += BtnGreet_Click;\n'+
+'        Content = new StackPanel { Spacing = 10, Children = { txtName, btnGreet, lblResult } };\n'+
+'    }\n'+
+'\n'+
+'    void BtnGreet_Click(object sender, RoutedEventArgs e)\n'+
+'    {\n'+
+'        lblResult.Text = "Hello, " + txtName.Text + "!";\n'+
+'    }\n'+
+'}',
+    out:null,
+    window:{title:'My First Window',rows:[['textbox','Type your name'],['button','Say Hello'],['label','Hello, Maria!']]},
+    notes:[
+      'A comment — this file is for reading today, typing next week.',
+      'Another comment. The GUI toolbox (Avalonia) comes with the starter project you’ll download from Brightspace.',
+      '<b>using</b> — same idea as using System, different toolbox: this one holds Button, TextBox, Window.',
+      'A second toolbox: where Click events live.',
+      'Blank line.',
+      '<b>class</b> — you know this. <b>: Window</b> is new: "MainWindow is a kind of Window". It inherits everything a window can do.',
+      'Opens the class.',
+      '<b>new + object initializer</b> — the Objects tab! Type TextBox, name txtName, one property set inside { }.',
+      'Same shape: a TextBlock (a label) whose Text starts empty — like s1.Name = "".',
+      'Same shape again: a Button whose caption is the string "Say Hello".',
+      'Blank line.',
+      'A method with the class’s own name and no return type: the <b>constructor</b>. It runs once, when the window is built. Think of it as the window’s Main.',
+      'Opens the constructor.',
+      '<b>Title = "…"</b> — a property set with =, exactly like s1.Name = "Maria". The dot is missing because we are <i>inside</i> the window: it means "my own Title".',
+      'Another property, an int (Variables tab).',
+      '<b>+=</b> here means "add this method to the list of things to run when the button is clicked". You never call BtnGreet_Click yourself — the window does, on every click (Methods tab).',
+      'Object initializer inside an object initializer: a StackPanel that stacks its Children top to bottom. Content is the window’s one big property: what to show.',
+      'Closes the constructor.',
+      'Blank line.',
+      '<b>A method definition</b> with two parameters (Methods tab). This is the event handler — the code that runs on each click.',
+      'Opens the handler.',
+      '<b>Read a property, glue strings, set a property.</b> txtName.Text is what the user typed; the result appears on the window inside lblResult. Every piece of this line was learned today.',
+      'Closes the handler.',
+      'Closes the class.'
+    ]
+  };
+
+  /* ---------- syntax highlighter (tokenizes raw text, escapes safely) ---------- */
+  var KW=/^(using|class|static|void|int|double|string|bool|var|new|return|public|private|true|false|if|else|char|decimal|float|long)$/;
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function hl(line){
+    var out='',i=0,n=line.length;
+    while(i<n){
+      var ch=line[i];
+      if(ch==='/'&&line[i+1]==='/'){out+='<span class="c">'+esc(line.slice(i))+'</span>';break;}
+      if(ch==='"'||(ch==='$'&&line[i+1]==='"')){
+        var j=i+(ch==='$'?2:1);
+        while(j<n&&line[j]!=='"'){if(line[j]==='\\')j++;j++;}
+        j++;
+        out+='<span class="s">'+esc(line.slice(i,j))+'</span>';i=j;continue;
+      }
+      if(/[A-Za-z_]/.test(ch)){
+        var j2=i;while(j2<n&&/[A-Za-z0-9_]/.test(line[j2]))j2++;
+        var w=line.slice(i,j2);
+        var after=line.slice(j2).match(/^\s*\(/);
+        var before=line.slice(0,i).match(/new\s+$/);
+        var cls;
+        if(KW.test(w))cls='k';
+        else if(before)cls='t';
+        else if(after)cls='m';
+        else if(/^[A-Z]/.test(w))cls='t';
+        else cls='p';
+        out+='<span class="'+cls+'">'+esc(w)+'</span>';i=j2;continue;
+      }
+      if(/[0-9]/.test(ch)){
+        var j3=i;while(j3<n&&/[0-9.]/.test(line[j3]))j3++;
+        out+='<span class="n">'+line.slice(i,j3)+'</span>';i=j3;continue;
+      }
+      out+=esc(ch);i++;
+    }
+    return out;
+  }
+
+  /* ---------- build one hover-explain example ---------- */
+  function buildExample(host,ex){
+    var lines=ex.code.split('\n');
+    var win=document.createElement('div');win.className='codewin';
+    var bar=document.createElement('div');bar.className='bar';
+    bar.innerHTML='<span class="dots"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i></span><span class="fname">'+esc(ex.file)+'</span><span class="tag">'+esc(ex.tag)+'</span><span class="btns"></span>';
+    var btns=bar.querySelector('.btns');
+    var copy=document.createElement('button');copy.type='button';copy.textContent='Copy';
+    btns.appendChild(copy);
+    var run=null;
+    if(ex.out){run=document.createElement('button');run.type='button';run.className='run';run.textContent='▶ Run';btns.appendChild(run);}
+    win.appendChild(bar);
+    var pre=document.createElement('pre');win.appendChild(pre);
+
+    var panel=document.createElement('div');panel.className='explain-panel';
+    var expl=document.createElement('div');expl.className='expl idle';
+    expl.innerHTML='<div class="lbl"><span>Explanation</span><span class="pinbadge">📌 pinned — click again to unpin</span></div><div class="codeq"></div><div class="why">Hover any line of the code to read what it does. Click a line to pin it.</div>';
+    panel.appendChild(expl);
+    var codeq=expl.querySelector('.codeq'),why=expl.querySelector('.why'),lbl=expl.querySelector('.lbl span');
+
+    var term=document.createElement('div');term.className='term';
+    if(ex.out){
+      term.innerHTML='<div class="thead"><span>▶ RUN → OUTPUT</span><span class="prompt">terminal</span></div><div class="placeholder">Press ▶ Run to see what this program prints. Predict it first!</div>';
+      panel.appendChild(term);
+    }else if(ex.window){
+      var w=ex.window;var rows='';
+      w.rows.forEach(function(r){
+        if(r[0]==='textbox')rows+='<div style="background:#fff;border:1px solid #9aa0b4;border-radius:4px;padding:6px 8px;color:#8a90a5;font-size:12.5px">'+esc(r[1])+'</div>';
+        if(r[0]==='button')rows+='<div style="display:inline-block;background:linear-gradient(#fdfdfd,#e4e6ee);border:1px solid #a9afc3;border-radius:4px;padding:5px 14px;color:#1b1f2e;font-size:12.5px">'+esc(r[1])+'</div>';
+        if(r[0]==='label')rows+='<div style="color:#1b1f2e;font-size:12.5px">'+esc(r[1])+'</div>';
+      });
+      term.className='';term.style.marginTop='12px';
+      term.innerHTML='<div style="font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;color:var(--muted);font-weight:700;margin-bottom:6px">▶ RUN → A WINDOW (after typing Maria and clicking)</div><div style="background:#f3f4f8;border:1px solid #b8bdcf;border-radius:8px;box-shadow:0 10px 26px rgba(27,31,46,.18);overflow:hidden;max-width:300px"><div style="background:linear-gradient(#fefefe,#e9eaf0);border-bottom:1px solid #c9cddc;padding:5px 10px;font-size:12px;color:#1b1f2e;display:flex;justify-content:space-between"><span>'+esc(w.title)+'</span><span style="color:#777;letter-spacing:2px;font-family:var(--mono)">— ▢ ✕</span></div><div style="padding:14px;display:flex;flex-direction:column;gap:10px">'+rows+'</div></div>';
+      panel.appendChild(term);
+    }
+
+    var pinned=null,rows=[];
+    function show(i){
+      expl.classList.remove('idle');
+      lbl.textContent='Line '+(i+1);
+      var txt=lines[i].trim();
+      codeq.textContent=txt||'(blank line)';codeq.style.display='block';
+      why.innerHTML=ex.notes[i]||'';
+    }
+    function idle(){
+      if(pinned!==null){show(pinned);return;}
+      expl.classList.add('idle');lbl.textContent='Explanation';codeq.style.display='none';
+      why.innerHTML='Hover any line of the code to read what it does. Click a line to pin it.';
+    }
+    lines.forEach(function(L,i){
+      var row=document.createElement('span');row.className='cl explain';row.tabIndex=0;
+      row.setAttribute('role','button');row.setAttribute('aria-label','Line '+(i+1)+': '+(L.trim()||'blank'));
+      row.innerHTML='<span class="ln">'+(i+1)+'</span><span class="src">'+(hl(L)||' ')+'</span>';
+      row.addEventListener('mouseenter',function(){if(pinned===null){rows.forEach(function(r){r.classList.remove('hot');});row.classList.add('hot');show(i);}});
+      row.addEventListener('mouseleave',function(){if(pinned===null){row.classList.remove('hot');idle();}});
+      row.addEventListener('focus',function(){if(pinned===null){show(i);}});
+      row.addEventListener('click',function(){
+        if(pinned===i){pinned=null;row.classList.remove('pinned');expl.classList.remove('pinned');show(i);return;}
+        rows.forEach(function(r){r.classList.remove('pinned','hot');});
+        pinned=i;row.classList.add('pinned');expl.classList.add('pinned');show(i);
+      });
+      row.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();row.click();}});
+      pre.appendChild(row);rows.push(row);
+    });
+
+    copy.addEventListener('click',function(){
+      function ok(){copy.textContent='Copied ✓';setTimeout(function(){copy.textContent='Copy';},1600);}
+      if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(ex.code).then(ok,ok);}
+      else{var ta=document.createElement('textarea');ta.value=ex.code;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');}catch(e){}document.body.removeChild(ta);ok();}
+    });
+    if(run){
+      run.addEventListener('click',function(){
+        term.innerHTML='<div class="thead"><span>▶ RUN → OUTPUT</span><span class="prompt">terminal</span></div>';
+        run.disabled=true;
+        ex.out.forEach(function(o,k){
+          setTimeout(function(){
+            var d=document.createElement('div');d.className='tline typing';d.textContent=o;term.appendChild(d);
+            if(k===ex.out.length-1){run.disabled=false;run.textContent='↻ Run again';}
+          },180*(k+1));
+        });
+      });
+    }
+    host.appendChild(win);host.appendChild(panel);
+  }
+
+  /* ---------- build slides & tabs ---------- */
+  var tpl=document.getElementById('slides');
+  var stage=document.getElementById('stage');
+  var strip=document.getElementById('tabstrip');
+  var secs=tpl.content.querySelectorAll('section');
+  var slides=[],tabs=[],visited={};
+  secs.forEach(function(sec,i){
+    var s=sec.cloneNode(true);
+    s.classList.add('slide');
+    stage.appendChild(s);
+    slides.push(s);
+    var t=document.createElement('button');
+    t.className='tab';t.type='button';
+    t.innerHTML='<span class="dot"></span>'+sec.dataset.tab;
+    t.addEventListener('click',function(){go(i);});
+    strip.appendChild(t);
+    tabs.push(t);
+  });
+  stage.querySelectorAll('.ex[data-ex]').forEach(function(h){buildExample(h,EX[h.dataset.ex]);});
+
+  var cur=0;
+  var prevBtn=document.getElementById('prevBtn'),nextBtn=document.getElementById('nextBtn');
+  function go(i){
+    if(i<0||i>=slides.length)return;
+    slides[cur].classList.remove('active');
+    tabs[cur].classList.remove('active');
+    if(visited[cur])tabs[cur].classList.add('done');
+    visited[cur]=true;
+    cur=i;
+    slides[cur].classList.add('active');
+    tabs[cur].classList.add('active');
+    tabs[cur].scrollIntoView({inline:'nearest',block:'nearest'});
+    slides[cur].scrollTop=0;
+    prevBtn.disabled=(cur===0);
+    nextBtn.disabled=(cur===slides.length-1);
+    document.getElementById('progressBar').style.width=((cur)/(slides.length-1)*100)+'%';
+    document.getElementById('where').textContent=(cur+1)+' / '+slides.length+' · '+secs[cur].dataset.tab;
+  }
+  prevBtn.addEventListener('click',function(){go(cur-1);});
+  nextBtn.addEventListener('click',function(){go(cur+1);});
+  document.addEventListener('keydown',function(e){
+    if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;
+    if(e.key==='ArrowRight')go(cur+1);
+    if(e.key==='ArrowLeft')go(cur-1);
+  });
+
+  /* ---------- flip cards ---------- */
+  stage.querySelectorAll('.flip').forEach(function(f){
+    function tog(){f.classList.toggle('flipped');}
+    f.addEventListener('click',tog);
+    f.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();tog();}});
+  });
+
+  /* ---------- pipeline ---------- */
+  var pipeInfo=[
+    '<b>Your source code.</b> Human-readable C# — what you type in the editor. The CPU cannot run it directly; it exists for people (and the compiler) to read.',
+    '<b>The compiler.</b> Reads your ENTIRE program first and checks the grammar: every missing semicolon, wrong capital, or unquoted text becomes an error with a file and line number. Only if everything is legal does it translate.',
+    '<b>IL — Intermediate Language.</b> The compiler’s output: compact, universal instructions not tied to any one computer. The same IL runs on Windows, macOS, and Linux — that’s why the same app works on every laptop in this room.',
+    '<b>The .NET runtime.</b> When your app launches, it translates IL into the exact machine code YOUR CPU speaks (Intel, AMD, or Apple Silicon) right before it’s needed, and manages memory for you.',
+    '<b>It runs.</b> Pure machine instructions execute: text appears in the terminal — or, from next week, a window opens and waits for a click. The whole pipeline usually takes under a second.'
+  ];
+  var pipeNodes=stage.querySelectorAll('#pipeline .pnode');
+  pipeNodes.forEach(function(n){
+    function sel(){pipeNodes.forEach(function(x){x.classList.remove('hot');});n.classList.add('hot');document.getElementById('pipeText').innerHTML=pipeInfo[+n.dataset.i];}
+    n.addEventListener('click',sel);n.addEventListener('mouseenter',sel);
+  });
+
+  /* ---------- bug hunt ---------- */
+  var bugSrc=[
+    ['using System;',false,'Correct — the toolbox line, exactly as it should be.'],
+    ['',false,'A blank line — always innocent.'],
+    ['class Program',false,'Correct — the container, capital P and all.'],
+    ['{',false,'Correct — an honest brace, partnered with the last line.'],
+    ['    static void Main()',false,'Correct — the starting point, spelled with its capital M.'],
+    ['    {',false,'Correct — opens Main; your code starts below.'],
+    ['        int course = "MAC 109";',true,'Bug — wrong TYPE: "MAC 109" is text, and an int box only holds whole numbers. The compiler: cannot convert string to int. Fix: string course = "MAC 109";'],
+    ['        Console.WriteLine("Welcome to " + course + "!");',false,'Correct — glue text + variable + text. All four rules obeyed.'],
+    ['        console.WriteLine("C# is fun!");',true,'Bug — Rule 2: lowercase "console". C# is case-sensitive and the class is Console. The compiler: the name ‘console’ does not exist in the current context.'],
+    ['        Console.WriteLine("Almost there")',true,'Bug — Rule 1: the semicolon is missing. Watch out: the compiler often reports this error on the NEXT line (line 11), because that is where it realizes the sentence never ended. Always check the line above too.'],
+    ['        Console.WriteLine(See you Friday!);',true,'Bug — Rule 3: no quotes, so C# hunts for variables named See, you, Friday and finds nothing. Text for humans must wear quotes.'],
+    ['        Console.WriteLine("Bye!");',false,'Correct — and once the four bugs are fixed, the program prints five friendly lines.'],
+    ['    }',false,'Correct — closes Main.'],
+    ['}',false,'Correct — closes the class. The suit was innocent all along; the bugs lived inside Main.']
+  ];
+  var bugPre=document.getElementById('bugCode');var bugExpl=document.getElementById('bugExpl');var found=0;
+  var bq=bugExpl.querySelector('.codeq'),bw=bugExpl.querySelector('.why');
+  bugSrc.forEach(function(B,i){
+    var div=document.createElement('span');
+    div.className='cl explain bugline';div.tabIndex=0;
+    div.innerHTML='<span class="ln">'+(i+1)+'</span><span class="src">'+(hl(B[0])||' ')+'</span>';
+    div.addEventListener('mouseenter',function(){
+      bugExpl.classList.remove('idle');bq.style.display='block';bq.textContent=B[0].trim()||'(blank line)';
+      bw.innerHTML=div.dataset.done?B[2]:'Line '+(i+1)+'. Does it break one of the four rules? <b>Click to decide.</b>';
+    });
+    div.addEventListener('click',function(){
+      if(div.dataset.done)return;
+      div.dataset.done='1';
+      var tag=document.createElement('span');
+      if(B[1]){div.classList.add('found');found++;
+        document.getElementById('bugScore').textContent='Found: '+found+' / 4'+(found===4?'  🎉 You debug like a pro!':'');
+        tag.className='buglabel err';tag.textContent='✗ bug';
+      }else{div.classList.add('wrongpick');tag.className='buglabel ok';tag.textContent='✓ fine';}
+      div.appendChild(tag);bw.innerHTML=B[2];
+    });
+    div.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();div.click();}});
+    bugPre.appendChild(div);
+  });
+
+  /* ---------- quiz ---------- */
+  var quiz=[
+    {q:'Which statement best describes C# and .NET?',
+     opts:['They are two names for the same thing','C# is the language you write; .NET is the platform and library your code runs on','.NET is the language; C# is the editor','C# only works on Windows'],
+     a:1,why:'C# is the vocabulary and grammar; .NET supplies the engine and thousands of ready-made classes like Console — and it runs on Windows, macOS, and Linux.'},
+    {q:'Inside Main: <code>Console.Write("Hi");</code> then <code>Console.WriteLine("there");</code> — what prints?',
+     opts:['<code>Hithere</code> on one line','<code>Hi</code> and <code>there</code> on two lines','<code>there</code> then <code>Hi</code>','Nothing — Write is not a real method'],
+     a:0,why:'Write stays on the same line; WriteLine ends it. Statements run top to bottom, so Hi is printed first, then there right after it.'},
+    {q:'Which line is completely correct?',
+     opts:['<code>console.WriteLine("Hi");</code>','<code>Console.WriteLine(Hi);</code>','<code>Console.WriteLine("Hi")</code>','<code>Console.WriteLine("Hi");</code>'],
+     a:3,why:'Capital-C Console (Rule 2), quotes around the text (Rule 3), and the semicolon (Rule 1). Each other option breaks exactly one rule.'},
+    {q:'Which declaration is WRONG?',
+     opts:['<code>int age = 19;</code>','<code>string name = "Maria";</code>','<code>int price = 4.25;</code>','<code>bool done = false;</code>'],
+     a:2,why:'4.25 is a decimal — it does not fit in an int box. It needs a double: <code>double price = 4.25;</code>'},
+    {q:'Which declaration compiles?',
+     opts:['<code>char grade = "A";</code>','<code>char grade = \'A\';</code>','<code>char grade = \'AB\';</code>','<code>char grade = A;</code>'],
+     a:1,why:'A char holds exactly ONE character in single quotes. "A" in double quotes is a string; \'AB\' is two characters; A with no quotes is a variable name.'},
+    {q:'Which type should store a product price like 19.99 in a shopping app?',
+     opts:['<code>int</code>','<code>decimal</code> (written <code>19.99m</code>)','<code>char</code>','<code>bool</code>'],
+     a:1,why:'decimal stores decimal values exactly, which is what money needs. int would drop the cents; double works but can show tiny rounding errors.'},
+    {q:'<code>string typed = "25";</code> — which line prints <code>26</code>?',
+     opts:['<code>Console.WriteLine(typed + 1);</code>','<code>Console.WriteLine((int)typed + 1);</code>','<code>Console.WriteLine(int.Parse(typed) + 1);</code>','<code>Console.WriteLine(typed.ToString() + 1);</code>'],
+     a:2,why:'int.Parse turns the text "25" into the number 25, so + adds. typed + 1 glues to "251"; a (int) cast cannot convert a string at all — that is a compile error.'},
+    {q:'What does <code>int x = (int)9.99;</code> store in x?',
+     opts:['<code>10</code>','<code>9</code>','<code>9.99</code>','A compile error'],
+     a:1,why:'A cast to int chops off the decimal part — it truncates, it does not round. Use Math.Round when you want 10.'},
+    {q:'<code>int a = 7; int b = 3;</code> — what does <code>Console.WriteLine("" + a + b);</code> print?',
+     opts:['<code>10</code>','<code>73</code>','<code>7 3</code>','A compile error'],
+     a:1,why:'The first piece is text (empty quotes), so + switches to GLUE mode: "" + 7 → "7", then "7" + 3 → "73". Without the quotes, a + b would be 10.'},
+    {q:'What does <code>Console.WriteLine(7 / 2);</code> print?',
+     opts:['<code>3.5</code>','<code>3</code>','<code>4</code>','<code>1</code>'],
+     a:1,why:'int ÷ int gives an int — the remainder is dropped. 7 / 2.0 would give 3.5; 7 % 2 would give the remainder, 1.'},
+    {q:'What does <code>new Student { Name = "Ahmed", Age = 21 }</code> do?',
+     opts:['Defines a new class called Student','Builds one Student object and sets two of its properties','Calls a method named Student with two arguments','Prints Ahmed and 21'],
+     a:1,why:'new builds an object from the Student blueprint; the { … } is an object initializer that sets properties. Next week: new Button { Content = "Save" } — same shape.'},
+    {q:'<code>static int Add(int a, int b) { return a + b; }</code> — which line uses it correctly?',
+     opts:['<code>Add(2, 3);</code> and expecting something to print','<code>int s = Add(2, 3);</code>','<code>int s = Add;</code>','<code>Add(2 + 3);</code>'],
+     a:1,why:'Add takes two ints and returns an int, so the call needs two arguments and the result should be stored (or printed). Calling it alone does nothing visible — it returns 5 to no one.'}
+  ];
+  var host=document.getElementById('quizHost');var score=0,answered=0;
+  quiz.forEach(function(Q,qi){
+    var box=document.createElement('div');box.className='q';
+    var h=document.createElement('h3');h.innerHTML=(qi+1)+'. '+Q.q;box.appendChild(h);
+    var why=document.createElement('p');why.className='why';why.innerHTML=Q.why;
+    Q.opts.forEach(function(o,oi){
+      var b=document.createElement('button');b.className='opt';b.type='button';b.innerHTML=o;
+      b.addEventListener('click',function(){
+        if(box.dataset.done)return;box.dataset.done='1';answered++;
+        box.querySelectorAll('.opt').forEach(function(x,xi){x.disabled=true;if(xi===Q.a)x.classList.add('right');});
+        if(oi===Q.a){score++;}else{b.classList.add('wrong');}
+        why.classList.add('show');
+        document.getElementById('quizScore').textContent='Score: '+score+' / '+quiz.length+(answered===quiz.length?(score===quiz.length?'  🏆 Perfect!':'  — review the explanations above, then move on.'):'');
+      });
+      box.appendChild(b);
+    });
+    box.appendChild(why);host.appendChild(box);
+  });
+
+  /* ---------- boot ---------- */
+  slides[0].classList.add('active');
+  tabs[0].classList.add('active');
+  prevBtn.disabled=true;
+  document.getElementById('where').textContent='1 / '+slides.length+' · '+secs[0].dataset.tab;
+})();
+</script>
+</body>
+</html>
