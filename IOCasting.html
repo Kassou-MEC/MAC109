@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="color-scheme" content="dark">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MAC 109 · Week 2: Input, Output &amp; Casting</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1220; --surface:#181c2e; --surface2:#222840; --border:#2f3654;
+    --ink:#eef0f8; --ink2:#c3c9dd; --muted:#9098b4;
+    --brand:#6d63ff; --brand2:#a45cff; --brand-soft:#2a2d55; --brand-ink:#c9c5ff;
+    --good:#22c58b; --good-soft:#12352b; --bad:#f06a60; --bad-soft:#3d1f23; --warn:#f5b83d; --warn-soft:#352b12;
+    --code-bg:#0a0d18; --code-bar:#151a2c; --code-border:#2a3150; --code-text:#e6e9f2; --code-ln:#5b627a;
+    --kw:#7aa2f7; --type:#2ac3de; --str:#e0af68; --com:#7f8aa8; --met:#c0caf5; --num:#ff9e64; --hl:#2c3350; --pin:#3b4a7a;
+    --sans:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+    --mono:'JetBrains Mono','Cascadia Code',Consolas,Menlo,monospace;
+    --radius:14px; --shadow:0 10px 30px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16.5px;line-height:1.55;overflow:hidden;-webkit-font-smoothing:antialiased}
+  button{font-family:var(--sans)}
+  b{font-weight:700}
+
+  /* ---------- app frame ---------- */
+  #app{display:flex;flex-direction:column;height:100vh}
+  #top{background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;padding:10px 22px;flex:0 0 auto}
+  #top .logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;font-family:var(--mono);font-weight:700;display:flex;align-items:center;justify-content:center;font-size:15px;flex:0 0 auto}
+  #top .ttl{font-weight:700;font-size:15px}
+  #top .ttl small{display:block;color:var(--muted);font-weight:500;font-size:12.5px}
+  #top .right{margin-left:auto;color:var(--muted);font-size:12.5px;display:flex;align-items:center;gap:14px}
+  #progressWrap{width:140px;height:6px;background:var(--surface2);border-radius:3px;overflow:hidden}
+  #progressBar{height:100%;background:linear-gradient(90deg,var(--brand),var(--brand2));width:0;transition:width .3s}
+
+  #tabstrip{background:var(--surface);display:flex;overflow-x:auto;flex:0 0 auto;border-bottom:1px solid var(--border);padding:0 14px;scrollbar-width:thin;gap:2px}
+  .tab{background:transparent;color:var(--ink2);border:none;border-bottom:3px solid transparent;padding:10px 13px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:7px}
+  .tab .dot{width:8px;height:8px;border-radius:50%;background:var(--border)}
+  .tab:hover{color:var(--brand-ink)}
+  .tab.active{color:var(--brand);border-bottom-color:var(--brand)}
+  .tab.active .dot{background:var(--brand)}
+  .tab.done .dot{background:var(--good)}
+  .tab:focus-visible{outline:2px solid var(--brand);outline-offset:-2px;border-radius:6px}
+
+  #stage{flex:1 1 auto;overflow:hidden;position:relative}
+  .slide{position:absolute;inset:0;overflow-y:auto;padding:34px max(40px,calc((100% - 1180px)/2)) 110px;display:none;animation:slidein .3s ease}
+  .slide.active{display:block}
+  .cl .src{white-space:pre;flex:1 1 auto}
+  @keyframes slidein{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){.slide{animation:none}*{transition:none!important}}
+
+  #bottom{background:var(--surface);border-top:1px solid var(--border);display:flex;align-items:center;gap:12px;padding:10px 22px;flex:0 0 auto}
+  #bottom button{background:var(--brand);color:#fff;border:none;padding:9px 18px;border-radius:10px;cursor:pointer;font-size:13.5px;font-weight:600}
+  #bottom button.ghost{background:var(--surface2);color:var(--ink)}
+  #bottom button:hover{filter:brightness(1.07)}
+  #bottom button:disabled{opacity:.35;cursor:default;filter:none}
+  #bottom .where{color:var(--muted);font-size:13px;margin-left:6px}
+  #bottom .grow{flex:1}
+  #bottom .hint{color:var(--muted);font-size:12.5px}
+  @media(max-width:700px){#bottom .hint,#top .right,#top .ttl small,.codewin .bar .tag,.codewin .bar .dots{display:none}#top .ttl{font-size:13.5px}#top{padding:8px 14px}#bottom{padding:8px 14px}.cl .ln{width:34px;padding-right:10px}.codewin pre{font-size:12.5px}}
+
+  /* ---------- typography & cards ---------- */
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--brand);margin-bottom:10px;font-weight:600}
+  h1{font-size:clamp(30px,4.2vw,46px);font-weight:800;line-height:1.12;margin-bottom:14px;letter-spacing:-.02em}
+  h2{font-size:clamp(24px,3vw,32px);font-weight:800;margin-bottom:6px;letter-spacing:-.015em}
+  h3{font-size:17px;font-weight:700}
+  .sub{color:var(--ink2);max-width:76ch;font-size:16.5px;margin-bottom:22px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  @media(max-width:1000px){.grid4{grid-template-columns:1fr 1fr}}
+  @media(max-width:860px){.grid2,.grid3,.grid4{grid-template-columns:1fr}.slide{padding:22px 16px 110px}}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow)}
+  .card p{color:var(--ink2);font-size:15px;margin-top:8px}
+  .pill{display:inline-block;font-family:var(--mono);font-size:11.5px;background:var(--brand-soft);color:var(--brand-ink);border-radius:20px;padding:3px 11px;margin-bottom:10px;font-weight:600}
+  .pill.g{background:var(--good-soft);color:#7ff0c3}.pill.w{background:var(--warn-soft);color:#fcd67a}.pill.r{background:var(--bad-soft);color:#ffb3ac}
+  code.inline{font-family:var(--mono);background:var(--surface2);border:1px solid var(--border);padding:1px 6px;border-radius:6px;font-size:.88em;color:var(--brand-ink)}
+  .note{background:var(--warn-soft);border:1px solid #5c4a1a;border-radius:12px;padding:12px 16px;color:#fbe3a6;font-size:14px;margin-top:16px}
+  .tip{background:var(--good-soft);border:1px solid #235e4a;border-radius:12px;padding:12px 16px;color:#bff5dd;font-size:14px;margin-top:16px}
+  .rule{display:flex;gap:14px;align-items:flex-start}
+  .rule .num{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;flex:0 0 auto;font-family:var(--mono)}
+  .objlist li{list-style:none;padding:7px 0 7px 30px;position:relative;font-size:15.5px}
+  .objlist li::before{content:"▸";position:absolute;left:8px;color:var(--brand);font-weight:700}
+  .checklist li{list-style:none;padding:9px 0 9px 32px;position:relative;font-size:15px;border-bottom:1px dashed var(--border)}
+  .checklist li::before{content:"✓";position:absolute;left:4px;color:var(--good);font-weight:800}
+  .kbd{font-family:var(--mono);background:var(--surface2);border:1px solid var(--border);border-bottom-width:2px;border-radius:5px;padding:1px 7px;font-size:12.5px}
+
+  /* ---------- hover-explain code examples ---------- */
+  .ex{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(280px,1fr);gap:16px;align-items:start;margin:16px 0 26px}
+  @media(max-width:900px){.ex{grid-template-columns:1fr}}
+  .codewin{background:var(--code-bg);border:1px solid var(--code-border);border-radius:var(--radius);overflow:hidden;box-shadow:0 14px 34px rgba(27,31,46,.18)}
+  .codewin .bar{background:var(--code-bar);padding:9px 14px;font-family:var(--mono);font-size:12px;color:#aab1c8;display:flex;gap:8px;align-items:center;border-bottom:1px solid var(--code-border)}
+  .codewin .bar .dots i{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:5px}
+  .codewin .bar .fname{font-weight:700;color:#e6e9f2}
+  .codewin .bar .tag{font-size:10.5px;background:#2f3650;color:#c0caf5;border-radius:20px;padding:2px 9px;font-family:var(--sans);font-weight:600}
+  .codewin .bar .btns{margin-left:auto;display:flex;gap:6px}
+  .codewin .bar button{background:#2f3650;border:1px solid #3d4661;color:#e6e9f2;border-radius:7px;padding:3px 11px;font-size:11.5px;cursor:pointer;font-weight:600}
+  .codewin .bar button:hover{background:#3b4463}
+  .codewin .bar button.run{background:var(--good);border-color:var(--good);color:#fff}
+  .codewin pre{padding:10px 0 12px;font-family:var(--mono);font-size:14px;line-height:1.7;overflow-x:auto;color:var(--code-text)}
+  .cl{display:flex;padding:0 14px 0 0;white-space:pre;border-left:3px solid transparent;cursor:default}
+  .cl .ln{width:44px;color:var(--code-ln);text-align:right;padding-right:16px;flex:0 0 auto;user-select:none}
+  .cl.explain{cursor:pointer}
+  .cl.explain:hover,.cl.explain.hot{background:var(--hl);border-left-color:var(--brand)}
+  .cl.explain.pinned{background:var(--pin);border-left-color:#ffd166}
+  .cl.explain:focus-visible{outline:none;background:var(--hl);border-left-color:var(--brand)}
+  .k{color:var(--kw)}.t{color:var(--type)}.s{color:var(--str)}.c{color:var(--com);font-style:italic}.m{color:var(--met)}.n{color:var(--num)}.p{color:var(--code-text)}
+
+  .explain-panel{position:sticky;top:6px}
+  .expl{background:var(--surface);border:1px solid var(--border);border-left:5px solid var(--brand);border-radius:var(--radius);padding:16px 18px;min-height:150px;box-shadow:var(--shadow);transition:border-color .2s}
+  .expl.pinned{border-left-color:#e0a800}
+  .expl .lbl{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;display:flex;align-items:center;gap:8px}
+  .expl .lbl .pinbadge{display:none;background:var(--warn-soft);color:#fcd67a;border-radius:20px;padding:1px 8px;letter-spacing:0;text-transform:none;font-family:var(--sans);font-weight:600}
+  .expl.pinned .lbl .pinbadge{display:inline-block}
+  .expl .codeq{font-family:var(--mono);font-size:13px;color:var(--brand-ink);background:var(--brand-soft);border-radius:8px;padding:6px 10px;margin-bottom:10px;white-space:pre-wrap;word-break:break-word}
+  .expl .why{font-size:15.5px;color:var(--ink);line-height:1.65}
+  .expl .why b{color:var(--brand-ink)}
+  .expl .why code{font-family:var(--mono);font-size:12.8px;background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:0 5px;color:var(--brand-ink)}
+  .expl.idle .codeq{display:none}
+  .expl.idle .why{color:var(--muted)}
+  .term{background:#0e1017;border:1px solid #2a2f44;border-radius:var(--radius);padding:12px 16px 14px;font-family:var(--mono);font-size:13.5px;line-height:1.8;color:#d8dcea;margin-top:12px;min-height:82px;box-shadow:0 10px 26px rgba(0,0,0,.25)}
+  .term .thead{font-size:10.5px;letter-spacing:.12em;color:#6b7390;font-weight:700;margin-bottom:4px;display:flex;justify-content:space-between}
+  .term .tline{white-space:pre-wrap}
+  .term .tline.typing{animation:pop .25s ease}
+  .term .placeholder{color:#5f6785;font-style:italic}
+  .term .prompt{color:#6b7390}
+  @keyframes pop{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:none}}
+  .exnote{font-size:14px;color:var(--ink2);margin:-12px 0 20px 4px}
+
+  /* ---------- flip cards ---------- */
+  .flip{perspective:900px;cursor:pointer;min-height:170px}
+  .flip .inner{position:relative;width:100%;height:100%;min-height:170px;transition:transform .5s;transform-style:preserve-3d}
+  .flip.flipped .inner{transform:rotateY(180deg)}
+  .face{position:absolute;inset:0;backface-visibility:hidden;border-radius:var(--radius);border:1px solid var(--border);padding:20px;display:flex;flex-direction:column;justify-content:center;box-shadow:var(--shadow)}
+  .face.front{background:var(--surface)}
+  .face.front .big{font-family:var(--mono);font-size:28px;font-weight:700;color:var(--brand-ink)}
+  .face.front small{color:var(--muted);margin-top:8px;font-size:12.5px}
+  .face.back{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;transform:rotateY(180deg);border:none}
+  .face.back p{font-size:14px;line-height:1.55}
+
+  /* ---------- pipeline ---------- */
+  .pipe{display:flex;align-items:stretch;flex-wrap:wrap;margin:18px 0 14px;gap:0}
+  .pnode{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px;text-align:center;flex:1;min-width:120px;cursor:pointer;box-shadow:var(--shadow)}
+  .pnode b{display:block;font-size:14px}
+  .pnode span{color:var(--muted);font-size:12px}
+  .pnode:hover,.pnode.hot{border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft)}
+  .parrow{display:flex;align-items:center;color:var(--brand);font-size:22px;padding:0 8px}
+
+  /* ---------- bug hunt ---------- */
+  .cl.bugline{cursor:pointer}
+  .cl.bugline:hover{background:var(--hl)}
+  .cl.bugline.found{background:#3a1f22;border-left-color:var(--bad)}
+  .cl.bugline.wrongpick{background:#1e3a2c;border-left-color:var(--good)}
+  .buglabel{margin-left:14px;font-family:var(--sans);font-size:12px;border-radius:5px;padding:1px 8px;white-space:normal}
+  .buglabel.err{background:var(--bad);color:#fff}
+  .buglabel.ok{background:var(--good);color:#fff}
+
+  /* ---------- quiz ---------- */
+  .q{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;margin-bottom:14px;box-shadow:var(--shadow)}
+  .q h3{margin-bottom:12px;font-size:16px}
+  .q .opt{display:block;width:100%;text-align:left;background:var(--surface2);color:var(--ink);border:1px solid var(--border);border-radius:9px;padding:10px 14px;margin-bottom:8px;cursor:pointer;font-size:14.5px;font-family:var(--sans)}
+  .q .opt code{font-family:var(--mono);font-size:13px}
+  .q .opt:hover:not(:disabled){border-color:var(--brand);background:var(--brand-soft)}
+  .q .opt.right{border-color:var(--good);background:var(--good-soft);color:#bff5dd;font-weight:600}
+  .q .opt.wrong{border-color:var(--bad);background:var(--bad-soft);color:#ffc9c4}
+  .q .why{margin-top:10px;font-size:13.5px;color:var(--ink2);display:none}
+  .q .why.show{display:block}
+  #quizScore{font-family:var(--mono);color:var(--brand-ink);font-size:15px;margin-top:6px;font-weight:600}
+
+  /* ---------- bridge table ---------- */
+  .bridge{width:100%;border-collapse:separate;border-spacing:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);font-size:14px}
+  .bridge th{background:var(--surface2);text-align:left;padding:11px 14px;font-size:12.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2)}
+  .bridge td{padding:11px 14px;border-top:1px solid var(--border);vertical-align:top}
+  .bridge td code{font-family:var(--mono);font-size:12.8px;background:var(--surface2);border-radius:6px;padding:2px 7px;color:var(--brand-ink);white-space:nowrap}
+  .bridge td.arrow{color:var(--brand);font-weight:800;text-align:center;width:40px}
+  .cheat{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  @media(max-width:1000px){.cheat{grid-template-columns:1fr 1fr}}
+  @media(max-width:700px){.cheat{grid-template-columns:1fr}}
+  .cheat .card{padding:14px 16px}
+  .cheat .card h3{font-size:14px;margin-bottom:6px}
+  .cheat .card code{display:block;font-family:var(--mono);font-size:12.5px;color:var(--brand-ink);background:var(--brand-soft);border-radius:8px;padding:8px 10px;white-space:pre-wrap;margin-top:6px}
+  .hero{display:grid;grid-template-columns:1.1fr 1fr;gap:28px;align-items:start}
+  @media(max-width:900px){.hero{grid-template-columns:1fr}}
+
+  .grad{background:linear-gradient(90deg,#8b83ff,#c77dff);-webkit-background-clip:text;background-clip:text;color:transparent}
+  code.inline.big-inline{font-size:.8em;padding:2px 8px}
+  .hero{display:grid;grid-template-columns:1.15fr 1fr;gap:28px;align-items:start}
+  @media(max-width:900px){.hero{grid-template-columns:1fr}}
+  .score{font-family:var(--mono);color:var(--brand-ink);font-weight:600}
+  /* IPO */
+  .ipo{display:flex;align-items:stretch;gap:0;flex-wrap:wrap;margin:8px 0 16px}
+  .ipo-box{flex:1;min-width:200px;border-radius:16px;padding:18px;text-align:center;cursor:pointer;border:1px solid var(--border);background:var(--surface);box-shadow:var(--shadow);transition:transform .15s,box-shadow .15s}
+  .ipo-box:hover,.ipo-box.hot{transform:translateY(-3px)}
+  .ipo-box .ico{font-size:30px;margin-bottom:4px}
+  .ipo-box b{display:block;font-size:18px;letter-spacing:.08em}
+  .ipo-box span{display:block;color:var(--ink2);font-size:13.5px;margin:2px 0 8px}
+  .ipo-box code{font-family:var(--mono);font-size:12.5px;background:var(--code-bg);border-radius:8px;padding:4px 8px;color:var(--code-text);display:inline-block}
+  .ipo-box.in{border-top:4px solid #2ac3de}.ipo-box.in.hot{box-shadow:0 0 0 3px rgba(42,195,222,.35)}
+  .ipo-box.pr{border-top:4px solid #f5b83d}.ipo-box.pr.hot{box-shadow:0 0 0 3px rgba(245,184,61,.35)}
+  .ipo-box.out{border-top:4px solid #22c58b}.ipo-box.out.hot{box-shadow:0 0 0 3px rgba(34,197,139,.35)}
+  .ipo-arrow{display:flex;align-items:center;font-size:28px;color:var(--brand);padding:0 12px}
+  @media(max-width:860px){.ipo-arrow{width:100%;justify-content:center;transform:rotate(90deg);padding:4px 0}}
+  /* ladder */
+  .ladder{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin:4px 0 18px}
+  .rung{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:8px 14px;font-family:var(--mono);font-weight:700;color:var(--brand-ink);text-align:center;box-shadow:var(--shadow)}
+  .rung:nth-child(1){font-size:13px}.rung:nth-child(3){font-size:15px}.rung:nth-child(5){font-size:17px}.rung:nth-child(7){font-size:19px}
+  .ladnote{flex-basis:100%;color:var(--muted);font-size:13px;margin-top:4px}.rung:nth-child(9){font-size:19px}
+  .rung small{display:block;font-family:var(--sans);font-weight:500;color:var(--muted);font-size:11px}
+  .rarrow{color:var(--good);font-weight:800;font-size:20px}
+  /* mini tables & code blocks */
+  table.mini{width:100%;border-collapse:collapse;margin-top:10px;font-size:14px}
+  table.mini td{padding:6px 8px;border-top:1px solid var(--border);color:var(--ink2)}
+  table.mini td:first-child{white-space:nowrap}
+  table.mini code,code.block,.bridge td code{font-family:var(--mono);font-size:12.8px;background:var(--surface2);border-radius:6px;padding:2px 7px;color:var(--brand-ink)}
+  code.block{display:block;white-space:pre;padding:8px 10px;margin-top:8px;overflow-x:auto}
+  .q h3 code,.q .opt code,.expl .why code,.fwhy code{font-family:var(--mono);font-size:.88em;background:var(--surface2);border-radius:5px;padding:0 5px;color:var(--brand-ink)}
+  /* terminal (live) */
+  .term .tbody{min-height:40px}
+  .term .tsample{margin-top:10px;padding-top:8px;border-top:1px dashed #2a2f44;font-family:var(--sans);font-size:12px;color:#8a92ad}
+  .term .tsample code{font-family:var(--mono);color:#e0af68;background:#1a1e2e;border-radius:5px;padding:1px 6px}
+  .term .tsample span{color:#6b7390}
+  .tin{background:transparent;border:none;border-bottom:1px dashed #6d63ff;color:#7ee7ff;font-family:var(--mono);font-size:13.5px;outline:none;min-width:120px;width:45%;padding:0 2px;caret-color:#7ee7ff}
+  .tin::placeholder{color:#4d5575;font-style:italic}
+  .techo{color:#7ee7ff;font-weight:600}
+  .terr{color:#ff8a80;font-weight:600;white-space:pre-wrap}
+  .tdone{color:#5f6785;font-style:italic;font-family:var(--sans);font-size:12px;margin-top:4px}
+  .tdone.bad{color:#ff8a80;font-style:normal}
+  .term .tline{white-space:pre-wrap;tab-size:8;min-height:1.8em}
+  /* window mockup */
+  .wm-cap{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;color:var(--muted);font-weight:700;margin-bottom:6px}
+  .wm{background:#f3f4f8;border:1px solid #b8bdcf;border-radius:8px;box-shadow:0 10px 26px rgba(0,0,0,.35);overflow:hidden;max-width:300px}
+  .wm-title{background:linear-gradient(#fefefe,#e9eaf0);border-bottom:1px solid #c9cddc;padding:5px 10px;font-size:12px;color:#1b1f2e;display:flex;justify-content:space-between}
+  .wm-title span:last-child{color:#777;letter-spacing:2px;font-family:var(--mono)}
+  .wm-body{padding:14px;display:flex;flex-direction:column;gap:10px}
+  .wm-tb{background:#fff;border:1px solid #9aa0b4;border-radius:4px;padding:6px 8px;color:#1b1f2e;font-size:12.5px}
+  .wm-btn{display:inline-block;background:linear-gradient(#fdfdfd,#e4e6ee);border:1px solid #a9afc3;border-radius:4px;padding:5px 14px;color:#1b1f2e;font-size:12.5px}
+  .wm-lbl{color:#1b1f2e;font-size:13px;font-weight:600}
+  /* finder */
+  .finder .frow{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .finder label{font-weight:600;color:var(--ink2);font-size:14px;display:flex;align-items:center;gap:8px}
+  .finder select{background:var(--surface2);color:var(--ink);border:1px solid var(--border);border-radius:9px;padding:7px 10px;font-family:var(--mono);font-size:14px}
+  .farrow{color:var(--brand);font-size:22px;font-weight:800}
+  .fres{margin-top:14px}
+  .fbadge{display:inline-block;border-radius:20px;padding:3px 12px;font-size:12.5px;font-weight:700;background:var(--brand-soft);color:var(--brand-ink)}
+  .fbadge.g{background:var(--good-soft);color:#7ff0c3}.fbadge.w{background:var(--warn-soft);color:#fcd67a}.fbadge.r{background:var(--bad-soft);color:#ffb3ac}
+  .fcode{display:block;white-space:pre;font-family:var(--mono);font-size:14px;background:var(--code-bg);color:var(--code-text);border:1px solid var(--code-border);border-radius:10px;padding:10px 14px;margin:10px 0;overflow-x:auto}
+  .fwhy{color:var(--ink2);font-size:15px}
+  .fwhy b{color:var(--ink)}
+  /* practice */
+  .apph{font-size:19px;margin:24px 0 2px}
+  .challenge{background:var(--brand-soft);border:1px solid #3d4280;border-radius:12px;padding:11px 15px;color:var(--ink);font-size:14.5px;margin:-10px 0 18px}
+  details.sol{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px;box-shadow:var(--shadow)}
+  details.sol summary{cursor:pointer;padding:14px 18px;font-size:15px;color:var(--ink2);list-style:none}
+  details.sol summary::-webkit-details-marker{display:none}
+  details.sol summary::before{content:"▸  ";color:var(--brand);font-weight:800}
+  details.sol[open] summary::before{content:"▾  "}
+  details.sol summary::after{content:"show solution";float:right;font-size:12px;color:var(--brand-ink);background:var(--brand-soft);border-radius:20px;padding:2px 10px}
+  details.sol[open] summary::after{content:"hide"}
+  details.sol .ex{padding:0 16px;margin-top:4px}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="top">
+    <div class="logo">C#</div>
+    <div class="ttl">MAC 109 · Week 2: Input, Output &amp; Casting<small>LaGuardia Community College · MEC Department · Prof. K. Kassou</small></div>
+    <div class="right"><span>Hover code to read it · type into the terminal</span><div id="progressWrap" aria-hidden="true"><div id="progressBar"></div></div></div>
+  </div>
+  <nav id="tabstrip" aria-label="Sections"></nav>
+  <main id="stage"></main>
+  <div id="bottom">
+    <button id="prevBtn" class="ghost" aria-label="Previous section">◀ Back</button>
+    <button id="nextBtn" aria-label="Next section">Next ▶</button>
+    <span class="where" id="where"></span>
+    <div class="grow"></div>
+    <span class="hint">← → keys move between sections · click a code line to pin its explanation</span>
+  </div>
+</div>
+
+<template id="slides">
+
+<!-- Start -->
+<section data-tab="Start">
+  <p class="eyebrow">Week 2 · Lecture</p>
+  <h1>Input, Output &amp; Casting:<br>teaching your program to <span class="grad">talk and listen</span></h1>
+  <div class="hero">
+    <div>
+      <p class="sub">Last week your programs could only <b>talk</b>: they printed the same thing every time. Today they learn to <b>listen</b>. You'll ask the user questions, read their answers, turn text into numbers, and print results that look professional. That's the exact skill a GUI needs: every TextBox is input, and every label is output.</p>
+      <p class="pill">By the end of today you can</p>
+      <ul class="objlist">
+        <li>Explain the <b>Input → Process → Output</b> model that every program and every app follows</li>
+        <li>Print polished output with <code class="inline">Write</code>, <code class="inline">WriteLine</code>, escape sequences, and formats like <code class="inline">:F2</code></li>
+        <li>Read what the user types with <code class="inline">Console.ReadLine()</code>, and know why it's always a <b>string</b></li>
+        <li>Turn text into numbers with <code class="inline">int.Parse</code>, <code class="inline">double.Parse</code>, <code class="inline">decimal.Parse</code>, and back with <code class="inline">ToString()</code></li>
+        <li><b>Cast</b> between number types, and predict when data gets chopped or wrapped</li>
+        <li>Read input safely with <code class="inline">int.TryParse</code>, so your program never crashes</li>
+      </ul>
+      <div class="tip">⌨️ <b>New this week:</b> the terminals are <b>live</b>. Press <b>▶ Run</b>, and when the program asks a question, <b>type your answer and press Enter</b>, just like a real console. Press Enter on an empty line to use the sample answer. Try weird answers too: that's how you learn what crashes.</div>
+    </div>
+    <div>
+      <div class="card">
+        <span class="pill g">Quick recap · Week 1</span>
+        <h3>You already know…</h3>
+        <p>✔ the program suit: <code class="inline">using System;</code> · <code class="inline">class Program</code> · <code class="inline">static void Main()</code><br>
+        ✔ <code class="inline">Console.WriteLine("…");</code> prints a line<br>
+        ✔ variables have a <b>type</b>: <code class="inline">int</code>, <code class="inline">double</code>, <code class="inline">decimal</code>, <code class="inline">string</code>, <code class="inline">bool</code>…<br>
+        ✔ <code class="inline">"25" + 1</code> is <code class="inline">"251"</code> (text glues!)<br>
+        ✔ <code class="inline">7 / 2</code> is <code class="inline">3</code> (int division!)</p>
+      </div>
+      <div class="card" style="margin-top:14px">
+        <span class="pill">Today's 3 keywords</span>
+        <p><b>Input</b>: data coming <i>into</i> the program (the keyboard).<br><b>Output</b>: data going <i>out</i> (the screen).<br><b>Casting</b>: changing a value from one type to another.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- IPO -->
+<section data-tab="Big Idea">
+  <p class="eyebrow">01 · The big idea</p>
+  <h2>Every program does three things: <span class="grad">Input → Process → Output</span></h2>
+  <p class="sub">An ATM reads your PIN and amount (<b>input</b>), checks your balance (<b>process</b>), and gives you cash plus a receipt (<b>output</b>). A calculator, a game, Instagram: all the same three steps. Click each box.</p>
+  <div class="ipo" id="ipo">
+    <div class="ipo-box in" data-i="0"><div class="ico">⌨️</div><b>INPUT</b><span>the user types</span><code>Console.ReadLine()</code></div>
+    <div class="ipo-arrow">→</div>
+    <div class="ipo-box pr" data-i="1"><div class="ico">⚙️</div><b>PROCESS</b><span>convert + calculate</span><code>int.Parse(…) · (int)x · a + b</code></div>
+    <div class="ipo-arrow">→</div>
+    <div class="ipo-box out" data-i="2"><div class="ico">🖥️</div><b>OUTPUT</b><span>show the result</span><code>Console.WriteLine(…)</code></div>
+  </div>
+  <div class="expl" id="ipoInfo"><div class="lbl">Click a box ↑</div><div class="why" id="ipoText">Every program today follows these three steps, and so will every window you build this semester.</div></div>
+  <h3 style="margin:26px 0 10px">Four words to own today (flip the cards)</h3>
+  <div class="grid4">
+    <div class="flip" tabindex="0" role="button" aria-label="Flip: Input"><div class="inner">
+      <div class="face front"><span class="big">Input</span><small>▸ click to flip</small></div>
+      <div class="face back"><p><b>Input</b> is any data that enters your program while it runs. Today: text typed on the keyboard. Next week: text typed into a TextBox.</p></div></div></div>
+    <div class="flip" tabindex="0" role="button" aria-label="Flip: Output"><div class="inner">
+      <div class="face front"><span class="big">Output</span><small>▸ click to flip</small></div>
+      <div class="face back"><p><b>Output</b> is any data your program shows or sends out. Today: text in the terminal. Next week: text on a label in your window.</p></div></div></div>
+    <div class="flip" tabindex="0" role="button" aria-label="Flip: Parsing"><div class="inner">
+      <div class="face front"><span class="big">Parsing</span><small>▸ click to flip</small></div>
+      <div class="face back"><p><b>Parsing</b> means reading text and building the value it describes: the text <b>"25"</b> becomes the number <b>25</b>. Tool: <code>int.Parse</code>.</p></div></div></div>
+    <div class="flip" tabindex="0" role="button" aria-label="Flip: Casting"><div class="inner">
+      <div class="face front"><span class="big">Casting</span><small>▸ click to flip</small></div>
+      <div class="face back"><p><b>Casting</b> changes a value from one number type to another: the double <b>3.9</b> becomes the int <b>3</b>. Syntax: <code>(int)x</code>.</p></div></div></div>
+  </div>
+</section>
+
+<!-- Output -->
+<section data-tab="Output">
+  <p class="eyebrow">02 · Output: making your program talk nicely</p>
+  <h2>Output: <code class="inline big-inline">Write</code>, <code class="inline big-inline">WriteLine</code>, special characters &amp; number formats</h2>
+  <p class="sub">You know <code class="inline">Console.WriteLine</code>. Now let's make output <b>look good</b>: stay on one line, add tabs and quotes, and show money as <b>$4.50</b> instead of <b>4.5</b>. Hover each line, then press ▶ Run.</p>
+  <div class="ex" data-ex="output"></div>
+  <div class="grid2">
+    <div class="card"><span class="pill">Escape sequences</span><h3>Special characters inside " "</h3>
+      <table class="mini"><tr><td><code>\n</code></td><td>new line</td></tr><tr><td><code>\t</code></td><td>tab (jump to next column)</td></tr><tr><td><code>\"</code></td><td>a quote mark inside text</td></tr><tr><td><code>\\</code></td><td>one backslash</td></tr></table></div>
+    <div class="card"><span class="pill">Number formats</span><h3>Put a format after a colon: <code class="inline">{x:F2}</code></h3>
+      <table class="mini"><tr><td><code>{x:F2}</code></td><td>4.5 → <b>4.50</b> (2 decimals)</td></tr><tr><td><code>{x:F0}</code></td><td>1234.56 → <b>1235</b> (rounded)</td></tr><tr><td><code>{x:N2}</code></td><td>1234.56 → <b>1,234.56</b></td></tr><tr><td><code>x.ToString("F2")</code></td><td>same as {x:F2}, outside a $-string</td></tr></table></div>
+  </div>
+  <div class="tip">🧪 <b>Try it:</b> copy the program into VS Code and change <code class="inline">F2</code> to <code class="inline">F4</code>, then add a line <code class="inline">Console.WriteLine("A\tB\tC");</code>. Predict first, then run.</div>
+</section>
+
+<!-- Input -->
+<section data-tab="Input">
+  <p class="eyebrow">03 · Input: making your program listen</p>
+  <h2><code class="inline big-inline">Console.ReadLine()</code>: wait, listen, give back a <span class="grad">string</span></h2>
+  <p class="sub">ReadLine does three things: it <b>pauses</b> the program, <b>waits</b> for the user to type and press Enter, then <b>gives back</b> everything they typed as a <b>string</b>. Press ▶ Run below and <b>have a conversation</b> with your program.</p>
+  <div class="ex" data-ex="readline"></div>
+  <div class="grid3">
+    <div class="card"><span class="pill">The pattern</span><h3>Prompt, then read</h3><code class="block">Console.Write("Question? ");
+string answer = Console.ReadLine();</code><p>Always ask first. A blinking cursor with no question confuses users.</p></div>
+    <div class="card"><span class="pill g">Why Write, not WriteLine?</span><h3>Keep the cursor on the line</h3><p>With <code class="inline">Write</code> the user types right next to the question: <i>What is your name? Maria</i>. With WriteLine they'd type on the line below. Both work; Write looks nicer.</p></div>
+    <div class="card"><span class="pill w">VS Code warning?</span><h3>A squiggle is not an error</h3><p>VS Code may underline <code class="inline">Console.ReadLine()</code> with "possible null value". It's a <b>warning</b>, and the program still runs. (ReadLine returns null only if input is closed.) Optional silencer: <code class="inline">Console.ReadLine() ?? ""</code></p></div>
+  </div>
+  <div class="note">⚠️ <b>Running in VS Code:</b> press <span class="kbd">F5</span> or use <b>Run ▸ Start Debugging</b>. If typing doesn't work in the Debug Console, open <b>Terminal ▸ New Terminal</b> and run it there. Most online C# compilers have an <b>input/stdin</b> box: type all answers there, one per line, <i>before</i> running.</div>
+</section>
+
+<!-- Parse -->
+<section data-tab="Text → Number">
+  <p class="eyebrow">04 · Reading numbers</p>
+  <h2>The #1 input problem: <span class="grad">"19" is not 19</span></h2>
+  <p class="sub">When a user types <b>19</b>, ReadLine hands you the <b>text</b> "19": two characters, like letters in a word. You can't do math with text. <b>Parse</b> reads the text and builds the real number. Run it with your age, then run it again and type <b>abc</b>.</p>
+  <div class="ex" data-ex="parse"></div>
+  <div class="grid2" style="margin-bottom:22px">
+    <div class="card"><span class="pill">The Parse family</span><h3>One Parse per type</h3>
+      <table class="mini"><tr><td><code>int.Parse("25")</code></td><td>→ 25</td></tr><tr><td><code>double.Parse("3.75")</code></td><td>→ 3.75</td></tr><tr><td><code>decimal.Parse("19.99")</code></td><td>→ 19.99 (money)</td></tr><tr><td><code>bool.Parse("true")</code></td><td>→ true</td></tr><tr><td><code>char.Parse("A")</code></td><td>→ 'A'</td></tr></table></div>
+    <div class="card"><span class="pill r">💥 When Parse crashes</span><h3>An <i>exception</i></h3><p>If the text isn't a valid number (<i>abc</i>, <i>twenty</i>, an empty line, or <i>3.5</i> for int.Parse), the program stops with a <b>FormatException</b>: C#'s way of saying "I can't build a number from that." A crash is not a disaster; it's a message. Read it, then fix the input or use <b>TryParse</b> (two tabs ahead).</p></div>
+  </div>
+  <h3 style="margin-bottom:4px">Read two numbers, calculate everything</h3>
+  <p class="sub" style="margin-bottom:6px">The one-line pattern you'll type most this semester: <code class="inline">double a = double.Parse(Console.ReadLine());</code> Read it <b>inside out</b>: read text → parse it → store it.</p>
+  <div class="ex" data-ex="calc"></div>
+</section>
+
+<!-- Casting -->
+<section data-tab="Casting">
+  <p class="eyebrow">05 · Casting between number types</p>
+  <h2>Casting: moving a value into a <span class="grad">different-sized box</span></h2>
+  <p class="sub">Each number type is a box of a certain size. Moving a value into a <b>bigger</b> box is always safe, so C# does it for you (<b>implicit</b>). Moving into a <b>smaller</b> box might not fit, so you must write a <b>cast</b> (<b>explicit</b>): the type name in parentheses, like <code class="inline">(int)</code>.</p>
+  <div class="ladder" aria-label="Safe widening order">
+    <div class="rung">byte<small>1 B</small></div><div class="rarrow">→</div>
+    <div class="rung">int<small>4 B</small></div><div class="rarrow">→</div>
+    <div class="rung">long<small>8 B</small></div><div class="rarrow">→</div>
+    <div class="rung">double<small>8 B · decimals</small></div>
+    <span class="ladnote">Left to right = automatic. A double's <i>range</i> is far bigger than a long's, so it sits at the end. (decimal is its own island: int and long go in automatically, but double ↔ decimal always needs a cast.)</span>
+  </div>
+  <div class="grid2" style="margin-bottom:6px">
+    <div class="card"><span class="pill g">→ Implicit (automatic)</span><p>Follow the arrows <b>left to right</b> and C# converts for you: <code class="inline">double d = 10;</code> · <code class="inline">long big = someInt;</code>. Nothing can be lost. (<code class="inline">char</code> → <code class="inline">int</code> is automatic too, and int → decimal.)</p></div>
+    <div class="card"><span class="pill w">← Explicit (a cast)</span><p>Going <b>right to left</b> needs a cast: <code class="inline">int i = (int)9.99;</code> gives <b>9</b>. The decimals are <b>chopped</b>, not rounded. And if the number is too big for the box, it <b>wraps around</b>.</p></div>
+  </div>
+  <div class="ex" data-ex="cast"></div>
+  <h3 style="margin-bottom:4px">Casting inside math: the two classic surprises</h3>
+  <p class="sub" style="margin-bottom:6px">Surprise 1: the right side of <code class="inline">=</code> is computed first, <i>on its own</i>. Surprise 2: <code class="inline">byte + byte</code> is an <code class="inline">int</code>. Hover lines 10–24.</p>
+  <div class="ex" data-ex="castmath"></div>
+</section>
+
+<!-- Convert -->
+<section data-tab="Convert">
+  <p class="eyebrow">06 · Parse, Convert, ToString: which tool when?</p>
+  <h2>Casting is for numbers. <span class="grad">Text needs different tools.</span></h2>
+  <p class="sub">You can't cast text: <code class="inline">(int)"42"</code> is a compile error, because a string isn't a number of a different size; it's a different <i>kind</i> of thing. For text you use <b>Parse</b> or <b>Convert</b> going in, and <b>ToString()</b> going out.</p>
+  <div class="ex" data-ex="convert"></div>
+  <h3 style="margin:6px 0 10px">🔎 Conversion Finder: pick any two types</h3>
+  <div class="finder card">
+    <div class="frow">
+      <label>From <select id="fromT"></select></label>
+      <span class="farrow">→</span>
+      <label>To <select id="toT"></select></label>
+    </div>
+    <div class="fres"><span class="fbadge" id="fBadge"></span><code class="fcode" id="fCode"></code><div class="fwhy" id="fWhy"></div></div>
+  </div>
+  <table class="bridge" style="margin-top:16px">
+    <thead><tr><th>You have…</th><th>You want…</th><th>Use</th><th>Example</th></tr></thead>
+    <tbody>
+      <tr><td>text (string)</td><td>a number</td><td><b>Parse</b> / Convert</td><td><code>int.Parse(text)</code></td></tr>
+      <tr><td>text from a user</td><td>a number, safely</td><td><b>TryParse</b></td><td><code>int.TryParse(text, out int n)</code></td></tr>
+      <tr><td>any value</td><td>text</td><td><b>ToString()</b></td><td><code>total.ToString("F2")</code></td></tr>
+      <tr><td>a small number type</td><td>a bigger one</td><td>nothing (implicit)</td><td><code>double d = count;</code></td></tr>
+      <tr><td>a bigger number type</td><td>a smaller one</td><td>a <b>cast</b></td><td><code>(int)average</code></td></tr>
+      <tr><td>a double</td><td>a <i>rounded</i> int</td><td><b>Convert</b> / Math.Round</td><td><code>Convert.ToInt32(3.7)</code> → 4</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- TryParse -->
+<section data-tab="Safe Input">
+  <p class="eyebrow">07 · Safe input</p>
+  <h2><code class="inline big-inline">int.TryParse</code>: the Parse that <span class="grad">never crashes</span></h2>
+  <p class="sub">Users make typos. Real apps can't crash every time someone types "twenty". <b>TryParse</b> <i>tries</i> the conversion and tells you honestly whether it worked, as a <b>bool</b>. Run it with <b>21</b>, then with <b>abc</b>, then with an empty line.</p>
+  <div class="ex" data-ex="tryparse"></div>
+  <div class="grid3">
+    <div class="card"><span class="pill">Parse</span><h3>Trusts the input</h3><p>Great when the text is guaranteed to be a number (you wrote it yourself). Crashes on bad input.</p></div>
+    <div class="card"><span class="pill g">TryParse</span><h3>Checks the input</h3><p>Returns <code class="inline">true</code>/<code class="inline">false</code>, never crashes. The number comes out through <code class="inline">out int number</code>, or 0 if it failed.</p></div>
+    <div class="card"><span class="pill w">Coming soon</span><h3>+ if = friendly apps</h3><p><code class="inline">if (success) { … } else { … }</code> lets you print "Please type a number" instead of garbage. That's the decisions lecture.</p></div>
+  </div>
+</section>
+
+<!-- Practice -->
+<section data-tab="★ Practice Apps">
+  <p class="eyebrow">08 · Put it all together</p>
+  <h2>Three complete <span class="grad">Input → Process → Output</span> apps</h2>
+  <p class="sub">Each program is labeled with <code class="inline">// INPUT</code>, <code class="inline">// PROCESS</code>, <code class="inline">// OUTPUT</code>. Run each one here, then copy it into VS Code and complete the challenge below it.</p>
+  <h3 class="apph">🌡️ App 1 · Temperature Converter</h3>
+  <div class="ex" data-ex="temp"></div>
+  <p class="challenge">🎯 <b>Challenge:</b> add a second conversion: Celsius → Fahrenheit, using <code class="inline">f = c * 9 / 5 + 32</code>. Ask for the Celsius value with its own prompt.</p>
+  <h3 class="apph">🍽️ App 2 · Tip Calculator</h3>
+  <div class="ex" data-ex="tip"></div>
+  <p class="challenge">🎯 <b>Challenge:</b> also print the tip each person pays. Then run it and type <b>0</b> people. What happens, and why?</p>
+  <h3 class="apph">📝 App 3 · Grade Average</h3>
+  <div class="ex" data-ex="grades"></div>
+  <p class="challenge">🎯 <b>Challenge:</b> change <code class="inline">sum / 3.0</code> to <code class="inline">sum / 3</code> and run with 85, 92, 88. Explain the new output in one sentence. Then add a 4th exam.</p>
+</section>
+
+<!-- Bug Hunt -->
+<section data-tab="Bug Hunt">
+  <p class="eyebrow">09 · Find the type bugs</p>
+  <h2>🐞 Bug hunt: 4 input &amp; conversion errors</h2>
+  <p class="sub" style="margin-bottom:10px">This program won't compile. Every bug is about <b>types</b>: text vs numbers, big box vs small box. Hover to read each line, <b>click</b> the broken ones. <span id="bugScore" class="score">Found: 0 / 4</span></p>
+  <div class="ex">
+    <div class="codewin"><div class="bar"><span class="dots"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i></span><span class="fname">Program.cs</span><span class="tag">4 errors hiding</span></div><pre id="bugCode"></pre></div>
+    <div class="explain-panel"><div class="expl idle" id="bugExpl"><div class="lbl">Bug hunt</div><div class="codeq"></div><div class="why">Hover a line. Ask yourself: what <b>type</b> is on the right side of <b>=</b>, and what type is the box on the left?</div></div>
+      <div class="note" style="margin-top:12px">🔍 <b>Detective question for every line:</b> "What type does the right side produce? Does it fit the box on the left?" That one question finds all four bugs.</div>
+    </div>
+  </div>
+  <h3 style="margin-bottom:4px">✅ The fixed program: run it</h3>
+  <div class="ex" data-ex="bugfixed"></div>
+</section>
+
+<!-- Quiz -->
+<section data-tab="Quiz">
+  <p class="eyebrow">10 · Knowledge check</p>
+  <h2>Prove it to yourself</h2>
+  <p class="sub">Predict before you click. The explanations are where the learning happens.</p>
+  <div id="quizHost"></div>
+  <p id="quizScore">Score: 0 / 12</p>
+</section>
+
+<!-- GUI bridge -->
+<section data-tab="→ GUI Next">
+  <p class="eyebrow">11 · The bridge to next week</p>
+  <h2>Same Input → Process → Output, <span class="grad">new place on the screen</span></h2>
+  <p class="sub">In a window, the keyboard input comes from a <b>TextBox</b> and the output goes to a <b>TextBlock</b> (label). The middle, <b>Process</b>, doesn't change at all. And a TextBox's <code class="inline">.Text</code> is a <b>string</b>, exactly like ReadLine, so everything you learned about Parse today transfers directly.</p>
+  <table class="bridge">
+    <thead><tr><th>Today (console)</th><th></th><th>Next week (window)</th><th>Why it's the same</th></tr></thead>
+    <tbody>
+      <tr><td><code>string name = Console.ReadLine();</code></td><td class="arrow">→</td><td><code>string name = txtName.Text;</code></td><td>both give you a <b>string</b></td></tr>
+      <tr><td><code>int.Parse(Console.ReadLine())</code></td><td class="arrow">→</td><td><code>int.Parse(txtAge.Text)</code></td><td>text → number, same Parse</td></tr>
+      <tr><td><code>int.TryParse(text, out int n)</code></td><td class="arrow">→</td><td><code>int.TryParse(txtAge.Text, out int n)</code></td><td>safe input, same TryParse</td></tr>
+      <tr><td><code>Console.WriteLine($"Tip: {tip:F2}");</code></td><td class="arrow">→</td><td><code>lblResult.Text = $"Tip: {tip:F2}";</code></td><td>same string, different destination</td></tr>
+      <tr><td><code>Console.WriteLine(total);</code></td><td class="arrow">→</td><td><code>lblTotal.Text = total.ToString();</code></td><td>a label needs <b>text</b>: ToString()</td></tr>
+      <tr><td>pressing <b>Enter</b></td><td class="arrow">→</td><td>clicking a <b>Button</b></td><td>the moment processing starts</td></tr>
+    </tbody>
+  </table>
+  <p class="sub" style="margin-top:22px;margin-bottom:6px"><b>Read-only preview:</b> today's Tip Calculator as a window. Hover lines 22–25: you already understand them.</p>
+  <div class="ex" data-ex="guipreview"></div>
+</section>
+
+<!-- Wrap up -->
+<section data-tab="Wrap-Up">
+  <p class="eyebrow">12 · Before you leave</p>
+  <h2>Week 2: cheat sheet &amp; practice</h2>
+  <div class="cheat" style="margin-bottom:18px">
+    <div class="card"><h3>Output</h3><code>Console.Write("stay ");
+Console.WriteLine("new line");
+Console.WriteLine();   // empty line
+"\n  \t  \"  \\"</code></div>
+    <div class="card"><h3>Formatting</h3><code>$"{price:F2}"     → 4.50
+$"{total:N2}"     → 1,234.56
+$"{x:F0}"         → rounded
+x.ToString("F2")</code></div>
+    <div class="card"><h3>Input</h3><code>Console.Write("Name? ");
+string name = Console.ReadLine();
+// ReadLine ALWAYS returns a string</code></div>
+    <div class="card"><h3>Text → number</h3><code>int n    = int.Parse(Console.ReadLine());
+double d = double.Parse(text);
+decimal m = decimal.Parse(text);</code></div>
+    <div class="card"><h3>Safe input</h3><code>bool ok = int.TryParse(text, out int n);
+// ok: true/false   n: number or 0</code></div>
+    <div class="card"><h3>Casting</h3><code>double d = 10;       // implicit
+int i = (int)9.99;   // 9 (chops)
+(double)a / b        // real division
+(byte)300            // 44 (wraps)</code></div>
+    <div class="card"><h3>Number → text</h3><code>score.ToString()
+Convert.ToString(score)
+"" + score</code></div>
+    <div class="card"><h3>Cast vs Convert</h3><code>(int)3.7              → 3
+Convert.ToInt32(3.7)  → 4
+Math.Round(3.7)       → 4</code></div>
+    <div class="card"><h3>The IPO recipe</h3><code>// INPUT   prompt + ReadLine + Parse
+// PROCESS math on real numbers
+// OUTPUT  WriteLine with :F2</code></div>
+  </div>
+
+  <h3 style="margin-bottom:4px">🏋️ Practice programs: try first, then peek</h3>
+  <p class="sub" style="margin-bottom:12px">Write each one yourself in VS Code. Stuck? Open the solution: it's a complete, runnable program with line-by-line explanations.</p>
+  <details class="sol"><summary><b>1 · Birthday math:</b> ask for a name and birth year; print how old they turn in 2026.</summary><div class="ex" data-ex="s_age"></div></details>
+  <details class="sol"><summary><b>2 · Rectangle:</b> ask for width and height (decimals allowed); print area and perimeter with 2 decimals.</summary><div class="ex" data-ex="s_rect"></div></details>
+  <details class="sol"><summary><b>3 · Minutes → hours:</b> ask for total minutes; print hours and leftover minutes (hint: <code class="inline">/</code> and <code class="inline">%</code>).</summary><div class="ex" data-ex="s_minutes"></div></details>
+  <details class="sol"><summary><b>4 · Store receipt:</b> ask for item, price, quantity; add NYC sales tax (8.875%) and print a receipt.</summary><div class="ex" data-ex="s_receipt"></div></details>
+
+  <div class="grid2" style="margin-top:20px">
+    <div><ul class="checklist">
+      <li>Describe any program as <b>Input → Process → Output</b>.</li>
+      <li>Use <code class="inline">Write</code> vs <code class="inline">WriteLine</code>, <code class="inline">\n \t \" \\</code>, and <code class="inline">:F2</code> / <code class="inline">:N2</code>.</li>
+      <li>Prompt + <code class="inline">Console.ReadLine()</code>, and explain why the result is always a string.</li>
+      <li>Convert text with <code class="inline">Parse</code>, safely with <code class="inline">TryParse</code>, and back with <code class="inline">ToString()</code>.</li>
+      <li>Explain implicit vs explicit conversion; predict <code class="inline">(int)9.99</code>, <code class="inline">(byte)300</code>, and <code class="inline">7 / 2</code> vs <code class="inline">(double)7 / 2</code>.</li>
+    </ul></div>
+    <div class="card"><span class="pill">Next week: your first window</span><h3>Same skills, now with a mouse</h3><p>Next week you open the starter project and build a real window: a TextBox for input, a Button to start processing, and a label for output. Your very first click handler will contain a line you already know: <code class="inline">int.Parse(txtAge.Text)</code>.</p></div>
+  </div>
+</section>
+
+</template>
+
+<script>
+var CODE={"output": "using System;\n\nclass Program\n{\n    static void Main()\n    {\n        // Write stays on the line, WriteLine ends it\n        Console.Write(\"Loading\");\n        Console.Write(\"...\");\n        Console.WriteLine(\" done!\");\n\n        // Escape sequences: special characters inside quotes\n        Console.WriteLine(\"Line one\\nLine two\");\n        Console.WriteLine(\"Name:\\tMaria\");\n        Console.WriteLine(\"She said \\\"Hi!\\\"\");\n        Console.WriteLine(\"Folder: C:\\\\MAC109\");\n        Console.WriteLine();\n\n        // Formatting numbers inside $-strings\n        double price = 4.5;\n        double total = 1234.56;\n        Console.WriteLine($\"Price: {price}\");\n        Console.WriteLine($\"Price: {price:F2}\");\n        Console.WriteLine($\"Total: {total:N2}\");\n        Console.WriteLine($\"Rounded: {total:F0}\");\n    }\n}", "readline": "using System;\n\nclass Program\n{\n    static void Main()\n    {\n        Console.Write(\"What is your name? \");\n        string name = Console.ReadLine();\n\n        Console.Write(\"What is your favorite food? \");\n        string food = Console.ReadLine();\n\n        Console.WriteLine($\"Nice to meet you, {name}!\");\n        Console.WriteLine($\"{name} loves {food}. Great choice!\");\n    }\n}", "parse": "using System;\n\nclass Program\n{\n    static void Main()\n    {\n        Console.Write(\"How old are you? \");\n        string text = Console.ReadLine();\n\n        Console.WriteLine(\"Glued: \" + (text + 1));\n\n        int age = int.Parse(text);\n        Console.WriteLine(\"Added: \" + (age + 1));\n\n        Console.WriteLine($\"Next year you will be {age + 1}.\");\n        Console.WriteLine($\"In 10 years you will be {age + 10}.\");\n    }\n}", "calc": "using System;\n\nclass Program\n{\n    static void Main()\n    {\n        Console.WriteLine(\"=== Mini Calculator ===\");\n\n        Console.Write(\"First number:  \");\n        double a = double.Parse(Console.ReadLine());\n\n        Console.Write(\"Second number: \");\n        double b = double.Parse(Console.ReadLine());\n\n        Console.WriteLine($\"{a} + {b} = {a + b}\");\n        Console.WriteLine($\"{a} - {b} = {a - b}\");\n        Console.WriteLine($\"{a} * {b} = {a * b}\");\n        Console.WriteLine($\"{a} / {b} = {a / b:F2}\");\n    }\n}", "cast": "using System;\n\nclass Program\n{\n    static void Main()\n    {\n        // IMPLICIT: small box into a big box - automatic, nothing lost\n        int students = 32;\n        long bigCopy = students;\n        double asDouble = students;\n        Console.WriteLine(bigCopy);\n        Console.WriteLine(asDouble);\n\n        // EXPLICIT (a cast): big box into a small box - you must ask\n        double temperature = 72.9;\n        int wholeDegrees = (int)temperature;\n        Console.WriteLine(wholeDegrees);\n\n        // A cast chops the decimals - it does NOT round\n        Console.WriteLine((int)9.99);\n        Console.WriteLine((int)-9.99);\n\n        // When the value does not fit, it wraps around\n        int tooBig = 300;\n        byte squeezed = (byte)tooBig;\n        Console.WriteLine(squeezed);\n    }\n}", "castmath": "using System;\n\nclass Program\n{\n    static void Main()\n    {\n        int points = 7;\n        int games = 2;\n\n        // The right side is computed FIRST, as int / int\n        double wrong = points / games;\n        Console.WriteLine(wrong);\n\n        // Cast one side to double BEFORE dividing\n        double right = (double)points / games;\n        Console.WriteLine(right);\n\n        // byte + byte gives an int\n        byte a = 10;\n        byte b = 20;\n        int sum = a + b;\n        byte smallSum = (byte)(a + b);\n        Console.WriteLine(sum);\n        Console.WriteLine(smallSum);\n\n        // Every char has a number code\n        char letter = 'A';\n        int code = letter;\n        Console.WriteLine(code);\n        Console.WriteLine((char)(code + 1));\n    }\n}", "convert": "using System;\n\nclass Program\n{\n    static void Main()\n    {\n        // Text into a number\n        int a = int.Parse(\"42\");\n        double b = double.Parse(\"3.75\");\n        int c = Convert.ToInt32(\"42\");\n        Console.WriteLine(a + 1);\n        Console.WriteLine(b * 2);\n        Console.WriteLine(c + 1);\n\n        // A number into text\n        int score = 95;\n        string s1 = score.ToString();\n        string s2 = Convert.ToString(score);\n        string s3 = \"\" + score;\n        Console.WriteLine(s1 + s2 + s3);\n\n        // Cast vs Convert on a decimal number\n        double value = 3.7;\n        Console.WriteLine((int)value);\n        Console.WriteLine(Convert.ToInt32(value));\n\n        // Text into a bool\n        bool isOpen = bool.Parse(\"true\");\n        Console.WriteLine(isOpen);\n    }\n}", "tryparse": "using System;\n\nclass Program\n{\n    static void Main()\n    {\n        Console.Write(\"Type a whole number: \");\n        string text = Console.ReadLine();\n\n        bool success = int.TryParse(text, out int number);\n\n        Console.WriteLine($\"Did it work? {success}\");\n        Console.WriteLine($\"The number:  {number}\");\n        Console.WriteLine($\"Doubled:     {number * 2}\");\n    }\n}", "temp": "using System;\n\nclass Program\n{\n    static void Main()\n    {\n        Console.WriteLine(\"=== Temperature Converter ===\");\n\n        // INPUT\n        Console.Write(\"Temperature in Fahrenheit: \");\n        double fahrenheit = double.Parse(Console.ReadLine());\n\n        // PROCESS\n        double celsius = (fahrenheit - 32) * 5 / 9;\n\n        // OUTPUT\n        Console.WriteLine($\"{fahrenheit} F = {celsius:F1} C\");\n    }\n}", "tip": "using System;\n\nclass Program\n{\n    static void Main()\n    {\n        Console.WriteLine(\"=== Tip Calculator ===\");\n\n        // INPUT\n        Console.Write(\"Bill amount: $\");\n        decimal bill = decimal.Parse(Console.ReadLine());\n\n        Console.Write(\"Tip percent (e.g. 18): \");\n        int percent = int.Parse(Console.ReadLine());\n\n        Console.Write(\"Number of people: \");\n        int people = int.Parse(Console.ReadLine());\n\n        // PROCESS\n        decimal tip = bill * percent / 100;\n        decimal total = bill + tip;\n        decimal each = total / people;\n\n        // OUTPUT\n        Console.WriteLine();\n        Console.WriteLine($\"Tip:       ${tip:F2}\");\n        Console.WriteLine($\"Total:     ${total:F2}\");\n        Console.WriteLine($\"Each pays: ${each:F2}\");\n    }\n}", "grades": "using System;\n\nclass Program\n{\n    static void Main()\n    {\n        Console.WriteLine(\"=== Grade Average ===\");\n\n        // INPUT\n        Console.Write(\"Your name: \");\n        string name = Console.ReadLine();\n        Console.Write(\"Exam 1: \");\n        int exam1 = int.Parse(Console.ReadLine());\n        Console.Write(\"Exam 2: \");\n        int exam2 = int.Parse(Console.ReadLine());\n        Console.Write(\"Exam 3: \");\n        int exam3 = int.Parse(Console.ReadLine());\n\n        // PROCESS\n        int sum = exam1 + exam2 + exam3;\n        double average = sum / 3.0;\n        int wholePart = (int)average;\n\n        // OUTPUT\n        Console.WriteLine();\n        Console.WriteLine($\"Student: {name.ToUpper()}\");\n        Console.WriteLine($\"Total points: {sum}\");\n        Console.WriteLine($\"Average: {average:F2}\");\n        Console.WriteLine($\"Average as int: {wholePart}\");\n    }\n}", "bugfixed": "using System;\n\nclass Program\n{\n    static void Main()\n    {\n        Console.Write(\"Your name? \");\n        string name = Console.ReadLine();\n        Console.Write(\"How many tickets? \");\n        int tickets = int.Parse(Console.ReadLine());\n        Console.Write(\"Price per ticket? \");\n        double price = double.Parse(Console.ReadLine());\n\n        double total = tickets * price;\n        string message = total.ToString(\"F2\");\n        Console.WriteLine(name + \", your total is $\" + message);\n    }\n}", "bug": "using System;\n\nclass Program\n{\n    static void Main()\n    {\n        string name = Console.ReadLine(\"Your name? \");\n        Console.Write(\"How many tickets? \");\n        int tickets = Console.ReadLine();\n        Console.Write(\"Price per ticket? \");\n        double price = double.Parse(Console.ReadLine());\n\n        int total = tickets * price;\n        string message = total;\n        Console.WriteLine(name + \", your total is $\" + message);\n    }\n}", "s_age": "using System;\n\nclass Program\n{\n    static void Main()\n    {\n        Console.Write(\"Your name: \");\n        string name = Console.ReadLine();\n        Console.Write(\"Year you were born: \");\n        int birthYear = int.Parse(Console.ReadLine());\n\n        int age = 2026 - birthYear;\n\n        Console.WriteLine($\"{name}, you turn {age} in 2026.\");\n    }\n}", "s_rect": "using System;\n\nclass Program\n{\n    static void Main()\n    {\n        Console.Write(\"Width: \");\n        double width = double.Parse(Console.ReadLine());\n        Console.Write(\"Height: \");\n        double height = double.Parse(Console.ReadLine());\n\n        double area = width * height;\n        double perimeter = 2 * (width + height);\n\n        Console.WriteLine($\"Area: {area:F2}\");\n        Console.WriteLine($\"Perimeter: {perimeter:F2}\");\n    }\n}", "s_minutes": "using System;\n\nclass Program\n{\n    static void Main()\n    {\n        Console.Write(\"Total minutes: \");\n        int totalMinutes = int.Parse(Console.ReadLine());\n\n        int hours = totalMinutes / 60;\n        int minutes = totalMinutes % 60;\n\n        Console.WriteLine($\"{totalMinutes} minutes = {hours} h {minutes} min\");\n    }\n}", "s_receipt": "using System;\n\nclass Program\n{\n    static void Main()\n    {\n        Console.Write(\"Item: \");\n        string item = Console.ReadLine();\n        Console.Write(\"Price: $\");\n        decimal price = decimal.Parse(Console.ReadLine());\n        Console.Write(\"Quantity: \");\n        int quantity = int.Parse(Console.ReadLine());\n\n        decimal subtotal = price * quantity;\n        decimal tax = subtotal * 0.08875m;\n        decimal total = subtotal + tax;\n\n        Console.WriteLine();\n        Console.WriteLine($\"{quantity} x {item} @ ${price:F2}\");\n        Console.WriteLine($\"Subtotal: ${subtotal:F2}\");\n        Console.WriteLine($\"Tax:      ${tax:F2}\");\n        Console.WriteLine($\"Total:    ${total:F2}\");\n    }\n}", "guipreview": "// PREVIEW ONLY - you build this in next week's lab (needs the Avalonia starter).\nusing Avalonia.Controls;\nusing Avalonia.Interactivity;\n\nclass MainWindow : Window\n{\n    TextBox txtBill = new TextBox { Watermark = \"Bill amount\" };\n    TextBox txtPercent = new TextBox { Watermark = \"Tip percent\" };\n    Button btnCalc = new Button { Content = \"Calculate\" };\n    TextBlock lblResult = new TextBlock { Text = \"\" };\n\n    public MainWindow()\n    {\n        Title = \"Tip Calculator\";\n        Width = 320;\n        btnCalc.Click += BtnCalc_Click;\n        Content = new StackPanel { Spacing = 10, Children = { txtBill, txtPercent, btnCalc, lblResult } };\n    }\n\n    void BtnCalc_Click(object sender, RoutedEventArgs e)\n    {\n        decimal bill = decimal.Parse(txtBill.Text);     // was: Console.ReadLine()\n        int percent = int.Parse(txtPercent.Text);\n        decimal tip = bill * percent / 100;             // unchanged\n        lblResult.Text = $\"Tip: ${tip:F2}\";             // was: Console.WriteLine\n    }\n}"};
+/* ===== C#-behaviour helpers used by the simulations ===== */
+function CsCrash(type,msg){this.type=type;this.msg=msg;}
+var cs={
+  fmtErr:function(s){return new CsCrash('System.FormatException',"The input string '"+s+"' was not in a correct format.");},
+  intParse:function(s){
+    var t=String(s).trim();
+    if(!/^[+-]?\d+$/.test(t))throw cs.fmtErr(s);
+    var v=Number(t);
+    if(v>2147483647||v<-2147483648)throw new CsCrash('System.OverflowException','Value was either too large or too small for an Int32.');
+    return v;
+  },
+  dblParse:function(s){
+    var t=String(s).trim();
+    if(!/^[+-]?(\d[\d,]*(\.\d*)?|\.\d+)([eE][+-]?\d+)?$/.test(t))throw cs.fmtErr(s);
+    return Number(t.replace(/,/g,''));
+  },
+  decParse:function(s){
+    var t=String(s).trim();
+    if(!/^[+-]?(\d[\d,]*(\.\d*)?|\.\d+)$/.test(t))throw cs.fmtErr(s);
+    return Number(t.replace(/,/g,''));
+  },
+  tryInt:function(s){try{return [true,cs.intParse(s)];}catch(e){return [false,0];}},
+  i32:function(x){return x|0;},
+  d:function(x){ /* default double.ToString() in .NET 8 */
+    if(!isFinite(x))return isNaN(x)?'NaN':(x>0?'\u221e':'-\u221e');
+    if(x===0)return '0';
+    var a=Math.abs(x);
+    if(a>=1e15||a<1e-5){var e=x.toExponential().split('e');var ex=parseInt(e[1],10);return e[0]+'E'+(ex<0?'-':'+')+(Math.abs(ex)<10?'0':'')+Math.abs(ex);}
+    return String(x);
+  },
+  F:function(x,n){return isFinite(x)?x.toFixed(n):cs.d(x);},
+  N:function(x,n){return isFinite(x)?x.toLocaleString('en-US',{minimumFractionDigits:n,maximumFractionDigits:n}):cs.d(x);},
+  M:function(x,n){var p=Math.pow(10,n);return (Math.sign(x)*Math.round(Math.abs(x)*p+1e-7)/p).toFixed(n);}, /* decimal: round half away from zero */
+  b:function(v){return v?'True':'False';}
+};
+
+/* ===== Examples: code comes from CODE[key] (the real .cs files) ===== */
+var EX={};
+
+EX.output={file:'Program.cs',tag:'complete program',samples:[],
+  sim:async function(io){
+    io.write('Loading');io.write('...');io.writeLine(' done!');
+    io.writeLine('Line one\nLine two');io.writeLine('Name:\tMaria');io.writeLine('She said "Hi!"');io.writeLine('Folder: C:\\MAC109');io.writeLine('');
+    var price=4.5,total=1234.56;
+    io.writeLine('Price: '+cs.d(price));io.writeLine('Price: '+cs.F(price,2));io.writeLine('Total: '+cs.N(total,2));io.writeLine('Rounded: '+cs.F(total,0));
+  },
+  notes:{
+    7:'A comment labeling the first idea. Remember: comments are for humans; the compiler skips them.',
+    8:'<b>Write</b> prints the text and the cursor <b>stays right after it</b>, on the same line.',
+    9:'Still on the same line: now the screen shows <i>Loading...</i>',
+    10:'<b>WriteLine</b> prints and then <b>jumps to a new line</b>. Lines 8–10 together make one line: <i>Loading... done!</i>',
+    12:'An <b>escape sequence</b> is a backslash <b>\\</b> followed by a letter. It lets you type characters that are hard to type inside quotes.',
+    13:'<b>\\n</b> means "new line right here". One WriteLine, two lines on screen.',
+    14:'<b>\\t</b> is a <b>tab</b>: it jumps to the next column. Handy for lining things up.',
+    15:'<b>\\"</b> puts a real quote mark inside a string. Without the backslash, C# would think the string ended at the quote.',
+    16:'<b>\\\\</b> prints ONE backslash. Since \\ starts escape sequences, you need two to mean "a real backslash" (like in Windows folder paths).',
+    17:'WriteLine with <b>nothing</b> inside prints an <b>empty line</b>. A cheap way to add breathing room to your output.',
+    19:'Now: making numbers look nice.',
+    20:'A double: 4.5.',
+    21:'Another double: 1234.56.',
+    22:'Plain $-string: C# prints the number as short as possible, <b>4.5</b>. For money that looks wrong. We want $4.50.',
+    23:'<b>:F2</b> after the variable means "<b>F</b>ixed-point, <b>2</b> decimals". Prints <b>4.50</b>. Change 2 to 1 or 3 to see the difference. F2 is the format you will use most.',
+    24:'<b>:N2</b> means "<b>N</b>umber with thousands separators, 2 decimals": <b>1,234.56</b>. Great for big amounts.',
+    25:'<b>:F0</b> means zero decimals. It <b>rounds</b> to the nearest whole number: 1234.56 prints <b>1235</b>. Formatting only changes how it <i>looks</i>; the variable still holds 1234.56.'
+  }};
+
+EX.readline={file:'Program.cs',tag:'complete program · type your answers',samples:['Maria','pizza'],
+  sim:async function(io){
+    io.write('What is your name? ');var name=await io.readLine();
+    io.write('What is your favorite food? ');var food=await io.readLine();
+    io.writeLine('Nice to meet you, '+name+'!');io.writeLine(name+' loves '+food+'. Great choice!');
+  },
+  notes:{
+    7:'<b>The prompt.</b> Always tell the user what to type. We use <b>Write</b> (not WriteLine) so the cursor waits on the <b>same line</b>, right after the question mark and space.',
+    8:'<b>Console.ReadLine()</b> pauses the program and waits until the user types something and presses <b>Enter</b>. Whatever they typed comes back as a <b>string</b>, and we store it in <b>name</b>. Read the line right to left: "read a line from the keyboard, put it in name".',
+    9:'Blank line.',
+    10:'A second prompt, same shape.',
+    11:'A second ReadLine: the program pauses again. Each ReadLine reads exactly <b>one line</b>, one Enter press.',
+    12:'Blank line.',
+    13:'<b>OUTPUT</b> using what the user typed. The program doesn\u2019t know the name until it runs; that is the magic of input.',
+    14:'Variables can be used as many times as you like. Run it twice with different answers: same code, different conversation.'
+  }};
+
+EX.parse={file:'Program.cs',tag:'complete program · type a number (then try "abc")',samples:['19'],
+  sim:async function(io){
+    io.write('How old are you? ');var text=await io.readLine();
+    io.writeLine('Glued: '+(text+'1'));
+    var age=cs.intParse(text);
+    io.writeLine('Added: '+cs.i32(age+1));
+    io.writeLine('Next year you will be '+cs.i32(age+1)+'.');io.writeLine('In 10 years you will be '+cs.i32(age+10)+'.');
+  },
+  notes:{
+    7:'The prompt: ask for a number.',
+    8:'The user types <b>19</b>, but ReadLine <b>always</b> gives back a <b>string</b>: the characters \'1\' and \'9\', not the number nineteen.',
+    9:'Blank line.',
+    10:'<b>The problem, live.</b> text is a string, so <b>+</b> glues: "19" + 1 becomes <b>"191"</b>. The parentheses make C# do (text + 1) first.',
+    11:'Blank line.',
+    12:'<b>The fix: int.Parse.</b> It reads the text "19" and builds the real number 19. Now age is an <b>int</b> you can do math with. <b>Try typing abc:</b> Parse can\u2019t build a number from letters, so the program <b>crashes</b> with a FormatException. You\u2019ll learn the safe way (TryParse) later today.',
+    13:'age is an int, so + <b>adds</b>: prints <b>20</b>. Same + as line 10, different type, different result.',
+    14:'Blank line.',
+    15:'Math inside a $-string\u2019s braces works as long as the variable is a number.',
+    16:'age + 10: prints <b>29</b> for an input of 19.'
+  }};
+
+EX.calc={file:'Program.cs',tag:'complete program · type two numbers',samples:['7','2'],
+  sim:async function(io){
+    io.writeLine('=== Mini Calculator ===');
+    io.write('First number:  ');var a=cs.dblParse(await io.readLine());
+    io.write('Second number: ');var b=cs.dblParse(await io.readLine());
+    io.writeLine(cs.d(a)+' + '+cs.d(b)+' = '+cs.d(a+b));io.writeLine(cs.d(a)+' - '+cs.d(b)+' = '+cs.d(a-b));
+    io.writeLine(cs.d(a)+' * '+cs.d(b)+' = '+cs.d(a*b));io.writeLine(cs.d(a)+' / '+cs.d(b)+' = '+cs.F(a/b,2));
+  },
+  notes:{
+    7:'A title line. Output can be friendly and decorated.',
+    8:'Blank line.',
+    9:'The prompt. The extra spaces line up the two answers neatly.',
+    10:'<b>Read and convert in one line.</b> Work from the inside out: (1) Console.ReadLine() gets the text, (2) double.Parse turns it into a double, (3) the result goes into <b>a</b>. We use <b>double</b> so the user can type decimals like 2.5.',
+    11:'Blank line.',
+    12:'Second prompt.',
+    13:'Same pattern for b. Memorize this shape: <code>double x = double.Parse(Console.ReadLine());</code>',
+    14:'Blank line.',
+    15:'Four outputs, one per operation. The braces hold both the variables and the math.',
+    16:'Subtraction.',
+    17:'Multiplication.',
+    18:'Division with <b>:F2</b> so the answer always shows 2 decimals. Because a and b are doubles, 7 / 2 gives 3.5 here (no int-division trap!). <b>Try dividing by 0:</b> doubles don\u2019t crash; they print \u221e (infinity).'
+  }};
+
+EX.cast={file:'Program.cs',tag:'complete program',samples:[],
+  sim:async function(io){
+    io.writeLine('32');io.writeLine('32');io.writeLine('72');io.writeLine('9');io.writeLine('-9');io.writeLine('44');
+  },
+  notes:{
+    7:'<b>Implicit conversion</b>: going from a smaller type to a bigger one. Nothing can be lost, so C# does it automatically. No special syntax.',
+    8:'An int holding 32.',
+    9:'int into long: a long can hold every possible int, so this is automatic. Like pouring a small cup into a big bucket.',
+    10:'int into double: also automatic. Every whole number is also a valid decimal number.',
+    11:'Prints <b>32</b>.',
+    12:'Prints <b>32</b>. It is a double now, but a double with no fraction prints without ".0".',
+    13:'Blank line.',
+    14:'<b>Explicit conversion = a cast.</b> Going from a bigger type to a smaller one <i>might</i> lose information, so C# makes you write it out.',
+    15:'A double holding 72.9.',
+    16:'<b>(int)</b> in front of a value is a <b>cast</b>. It means: "I know this might lose something. Convert it anyway." Without (int) the compiler says: <i>Cannot implicitly convert type \'double\' to \'int\'</i>.',
+    17:'Prints <b>72</b>, not 73! Read the next two lines to see why.',
+    18:'Blank line.',
+    19:'The most important fact about casting to int.',
+    20:'(int)9.99 is <b>9</b>. A cast <b>chops off</b> everything after the decimal point (this is called <i>truncation</i>). It never rounds up.',
+    21:'For negatives it also chops toward zero: <b>-9</b>, not -10.',
+    22:'Blank line.',
+    23:'What if the value is simply too big for the smaller box?',
+    24:'300 fits easily in an int...',
+    25:'...but a byte only holds 0 to 255. The cast forces it anyway, and the value <b>wraps around</b> like a car odometer: 300 − 256 = 44. No error, just a wrong number. This is why casts deserve respect.',
+    26:'Prints <b>44</b>.'
+  }};
+
+EX.castmath={file:'Program.cs',tag:'complete program',samples:[],
+  sim:async function(io){io.writeLine('3');io.writeLine('3.5');io.writeLine('30');io.writeLine('30');io.writeLine('65');io.writeLine('B');},
+  notes:{
+    7:'7 points, an int.',
+    8:'2 games, an int.',
+    9:'Blank line.',
+    10:'<b>Big rule:</b> C# computes the right side of = first, all by itself, and only then stores it on the left.',
+    11:'The right side is int / int, so C# computes <b>7 / 2 = 3</b> (whole-number division). Only <i>then</i> does 3 go into the double. Declaring <b>wrong</b> as a double does not change how the right side was computed.',
+    12:'Prints <b>3</b>. The .5 was lost before it ever reached the double.',
+    13:'Blank line.',
+    14:'The fix: convert <i>before</i> the division happens.',
+    15:'<b>(double)points</b> turns 7 into 7.0 first. Now it\u2019s double / int, so C# does decimal division: <b>3.5</b>. The cast applies only to <b>points</b>, which is enough, because one double side makes the whole division a double.',
+    16:'Prints <b>3.5</b>.',
+    17:'Blank line.',
+    18:'A surprise many students ask about.',
+    19:'A byte holding 10.',
+    20:'A byte holding 20.',
+    21:'<b>a + b is an int, not a byte!</b> C# has no + for bytes: it first widens both to int, then adds. The result type is int (because 255 + 255 = 510 wouldn\u2019t fit in a byte). Storing it in an int is automatic.',
+    22:'To store it back in a byte you need a cast: <b>(byte)(a + b)</b>. The parentheses around a + b matter: add first, then cast. Without the cast: <i>Cannot implicitly convert type \'int\' to \'byte\'</i>.',
+    23:'Prints <b>30</b>.',
+    24:'Prints <b>30</b>. It fits, so nothing wrapped.',
+    25:'Blank line.',
+    26:'Bonus: characters are secretly numbers.',
+    27:'A char holding \'A\'.',
+    28:'char into int is <b>implicit</b>: every character has a number code. \'A\' is 65, \'B\' is 66, \'a\' is 97.',
+    29:'Prints <b>65</b>.',
+    30:'Add 1 to get 66, then <b>(char)</b> casts it back to a character: prints <b>B</b>. int into char needs a cast.'
+  }};
+
+EX.convert={file:'Program.cs',tag:'complete program',samples:[],
+  sim:async function(io){io.writeLine('43');io.writeLine('7.5');io.writeLine('43');io.writeLine('959595');io.writeLine('3');io.writeLine('4');io.writeLine('True');},
+  notes:{
+    7:'<b>Parsing</b> = reading text and building the value it describes.',
+    8:'<b>int.Parse</b> turns the text "42" into the int 42.',
+    9:'<b>double.Parse</b> turns "3.75" into the double 3.75. Every number type has its own Parse: decimal.Parse, long.Parse, byte.Parse\u2026',
+    10:'<b>Convert.ToInt32</b> does the same job as int.Parse. (Int32 is .NET\u2019s full name for int.) You will see both styles online; they are interchangeable for text.',
+    11:'Real numbers now, so + adds: <b>43</b>.',
+    12:'3.75 × 2 = <b>7.5</b>.',
+    13:'<b>43</b> again. Convert gave the same result.',
+    14:'Blank line.',
+    15:'The other direction: number into text.',
+    16:'An int: 95.',
+    17:'<b>.ToString()</b>: every value in C# can turn itself into text. This is the one you\u2019ll use most, especially next week: <code>lblScore.Text = score.ToString();</code>',
+    18:'<b>Convert.ToString</b> does the same thing.',
+    19:'Gluing with an empty string also converts, because + with text means glue.',
+    20:'All three are strings "95", so + glues them: <b>959595</b>. Proof that they are text, not numbers!',
+    21:'Blank line.',
+    22:'<b>Careful:</b> a cast and Convert are NOT the same for decimal numbers.',
+    23:'A double: 3.7.',
+    24:'<b>(int)</b> cast chops the decimals: <b>3</b>.',
+    25:'<b>Convert.ToInt32</b> rounds to the nearest whole number: <b>4</b>. Choose on purpose! (For exact .5 values Convert uses "banker\u2019s rounding": 2.5 becomes 2, 3.5 becomes 4.)',
+    26:'Blank line.',
+    27:'Text can become a bool too.',
+    28:'<b>bool.Parse</b> accepts "true" or "false" (any capitalization). Anything else crashes.',
+    29:'Prints <b>True</b>.'
+  }};
+
+EX.tryparse={file:'Program.cs',tag:'complete program · try 21, then try abc',samples:['21'],
+  sim:async function(io){
+    io.write('Type a whole number: ');var text=await io.readLine();
+    var r=cs.tryInt(text);
+    io.writeLine('Did it work? '+cs.b(r[0]));io.writeLine('The number:  '+r[1]);io.writeLine('Doubled:     '+cs.i32(r[1]*2));
+  },
+  notes:{
+    7:'The prompt.',
+    8:'Read the text. It could be "21"... or "abc"... or "twenty". We can\u2019t trust users!',
+    9:'Blank line.',
+    10:'<b>int.TryParse = Parse that never crashes.</b> It <i>tries</i> to convert text. It gives back a <b>bool</b>: true if it worked, false if not. The converted number comes out through <b>out int number</b>: this declares a new int variable named number and lets TryParse fill it in. If the text isn\u2019t a number, number is set to <b>0</b>.',
+    11:'Blank line.',
+    12:'Prints <b>True</b> for "21" and <b>False</b> for "abc". In a few weeks you\u2019ll use this bool with <b>if</b> to show a friendly message like "Please enter a number".',
+    13:'The number itself: <b>21</b>, or <b>0</b> if it failed.',
+    14:'Math works either way, and the program keeps running. No crash, ever. This is how real apps read input.'
+  }};
+
+EX.temp={file:'Program.cs',tag:'practice app · type a temperature',samples:['98.6'],
+  sim:async function(io){
+    io.writeLine('=== Temperature Converter ===');
+    io.write('Temperature in Fahrenheit: ');var f=cs.dblParse(await io.readLine());
+    var c=(f-32)*5/9;
+    io.writeLine(cs.d(f)+' F = '+cs.F(c,1)+' C');
+  },
+  notes:{
+    7:'A title line.',
+    8:'Blank line.',
+    9:'<b>INPUT</b> section. Labeling the three parts with comments keeps programs easy to read.',
+    10:'The prompt.',
+    11:'Read + parse into a double, so 98.6 works (int.Parse would crash on the decimal point).',
+    12:'Blank line.',
+    13:'<b>PROCESS</b> section: the formula.',
+    14:'The Fahrenheit-to-Celsius formula. Parentheses first: subtract 32, then × 5, then ÷ 9. The result is a double because fahrenheit is a double.',
+    15:'Blank line.',
+    16:'<b>OUTPUT</b> section.',
+    17:'<b>:F1</b> shows one decimal: 98.6 F = <b>37.0</b> C. Without it you might see 36.99999999999999 because of how doubles store decimals.'
+  }};
+
+EX.tip={file:'Program.cs',tag:'practice app · type 3 answers',samples:['60','18','3'],
+  sim:async function(io){
+    io.writeLine('=== Tip Calculator ===');
+    io.write('Bill amount: $');var bill=cs.decParse(await io.readLine());
+    io.write('Tip percent (e.g. 18): ');var percent=cs.intParse(await io.readLine());
+    io.write('Number of people: ');var people=cs.intParse(await io.readLine());
+    if(people===0)throw new CsCrash('System.DivideByZeroException','Attempted to divide by zero.');
+    var tip=bill*percent/100,total=bill+tip,each=total/people;
+    io.writeLine('');io.writeLine('Tip:       $'+cs.M(tip,2));io.writeLine('Total:     $'+cs.M(total,2));io.writeLine('Each pays: $'+cs.M(each,2));
+  },
+  notes:{
+    7:'A title line.',
+    8:'Blank line.',
+    9:'<b>INPUT</b>: three questions.',
+    10:'Prompt ends with $ so the user types just the number after it.',
+    11:'<b>decimal</b> for money, and <b>decimal.Parse</b> to read it. Same Parse pattern, different type.',
+    12:'Blank line.',
+    13:'Second prompt.',
+    14:'A whole-number percent: int.Parse.',
+    15:'Blank line.',
+    16:'Third prompt.',
+    17:'Number of people: int.Parse again.',
+    18:'Blank line.',
+    19:'<b>PROCESS</b>: three calculations, each building on the last.',
+    20:'decimal × int ÷ int. The int is <b>implicitly</b> converted to decimal (int fits inside decimal), so the result is an exact decimal: 60 × 18 ÷ 100 = <b>10.8</b>.',
+    21:'Bill plus tip.',
+    22:'Split the total. <b>Try 0 people:</b> unlike double, decimal division by zero <b>crashes</b> with DivideByZeroException.',
+    23:'Blank line.',
+    24:'<b>OUTPUT</b>: a neat receipt.',
+    25:'Empty line for spacing.',
+    26:'<b>$</b> inside the quotes is a literal dollar sign; the <b>$</b> before the quotes is what turns on {braces}. :F2 always shows cents: <b>$10.80</b>.',
+    27:'Total with cents.',
+    28:'Each person\u2019s share, rounded to cents for display.'
+  }};
+
+EX.grades={file:'Program.cs',tag:'practice app · type a name + 3 exam scores',samples:['Maria','85','92','88'],
+  sim:async function(io){
+    io.writeLine('=== Grade Average ===');
+    io.write('Your name: ');var name=await io.readLine();
+    io.write('Exam 1: ');var e1=cs.intParse(await io.readLine());
+    io.write('Exam 2: ');var e2=cs.intParse(await io.readLine());
+    io.write('Exam 3: ');var e3=cs.intParse(await io.readLine());
+    var sum=cs.i32(e1+e2+e3),avg=sum/3.0,whole=Math.trunc(avg);
+    io.writeLine('');io.writeLine('Student: '+name.toUpperCase());io.writeLine('Total points: '+sum);io.writeLine('Average: '+cs.F(avg,2));io.writeLine('Average as int: '+whole);
+  },
+  notes:{
+    7:'A title line.',
+    8:'Blank line.',
+    9:'<b>INPUT</b>: four questions.',
+    10:'Prompt for the name.',
+    11:'A name is text, so no Parse is needed. ReadLine already gives a string.',
+    12:'Prompt for exam 1.',
+    13:'Exam scores are whole numbers: int.Parse.',
+    14:'Prompt for exam 2.',
+    15:'Same pattern.',
+    16:'Prompt for exam 3.',
+    17:'Same pattern. Notice how repetitive input code is. In a few weeks, loops will shrink this.',
+    18:'Blank line.',
+    19:'<b>PROCESS</b>',
+    20:'Add three ints: the sum is an int (265 for 85, 92, 88).',
+    21:'<b>sum / 3.0</b>: the <b>.0</b> makes 3.0 a double, so this is decimal division: 88.333\u2026 Writing sum / 3 would give 88 (int division, the trap from the Casting tab).',
+    22:'A cast chops the decimals: <b>88</b>.',
+    23:'Blank line.',
+    24:'<b>OUTPUT</b>',
+    25:'Empty line for spacing.',
+    26:'Methods work right inside the braces: <b>.ToUpper()</b> shouts the name.',
+    27:'Prints the int sum.',
+    28:':F2 for a clean average: <b>88.33</b>.',
+    29:'The cast version: <b>88</b>. Same value, two different outputs, because of casting.'
+  }};
+
+EX.bugfixed={file:'Program.cs',tag:'the FIXED version · compiles & runs',samples:['Maria','3','12.5'],
+  sim:async function(io){
+    io.write('Your name? ');var name=await io.readLine();
+    io.write('How many tickets? ');var t=cs.intParse(await io.readLine());
+    io.write('Price per ticket? ');var p=cs.dblParse(await io.readLine());
+    var total=t*p;io.writeLine(name+', your total is $'+cs.F(total,2));
+  },
+  notes:{
+    7:'<b>Fix 1:</b> the prompt moved into its own Write. ReadLine takes <b>no</b> arguments: it can\u2019t print a question.',
+    8:'...and ReadLine just reads.',
+    9:'Prompt.',
+    10:'<b>Fix 2:</b> int.Parse around ReadLine. ReadLine returns a string, and a string can\u2019t go straight into an int.',
+    11:'Prompt.',
+    12:'This line was already correct.',
+    13:'Blank line.',
+    14:'<b>Fix 3:</b> total is now a <b>double</b>. int × double gives a double, and a double can\u2019t silently shrink into an int (the cents would be lost).',
+    15:'<b>Fix 4:</b> <b>.ToString("F2")</b> turns the number into text, with 2 decimals. A number can\u2019t be stored in a string variable without converting.',
+    16:'Glue it all together. 3 tickets × $12.50 = <b>$37.50</b>.'
+  }};
+
+EX.s_age={file:'Program.cs',tag:'solution',samples:['Maria','2006'],
+  sim:async function(io){io.write('Your name: ');var n=await io.readLine();io.write('Year you were born: ');var y=cs.intParse(await io.readLine());io.writeLine(n+', you turn '+cs.i32(2026-y)+' in 2026.');},
+  notes:{7:'Prompt.',8:'Text: no Parse needed.',9:'Prompt.',10:'A year is a whole number: int.Parse.',12:'PROCESS: simple subtraction.',14:'OUTPUT: glue it all into one friendly sentence.'}};
+
+EX.s_rect={file:'Program.cs',tag:'solution',samples:['4.5','2'],
+  sim:async function(io){io.write('Width: ');var w=cs.dblParse(await io.readLine());io.write('Height: ');var h=cs.dblParse(await io.readLine());io.writeLine('Area: '+cs.F(w*h,2));io.writeLine('Perimeter: '+cs.F(2*(w+h),2));},
+  notes:{7:'Prompt.',8:'double, so decimals like 4.5 are allowed.',9:'Prompt.',10:'Same pattern.',12:'Area = width × height.',13:'Perimeter = 2 × (width + height). The parentheses make the + happen first.',15:':F2 keeps the output tidy.',16:'Same format for the perimeter.'}};
+
+EX.s_minutes={file:'Program.cs',tag:'solution',samples:['135'],
+  sim:async function(io){io.write('Total minutes: ');var m=cs.intParse(await io.readLine());io.writeLine(m+' minutes = '+Math.trunc(m/60)+' h '+(m%60)+' min');},
+  notes:{7:'Prompt.',8:'int.Parse: minutes are whole numbers.',10:'<b>int / int</b> drops the remainder. Here that\u2019s exactly what we want: 135 / 60 = 2 whole hours.',11:'<b>%</b> gives the remainder: 135 % 60 = 15 minutes left over.',13:'Prints <b>135 minutes = 2 h 15 min</b>.'}};
+
+EX.s_receipt={file:'Program.cs',tag:'solution',samples:['Notebook','3.50','4'],
+  sim:async function(io){io.write('Item: ');var it=await io.readLine();io.write('Price: $');var p=cs.decParse(await io.readLine());io.write('Quantity: ');var q=cs.intParse(await io.readLine());
+    var sub=p*q,tax=sub*0.08875,tot=sub+tax;io.writeLine('');io.writeLine(q+' x '+it+' @ $'+cs.M(p,2));io.writeLine('Subtotal: $'+cs.M(sub,2));io.writeLine('Tax:      $'+cs.M(tax,2));io.writeLine('Total:    $'+cs.M(tot,2));},
+  notes:{7:'Prompt.',8:'Text: no Parse.',9:'Prompt ending in $.',10:'decimal for money.',11:'Prompt.',12:'int for a count.',14:'decimal × int: the int widens to decimal automatically.',15:'NYC sales tax is 8.875%. The <b>m</b> suffix makes 0.08875 a decimal literal; without it, it\u2019s a double and C# refuses to multiply decimal × double.',16:'Subtotal + tax.',18:'Spacing line.',19:'Receipt header: quantity, item, unit price.',20:'Subtotal with cents.',21:'Tax, rounded to cents for display.',22:'Grand total.'}};
+
+EX.guipreview={file:'MainWindow.cs',tag:'READ-ONLY preview · next week',samples:null,
+  window:{title:'Tip Calculator',rows:[['textbox','60'],['textbox','18'],['button','Calculate'],['label','Tip: $10.80']]},
+  notes:{
+    1:'A comment: this file is for reading today and building next week.',
+    2:'The GUI toolbox (Avalonia): Window, Button, TextBox, TextBlock. It comes with the starter project.',
+    3:'A second toolbox: where Click events live.',
+    5:'A window class: MainWindow <b>is a</b> Window.',
+    7:'TextBox #1: <b>this replaces the first Console.ReadLine()</b>. The user types the bill here.',
+    8:'TextBox #2 replaces the second ReadLine.',
+    9:'The button: the user clicks it instead of pressing Enter.',
+    10:'A TextBlock (label): <b>this replaces Console.WriteLine</b>. The answer appears here.',
+    12:'The constructor runs once, when the window opens.',
+    14:'Window title: a string property.',
+    15:'Window width: an int property.',
+    16:'"When clicked, run BtnCalc_Click."',
+    17:'Stack the four controls top to bottom.',
+    20:'The click handler: the whole program runs here, on every click.',
+    22:'<b>INPUT</b>: <code>decimal.Parse(txtBill.Text)</code>. Exactly today\u2019s pattern; txtBill.Text is a <b>string</b>, just like ReadLine\u2019s result.',
+    23:'Same for the percent: int.Parse on a TextBox\u2019s text.',
+    24:'<b>PROCESS</b>: identical to today\u2019s console version, character for character.',
+    25:'<b>OUTPUT</b>: instead of Console.WriteLine, we assign a string to the label\u2019s <b>Text</b> property, formatted with :F2 exactly like today.'
+  }};
+
+/* default explanations for the fixed "suit" lines */
+function defaultNote(line){
+  var t=line.trim();
+  if(t==='')return 'A blank line. The compiler ignores it; it\u2019s a paragraph break for humans.';
+  if(t==='using System;')return 'The toolbox line: gives this file access to <b>System</b>, where Console, Convert and Math live.';
+  if(t==='class Program')return 'The container class. Every C# program lives inside a class.';
+  if(t==='static void Main()')return 'The starting point: execution begins here and runs top to bottom.';
+  if(t==='{')return 'Opens a block. Every { needs its matching }.';
+  if(t==='}')return 'Closes a block: the partner of an earlier {.';
+  if(/^\/\//.test(t))return 'A comment: a note for humans. The compiler skips it.';
+  return null;
+}
+
+(function(){
+  "use strict";
+
+  /* ---------- syntax highlighter ---------- */
+  var KW=/^(using|class|static|void|int|double|string|bool|var|new|return|public|private|true|false|if|else|char|decimal|float|long|byte|out)$/;
+  function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function hl(line){
+    var out='',i=0,n=line.length;
+    while(i<n){
+      var ch=line[i];
+      if(ch==='/'&&line[i+1]==='/'){out+='<span class="c">'+esc(line.slice(i))+'</span>';break;}
+      if(ch==='"'||(ch==='$'&&line[i+1]==='"')){
+        var j=i+(ch==='$'?2:1);
+        while(j<n&&line[j]!=='"'){if(line[j]==='\\')j++;j++;}
+        j++;out+='<span class="s">'+esc(line.slice(i,j))+'</span>';i=j;continue;
+      }
+      if(ch==="'"){var q=line.indexOf("'",i+1);if(q>i){out+='<span class="s">'+esc(line.slice(i,q+1))+'</span>';i=q+1;continue;}}
+      if(/[A-Za-z_]/.test(ch)){
+        var j2=i;while(j2<n&&/[A-Za-z0-9_]/.test(line[j2]))j2++;
+        var w=line.slice(i,j2);
+        var after=/^\s*\(/.test(line.slice(j2));
+        var before=/new\s+$/.test(line.slice(0,i));
+        var cls=KW.test(w)?'k':before?'t':after?'m':/^[A-Z]/.test(w)?'t':'p';
+        out+='<span class="'+cls+'">'+esc(w)+'</span>';i=j2;continue;
+      }
+      if(/[0-9]/.test(ch)){var j3=i;while(j3<n&&/[0-9.m]/.test(line[j3]))j3++;out+='<span class="n">'+line.slice(i,j3)+'</span>';i=j3;continue;}
+      out+=esc(ch);i++;
+    }
+    return out;
+  }
+
+  /* ---------- live terminal ---------- */
+  function Terminal(host,samples){
+    this.host=host;this.samples=samples||[];this.token=0;
+    host.innerHTML='<div class="thead"><span>▶ RUN → TERMINAL</span><span class="prompt">'+(this.samples.length?'type answers + Enter':'output')+'</span></div><div class="tbody"><div class="placeholder">Press ▶ Run to start the program.'+(this.samples.length?' It will ask you questions: type in here!':' Predict the output first!')+'</div></div>'+
+      (this.samples.length?'<div class="tsample">Sample answers: '+this.samples.map(function(s){return '<code>'+esc(s)+'</code>';}).join(' · ')+' <span>(press Enter on an empty line to use them)</span></div>':'');
+    this.body=host.querySelector('.tbody');
+  }
+  Terminal.prototype.reset=function(){this.token++;this.body.innerHTML='';this.cur=null;this.newLine();this.si=0;return this.token;};
+  Terminal.prototype.newLine=function(){var d=document.createElement('div');d.className='tline typing';this.body.appendChild(d);this.cur=d;};
+  Terminal.prototype.write=function(s){
+    var parts=String(s).split('\n');
+    for(var i=0;i<parts.length;i++){
+      if(i>0)this.newLine();
+      if(parts[i])this.cur.appendChild(document.createTextNode(parts[i]));
+    }
+  };
+  Terminal.prototype.readLine=function(tok){
+    var self=this;var sample=this.samples[this.si++]||'';
+    return new Promise(function(resolve){
+      var inp=document.createElement('input');inp.className='tin';inp.type='text';inp.spellcheck=false;inp.autocomplete='off';
+      inp.placeholder=sample;inp.setAttribute('aria-label','Type your answer and press Enter');
+      self.cur.appendChild(inp);
+      try{inp.focus({preventScroll:true});}catch(e){inp.focus();}
+      inp.addEventListener('keydown',function(e){
+        if(e.key!=='Enter')return;
+        e.preventDefault();e.stopPropagation();
+        if(tok!==self.token)return;
+        var v=inp.value===''?sample:inp.value;
+        var sp=document.createElement('span');sp.className='techo';sp.textContent=v;
+        inp.replaceWith(sp);self.newLine();resolve(v);
+      });
+    });
+  };
+  Terminal.prototype.crash=function(err){
+    if(this.cur&&!this.cur.textContent&&!this.cur.children.length)this.cur.remove();
+    var d=document.createElement('div');d.className='tline terr';
+    d.textContent='Unhandled exception. '+err.type+': '+err.msg;this.body.appendChild(d);
+    var h=document.createElement('div');h.className='tline tdone bad';h.textContent='💥 The program crashed and stopped here. Every line after the crash never ran.';this.body.appendChild(h);
+  };
+  Terminal.prototype.done=function(){
+    if(this.cur&&!this.cur.textContent&&!this.cur.children.length)this.cur.remove();
+    var d=document.createElement('div');d.className='tline tdone';d.textContent='✔ program finished';this.body.appendChild(d);
+  };
+
+  /* ---------- hover-explain example ---------- */
+  function buildExample(host,key){
+    var ex=EX[key];var code=CODE[key];var lines=code.split('\n');
+    var win=document.createElement('div');win.className='codewin';
+    var bar=document.createElement('div');bar.className='bar';
+    bar.innerHTML='<span class="dots"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i></span><span class="fname">'+esc(ex.file)+'</span><span class="tag">'+esc(ex.tag)+'</span><span class="btns"></span>';
+    var btns=bar.querySelector('.btns');
+    var copy=document.createElement('button');copy.type='button';copy.textContent='Copy';btns.appendChild(copy);
+    var run=null;if(ex.sim){run=document.createElement('button');run.type='button';run.className='run';run.textContent='▶ Run';btns.appendChild(run);}
+    win.appendChild(bar);var pre=document.createElement('pre');win.appendChild(pre);
+
+    var panel=document.createElement('div');panel.className='explain-panel';
+    var expl=document.createElement('div');expl.className='expl idle';
+    expl.innerHTML='<div class="lbl"><span>Explanation</span><span class="pinbadge">📌 pinned: click again to unpin</span></div><div class="codeq"></div><div class="why">Hover any line of the code to read what it does. Click a line to pin it.</div>';
+    panel.appendChild(expl);
+    var codeq=expl.querySelector('.codeq'),why=expl.querySelector('.why'),lbl=expl.querySelector('.lbl span');
+
+    var term=null;
+    if(ex.sim){var th=document.createElement('div');th.className='term';panel.appendChild(th);term=new Terminal(th,ex.samples);}
+    else if(ex.window){
+      var w=ex.window,rows='';
+      w.rows.forEach(function(r){
+        if(r[0]==='textbox')rows+='<div class="wm-tb">'+esc(r[1])+'</div>';
+        if(r[0]==='button')rows+='<div><span class="wm-btn">'+esc(r[1])+'</span></div>';
+        if(r[0]==='label')rows+='<div class="wm-lbl">'+esc(r[1])+'</div>';
+      });
+      var wm=document.createElement('div');wm.style.marginTop='12px';
+      wm.innerHTML='<div class="wm-cap">▶ RUN → A WINDOW (after typing and clicking)</div><div class="wm"><div class="wm-title"><span>'+esc(w.title)+'</span><span>— ▢ ✕</span></div><div class="wm-body">'+rows+'</div></div>';
+      panel.appendChild(wm);
+    }
+
+    var pinned=null,rowEls=[];
+    function note(i){return ex.notes[i+1]||defaultNote(lines[i])||'';}
+    function show(i){expl.classList.remove('idle');lbl.textContent='Line '+(i+1);codeq.textContent=lines[i].trim()||'(blank line)';why.innerHTML=note(i);}
+    function idle(){if(pinned!==null){show(pinned);return;}expl.classList.add('idle');lbl.textContent='Explanation';why.innerHTML='Hover any line of the code to read what it does. Click a line to pin it.';}
+    lines.forEach(function(L,i){
+      var row=document.createElement('span');row.className='cl explain';row.tabIndex=0;row.setAttribute('role','button');
+      row.setAttribute('aria-label','Line '+(i+1)+': '+(L.trim()||'blank'));
+      row.innerHTML='<span class="ln">'+(i+1)+'</span><span class="src">'+(hl(L)||' ')+'</span>';
+      row.addEventListener('mouseenter',function(){if(pinned===null){rowEls.forEach(function(r){r.classList.remove('hot');});row.classList.add('hot');show(i);}});
+      row.addEventListener('mouseleave',function(){if(pinned===null){row.classList.remove('hot');idle();}});
+      row.addEventListener('focus',function(){if(pinned===null)show(i);});
+      row.addEventListener('click',function(){
+        if(pinned===i){pinned=null;row.classList.remove('pinned');expl.classList.remove('pinned');show(i);return;}
+        rowEls.forEach(function(r){r.classList.remove('pinned','hot');});
+        pinned=i;row.classList.add('pinned');expl.classList.add('pinned');show(i);
+      });
+      row.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();row.click();}});
+      pre.appendChild(row);rowEls.push(row);
+    });
+
+    copy.addEventListener('click',function(){
+      function ok(){copy.textContent='Copied ✓';setTimeout(function(){copy.textContent='Copy';},1600);}
+      if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(code).then(ok,ok);}
+      else{var ta=document.createElement('textarea');ta.value=code;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');}catch(e){}document.body.removeChild(ta);ok();}
+    });
+    if(run){
+      run.addEventListener('click',function(){
+        var tok=term.reset();run.textContent='↻ Restart';
+        var io={write:function(s){if(tok===term.token)term.write(s);},writeLine:function(s){if(tok===term.token)term.write((s===undefined?'':s)+'\n');},readLine:function(){return term.readLine(tok);}};
+        ex.sim(io).then(function(){if(tok===term.token){term.done();run.textContent='↻ Run again';}},
+          function(err){if(tok!==term.token)return;if(err instanceof CsCrash){term.crash(err);}else{term.crash({type:'Error',msg:String(err)});}run.textContent='↻ Run again';});
+      });
+    }
+    host.appendChild(win);host.appendChild(panel);
+  }
+
+  /* ---------- slides & tabs ---------- */
+  var tpl=document.getElementById('slides'),stage=document.getElementById('stage'),strip=document.getElementById('tabstrip');
+  var secs=tpl.content.querySelectorAll('section'),slides=[],tabs=[],visited={};
+  secs.forEach(function(sec,i){
+    var s=sec.cloneNode(true);s.classList.add('slide');stage.appendChild(s);slides.push(s);
+    var t=document.createElement('button');t.className='tab';t.type='button';t.innerHTML='<span class="dot"></span>'+sec.dataset.tab;
+    t.addEventListener('click',function(){go(i);});strip.appendChild(t);tabs.push(t);
+  });
+  stage.querySelectorAll('.ex[data-ex]').forEach(function(h){buildExample(h,h.dataset.ex);});
+  var cur=0,prevBtn=document.getElementById('prevBtn'),nextBtn=document.getElementById('nextBtn');
+  function go(i){
+    if(i<0||i>=slides.length)return;
+    slides[cur].classList.remove('active');tabs[cur].classList.remove('active');
+    if(visited[cur])tabs[cur].classList.add('done');visited[cur]=true;cur=i;
+    slides[cur].classList.add('active');tabs[cur].classList.add('active');
+    tabs[cur].scrollIntoView({inline:'nearest',block:'nearest'});slides[cur].scrollTop=0;
+    prevBtn.disabled=(cur===0);nextBtn.disabled=(cur===slides.length-1);
+    document.getElementById('progressBar').style.width=(cur/(slides.length-1)*100)+'%';
+    document.getElementById('where').textContent=(cur+1)+' / '+slides.length+' · '+secs[cur].dataset.tab;
+  }
+  prevBtn.addEventListener('click',function(){go(cur-1);});nextBtn.addEventListener('click',function(){go(cur+1);});
+  document.addEventListener('keydown',function(e){
+    var tg=e.target.tagName;if(tg==='INPUT'||tg==='TEXTAREA'||tg==='SELECT')return;
+    if(e.key==='ArrowRight')go(cur+1);if(e.key==='ArrowLeft')go(cur-1);
+  });
+
+  /* ---------- flip cards ---------- */
+  stage.querySelectorAll('.flip').forEach(function(f){
+    function tog(){f.classList.toggle('flipped');}
+    f.addEventListener('click',tog);f.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();tog();}});
+  });
+
+  /* ---------- IPO boxes ---------- */
+  var ipoInfo=[
+    '<b>INPUT</b>: data flows <i>into</i> the program. In the console: <code>Console.ReadLine()</code> waits for the user to type and press Enter. It <b>always</b> gives you a <b>string</b>, even when the user types digits. Next week: <code>txtName.Text</code> from a TextBox.',
+    '<b>PROCESS</b>: the program works on the data. Step one is usually <b>converting</b> the text into the right type (<code>int.Parse</code>, casting). Step two is the actual work: math, gluing text, decisions. The user never sees this part.',
+    '<b>OUTPUT</b>: results flow <i>out</i>. In the console: <code>Console.WriteLine</code>, formatted nicely with <code>:F2</code>. Next week: <code>lblResult.Text = …</code> puts the result on a label in your window.'
+  ];
+  var ipoBoxes=stage.querySelectorAll('#ipo .ipo-box');
+  ipoBoxes.forEach(function(b){
+    function sel(){ipoBoxes.forEach(function(x){x.classList.remove('hot');});b.classList.add('hot');document.getElementById('ipoText').innerHTML=ipoInfo[+b.dataset.i];}
+    b.addEventListener('click',sel);b.addEventListener('mouseenter',sel);
+  });
+
+  /* ---------- Conversion Finder ---------- */
+  var T=['string','int','double','decimal','long','byte','char','bool'];
+  var SAMPLE={int:'65',double:'65.7',decimal:'65.7m',long:'65L',byte:'65',char:"'A'",bool:'true'};
+  var SVAL={int:65,double:65.7,decimal:65.7,long:65,byte:65,char:65,bool:true};
+  var STXT={int:'"65"',double:'"65.7"',decimal:'"65.7"',long:'"65"',byte:'"65"',char:'"A"',bool:'"true"'};
+  var VAR={string:'text',int:'n',double:'d',decimal:'m',long:'big',byte:'small',char:'c',bool:'flag'};
+  var IMPLICIT={byte:['int','long','double','decimal'],int:['long','double','decimal'],long:['double','decimal'],char:['int','long','double','decimal']};
+  var CONVM={int:'ToInt32',double:'ToDouble',decimal:'ToDecimal',long:'ToInt64',byte:'ToByte',char:'ToChar',bool:'ToBoolean',string:'ToString'};
+  function show(v,t){
+    if(t==='char')return "'"+String.fromCharCode(v)+"'";
+    if(t==='bool')return v?'true':'false';
+    if(t==='string')return '"'+v+'"';
+    return String(v);
+  }
+  function finder(){
+    var f=document.getElementById('fromT').value,t=document.getElementById('toT').value;
+    var badge=document.getElementById('fBadge'),codeEl=document.getElementById('fCode'),whyEl=document.getElementById('fWhy');
+    var decl=(f==='string'?'string text = '+STXT[t==='string'?'int':t]:f+' '+VAR[f]+' = '+SAMPLE[f])+';';
+    var src=VAR[f],b,c,w;
+    if(f===t){b=['same','g','No conversion needed'];c=decl;w='It is already the type you want.';}
+    else if(f==='string'){
+      b=['parse','','Parse (text → '+t+')'];c=decl+'\n'+t+' '+VAR[t]+' = '+t+'.Parse(text);';
+      var val=t==='char'?"'A'":t==='bool'?'true':STXT[t].replace(/"/g,'');
+      w='Text can’t be cast. <b>'+t+'.Parse</b> reads the text and builds the value: <b>'+val+'</b>. It crashes if the text is invalid; for user input prefer <b>'+t+'.TryParse</b>'+(t==='bool'||t==='char'?'':'')+'.';
+    }
+    else if(t==='string'){b=['tostring','','ToString()'];c=decl+'\nstring text = '+src+'.ToString();';w='Every value can turn itself into text with <b>.ToString()</b>. Result: <b>'+(f==='bool'?'"True"':f==='char'?'"A"':'"'+(f==='double'||f==='decimal'?'65.7':'65')+'"')+'</b>'+(f==='bool'?' (capital T when converted to text).':'.');}
+    else if(f==='bool'||t==='bool'){
+      if(f==='char'||t==='char'){b=['none','r','Not possible'];c=decl+'\n// no conversion between char and bool';w='There is no meaningful conversion between a character and true/false. A cast won\u2019t compile, and Convert.ToBoolean(c) / Convert.ToChar(flag) compile but <b>crash</b> at runtime with an InvalidCastException.';}
+      else if(f==='bool'){b=['convert','w','Convert only (no cast)'];c=decl+'\n'+t+' '+VAR[t]+' = Convert.'+CONVM[t]+'(flag);';w='You can’t cast a bool to a number in C#. <b>Convert</b> maps true → <b>1</b>, false → <b>0</b>.';}
+      else {b=['convert','w','Convert only (no cast)'];c=decl+'\nbool flag = Convert.ToBoolean('+src+');';w='You can’t cast a number to bool. <b>Convert.ToBoolean</b> gives <b>false</b> for 0 and <b>true</b> for anything else (here: true). Clearer alternative: <code>'+src+' != 0</code>.';}
+    }
+    else if(IMPLICIT[f]&&IMPLICIT[f].indexOf(t)>=0){
+      b=['implicit','g','Implicit: automatic'];c=decl+'\n'+t+' '+VAR[t]+' = '+src+';';
+      w='A <b>'+t+'</b> can hold every possible <b>'+f+'</b> value, so nothing can be lost and C# converts automatically. Result: <b>'+(f==='char'?'65':'65')+'</b>'+(f==='char'?' (the character code of \'A\').':'.');
+    }
+    else {
+      var v=SVAL[f],r=Math.trunc(v);
+      b=['cast','w','Explicit: needs a cast'];c=decl+'\n'+t+' '+VAR[t]+' = ('+t+')'+src+';';
+      var res=(t==='double'||t==='decimal')?String(v):show(r,t);
+      w='A <b>'+t+'</b> can’t hold every <b>'+f+'</b> value'+((f==='double'||f==='decimal')&&t!=='double'&&t!=='decimal'?' (decimals get <b>chopped</b>)':'')+', so C# requires a cast: <b>('+t+')</b>. Result: <b>'+res+'</b>.'+(t==='byte'?' Values over 255 would wrap around.':'')+(t==='char'?' The number becomes the character with that code.':'')+(f==='double'&&t==='decimal'?' (double → decimal needs a cast because their precision rules differ.)':'');
+    }
+    badge.textContent=b[2];badge.className='fbadge '+b[1];codeEl.innerHTML=c.split('\n').map(hl).join('\n');whyEl.innerHTML=w;
+  }
+  var fromS=document.getElementById('fromT'),toS=document.getElementById('toT');
+  T.forEach(function(t){fromS.add(new Option(t,t));toS.add(new Option(t,t));});
+  fromS.value='string';toS.value='int';
+  fromS.addEventListener('change',finder);toS.addEventListener('change',finder);finder();
+
+  /* ---------- bug hunt ---------- */
+  var BUG={7:[true,'<b>Bug:</b> ReadLine takes <b>no arguments</b>; it can’t print a question. The compiler says <i>No overload for method \'ReadLine\' takes 1 arguments</i>. Fix: a separate <code>Console.Write("Your name? ");</code> first, then <code>Console.ReadLine()</code>.'],
+    9:[true,'<b>Bug:</b> ReadLine returns a <b>string</b>, but tickets is an <b>int</b> box. <i>Cannot implicitly convert type \'string\' to \'int\'</i>. Fix: <code>int.Parse(Console.ReadLine())</code>.'],
+    11:[false,'Correct: prompt was printed on line 10, and the text is parsed into a double.'],
+    13:[true,'<b>Bug:</b> int × double gives a <b>double</b> (e.g. 37.5). Putting it in an int would lose the cents, so C# refuses: <i>Cannot implicitly convert type \'double\' to \'int\'</i>. Fix: <code>double total = …</code>'],
+    14:[true,'<b>Bug:</b> a number can’t be stored in a string box. <i>Cannot implicitly convert type \'int\' to \'string\'</i>. Fix: <code>total.ToString("F2")</code>.'],
+    15:[false,'Correct: gluing strings. Once the bugs above are fixed, this prints the friendly total.']};
+  var bugLines=CODE.bug.split('\n'),bugPre=document.getElementById('bugCode'),bugExpl=document.getElementById('bugExpl'),found=0;
+  var bq=bugExpl.querySelector('.codeq'),bw=bugExpl.querySelector('.why');
+  bugLines.forEach(function(L,i){
+    var info=BUG[i+1]||[false,'Correct: '+(defaultNote(L)||'this line is fine.')];
+    var d=document.createElement('span');d.className='cl explain bugline';d.tabIndex=0;
+    d.innerHTML='<span class="ln">'+(i+1)+'</span><span class="src">'+(hl(L)||' ')+'</span>';
+    d.addEventListener('mouseenter',function(){bugExpl.classList.remove('idle');bq.textContent=L.trim()||'(blank line)';bw.innerHTML=d.dataset.done?info[1]:'Line '+(i+1)+'. Right side type? Left side box? <b>Click to decide.</b>';});
+    d.addEventListener('click',function(){
+      if(d.dataset.done)return;d.dataset.done='1';var tag=document.createElement('span');
+      if(info[0]){d.classList.add('found');found++;document.getElementById('bugScore').textContent='Found: '+found+' / 4'+(found===4?'  🎉 Type detective!':'');tag.className='buglabel err';tag.textContent='✗ bug';}
+      else{d.classList.add('wrongpick');tag.className='buglabel ok';tag.textContent='✓ fine';}
+      d.querySelector('.src').appendChild(tag);bw.innerHTML=info[1];
+    });
+    d.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();d.click();}});
+    bugPre.appendChild(d);
+  });
+
+  /* ---------- quiz ---------- */
+  var quiz=[
+    {q:'What type does <code>Console.ReadLine()</code> give back?',opts:['<code>int</code>','Whatever type the user typed','<code>string</code>, always','<code>char</code>'],a:2,why:'Always a string, even if the user types digits. Converting it is YOUR job (Parse / TryParse).'},
+    {q:'The user types <b>5</b>. What prints? <code>string t = Console.ReadLine(); Console.WriteLine(t + 5);</code>',opts:['<code>10</code>','<code>55</code>','<code>t5</code>','A compile error'],a:1,why:'t is the text "5", so + glues: "5" + 5 → "55". Parse it first to get 10.'},
+    {q:'Which line correctly reads a whole number from the user?',opts:['<code>int n = Console.ReadLine();</code>','<code>int n = (int)Console.ReadLine();</code>','<code>int n = int.Parse(Console.ReadLine());</code>','<code>int n = Console.ReadLine(int);</code>'],a:2,why:'ReadLine gives a string; int.Parse turns it into an int. You can’t cast text: (int)"5" is a compile error.'},
+    {q:'Why do we usually prompt with <code>Console.Write</code> instead of <code>WriteLine</code>?',opts:['Write is faster','So the user types on the same line as the question','WriteLine can’t print questions','ReadLine only works after Write'],a:1,why:'Write leaves the cursor right after the prompt, so the answer appears next to the question. Both work; Write just looks nicer.'},
+    {q:'What does <code>$"{4.5:F2}"</code> produce?',opts:['<code>4.5</code>','<code>4.50</code>','<code>5</code>','<code>4.5F2</code>'],a:1,why:':F2 = fixed-point with 2 decimals. It changes only how the number looks.'},
+    {q:'What is stored? <code>int x = (int)8.9;</code>',opts:['<code>9</code>','<code>8</code>','<code>8.9</code>','A compile error'],a:1,why:'Casting to int chops off the decimals (truncation). It never rounds. Use Convert.ToInt32 or Math.Round to get 9.'},
+    {q:'Which line compiles WITHOUT a cast?',opts:['<code>int i = 3.5;</code>','<code>byte b = someInt;</code>','<code>double d = 10;</code>','<code>int i = someLong;</code>'],a:2,why:'int → double is widening (small box → big box), so it’s implicit. The others go from a bigger type into a smaller one and need a cast.'},
+    {q:'<code>double avg = 9 / 2;</code> What is avg?',opts:['<code>4.5</code>','<code>4</code>','<code>5</code>','<code>4.0</code> printed as 4.5'],a:1,why:'The right side is computed first as int / int = 4. Only then is 4 stored in the double. Fix: (double)9 / 2 or 9 / 2.0.'},
+    {q:'<code>byte a = 10, b = 20;</code> Why does <code>byte sum = a + b;</code> fail?',opts:['10 + 20 is too big for a byte','a + b produces an <code>int</code>, and int → byte needs a cast','bytes can’t be added','sum is a reserved word'],a:1,why:'C# widens bytes to int before adding, so the result type is int. Storing an int in a byte needs (byte)(a + b), or just use int sum.'},
+    {q:'The user types <b>abc</b> into <code>int.Parse(Console.ReadLine())</code>. What happens?',opts:['n becomes 0','n becomes -1','The program crashes with a FormatException','The compiler catches it'],a:2,why:'Parse can’t build a number from letters, so it throws a FormatException at runtime. The compiler can’t know what the user will type.'},
+    {q:'<code>bool ok = int.TryParse("abc", out int n);</code> What are ok and n?',opts:['ok = true, n = 0','ok = false, n = 0','It crashes','ok = false, n = "abc"'],a:1,why:'TryParse never crashes: it returns false and sets n to 0. That’s why real apps use it for user input.'},
+    {q:'Next week: <code>txtAge</code> is a TextBox. What type is <code>txtAge.Text</code>?',opts:['<code>int</code>','<code>string</code>, so you need <code>int.Parse(txtAge.Text)</code>','<code>TextBox</code>','It depends on what the user typed'],a:1,why:'Exactly like ReadLine: a TextBox’s Text is always a string. Today’s Parse skills transfer directly.'}
+  ];
+  var host=document.getElementById('quizHost'),score=0,answered=0;
+  quiz.forEach(function(Q,qi){
+    var box=document.createElement('div');box.className='q';
+    var h=document.createElement('h3');h.innerHTML=(qi+1)+'. '+Q.q;box.appendChild(h);
+    var why=document.createElement('p');why.className='why';why.innerHTML=Q.why;
+    Q.opts.forEach(function(o,oi){
+      var b=document.createElement('button');b.className='opt';b.type='button';b.innerHTML=o;
+      b.addEventListener('click',function(){
+        if(box.dataset.done)return;box.dataset.done='1';answered++;
+        box.querySelectorAll('.opt').forEach(function(x,xi){x.disabled=true;if(xi===Q.a)x.classList.add('right');});
+        if(oi===Q.a)score++;else b.classList.add('wrong');
+        why.classList.add('show');
+        document.getElementById('quizScore').textContent='Score: '+score+' / '+quiz.length+(answered===quiz.length?(score===quiz.length?'  🏆 Perfect!':'  · review the explanations, then try the practice apps.'):'');
+      });
+      box.appendChild(b);
+    });
+    box.appendChild(why);host.appendChild(box);
+  });
+
+  /* ---------- boot ---------- */
+  slides[0].classList.add('active');tabs[0].classList.add('active');prevBtn.disabled=true;
+  document.getElementById('where').textContent='1 / '+slides.length+' · '+secs[0].dataset.tab;
+})();
+</script>
+</body>
+</html>
