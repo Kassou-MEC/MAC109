@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>MAC 109 · Assignment 1 — C# Syntax</title>
+<style>
+:root{
+  --bg:#0f1220; --surface:#181c2e; --surface2:#222840; --border:#2f3654;
+  --ink:#eef0f8; --ink2:#c3c9dd; --muted:#9098b4;
+  --brand:#6d63ff; --brand2:#a45cff; --brand-soft:#2a2d55; --brand-ink:#c9c5ff;
+  --good:#22c58b; --good-soft:#12352b; --bad:#f06a60; --bad-soft:#3d1f23; --warn:#f5b83d; --warn-soft:#352b12;
+  --code-bg:#0a0d18; --code-border:#2a3150; --code-text:#e6e9f2; --code-ln:#5b627a;
+  --sans:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --mono:'JetBrains Mono','Cascadia Code',Consolas,Menlo,monospace;
+  --radius:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16.5px;line-height:1.55;-webkit-font-smoothing:antialiased;padding-bottom:96px}
+button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
+code,.mono{font-family:var(--mono);font-size:.92em}
+p code,li code,label code,.q code{background:var(--code-bg);border:1px solid var(--code-border);border-radius:6px;padding:1px 6px;color:var(--brand-ink)}
+.hidden{display:none !important}
+
+#top{position:sticky;top:0;z-index:20;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;padding:10px 20px;flex-wrap:wrap}
+#top .logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;font-family:var(--mono);font-weight:700;display:flex;align-items:center;justify-content:center;font-size:15px;flex:0 0 auto}
+#top .ttl{font-weight:700;font-size:15px}
+#top .ttl small{display:block;color:var(--muted);font-weight:500;font-size:12.5px}
+#top .right{margin-left:auto;color:var(--muted);font-size:13px;display:flex;align-items:center;gap:12px}
+#progressWrap{width:130px;height:6px;background:var(--surface2);border-radius:3px;overflow:hidden}
+#progressBar{height:100%;background:linear-gradient(90deg,var(--brand),var(--brand2));width:0;transition:width .3s}
+.chip{background:var(--brand-soft);color:var(--brand-ink);border-radius:999px;padding:3px 12px;font-weight:600;font-size:13px}
+
+main{max-width:880px;margin:0 auto;padding:26px 16px}
+h1{font-size:30px;line-height:1.2;margin-bottom:10px;text-wrap:balance}
+h2{font-size:21px;margin:34px 0 4px}
+.eyebrow{color:var(--brand-ink);font-weight:700;font-size:12.5px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}
+.sub{color:var(--ink2)}
+.partnote{color:var(--muted);font-size:14.5px;margin-bottom:14px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;margin:14px 0}
+.card.q{position:relative}
+.qhead{display:flex;gap:10px;align-items:baseline;margin-bottom:10px}
+.qnum{font-family:var(--mono);font-weight:700;color:var(--brand-ink);flex:0 0 auto}
+.qtext{font-weight:600;flex:1}
+.pts{color:var(--muted);font-size:13px;white-space:nowrap}
+ul.rules{margin:12px 0 0 20px;color:var(--ink2)}
+ul.rules li{margin:5px 0}
+
+.btn{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;border:0;border-radius:10px;padding:10px 20px;font-weight:700;cursor:pointer}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.ghost{background:var(--surface2);border:1px solid var(--border);color:var(--ink)}
+.btn.small{padding:6px 12px;font-size:13.5px}
+.btn:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,.opt:focus-within,.cl.click:focus-visible,.tokbtn:focus-visible{outline:2px solid var(--brand-ink);outline-offset:2px}
+input[type=text],select,textarea{background:var(--code-bg);border:1px solid var(--code-border);border-radius:10px;padding:9px 12px;width:100%}
+textarea{font-family:var(--mono);font-size:14.5px;resize:vertical}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.err{color:var(--bad);font-size:14px;margin-top:8px;min-height:20px}
+
+.opt{display:flex;gap:12px;align-items:flex-start;border:1px solid var(--border);background:var(--surface2);border-radius:10px;padding:10px 14px;margin:8px 0;cursor:pointer}
+.opt input{margin-top:5px;accent-color:var(--brand)}
+.opt.sel{border-color:var(--brand);background:var(--brand-soft)}
+.opt.right{border-color:var(--good);background:var(--good-soft)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+
+.codebox{background:var(--code-bg);border:1px solid var(--code-border);border-radius:10px;margin:10px 0;overflow-x:auto;padding:10px 0}
+.cl{display:flex;font-family:var(--mono);font-size:14px;line-height:1.7;color:var(--code-text);white-space:pre;padding-right:14px}
+.cl .ln{flex:0 0 42px;text-align:right;padding-right:14px;color:var(--code-ln);user-select:none}
+.cl.click{cursor:pointer}
+.cl.click:hover{background:#1a2036}
+.cl.sel{background:var(--warn-soft);box-shadow:inset 3px 0 0 var(--warn)}
+.cl.right{background:var(--good-soft);box-shadow:inset 3px 0 0 var(--good)}
+.cl.wrong{background:var(--bad-soft);box-shadow:inset 3px 0 0 var(--bad)}
+.cl.missed{box-shadow:inset 3px 0 0 var(--good)}
+.cl input{width:130px;padding:1px 8px;border-radius:6px;font-family:var(--mono);font-size:14px;border-color:var(--brand)}
+.outlabel{font-size:13px;color:var(--muted);margin:8px 0 4px}
+
+.tyrow{display:flex;align-items:center;gap:14px;padding:8px 0;border-bottom:1px solid var(--border)}
+.tyrow:last-child{border-bottom:0}
+.tyrow .lit{font-family:var(--mono);flex:1;color:var(--code-text)}
+.tyrow select{width:150px}
+.tray{display:flex;flex-wrap:wrap;gap:8px;min-height:46px;padding:8px;border-radius:10px;border:1px dashed var(--border);margin:8px 0}
+.tray.answer{border-style:solid;background:var(--code-bg);border-color:var(--code-border)}
+.tokbtn{font-family:var(--mono);font-size:14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:5px 11px;cursor:pointer;color:var(--code-text)}
+.tokbtn:disabled{cursor:default}
+.tray.answer .tokbtn{background:var(--brand-soft);border-color:var(--brand)}
+.tray .ph{color:var(--muted);font-size:13.5px;align-self:center}
+
+.fb{margin-top:12px;border-radius:10px;padding:10px 14px;font-size:14.5px;border:1px solid var(--border);background:var(--surface2);color:var(--ink2)}
+.fb b.ok{color:var(--good)} .fb b.no{color:var(--bad)} .fb b.part{color:var(--warn)}
+.fb pre{font-family:var(--mono);font-size:13.5px;margin-top:6px;white-space:pre-wrap;color:var(--code-text)}
+
+#bar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--border);padding:12px 20px;display:flex;gap:14px;align-items:center}
+#bar .grow{flex:1;color:var(--muted);font-size:13.5px}
+.codeout{font-family:var(--mono);font-size:13px;word-break:break-all;background:var(--code-bg);border:1px solid var(--code-border);border-radius:10px;padding:12px;max-height:150px;overflow:auto;margin:10px 0;user-select:all}
+.score{font-size:54px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1}
+.score small{font-size:20px;color:var(--muted);font-weight:600}
+.parts{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-top:16px}
+.parts div{background:var(--surface2);border-radius:10px;padding:8px 12px;font-size:13px;color:var(--muted)}
+.parts div b{display:block;color:var(--ink);font-size:17px;font-variant-numeric:tabular-nums}
+.sealed{border-color:var(--warn);background:var(--warn-soft)}
+#instr{border-color:var(--brand)}
+.rc{font-family:var(--mono);font-size:30px;font-weight:700;letter-spacing:.14em;color:var(--warn)}
+.tblwrap{overflow-x:auto;margin-top:12px}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--border);white-space:nowrap}
+th{color:var(--muted);font-weight:600;font-size:12.5px;text-transform:uppercase;letter-spacing:.04em}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+details summary{cursor:pointer;color:var(--brand-ink);font-weight:600;margin-top:14px}
+.keylist{font-family:var(--mono);font-size:13px;white-space:pre-wrap;color:var(--ink2);margin-top:8px}
+footer{max-width:880px;margin:0 auto;padding:0 16px 20px;color:var(--muted);font-size:13px}
+footer a{color:var(--muted)}
+@media (max-width:600px){h1{font-size:24px}.card{padding:16px}#top .ttl small{display:none}.tyrow{flex-wrap:wrap}}
+@media print{
+  body{background:#fff;color:#000;padding:0}
+  #top,#bar,footer,#instr,.noprint{display:none !important}
+  .card{border:1px solid #999;background:#fff;break-inside:avoid}
+  .codebox,.codeout,input,select,textarea,.opt,.tray,.tokbtn,.fb,.parts div{background:#fff !important;color:#000 !important;border-color:#999 !important}
+  .cl,.cl .ln,.sub,.partnote,.pts,.qnum,.eyebrow,.tyrow .lit{color:#000 !important}
+  .opt.sel{border:2px solid #000 !important}
+  .cl.sel{box-shadow:inset 4px 0 0 #000}
+}
+</style>
+</head>
+<body>
+<div id="top">
+  <div class="logo">C#</div>
+  <div class="ttl">MAC 109 · Assignment 1 — C# Syntax<small>LaGuardia Community College · MEC Department · Prof. K. Kassou</small></div>
+  <div class="right"><span id="who" class="chip hidden"></span><span id="progTxt"></span><div id="progressWrap" aria-hidden="true"><div id="progressBar"></div></div></div>
+</div>
+<main>
+  <section id="instr" class="card hidden"></section>
+  <section id="start"></section>
+  <section id="status"></section>
+  <section id="work" class="hidden"></section>
+</main>
+<div id="bar" class="hidden">
+  <div class="grow" id="barTxt"></div>
+  <button class="btn ghost" id="printBtn">Print / Save PDF</button>
+  <button class="btn" id="submitBtn">Lock &amp; submit</button>
+</div>
+<footer><a href="#" id="instrLink">Instructor</a></footer>
+
+<script>
+(function(){
+"use strict";
+/* ---------- sealed data (answer key is encrypted; it is NOT readable in this file) ---------- */
+var SEAL={"iter": 150000, "chk": "56932d06f924d6fb", "sR": "a186bf9cd02dab88", "wR": "4b330a07ce3c9fda87f0cdb23058e639e0421a791cf41922b8ab9d44c4be20ba", "sI": "a9d48a53388e32a5", "wI": "d2d3050189315f35460355e7379a8bea72270f420e0531fc906f26eecfad1f81", "blob": "8fadc5ec47f2163575ee715ecb9bb20bca1bc8329fc9fea2256388be9321816635c64d5ff0a1985901f82e2625fa50b3ddd5c87abd7390006225b35f9f804e73f55c9bd24b72ac7f81f0f3a44a0db4ba8b4469db434339dbbc7086f9a8e44fde3ba3bdfe2e36cb85e171087ad0c1419c806b8453ca3edc6275e693cadc199bd2d0dca6b817ed9879302d0a4fc356b14149c51fd580d5784eede806af541253089be2454a50bbd2fac3aaf85ea3a641ec57ff9b4d1784189364c4d3967cebdff8996a79d76027ce5551de7268cd056920d49ee1adfbec7f33bedd1d576e6db6089a194800f0e7c40c404309b4fc03ac0a435e41c6477e24ba0f669d9a6653316a5f7cd22d1b70e34259ae4eba1722fda6ba21a8ea8ed7f22c9b6b14208f89e2941566a259d0c9fa887bf259bf29b4127318f21a11516819c4d94f9de83fe26b1d7ba2d52517c6558c670ae10a281ae185a7c2a2a4d1926dac68223549c30019142a1393ceaaace4ececfb10ce244e85cef4040d79080d47a7f6651c03360baeb99bea82f90fe45c6aa1d190fbc8690b4cfc8ab616297ef39478df80c1c4392de7ec161ebb21419ef746b963dc71b55910ccee8df0ea7756540d6d7aba28809e5063159ad891436d3d91d04ac92fed8b37f408f0dc7f37006ab74c663a6bc3925567c1a7d43b306b2bb752a5150517dbe04604ae9568ce5f52d8184534d7cf5518b993ffde2ee5aa509bb6ad9595448212d8ff2a1075f09be21762f033baa2ef1a9f8db5763a5f6ad329b6f3e3c2a9e333b34292182b13eaf6dda19d576fa0e0762b9a4bf07ad9ac94d66957f23e419ab6c144157a53696feb69281d6666b09d9c9c28bc31e10f20adc3ae2b6c8e181957bbef0fb071988c161c7cc0ccca18d1dc362f87948533f49b34898dcf1dec868238b8e1b9111b576590ccf9c8fd9a4b16eb1a9042e162ce662bc28d7b70f61d9634a618994e8f019adc67899cb8c2c3c8dca9658e6511833b8405c6ab496c9e0df4a9b53d309587201450eb47794f94cb3aa3c7c30d509f6c469c3a70b058435f050edd2bb61e867c6320202b75b9640a0693fc7eabbc18a72385f60a0a1341c4262c347314e40b0b88ed9a51f640ff0e382bbc56c9627ba1c7c866e3e5d28c4e2ff5dbc1313c30e1a2d9c02f4bd740568775b175cc084decb0dfbc007faca35046ca16d2f46a169b3f99122c24d328aba4ffcf2aa5a1c33d18483493cb909ca7d1dccbd0916f8b969271df9017a2fb7d1a8cec6eb66c9856d433b2fde001537d18a837f6ea4eccac2f5d0a7f06c2f2fad80729269bce686392cd0f7f389b77fb4005a95e0afcea6284c0f266ed0957325103ac15a65d92ef85bd3a46dde8395e5ed265660f483dc165c585668617f20fd421f3b36fcc56b727ffad8660616b469682deab9158110d93acd3bbfdcb990509901369cfbf137062505d6f96c08127f0295d3417181bb35cae05e8517b64443c3e5b6bae8e825df69439d3e53f9d978d1cc61acd2cc34abff575ed2596566e89e059549384992b52f914765a788803dd1e660adb343d622965fac8b97cd2e0e9a0ab5d58f7f3759a8006b33f5e0e8eb80a2d49bbe68f160f94355f4dc8714e2f1d2d71d088d61c8ada25f1eec1e9bc69bab1e8b2f5d1975e770430f6a4a8e4220ce1ebb97314c13c7bf34b2a793454256446684dc7d658f62352d2aa51478b183080719a138fcb8da99c2bcd3694e64f889901ff1fd24f3e07d52ec82c0c05ea5a73734e4fd0b61c4b7a1f60bdac4b540f4178f8b8effa90d1becbd5e6753c6c450913498dcb85a93c5f372eb883f232176e4a97efc9fd378a329cb8ef8d73e6ce5fe2481b8962fffccd85c280f64200b2360607b400c0a969804631c194cc0370fe974e078e50e7b3cc59171be440d9b555d436859aeeebe081852a2de507854d22071bad55e154312770dee9d422526770d7f15f0c445d0476e5c12d8643114dfea64eaa048a300e42c10a314e96a2038cf6f40372fb147b16355e7218ec18b45cf0e4c1698f11ee0cc4a5e07f6bef22e9664a49e4687ce0c2aceccfb0595cee7513e75a8aaa267e838a0663ba8c6442dab64fa478134f9b38d934406df482fa37a9d5b96d9f4adec26602c8a600964ad4e1c594bf85828a20eb824d54d8acd35495a3b0bed3ba9b7d80ef5c45c814f65ff965d5882aa54438c7b0645365e4e86257e4642ffc7a17652004f36ddf1bd8dcc576ee0096129628ac5566924269a8f4314aec3fcaf0deafb8ebafc0eed5d60a7a6ccad41115adf845cf3a962df477df63b113c36aade0eff7e5d50763a61a8b3c90d95f4c65c2338f29e1f272ab49ce618bc889c499891f1d68f273c5f069b13e7e9a18c3074d2fe66e295d73ebe77e02731157f5a40eb6eed155f7766b8515cf6016076b05653718fd28423d961e4c6b565666d9bc8f6ee70ece9feec41626e54cf9383b8c8f10221ee90bb97f791a746f583b41f3db7f841a690f2bc0e8f9a7a0ab4c7218ad9cadcc7c4609a9633ad88ffd27232033f274c613d97e1ebdb9a0a2dfa135c4b765cd58ee6682252564c80b90086dbc853fe9f102857bfe2c9e562a66635dabd6ca6b18dc07b7aed202a9129b574e833c86882f949e023fbfa6f81e890d6a1c95ac6dc2ead20ad4563ed6086ef05e9b9b08ad81b9e3496cc25082085168bb6b44b163ef4ef3490d3615a3782048cb40092955afe845e1bd4d020fd81aa2c828960c02ca193e3b9d9046a4b8942c122975f8b6cd33823e570d9d902235d3a5a06fe3ba8ebfec5b98a3938f367045fb5a13cce7b0795f68737549fb05f306fe727a744bf16b7f33f486facd77de2b2f12f098c0959f2c7789fa0d1f8cd8030684192982ea95439e86b2bf4e8b13f91e91018ff1eea346d81569adb6bfb9535d0a97b60c5b9ece015668988f921e513fd9539a55101b827cbe42d92dd66abd1228d65922949b33703da60f7503e9c1d337319aae91e35848a599bea2504eee8834b707fc508cff5db94e5dd1b03a4cd5545fc997880edcd2fa7362cf29aa1db5d97818425af8e28280c33b9da5529a1ebe334383dbe1684ea6957809a1cf3e01ec70dee9077d6a8f2e660e62466dd9b862170d3b4084a53a282f5104cedc6e10489fc33508cb8abe65d2d4dd18b3b70c2bea8b32eff10f54d157454b8a6dfd2dafc9432fc0f89924d3c7e7fe951418aafa3fee00a88be00bb1c2fbebfd465c42e54775494c85987113508d50f702e9df58b49c9ad9f39a2abeac709cb5874b2b60fa52874dce54d75f79616d87a828873d7217b7056a69c9b1201d0ab8a3b4d86c4aa230828d96b7fc5295a423d387141cb53caa176a53030887e8efe3b68e20664d2f80eeea745b57599b37e93afc7d421a20e2d054dfb88b35da6ba3d12c9bb400d62302fcd7564508534691e48afdae14acb51ba9094585ba652022560644404ee57170c8178b4b9cd01744f4957448aefaa8eee9a906fb746c06a97ce3d20d4878350a009c92bfe3c33b17f533ffb8aabc5887b5134f3f21fad7262b236e3079fce39b7f073cc2c4c1b6ff3b4f4be98a590b4d18617ece815e665ec3fd1d08d8a587907c261c86b07db18a429d94ab8b208ad9f304699bc4a0c57a6af651b8f5dd8338c92ae6f130c62606a098a8e466dcb3821cb390b1cd5d7a04f1767eedbdcd963648ee7ce3cf93cb163e354a97f1407a4b42dddac71e53bdd553cf6d3e8108b79ea0798fbee9445ddf27f0bf32bd830098ff4b26fe9162ce7dc8c0a21916681cb95e8fd6c61d8661751ed478d59508aae4a663374124fcd0dcd138e38bc9407439e8e8e5babcee582d2f533aaf288ef3e6c5d96ba4d9911142cfffff33c09eec8bc02a926a90bca0276e1ae43ac9f4fe10cbfb23d8a804236fecb87308e3ad89eb77b36c83c10b4d94b0a8f1f20496bc155d42bd89463ef420cb89e1dbe83f83906759453a0b44d25de8e3c0f0e347368443dece32db7bf8ff508054ce6995eca753e3815a4802044288d33e45dfa13fb49272eef4504be2ab8ed131adc179f977f84bf5c04cab47ae0aedae8e3501ba01674c7e1a92afacce892473ea068d7b723f5b5d68466ef59fbfec91e4ef2bfbddee103462ebe5260a4555ad5db3022ca0e3bdd1ee8017cdc8073ffbd6df27e67ed64b1c2024d5dc49ffed4524a661b72f28bb6732e30ad81e77bd2f592194a1a9224afb6fc3d18f616fa62d1e092d7022f8b0372e5f71c4909b4ac3869d6c4c2711eeb893bac6991a2b9f27edfb769021399b21649a56d454caf6c3c4ce40a23cc4058100b2e9b0c3ae841c4c3fecf6e7fc8167ad8bf21c27a952d4177f06e3abbc60cd5d0c62afea6b"};
+var AID='M109A1', ITER=SEAL.iter;
+var LS_STATE='mac109_a1_state', LS_IK='mac109_a1_ik', LS_ROSTER='mac109_a1_roster';
+
+/* ---------- questions (no answers here) ---------- */
+function prog(body, extra){
+  return 'using System;\n\nclass Program\n{\n    static void Main()\n    {\n'+body.split('\n').map(function(l){return l?'        '+l:'';}).join('\n')+'\n    }\n'+(extra?'\n'+extra+'\n':'')+'}';
+}
+var QD={
+ mc:[
+  {id:'m1',q:'When you press Run, which line does the computer look for to know where your program starts?',o:[['a','`using System;`'],['b','`static void Main()`'],['c','`class Program`'],['d','`Console.WriteLine(...)`']]},
+  {id:'m2',q:'What is the job of `using System;` at the top of the file?',o:[['a','It starts the program running'],['b','It lets this file use the System toolbox, where `Console` lives'],['c','It creates a variable named System'],['d','It prints the word System on the screen']]},
+  {id:'m3',q:'What is the difference between `Console.Write` and `Console.WriteLine`?',o:[['a','`Write` is for numbers and `WriteLine` is for text'],['b','There is no difference'],['c','`WriteLine` prints and then moves to a new line; `Write` prints and stays on the same line'],['d','`Write` prints and then moves to a new line; `WriteLine` stays on the same line']]},
+  {id:'m4',q:'Which of these is a legal C# variable name?',o:[['a','`2ndPlace`'],['b','`first name`'],['c','`total-price`'],['d','`totalPrice`']]},
+  {id:'m5',q:'Which declaration compiles without an error?',o:[['a','`float temp = 72.5;`'],['b','`decimal price = 19.99m;`'],['c','`char grade = "A";`'],['d','`int count = "5";`']]},
+  {id:'m6',q:'A user types 25 into a TextBox. What type of value does your program receive?',o:[['a','`int`'],['b','`double`'],['c','`string`'],['d','`bool`']]},
+  {id:'m7',q:'What value does `(int)3.99` produce?',o:[['a','`3`'],['b','`4`'],['c','`3.99`'],['d','Nothing — it is a compile error']]},
+  {id:'m8',q:'In `static int Add(int a, int b)`, what does the word `int` right before `Add` tell you?',o:[['a','The method takes exactly one parameter'],['b','`Add` is a variable of type int'],['c','The method can only be called once'],['d','The method gives back (returns) an int']]},
+  {id:'m9',q:'What is the relationship between a class and an object?',o:[['a','They are two words for the same thing'],['b','A class is the blueprint; `new` builds a real object from it'],['c','An object is the blueprint; a class is one copy built from it'],['d','A class is a variable stored inside an object']]},
+  {id:'m10',q:'The line `Console.WriteLine(Hello);` does not compile. Why?',o:[['a','`WriteLine` cannot print words'],['b','`Console` should be written in lowercase'],['c','Without quotes, C# thinks `Hello` is a variable — and no such variable exists'],['d','The semicolon is in the wrong place']]}
+ ],
+ po:[
+  {id:'p1',v:[
+    prog('Console.Write("Mon");\nConsole.WriteLine("day");\n// Console.WriteLine("Tuesday");\nConsole.Write("Fri");\nConsole.WriteLine("day");\nConsole.WriteLine("Done!");'),
+    prog('Console.Write("Sun");\nConsole.WriteLine("set");\n// Console.WriteLine("Noon");\nConsole.Write("Mid");\nConsole.WriteLine("night");\nConsole.WriteLine("Bye!");'),
+    prog('Console.Write("Key");\nConsole.WriteLine("board");\n// Console.WriteLine("Mouse");\nConsole.Write("Lap");\nConsole.WriteLine("top");\nConsole.WriteLine("Ready!");')]},
+  {id:'p2',v:[[17,5],[19,4],[23,5]].map(function(p){return prog('int cookies = '+p[0]+';\nint kids = '+p[1]+';\n\nConsole.WriteLine(cookies / kids);\nConsole.WriteLine(cookies % kids);\nConsole.WriteLine(cookies / 2.0);');})},
+  {id:'p3',v:[[4,6],[5,3],[2,9]].map(function(p){return prog('int a = '+p[0]+';\nint b = '+p[1]+';\n\nConsole.WriteLine(a + b);\nConsole.WriteLine("" + a + b);\nConsole.WriteLine($"Total: {a * b}");');})},
+  {id:'p4',v:[['30',5,'7.89'],['40',2,'5.95'],['12',3,'9.2']].map(function(p){return prog('string typed = "'+p[0]+'";\nint n = int.Parse(typed);\nConsole.WriteLine(n + '+p[1]+');\nConsole.WriteLine(typed + '+p[1]+');\n\ndouble g = '+p[2]+';\nConsole.WriteLine((int)g);');})},
+  {id:'p5',v:[['Sam',3,4,'Lee'],['Ana',6,2,'Kai'],['Omar',5,5,'Zoe']].map(function(p){return prog('Greet("'+p[0]+'");\nint r = Add('+p[1]+', '+p[2]+');\nConsole.WriteLine(r);\nGreet("'+p[3]+'");','    static void Greet(string name)\n    {\n        Console.WriteLine("Hi, " + name + "!");\n    }\n\n    static int Add(int a, int b)\n    {\n        return a + b;\n    }');})}
+ ],
+ bug:prog('string city = "Queens";\nint year = 2026\nconsole.WriteLine("Hello from " + city);\nchar grade = "A";\nConsole.WriteLine(year);\nConsole.WriteLine(See you Friday!);\nConsole.WriteLine(grade);'),
+ ty:[['y1','19.99m'],['y2',"'B'"],['y3','"B"'],['y4','true'],['y5','3.75'],['y6','72.5f']],
+ types:['byte','int','long','float','double','decimal','char','string','bool'],
+ tok:[
+  {id:'t1',q:'Build the statement that creates a new Button object and stores it in a variable named `btnSave`. Not every piece is needed.',t:['Button','btnSave','=','new','Button()',';','class','btnSave()']},
+  {id:'t2',q:'The variable `typed` holds the text "25". Build the statement that converts it to a whole number stored in `age`. Not every piece is needed.',t:['int','age','=','int.Parse(typed)',';','(string)typed','string']}
+ ],
+ bl:[
+  {id:'b1',q:'This method gives nothing back. Type the missing keyword.',c:'static ____ SayHello()\n{\n    Console.WriteLine("Hello from a method!");\n}'},
+  {id:'b2',q:'This method must send its answer back to the caller. Type the missing keyword.',c:'static int Add(int a, int b)\n{\n    ____ a + b;\n}'},
+  {id:'b3',q:'Turn the number into text. Type the missing method name.',c:'int age = 19;\nstring label = age.____();'},
+  {id:'b4',q:'One character is missing so that {name} gets filled in with Maria. Type it.',c:'string name = "Maria";\nConsole.WriteLine(____"Hello, {name}!");'},
+  {id:'b5',q:'Type the two-character shortcut that makes this line mean the same as  count = count + 1;',c:'int count = 0;\ncount ____ 1;'}
+ ]
+};
+var PTS={mc:4,po:4,bug:2,ty:2,tok:5,bl:2};
+var PARTS=[['mc','Multiple choice',40],['po','Predict output',20],['bug','Bug hunt',8],['ty','Data types',12],['tok','Build it',10],['bl','Fill in',10]];
+
+/* ---------- tiny helpers ---------- */
+function $(id){return document.getElementById(id);}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function fmt(s){return esc(s).replace(/`([^`]+)`/g,'<code>$1</code>');}
+function utf8(s){return new TextEncoder().encode(s);}
+function hex(b){var o='';for(var i=0;i<b.length;i++)o+=(b[i]<16?'0':'')+b[i].toString(16);return o;}
+function unhex(h){var b=new Uint8Array(h.length/2);for(var i=0;i<b.length;i++)b[i]=parseInt(h.substr(i*2,2),16);return b;}
+function cat(a,b){var o=new Uint8Array(a.length+b.length);o.set(a);o.set(b,a.length);return o;}
+function lsGet(k){try{return localStorage.getItem(k);}catch(e){return null;}}
+function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
+function lsDel(k){try{localStorage.removeItem(k);}catch(e){}}
+function b64e(s){var b=utf8(s),t='';for(var i=0;i<b.length;i++)t+=String.fromCharCode(b[i]);return btoa(t).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}
+function b64d(s){s=s.replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';var t=atob(s),b=new Uint8Array(t.length);for(var i=0;i<t.length;i++)b[i]=t.charCodeAt(i);return new TextDecoder().decode(b);}
+
+/* ---------- SHA-256 (pure JS so the page works anywhere, even opened as a file) ---------- */
+var K256=(function(){var k=[],n=2,i=0;function isP(x){for(var d=2;d*d<=x;d++)if(x%d===0)return false;return true;}
+  while(i<64){if(isP(n)){var c=Math.pow(n,1/3);k[i++]=((c-Math.floor(c))*4294967296)>>>0;}n++;}return k;})();
+function sha(msg){
+  var H=[0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19];
+  var l=msg.length,n=((l+9+63)>>6)<<6,m=new Uint8Array(n);m.set(msg);m[l]=0x80;
+  var bits=l*8;m[n-4]=bits>>>24;m[n-3]=(bits>>>16)&255;m[n-2]=(bits>>>8)&255;m[n-1]=bits&255;
+  var w=new Uint32Array(64);
+  for(var off=0;off<n;off+=64){
+    for(var i=0;i<16;i++)w[i]=(m[off+i*4]<<24|m[off+i*4+1]<<16|m[off+i*4+2]<<8|m[off+i*4+3])>>>0;
+    for(i=16;i<64;i++){var x=w[i-15],y=w[i-2];
+      w[i]=(w[i-16]+((x>>>7|x<<25)^(x>>>18|x<<14)^(x>>>3))+w[i-7]+((y>>>17|y<<15)^(y>>>19|y<<13)^(y>>>10)))>>>0;}
+    var a=H[0],b=H[1],c=H[2],d=H[3],e=H[4],f=H[5],g=H[6],h=H[7];
+    for(i=0;i<64;i++){
+      var t1=(h+((e>>>6|e<<26)^(e>>>11|e<<21)^(e>>>25|e<<7))+((e&f)^(~e&g))+K256[i]+w[i])>>>0;
+      var t2=(((a>>>2|a<<30)^(a>>>13|a<<19)^(a>>>22|a<<10))+((a&b)^(a&c)^(b&c)))>>>0;
+      h=g;g=f;f=e;e=(d+t1)>>>0;d=c;c=b;b=a;a=(t1+t2)>>>0;}
+    H[0]=(H[0]+a)>>>0;H[1]=(H[1]+b)>>>0;H[2]=(H[2]+c)>>>0;H[3]=(H[3]+d)>>>0;H[4]=(H[4]+e)>>>0;H[5]=(H[5]+f)>>>0;H[6]=(H[6]+g)>>>0;H[7]=(H[7]+h)>>>0;
+  }
+  var out=new Uint8Array(32);for(i=0;i<8;i++){out[i*4]=H[i]>>>24;out[i*4+1]=(H[i]>>>16)&255;out[i*4+2]=(H[i]>>>8)&255;out[i*4+3]=H[i]&255;}
+  return out;
+}
+function kdf(pass,salt){var h=sha(utf8(salt+'|'+pass));for(var i=0;i<ITER;i++)h=sha(h);return h;}
+function unwrap(pass,salt,wrapHex){ // returns master key or null
+  var k=kdf(pass,salt),w=unhex(wrapHex),m=new Uint8Array(32);for(var i=0;i<32;i++)m[i]=w[i]^k[i];
+  return checkM(m)?m:null;
+}
+function checkM(m){return hex(sha(m)).slice(0,16)===SEAL.chk;}
+function openKey(m){
+  var ct=unhex(SEAL.blob),pt=new Uint8Array(ct.length);
+  for(var blk=0;blk*32<ct.length;blk++){
+    var ks=sha(cat(m,new Uint8Array([blk>>>24,(blk>>>16)&255,(blk>>>8)&255,blk&255])));
+    for(var i=0;i<32&&blk*32+i<ct.length;i++)pt[blk*32+i]=ct[blk*32+i]^ks[i];
+  }
+  return JSON.parse(new TextDecoder().decode(pt));
+}
+function normCode(s){return String(s).toUpperCase().replace(/[^A-Z0-9]/g,'');}
+
+/* ---------- seeded per-student versions (from last name) ---------- */
+function normName(n){return String(n).trim().replace(/\s+/g,' ').toLowerCase();}
+function seedOf(name,tag){var s=normName(name)+'#'+tag,h=2166136261;for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return h>>>0;}
+function rng(seed){var a=seed;return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function shuffle(arr,name,tag){var r=rng(seedOf(name,tag)),a=arr.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(r()*(i+1)),t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function variant(name,id,n){return seedOf(name,'v'+id)%n;}
+
+/* ---------- state ---------- */
+var S={name:'',ans:{},sub:null,rc:''};
+var KEY=null, INSTR=false;
+function load(){var r=lsGet(LS_STATE);if(r){try{var o=JSON.parse(r);if(o&&typeof o==='object'){S.name=o.name||'';S.ans=o.ans||{};S.sub=o.sub||null;S.rc=o.rc||'';}}catch(e){}}}
+function save(){lsSet(LS_STATE,JSON.stringify(S));}
+
+/* ---------- grading (needs the opened key) ---------- */
+function normOut(s){return String(s||'').replace(/\r/g,'').split('\n').map(function(l){return l.trim();}).filter(function(l){return l!=='';});}
+function r1(x){return Math.round(x*10)/10;}
+function grade(name,ans,K){
+  var items=[],parts={},total=0;
+  function add(part,id,label,got,max,ok,yours,correct,why){items.push({part:part,id:id,label:label,got:got,max:max,yours:yours,correct:correct,why:why||''});parts[part]=r1((parts[part]||0)+got);}
+  QD.mc.forEach(function(q){var k=K.mc[q.id],a=ans[q.id]||'';function txt(id){for(var i=0;i<q.o.length;i++)if(q.o[i][0]===id)return q.o[i][1];return '(no answer)';}
+    add('mc',q.id,q.q,a===k[0]?PTS.mc:0,PTS.mc,a===k[0],txt(a),txt(k[0]),k[1]);});
+  QD.po.forEach(function(q){var k=K.po[q.id],vi=variant(name,q.id,q.v.length),exp=normOut(k[0][vi]),stu=normOut(ans[q.id]);
+    var hit=0;for(var i=0;i<exp.length;i++)if(stu[i]===exp[i])hit++;
+    var got=r1(PTS.po*hit/Math.max(exp.length,stu.length));
+    add('po',q.id,'Predict the output',got,PTS.po,got===PTS.po,stu.join('\n')||'(no answer)',exp.join('\n'),k[1]);});
+  (function(){var k=K.bug,sel=(ans.bug||[]).slice(0,4),hit=0;sel.forEach(function(l){if(k[0].indexOf(l)>=0)hit++;});
+    add('bug','bug','Bug hunt',hit*PTS.bug,4*PTS.bug,hit===4,sel.length?'lines '+sel.slice().sort(function(a,b){return a-b;}).join(', '):'(no lines chosen)','lines '+k[0].join(', '),k[0].map(function(l){return 'Line '+l+': '+k[1][l];}).join('\n'));})();
+  QD.ty.forEach(function(q){var k=K.ty[q[0]],a=ans[q[0]]||'';add('ty',q[0],'Type of '+q[1],a===k?PTS.ty:0,PTS.ty,a===k,a||'(no answer)',k,'');});
+  QD.tok.forEach(function(q){var k=K.tok[q.id],a=(ans[q.id]||[]).join(' ');add('tok',q.id,q.q,a===k[0]?PTS.tok:0,PTS.tok,a===k[0],a||'(no answer)',k[0],k[1]);});
+  QD.bl.forEach(function(q){var k=K.bl[q.id],a=String(ans[q.id]||'').trim(),ok=k[0].indexOf(a)>=0;add('bl',q.id,q.q,ok?PTS.bl:0,PTS.bl,ok,a||'(no answer)',k[0][0],k[1]);});
+  items.forEach(function(i){total+=i.got;});
+  return {total:r1(total),parts:parts,items:items};
+}
+
+/* ---------- submission codes ---------- */
+function makeCode(){
+  var body=b64e(JSON.stringify({a:AID,n:S.name,t:new Date().toISOString(),r:S.ans}));
+  return AID+'.'+body+'.'+receipt(body);
+}
+function receipt(body){return hex(sha(utf8(body+'|'+AID+'|seal'))).slice(0,6).toUpperCase();}
+function readCode(code){
+  var p=String(code).trim().split('.');if(p.length!==3||p[0]!==AID)return null;
+  try{var o=JSON.parse(b64d(p[1]));if(!o||!o.n||!o.r)return null;return {name:o.n,t:o.t,ans:o.r,rcpt:p[2],ok:receipt(p[1])===p[2]};}catch(e){return null;}
+}
+
+/* ---------- rendering the assignment ---------- */
+function codeLines(code,opts){
+  opts=opts||{};
+  return '<div class="codebox">'+code.split('\n').map(function(l,i){
+    var n=i+1,cls='cl',attr='';
+    if(opts.click&&l.trim()!==''){cls+=' click';attr=' tabindex="0" role="button" data-line="'+n+'"';}
+    var body=esc(l)||' ';
+    if(opts.blank)body=body.replace('____','<input type="text" id="in_'+opts.blank+'" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="missing code">');
+    return '<div class="'+cls+'"'+attr+'><span class="ln">'+(opts.noln?'':n)+'</span><span>'+body+'</span></div>';
+  }).join('')+'</div>';
+}
+var qn=0;
+function qcard(id,num,text,pts,inner){return '<div class="card q" id="q_'+id+'"><div class="qhead"><span class="qnum">'+num+'</span><span class="qtext">'+text+'</span><span class="pts">'+pts+' pts</span></div>'+inner+'<div class="fbslot"></div></div>';}
+function render(){
+  var n=S.name,h='';qn=0;
+  h+='<h2>Part A · Multiple choice</h2><p class="partnote">10 questions · 4 points each · choose one answer.</p>';
+  shuffle(QD.mc,n,'mcorder').forEach(function(q){qn++;
+    var o=shuffle(q.o,n,q.id).map(function(op){return '<label class="opt"><input type="radio" name="'+q.id+'" value="'+op[0]+'"><span>'+fmt(op[1])+'</span></label>';}).join('');
+    h+=qcard(q.id,qn,fmt(q.q),PTS.mc,o);});
+  h+='<h2>Part B · Predict the output</h2><p class="partnote">5 programs · 4 points each · type exactly what the program prints, one line of output per line. Capital letters, spaces and punctuation count.</p>';
+  QD.po.forEach(function(q){qn++;
+    h+=qcard(q.id,qn,'What does this complete program print?',PTS.po,codeLines(q.v[variant(n,q.id,q.v.length)])+'<div class="outlabel">Output</div><textarea id="in_'+q.id+'" rows="4" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="program output"></textarea>');});
+  qn++;
+  h+='<h2>Part C · Bug hunt</h2><p class="partnote">8 points · this program will not compile. Exactly 4 lines are broken — click them. Click a line again to un-select it.</p>';
+  h+=qcard('bug',qn,'Find the 4 broken lines. <span id="bugCount" class="pts"></span>',8,'<div id="bugBox">'+codeLines(QD.bug,{click:true})+'</div>');
+  qn++;
+  h+='<h2>Part D · Data types</h2><p class="partnote">12 points · 2 each · pick the C# type of each value exactly as it is written.</p>';
+  h+=qcard('ty',qn,'What type is each literal?',12,shuffle(QD.ty,n,'ty').map(function(q){
+    return '<div class="tyrow" id="row_'+q[0]+'"><span class="lit">'+esc(q[1])+'</span><select id="in_'+q[0]+'" aria-label="type of '+esc(q[1])+'"><option value="">— choose —</option>'+QD.types.map(function(t){return '<option>'+t+'</option>';}).join('')+'</select></div>';}).join(''));
+  h+='<h2>Part E · Build the statement</h2><p class="partnote">2 statements · 5 points each · click pieces in order to build the line. Click a piece in your answer to remove it.</p>';
+  QD.tok.forEach(function(q){qn++;
+    h+=qcard(q.id,qn,fmt(q.q),PTS.tok,'<div class="outlabel">Your statement</div><div class="tray answer" id="ans_'+q.id+'"></div><div class="outlabel">Pieces</div><div class="tray" id="bank_'+q.id+'"></div>');});
+  h+='<h2>Part F · Fill in the missing code</h2><p class="partnote">5 blanks · 2 points each · remember: case matters in C#.</p>';
+  QD.bl.forEach(function(q){qn++;h+=qcard(q.id,qn,fmt(q.q),PTS.bl,codeLines(q.c,{blank:q.id,noln:true}));});
+  $('work').innerHTML=h;
+  wire();restore();
+}
+function locked(){return !!S.sub;}
+function wire(){
+  var w=$('work');
+  w.addEventListener('change',function(e){var t=e.target;
+    if(t.type==='radio'){S.ans[t.name]=t.value;paintMC(t.name);}
+    else if(t.tagName==='SELECT'){S.ans[t.id.slice(3)]=t.value;}
+    changed();});
+  w.addEventListener('input',function(e){var t=e.target;if(t.tagName==='TEXTAREA'||t.type==='text'){S.ans[t.id.slice(3)]=t.value;changed();}});
+  function bugClick(el){if(locked())return;var l=+el.getAttribute('data-line'),a=S.ans.bug||[],i=a.indexOf(l);
+    if(i>=0)a.splice(i,1);else{if(a.length>=4)return;a.push(l);}S.ans.bug=a;paintBug();changed();}
+  $('bugBox').addEventListener('click',function(e){var el=e.target.closest('.cl.click');if(el)bugClick(el);});
+  $('bugBox').addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){var el=e.target.closest('.cl.click');if(el){e.preventDefault();bugClick(el);}}});
+  QD.tok.forEach(function(q){
+    $('bank_'+q.id).addEventListener('click',function(e){var b=e.target.closest('.tokbtn');if(!b||locked())return;(S.ans[q.id]=S.ans[q.id]||[]).push(b.getAttribute('data-t'));paintTok(q);changed();});
+    $('ans_'+q.id).addEventListener('click',function(e){var b=e.target.closest('.tokbtn');if(!b||locked())return;S.ans[q.id].splice(+b.getAttribute('data-i'),1);paintTok(q);changed();});
+  });
+}
+function paintMC(id){var els=document.querySelectorAll('input[name="'+id+'"]');for(var i=0;i<els.length;i++)els[i].parentNode.classList.toggle('sel',els[i].checked);}
+function paintBug(){var a=S.ans.bug||[],els=document.querySelectorAll('#bugBox .cl.click');
+  for(var i=0;i<els.length;i++)els[i].classList.toggle('sel',a.indexOf(+els[i].getAttribute('data-line'))>=0);
+  $('bugCount').textContent='Selected: '+a.length+' / 4';}
+function paintTok(q){var a=S.ans[q.id]||[],used=a.slice(),dis=locked()?' disabled':'';
+  $('ans_'+q.id).innerHTML=a.length?a.map(function(t,i){return '<button type="button" class="tokbtn" data-i="'+i+'"'+dis+'>'+esc(t)+'</button>';}).join(''):'<span class="ph">Click pieces below to build the statement…</span>';
+  $('bank_'+q.id).innerHTML=shuffle(q.t,S.name,q.id).filter(function(t){var i=used.indexOf(t);if(i>=0){used.splice(i,1);return false;}return true;}).map(function(t){return '<button type="button" class="tokbtn" data-t="'+esc(t)+'"'+dis+'>'+esc(t)+'</button>';}).join('')||'<span class="ph">All pieces used.</span>';}
+function restore(){
+  QD.mc.forEach(function(q){var v=S.ans[q.id];if(v){var el=document.querySelector('input[name="'+q.id+'"][value="'+v+'"]');if(el)el.checked=true;}paintMC(q.id);});
+  QD.po.concat(QD.bl).forEach(function(q){$('in_'+q.id).value=S.ans[q.id]||'';});
+  QD.ty.forEach(function(q){$('in_'+q[0]).value=S.ans[q[0]]||'';});
+  paintBug();QD.tok.forEach(paintTok);
+  if(locked()){var els=$('work').querySelectorAll('input,select,textarea');for(var i=0;i<els.length;i++)els[i].disabled=true;}
+  progress();
+}
+function countAnswered(){var c=0,t=0;
+  QD.mc.forEach(function(q){t++;if(S.ans[q.id])c++;});
+  QD.po.concat(QD.bl).forEach(function(q){t++;if(String(S.ans[q.id]||'').trim())c++;});
+  t++;if((S.ans.bug||[]).length)c++;
+  QD.ty.forEach(function(q){t++;if(S.ans[q[0]])c++;});
+  QD.tok.forEach(function(q){t++;if((S.ans[q.id]||[]).length)c++;});
+  return [c,t];}
+function progress(){var p=countAnswered();$('progressBar').style.width=(100*p[0]/p[1])+'%';$('progTxt').textContent=p[0]+' / '+p[1]+' answered';
+  $('barTxt').textContent=locked()?'Submitted and locked.':(p[0]<p[1]?(p[1]-p[0])+' item(s) still unanswered · your work saves automatically on this device':'Everything answered · ready to submit');}
+function changed(){save();progress();}
+
+/* ---------- start, submit, status ---------- */
+function showStart(){
+  $('start').innerHTML='<p class="eyebrow">Week 1 · Auto-graded assignment · 100 points</p><h1>C# Syntax — show what you can read and write</h1>'+
+   '<p class="sub">Based on the Week 1 lecture: the program skeleton, statements, variables, data types and conversion, strings, arithmetic, methods, objects, and the four grammar rules.</p>'+
+   '<div class="card"><label for="nameIn"><b>Your last name</b></label><p class="partnote">Last name only. Do not enter a student ID.</p>'+
+   '<div class="row"><input type="text" id="nameIn" maxlength="40" autocomplete="family-name" style="max-width:320px" placeholder="e.g. Lopez"><button class="btn" id="beginBtn">Begin</button></div><div class="err" id="nameErr" role="alert"></div>'+
+   '<ul class="rules"><li>Your version of some questions is generated from your last name — type it the same way every time.</li><li>Answers save automatically on this device. You can close the page and come back.</li><li>When you press <b>Lock &amp; submit</b> your answers are final and you receive a submission code to paste into Brightspace.</li><li>Your grade stays hidden until your professor gives the class a release code.</li></ul></div>'+
+   '<details class="card"><summary style="margin-top:0">Already submitted on another device? Check your grade</summary><p class="partnote" style="margin-top:10px">Paste your submission code, then enter the release code from your professor.</p><textarea id="lateCode" rows="3" placeholder="M109A1. …" aria-label="submission code"></textarea><div class="row" style="margin-top:10px"><button class="btn ghost" id="lateBtn">Load my submission</button></div><div class="err" id="lateErr" role="alert"></div></details>';
+  $('beginBtn').onclick=begin;$('nameIn').onkeydown=function(e){if(e.key==='Enter')begin();};
+  $('lateBtn').onclick=function(){var o=readCode($('lateCode').value);if(!o||!o.ok){$('lateErr').textContent='That is not a valid submission code. Copy the whole code, from M109A1 to the end.';return;}
+    S.name=o.name;S.ans=o.ans;S.sub={code:$('lateCode').value.trim(),t:o.t};save();enter();};
+}
+function begin(){var v=$('nameIn').value.trim().replace(/\s+/g,' ');
+  if(/\d/.test(v)){$('nameErr').textContent='Last name only — no numbers or ID.';return;}
+  if(!/^[A-Za-zÀ-ɏ' -]{2,40}$/.test(v)){$('nameErr').textContent='Please type your last name (letters only, at least 2).';return;}
+  S.name=v;S.ans={};S.sub=null;save();enter();}
+function enter(){
+  $('start').classList.add('hidden');$('work').classList.remove('hidden');$('bar').classList.remove('hidden');
+  $('who').textContent=S.name;$('who').classList.remove('hidden');
+  render();showStatus();
+}
+function submit(){
+  var p=countAnswered(),msg=(p[0]<p[1]?'You still have '+(p[1]-p[0])+' unanswered item(s).\n\n':'')+'Lock and submit? You will not be able to change your answers.';
+  if(!window.confirm(msg))return;
+  S.sub={code:makeCode(),t:new Date().toISOString()};save();restore();QD.tok.forEach(paintTok);showStatus();window.scrollTo(0,0);
+}
+function showStatus(){
+  var st=$('status');$('submitBtn').classList.toggle('hidden',locked());
+  if(!locked()){st.innerHTML=INSTR?'<div class="card"><b>Instructor preview.</b> <span class="sub">Answer as “'+esc(S.name)+'”; your grade appears as soon as you submit.</span> <button class="btn ghost small" id="resetBtn">Start over</button></div>':'';hookReset();return;}
+  var o=readCode(S.sub.code),h='<div class="card"><p class="eyebrow">Submitted · '+esc(new Date(S.sub.t).toLocaleString())+'</p><h1 style="font-size:24px">Thank you, '+esc(S.name)+'. Your answers are locked.</h1>'+
+   '<p class="sub">Copy this submission code and paste it into the Brightspace assignment. Receipt: <b class="mono">'+esc(o?o.rcpt:'')+'</b></p><div class="codeout" id="codeOut">'+esc(S.sub.code)+'</div>'+
+   '<div class="row noprint"><button class="btn" id="copyBtn">Copy submission code</button>'+(INSTR?'<button class="btn ghost small" id="resetBtn">Start over</button>':'')+'<span id="copyMsg" class="sub"></span></div></div>';
+  if(KEY){h+=resultCard(grade(S.name,S.ans,KEY));}
+  else{h+='<div class="card sealed noprint"><b>Your grade is sealed.</b><p class="sub">It will open when your professor gives the class a release code.</p><div class="row" style="margin-top:10px"><input type="text" id="rcIn" maxlength="12" style="max-width:200px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.1em" placeholder="Release code" aria-label="release code" autocomplete="off"><button class="btn" id="rcBtn">Show my grade</button></div><div class="err" id="rcErr" role="alert"></div></div>';}
+  st.innerHTML=h;hookReset();
+  $('copyBtn').onclick=function(){var done=function(){$('copyMsg').textContent='Copied.';};
+    if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(S.sub.code).then(done,sel);else sel();
+    function sel(){var r=document.createRange();r.selectNodeContents($('codeOut'));var s=window.getSelection();s.removeAllRanges();s.addRange(r);$('copyMsg').textContent='Code selected — press Ctrl/⌘+C.';}};
+  if($('rcBtn')){$('rcBtn').onclick=tryRelease;$('rcIn').onkeydown=function(e){if(e.key==='Enter')tryRelease();};}
+  if(KEY)feedback(grade(S.name,S.ans,KEY));
+}
+function hookReset(){if($('resetBtn'))$('resetBtn').onclick=function(){if(!window.confirm('Clear this attempt on this device and start over?'))return;lsDel(LS_STATE);location.reload();};}
+function tryRelease(){
+  var c=normCode($('rcIn').value);if(c.length<4){$('rcErr').textContent='Enter the release code from your professor.';return;}
+  $('rcErr').textContent='Checking…';
+  setTimeout(function(){var m=unwrap(c,SEAL.sR,SEAL.wR);
+    if(!m){$('rcErr').textContent='That code is not correct. Grades open only after your professor releases them.';return;}
+    KEY=openKey(m);S.rc=c;save();showStatus();},30);
+}
+function resultCard(g){
+  return '<div class="card"><p class="eyebrow">Your grade</p><div class="score">'+g.total+'<small> / 100</small></div><div class="parts">'+
+    PARTS.map(function(p){return '<div>'+p[1]+'<b>'+(g.parts[p[0]]||0)+' / '+p[2]+'</b></div>';}).join('')+'</div><p class="sub" style="margin-top:12px">Scroll down to see each question marked, with the correct answer and why.</p></div>';
+}
+function feedback(g){
+  g.items.forEach(function(it){
+    var card=$('q_'+(it.part==='ty'?'ty':it.id));if(!card)return;
+    var full=it.got===it.max,cls=full?'ok':(it.got>0?'part':'no');
+    if(it.part==='mc'){var k=KEY.mc[it.id][0],els=document.querySelectorAll('input[name="'+it.id+'"]');
+      for(var i=0;i<els.length;i++){var L=els[i].parentNode;if(els[i].value===k)L.classList.add('right');else if(els[i].checked)L.classList.add('wrong');}}
+    if(it.part==='bug'){var good=KEY.bug[0],sel=S.ans.bug||[],ls=document.querySelectorAll('#bugBox .cl.click');
+      for(var j=0;j<ls.length;j++){var n=+ls[j].getAttribute('data-line'),isG=good.indexOf(n)>=0,isS=sel.indexOf(n)>=0;ls[j].classList.remove('sel');
+        if(isG&&isS)ls[j].classList.add('right');else if(isS)ls[j].classList.add('wrong');else if(isG)ls[j].classList.add('missed');}}
+    if(it.part==='ty'){var row=$('row_'+it.id);if(row&&!row.querySelector('.tyfb'))row.insertAdjacentHTML('beforeend','<span class="tyfb pts"><b class="'+cls+'" style="color:var(--'+(full?'good':'bad')+')">'+(full?'✓ correct':'✗ '+esc(it.correct))+'</b></span>');return;}
+    var multi=/\n/.test(it.correct)||it.part==='po';
+    card.querySelector('.fbslot').innerHTML='<div class="fb"><b class="'+cls+'">'+(full?'✓ Correct':(it.got>0?'◐ Partly correct':'✗ Not correct'))+' · '+it.got+' / '+it.max+'</b>'+
+      (full?'':(multi?'<div>Correct answer:</div><pre>'+esc(it.correct)+'</pre>':'<div>Correct answer: <code>'+fmt(it.correct)+'</code></div>'))+
+      (it.why?(/\n/.test(it.why)?'<pre>'+esc(it.why)+'</pre>':'<div>'+fmt(it.why)+'</div>'):'')+'</div>';
+  });
+}
+
+/* ---------- instructor console ---------- */
+function roster(){try{return JSON.parse(lsGet(LS_ROSTER)||'[]');}catch(e){return [];}}
+function showInstr(){
+  var el=$('instr');el.classList.remove('hidden');
+  var rc=KEY.rc,codes=roster();
+  var rows=codes.map(function(c){var o=readCode(c);if(!o)return null;var g=grade(o.name,o.ans,KEY);return {o:o,g:g};}).filter(Boolean)
+    .sort(function(a,b){return normName(a.o.name)<normName(b.o.name)?-1:1;});
+  var seen={};rows.forEach(function(r){var k=normName(r.o.name);seen[k]=(seen[k]||0)+1;});
+  var h='<p class="eyebrow">Instructor console · only visible on this device</p>'+
+    '<div class="row" style="justify-content:space-between;align-items:flex-end"><div><div class="sub">Release code — give this to the class when you want grades to open</div><div class="rc">'+esc(rc.slice(0,3)+'-'+rc.slice(3))+'</div></div>'+
+    '<div class="sub" style="text-align:right">'+rows.length+' submission(s)'+(rows.length?' · average <b style="color:var(--ink)">'+r1(rows.reduce(function(s,r){return s+r.g.total;},0)/rows.length)+'</b>':'')+'</div></div>'+
+    '<div class="outlabel" style="margin-top:16px">Paste submission codes from Brightspace (one or many, separated by spaces or new lines)</div><textarea id="pasteIn" rows="3" placeholder="M109A1. …" aria-label="submission codes"></textarea>'+
+    '<div class="row" style="margin-top:10px"><button class="btn" id="addBtn">Grade pasted codes</button><button class="btn ghost small" id="csvBtn"'+(rows.length?'':' disabled')+'>Download CSV</button><button class="btn ghost small" id="clrBtn"'+(rows.length?'':' disabled')+'>Clear list</button><span id="addMsg" class="sub"></span></div>';
+  if(rows.length){h+='<div class="tblwrap"><table><thead><tr><th>Last name</th><th class="num">Grade</th>'+PARTS.map(function(p){return '<th class="num">'+p[1]+'</th>';}).join('')+'<th>Submitted</th><th>Receipt</th></tr></thead><tbody>'+
+    rows.map(function(r){var dup=seen[normName(r.o.name)]>1;return '<tr><td>'+esc(r.o.name)+(dup?' <span style="color:var(--warn)" title="More than one submission with this last name">⚠ duplicate</span>':'')+'</td><td class="num"><b>'+r.g.total+'</b></td>'+
+      PARTS.map(function(p){return '<td class="num">'+(r.g.parts[p[0]]||0)+'</td>';}).join('')+'<td>'+esc(r.o.t?new Date(r.o.t).toLocaleString():'')+'</td><td class="mono">'+esc(r.o.rcpt)+(r.o.ok?'':' <span style="color:var(--bad)">✗ altered</span>')+'</td></tr>';}).join('')+'</tbody></table></div>';}
+  h+='<details><summary>Answer key</summary><div class="keylist">'+esc(keyText())+'</div></details>'+
+    '<p class="sub" style="margin-top:14px;font-size:13.5px">You are signed in as instructor on this browser, so no code is needed here. <a href="#" id="outLink" style="color:var(--brand-ink)">Sign out on this device</a></p>';
+  el.innerHTML=h;
+  $('addBtn').onclick=function(){var toks=$('pasteIn').value.split(/\s+/).filter(Boolean),cur=roster(),add=0,bad=0;
+    toks.forEach(function(t){var o=readCode(t);if(!o){bad++;return;}if(cur.indexOf(t)<0){cur.push(t);add++;}});
+    lsSet(LS_ROSTER,JSON.stringify(cur));showInstr();$('addMsg').textContent=add+' added'+(bad?' · '+bad+' not recognized':'');};
+  $('clrBtn').onclick=function(){if(window.confirm('Remove all graded submissions from this device?')){lsDel(LS_ROSTER);showInstr();}};
+  $('csvBtn').onclick=function(){var q=function(s){return '"'+String(s).replace(/"/g,'""')+'"';};
+    var csv=[['Last name','Grade'].concat(PARTS.map(function(p){return p[1];})).concat(['Submitted','Receipt','Code intact']).map(q).join(',')].concat(rows.map(function(r){
+      return [r.o.name,r.g.total].concat(PARTS.map(function(p){return r.g.parts[p[0]]||0;})).concat([r.o.t||'',r.o.rcpt,r.o.ok?'yes':'NO']).map(q).join(',');})).join('\r\n');
+    var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='MAC109_Assignment1_grades.csv';document.body.appendChild(a);a.click();a.remove();};
+  $('outLink').onclick=function(e){e.preventDefault();lsDel(LS_IK);location.reload();};
+}
+function keyText(){var K=KEY,o=[];
+  o.push('PART A');QD.mc.forEach(function(q){var k=K.mc[q.id][0];q.o.forEach(function(op){if(op[0]===k)o.push('  '+q.q.replace(/`/g,'')+'\n      → '+op[1].replace(/`/g,''));});});
+  o.push('PART B (version depends on last name)');QD.po.forEach(function(q,i){K.po[q.id][0].forEach(function(a,v){o.push('  Program '+(i+1)+' v'+(v+1)+': '+a.split('\n').join(' ⏎ '));});});
+  o.push('PART C  broken lines: '+K.bug[0].join(', '));
+  o.push('PART D');QD.ty.forEach(function(q){o.push('  '+q[1]+' → '+K.ty[q[0]]);});
+  o.push('PART E');QD.tok.forEach(function(q){o.push('  '+K.tok[q.id][0]);});
+  o.push('PART F');QD.bl.forEach(function(q){o.push('  '+K.bl[q.id][0].join(' or '));});
+  return o.join('\n');}
+function instrLogin(e){
+  e.preventDefault();if(INSTR)return;
+  var p=window.prompt('Instructor passcode');if(!p)return;
+  var m=unwrap(p.trim(),SEAL.sI,SEAL.wI);if(!m){window.alert('Incorrect passcode.');return;}
+  lsSet(LS_IK,hex(m));location.reload();
+}
+
+/* ---------- boot ---------- */
+load();
+(function(){var ik=lsGet(LS_IK);if(ik&&/^[0-9a-f]{64}$/.test(ik)){var m=unhex(ik);if(checkM(m)){KEY=openKey(m);INSTR=true;}}
+  if(!KEY&&S.rc){var m2=unwrap(S.rc,SEAL.sR,SEAL.wR);if(m2)KEY=openKey(m2);}})();
+$('instrLink').onclick=instrLogin;
+$('submitBtn').onclick=submit;
+$('printBtn').onclick=function(){window.print();};
+if(INSTR){showInstr();$('instrLink').classList.add('hidden');}
+if(S.name)enter();else showStart();
+})();
+</script>
+</body>
+</html>
