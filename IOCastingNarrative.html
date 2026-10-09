@@ -1,0 +1,1367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<title>MAC109 — Input, Output & Casting Interactive Lecture</title>
+<style>
+:root{
+  --bg:#151a21; --panel:#1c232d; --soft:#10151b; --text:#e3e9f2; --muted:#94a1b5;
+  --border:#2a3442; --accent:#f2b63c; --accent2:#b8a1f5; --accentSoft:rgba(242,182,60,.14);
+  --teal:#57d9c0; --blue:#82b8f0;
+  --good:#57d9c0; --goodbg:rgba(87,217,192,.14); --bad:#e0716f; --badbg:rgba(224,113,111,.14);
+  --warn:#f2b63c; --warnbg:rgba(242,182,60,.14);
+  --serif:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --mono:"JetBrains Mono","SF Mono",Consolas,Menlo,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--serif);font-size:1.12rem;line-height:1.7}
+.wrap{max-width:1140px;margin:auto;padding:28px 20px 48px}
+.hero{display:grid;grid-template-columns:1.35fr .65fr;gap:18px;align-items:start;padding:14px 0 4px}
+h1{font-size:clamp(2rem,4.5vw,2.9rem);line-height:1.1;margin:.3rem 0 .55rem;font-weight:700}
+h2{font-size:1.75rem;margin:.3rem 0 .6rem;font-weight:700;line-height:1.2}
+h3{font-size:1.2rem;margin:.2rem 0 .45rem;font-weight:700;line-height:1.25}
+h3 code{color:var(--accent)}
+.card,.panel{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:20px 22px}
+.soft{background:var(--soft)}
+.teacher{border-left:4px solid var(--teal)}
+.teacher>strong{font-family:var(--mono);font-size:.8rem;font-weight:500;color:var(--teal);letter-spacing:.05em;text-transform:uppercase}
+.teacher p{font-style:italic}
+.teacher pre,.teacher ul{font-style:normal}
+.question{border-left:4px solid var(--blue)}
+.question>strong{font-family:var(--mono);font-size:.8rem;font-weight:500;color:var(--blue);letter-spacing:.05em;text-transform:uppercase}
+.eyebrow{font-family:var(--mono);font-size:.82rem;font-weight:500;color:var(--accent);text-transform:none;letter-spacing:.02em}
+.muted{color:var(--muted)}
+.big{font-size:1.22rem;font-weight:600}
+.hero .big{display:inline;background:linear-gradient(transparent 62%,rgba(242,182,60,.38) 62%);padding:0 .15em}
+.small{font-size:.92rem}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:24px 0 20px}
+button{min-height:42px;border:1px solid var(--border);border-radius:10px;background:var(--panel);color:var(--text);padding:9px 14px;font-family:var(--mono);font-size:.88rem;font-weight:500;cursor:pointer}
+button:hover{border-color:var(--accent)}
+button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.tabs button{border-radius:999px}
+button.active{background:var(--accent);border-color:var(--accent);color:#1a1408;font-weight:700}
+.story{display:none}.story.active{display:block}
+@media (prefers-reduced-motion:no-preference){
+  .story.active{animation:sceneIn .35s ease-out}
+  @keyframes sceneIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+}
+pre,code{font-family:var(--mono)}
+pre{white-space:pre-wrap;background:var(--soft);color:var(--text);padding:16px;border-radius:12px;overflow:auto;border:1px solid var(--border);font-size:.95rem;line-height:1.65}
+code{font-size:.9em;background:var(--soft);border:1px solid var(--border);border-radius:5px;padding:.08em .4em}
+pre code,button code{border:none;background:none;padding:0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.flow{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;margin-top:16px}
+.flowbox{flex:1;min-width:190px;padding:18px;border:1.5px solid var(--border);border-radius:14px;text-align:center;background:var(--soft);font-family:var(--serif);font-size:1rem}
+button.flowbox:hover{border-color:var(--accent);background:var(--accentSoft)}
+.flowbox strong{font-family:var(--mono);color:var(--accent)}
+.arrow{display:flex;align-items:center;font-size:1.8rem;color:var(--teal);padding:0 4px}
+.feedback{margin-top:12px;font-family:var(--mono);font-size:.95rem;font-weight:500;color:var(--teal);min-height:1.3em}
+.good{background:var(--goodbg)!important;border-color:var(--good)!important}
+.bad{background:var(--badbg)!important;border-color:var(--bad)!important}
+.warn{background:var(--warnbg)!important;border-color:var(--warn)!important}
+.navrow{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:22px}
+.navrow button:last-child{background:var(--accent);border-color:var(--accent);color:#1a1408;font-weight:700}
+.terminal{background:#0d1117;color:#e6edf3;border-radius:12px;padding:16px;font-family:var(--mono);font-size:.95rem;min-height:105px;border:1px solid var(--border);line-height:1.7}
+.terminal .input{color:#67e8f9}.terminal .error{color:#fca5a5}.terminal .result{color:#86efac}
+input,select{min-height:42px;border:1px solid var(--border);border-radius:9px;padding:8px 10px;font-size:16px;background:var(--soft);color:var(--text);font-family:var(--mono)}
+input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+label{font-weight:600;font-size:.98rem}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:end}
+.pill{display:inline-block;padding:4px 10px;border-radius:999px;background:var(--soft);border:1px solid var(--border);font-family:var(--mono);font-size:.8rem;font-weight:500}
+.tableWrap{overflow:auto}
+table{border-collapse:collapse;width:100%;min-width:760px}
+th,td{border:1px solid var(--border);padding:11px 12px;text-align:left;vertical-align:top}
+th{background:var(--panel);font-family:var(--mono);font-size:.82rem;font-weight:500;color:var(--teal)}
+.box{border:1px solid var(--border);border-radius:12px;padding:14px;background:var(--panel)}
+.box code{color:var(--accent);font-weight:700}
+.box p{margin:.4rem 0 0;font-size:.95rem;color:var(--muted)}
+.ladder{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin:15px 0;color:var(--teal);font-size:1.2rem}
+.rung{border:1.5px solid var(--accent);border-radius:10px;padding:10px 14px;background:var(--soft);font-family:var(--mono);font-weight:700;color:var(--text);font-size:1rem}
+details{margin-top:12px}
+summary{cursor:pointer;font-weight:700}
+summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.score{font-family:var(--mono);font-size:1.05rem;font-weight:700;color:var(--accent);margin-top:10px}
+#bugHost button{font-family:var(--mono);font-size:.9rem;background:var(--soft)}
+#bugHost .small{font-family:var(--serif);font-size:.95rem;margin-top:6px}
+
+/* --- complete C# examples with per-line explanations --- */
+details.csharp{background:var(--soft);border:1px solid var(--border);border-radius:14px;padding:0;margin-top:16px}
+details.csharp>summary{list-style:none;padding:14px 20px;font-family:var(--mono);font-size:.95rem;color:var(--accent);font-weight:500}
+details.csharp>summary::-webkit-details-marker{display:none}
+details.csharp>summary::before{content:"\25B8  "}
+details.csharp[open]>summary::before{content:"\25BE  "}
+details.csharp>*:not(summary){margin-left:20px;margin-right:20px}
+details.csharp>.outbox{margin-bottom:18px}
+.copyrow{display:flex;gap:8px;justify-content:flex-end;margin:4px 0 0;flex-wrap:wrap}
+.copyrow button{min-height:36px;padding:6px 14px;font-size:.84rem;border-radius:8px;color:var(--accent);border-color:var(--accent);background:transparent}
+.copyrow button:hover{background:var(--accent);color:#1a1408}
+.codewrap{display:grid;grid-template-columns:1.3fr .7fr;gap:14px;margin-top:12px}
+.codelines{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:8px 0;overflow:auto}
+.cl{display:flex;cursor:pointer;border-left:3px solid transparent}
+.cl .ln{min-width:3.2ch;padding:0 9px;text-align:right;color:#4b5769;font-family:var(--mono);font-size:.84rem;user-select:none}
+.cl .ct{font-family:var(--mono);font-size:.95rem;line-height:1.62;white-space:pre;padding-right:16px}
+.cl:hover{background:rgba(255,255,255,.04)}
+.cl.active{background:var(--accentSoft);border-left-color:var(--accent)}
+.cl.active .ln{color:var(--accent)}
+.cl:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.tk-kw{color:#b8a1f5}.tk-typ{color:var(--blue)}.tk-str{color:var(--teal)}.tk-com{color:#67748a;font-style:italic}.tk-num{color:#eaa46b}
+.expl{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px;position:sticky;top:12px;align-self:start;min-height:160px}
+.expl .lineno{display:inline-block;font-family:var(--mono);font-size:.76rem;color:var(--accent);border:1px solid var(--accent);border-radius:999px;padding:2px 11px;margin-bottom:9px}
+.expl pre.echo{margin:0 0 10px;padding:8px 11px;font-size:.84rem;color:var(--blue)}
+.expl .note{margin:0;font-size:1.02rem;line-height:1.6}
+.expl .pinstate{margin:11px 0 0;font-family:var(--mono);font-size:.74rem;color:var(--muted)}
+.outbox{margin-top:12px}
+.outbox>span{font-family:var(--mono);font-size:.8rem}
+.outbox pre{margin:6px 0 0;font-size:.88rem}
+
+@media(max-width:820px){
+  .hero,.grid2,.grid3,.grid4,.codewrap{grid-template-columns:1fr}
+  .arrow{width:100%;justify-content:center;transform:rotate(90deg)}
+  .expl{position:static}
+  body{font-size:1.05rem}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<section class="hero">
+  <div>
+    <div class="eyebrow">MAC109 · Week 2 · Instructor-Led Interactive Lecture</div>
+    <h1>Input, Output & Casting</h1>
+    <p class="big">Teaching a C# program to talk, listen, understand, and convert.</p>
+    <p class="muted">Narrative flow: concept → prediction → visualization → C# syntax → student check.</p>
+  </div>
+  <div class="card soft">
+    <strong>By the end, students should be able to explain:</strong>
+    <ul>
+      <li>Input → Process → Output</li>
+      <li>Why <code>ReadLine()</code> gives text</li>
+      <li>When to Parse, Cast, Convert, or TryParse</li>
+      <li>Why some conversions lose information</li>
+    </ul>
+  </div>
+</section>
+
+<div class="tabs">
+  <button class="tab active" data-tab="s1">1. Big Idea</button>
+  <button class="tab" data-tab="s2">2. Output</button>
+  <button class="tab" data-tab="s3">3. Input</button>
+  <button class="tab" data-tab="s4">4. Text → Number</button>
+  <button class="tab" data-tab="s5">5. Casting</button>
+  <button class="tab" data-tab="s6">6. Convert</button>
+  <button class="tab" data-tab="s7">7. Safe Input</button>
+  <button class="tab" data-tab="s8">8. Practice Apps</button>
+  <button class="tab" data-tab="s9">9. Bug Hunt</button>
+  <button class="tab" data-tab="s10">10. GUI Bridge</button>
+  <button class="tab" data-tab="s11">11. Final Check</button>
+</div>
+
+<section id="s1" class="story active panel">
+  <div class="eyebrow">Scene 1 · The story behind almost every program</div>
+  <h2>Input → Process → Output</h2>
+  <p>Start with something familiar: an ATM, calculator, game, or registration form.</p>
+
+  <div class="flow">
+    <button type="button" class="flowbox ipo" data-v="input"><strong>⌨ INPUT</strong><br><span class="muted">data enters the program</span><br><code>Console.ReadLine()</code></button>
+    <div class="arrow">→</div>
+    <button type="button" class="flowbox ipo" data-v="process"><strong>⚙ PROCESS</strong><br><span class="muted">convert + calculate</span><br><code>Parse · cast · math</code></button>
+    <div class="arrow">→</div>
+    <button type="button" class="flowbox ipo" data-v="output"><strong>🖥 OUTPUT</strong><br><span class="muted">show the result</span><br><code>Console.WriteLine()</code></button>
+  </div>
+  <div id="ipoText" class="card soft" style="margin-top:14px">Click the three stages while you explain them.</div>
+
+  <div class="card teacher" style="margin-top:16px">
+    <strong>Instructor narrative</strong>
+    <p>“Last week our program could talk, but it said the same thing every time. Today it learns to listen. Once it listens, it can process different information for different users.”</p>
+  </div>
+
+  <div class="card question">
+    <strong>Ask the class</strong>
+    <p>A temperature converter asks for Fahrenheit, calculates Celsius, then displays the answer. Which part is the calculation?</p>
+    <button class="ipoQ" data-a="input">Input</button>
+    <button class="ipoQ" data-a="process">Process</button>
+    <button class="ipoQ" data-a="output">Output</button>
+    <div id="ipoFeedback" class="feedback"></div>
+  </div>
+  <div class="navrow"><span></span><button data-next="s2">Next →</button></div>
+</section>
+
+<section id="s2" class="story panel">
+  <div class="eyebrow">Scene 2 · Making the program talk clearly</div>
+  <h2><code>Write</code> vs <code>WriteLine</code></h2>
+
+  <div class="grid2">
+    <div class="card">
+      <h3><code>Console.Write()</code></h3>
+      <p>Keeps the cursor on the same line.</p>
+      <pre>Console.Write("Your name? ");</pre>
+      <div class="terminal">Your name? <span class="input">Maria</span></div>
+    </div>
+    <div class="card">
+      <h3><code>Console.WriteLine()</code></h3>
+      <p>Prints, then moves to the next line.</p>
+      <pre>Console.WriteLine("Welcome!");</pre>
+      <div class="terminal">Welcome!<br>▌</div>
+    </div>
+  </div>
+
+  <div class="card question">
+    <strong>Why usually use Write for a prompt?</strong>
+    <button class="writeQ" data-a="same">So the answer appears on the same line</button>
+    <button class="writeQ" data-a="required">Because ReadLine requires Write</button>
+    <div id="writeFeedback" class="feedback"></div>
+  </div>
+
+  <h3>Special characters and formatting</h3>
+  <div class="grid3">
+    <div class="box"><code>\n</code><p>new line</p></div>
+    <div class="box"><code>\t</code><p>tab</p></div>
+    <div class="box"><code>\"</code><p>quotation mark inside text</p></div>
+    <div class="box"><code>\\</code><p>backslash</p></div>
+    <div class="box"><code>{price:F2}</code><p>2 decimal places</p></div>
+    <div class="box"><code>{total:N2}</code><p>thousands separator + 2 decimals</p></div>
+  </div>
+
+  <div class="card teacher">
+    <strong>Important distinction</strong>
+    <p>“Formatting changes how the number <em>looks</em>; it does not change the value stored in the variable.”</p>
+  </div>
+
+  <div class="card question">
+    <strong>Predict</strong>
+    <p>What does <code>$"{4.5:F2}"</code> display?</p>
+    <button class="formatQ" data-a="4.50">4.50</button>
+    <button class="formatQ" data-a="5">5</button>
+    <button class="formatQ" data-a="4.5F2">4.5F2</button>
+    <div id="formatFeedback" class="feedback"></div>
+  </div>
+  <details class="card csharp"><summary>Show complete C# example — OutputDemo.cs</summary>
+<div class="copyrow"><button type="button" class="copyBtn">Copy code</button></div>
+<div class="codewrap">
+<div class="codelines"></div>
+<div class="expl"><p class="note muted">Click or hover on any line of code — its complete explanation appears here.</p></div>
+</div>
+<div class="outbox"><span class="muted">Expected output:</span><pre>Your name? (Write keeps the cursor here)
+Welcome!
+Line one
+Line two
+Name:	Maria
+She said "hello"
+Price: 4.50
+Total: 1,234.50</pre></div>
+<script type="text/plain" class="src">
+using System;
+
+class Program
+{
+    static void Main()
+    {
+        Console.Write("Your name? ");
+        Console.WriteLine("(Write keeps the cursor here)");
+
+        Console.WriteLine("Welcome!");
+        Console.WriteLine("Line one\nLine two");
+        Console.WriteLine("Name:\tMaria");
+        Console.WriteLine("She said \"hello\"");
+
+        double price = 4.5;
+        double total = 1234.5;
+        Console.WriteLine($"Price: {price:F2}");
+        Console.WriteLine($"Total: {total:N2}");
+    }
+}
+</script>
+<script type="application/json" class="notes">
+[
+"Every console program starts by borrowing the Console tools from the System namespace.",
+"",
+"C# code lives inside a class. Unlike Java, the class name does NOT have to match the file name - paste this into any online compiler as-is.",
+"Opens the class.",
+"Main() is where the program starts running.",
+"Opens Main.",
+"Write prints and KEEPS THE CURSOR on the same line - the left terminal demo above.",
+"Proof: this text appears right beside the prompt, on the same line.",
+"",
+"WriteLine prints, then moves to the NEXT line - the right terminal demo.",
+"\\n inside the text means new line: one WriteLine, two printed lines.",
+"\\t is a tab - it lines things up in columns.",
+"\\\" prints a real quotation mark inside the text without ending the string.",
+"",
+"A price with one decimal typed in the code...",
+"...and a bigger number for the thousands-separator demo.",
+"$ starts an interpolated string; {price:F2} means SHOW price with 2 decimals. The variable itself is unchanged - formatting changes looks, not values.",
+"{total:N2}: thousands separator plus 2 decimals. Prints 1,234.50.",
+"Closes Main().",
+"Closes the class."
+]
+</script>
+</details>
+  <div class="navrow"><button data-next="s1">← Back</button><button data-next="s3">Next →</button></div>
+</section>
+
+<section id="s3" class="story panel">
+  <div class="eyebrow">Scene 3 · Making the program listen</div>
+  <h2><code>Console.ReadLine()</code> pauses, listens, and returns text</h2>
+
+  <div class="card teacher">
+    <strong>Instructor wording</strong>
+    <p>“ReadLine waits until the user presses Enter, then gives your program everything the user typed as a <strong>string</strong>.”</p>
+  </div>
+
+  <pre>Console.Write("What is your name? ");
+string name = Console.ReadLine();
+
+Console.WriteLine($"Hello, {name}!");</pre>
+
+  <div class="card">
+    <strong>Live conversation simulator</strong>
+    <div class="row" style="margin-top:10px">
+      <label>Name <input id="nameInput" value="Maria"></label>
+      <button id="nameRun" type="button">Run conversation</button>
+    </div>
+    <div id="nameTerm" class="terminal" style="margin-top:12px">What is your name? ▌</div>
+  </div>
+
+  <div class="card question">
+    <strong>The most important input question</strong>
+    <p>If the user types <strong>25</strong>, what type does <code>ReadLine()</code> return?</p>
+    <button class="readQ" data-a="string">string</button>
+    <button class="readQ" data-a="int">int</button>
+    <button class="readQ" data-a="smart">C# figures it out automatically</button>
+    <div id="readFeedback" class="feedback"></div>
+  </div>
+
+  <div class="card soft">
+    <strong>Student rule</strong>
+    <p><code>Console.ReadLine()</code> gives you text. Digits typed on a keyboard are still text until you convert them.</p>
+  </div>
+  <details class="card csharp"><summary>Show complete C# example — Greeting.cs</summary>
+<div class="copyrow"><button type="button" class="copyBtn">Copy code</button></div>
+<div class="codewrap">
+<div class="codelines"></div>
+<div class="expl"><p class="note muted">Click or hover on any line of code — its complete explanation appears here.</p></div>
+</div>
+<div class="outbox"><span class="muted">Sample run — the user types Maria:</span><pre>What is your name? Maria
+Hello, Maria!</pre></div>
+<script type="text/plain" class="src">
+using System;
+
+class Program
+{
+    static void Main()
+    {
+        Console.Write("What is your name? ");
+        string name = Console.ReadLine();
+
+        Console.WriteLine($"Hello, {name}!");
+    }
+}
+</script>
+<script type="application/json" class="notes">
+[
+"The Console tools.",
+"",
+"Same shell as every program this week.",
+"Opens the class.",
+"Start here.",
+"Opens Main.",
+"Write, not WriteLine: the user's answer will appear on the SAME line as the question - Scene 2's rule.",
+"The whole lesson in one line: ReadLine WAITS until Enter, then hands back everything typed as a STRING. Even digits arrive as text.",
+"",
+"An interpolated string drops the variable into the message. No conversion needed here - we are using the text AS text.",
+"Closes Main().",
+"Closes the class."
+]
+</script>
+</details>
+  <div class="navrow"><button data-next="s2">← Back</button><button data-next="s4">Next →</button></div>
+</section>
+
+<section id="s4" class="story panel">
+  <div class="eyebrow">Scene 4 · The #1 input problem</div>
+  <h2><code>"19"</code> is not the same thing as <code>19</code></h2>
+
+  <div class="grid2">
+    <div class="card">
+      <h3>Text</h3>
+      <div class="big"><code>"19"</code></div>
+      <p>Two characters: <code>'1'</code> and <code>'9'</code>.</p>
+      <p><code>"19" + 1</code> → <strong>"191"</strong></p>
+    </div>
+    <div class="card">
+      <h3>Number</h3>
+      <div class="big"><code>19</code></div>
+      <p>An integer value used in arithmetic.</p>
+      <p><code>19 + 1</code> → <strong>20</strong></p>
+    </div>
+  </div>
+
+  <div class="card question">
+    <strong>Try it</strong>
+    <div class="row">
+      <label>Type an age <input id="ageText" value="19"></label>
+      <button id="parseDemo" type="button">Compare text vs parsed number</button>
+    </div>
+    <div id="parseTerm" class="terminal" style="margin-top:12px"></div>
+  </div>
+
+  <h3>Parse family</h3>
+  <div class="grid3">
+    <div class="box"><code>int.Parse("25")</code><p>→ 25</p></div>
+    <div class="box"><code>double.Parse("3.75")</code><p>→ 3.75</p></div>
+    <div class="box"><code>decimal.Parse("19.99")</code><p>→ 19.99</p></div>
+    <div class="box"><code>bool.Parse("true")</code><p>→ true</p></div>
+    <div class="box"><code>char.Parse("A")</code><p>→ 'A'</p></div>
+  </div>
+
+  <div class="card teacher">
+    <strong>Read this line inside out</strong>
+    <pre>double a = double.Parse(Console.ReadLine());</pre>
+    <p>1. Read text → 2. Parse text into a double → 3. Store the double in <code>a</code>.</p>
+  </div>
+
+  <div class="card question">
+    <strong>What if the user types <code>abc</code> into <code>int.Parse</code>?</strong>
+    <button class="parseQ" data-a="error">FormatException at runtime</button>
+    <button class="parseQ" data-a="zero">It becomes 0</button>
+    <button class="parseQ" data-a="compiler">Compiler catches it</button>
+    <div id="parseFeedback" class="feedback"></div>
+  </div>
+  <details class="card csharp"><summary>Show complete C# example — TextVsNumber.cs</summary>
+<div class="copyrow"><button type="button" class="copyBtn">Copy code</button></div>
+<div class="codewrap">
+<div class="codelines"></div>
+<div class="expl"><p class="note muted">Click or hover on any line of code — its complete explanation appears here.</p></div>
+</div>
+<div class="outbox"><span class="muted">Expected output:</span><pre>191
+20</pre></div>
+<script type="text/plain" class="src">
+using System;
+
+class Program
+{
+    static void Main()
+    {
+        // What ReadLine gives us: TEXT
+        string ageText = "19";
+
+        // Text + number: C# glues them together
+        Console.WriteLine(ageText + 1);
+
+        // Parse first, THEN add
+        int age = int.Parse(ageText);
+        Console.WriteLine(age + 1);
+    }
+}
+</script>
+<script type="application/json" class="notes">
+[
+"The Console tools.",
+"",
+"Scene 4's whole argument, runnable.",
+"Opens the class.",
+"Start.",
+"Opens Main.",
+"We hard-code the text so the experiment is repeatable - this is exactly what ReadLine would hand you if the user typed 19.",
+"Quotation marks make it TEXT: the characters 1 and 9, not the number nineteen.",
+"",
+"Experiment 1: use the text directly.",
+"Text + number: C# converts the 1 to text and GLUES. Prints 191 - the classic beginner shock.",
+"",
+"Experiment 2: convert FIRST.",
+"int.Parse reads the characters and builds the actual number 19.",
+"Now + means arithmetic. Prints 20.",
+"Closes Main().",
+"Closes the class."
+]
+</script>
+</details>
+  <div class="navrow"><button data-next="s3">← Back</button><button data-next="s5">Next →</button></div>
+</section>
+
+<section id="s5" class="story panel">
+  <div class="eyebrow">Scene 5 · Number type to number type</div>
+  <h2>Casting: moving a value into a different-sized numeric box</h2>
+
+  <div class="ladder">
+    <span class="rung">byte</span> → <span class="rung">short</span> → <span class="rung">int</span> → <span class="rung">long</span> → <span class="rung">float</span> → <span class="rung">double</span>
+  </div>
+
+  <div class="grid2">
+    <div class="card good">
+      <h3>Implicit conversion</h3>
+      <p>Smaller/safe numeric type → larger compatible type.</p>
+      <pre>int students = 32;
+double count = students;</pre>
+      <p>No cast syntax required.</p>
+    </div>
+    <div class="card warn">
+      <h3>Explicit cast</h3>
+      <p>Potentially lossy conversion.</p>
+      <pre>double temp = 72.9;
+int whole = (int)temp;</pre>
+      <p><code>whole</code> becomes <strong>72</strong>.</p>
+    </div>
+  </div>
+
+  <div class="card teacher">
+    <strong>Critical sentence</strong>
+    <p>“Casting a floating-point value to <code>int</code> truncates the fractional part. It does not round.”</p>
+  </div>
+
+  <div class="card question">
+    <strong>Predict each result</strong>
+    <div class="grid3">
+      <button class="castPredict" data-v="9.99">(int)9.99</button>
+      <button class="castPredict" data-v="-9.99">(int)-9.99</button>
+      <button class="castPredict" data-v="division">7 / 2 stored in double</button>
+    </div>
+    <div id="castFeedback" class="feedback"></div>
+  </div>
+
+  <div class="card">
+    <h3>The integer-division trap</h3>
+    <pre>int points = 7;
+int games = 2;
+
+double wrong = points / games;          // 3
+double right = (double)points / games;  // 3.5</pre>
+    <p>The right side is evaluated first. <code>int / int</code> performs integer division before the result is assigned to the <code>double</code>.</p>
+  </div>
+
+  <div class="card question">
+    <strong>One more surprise</strong>
+    <p>What does <code>(byte)300</code> produce in the unchecked/default context demonstrated in this lecture?</p>
+    <button class="byteQ" data-a="44">44</button>
+    <button class="byteQ" data-a="300">300</button>
+    <button class="byteQ" data-a="255">255</button>
+    <div id="byteFeedback" class="feedback"></div>
+  </div>
+
+  <details class="card csharp"><summary>Show complete C# example — CastingDemo.cs</summary>
+<div class="copyrow"><button type="button" class="copyBtn">Copy code</button></div>
+<div class="codewrap">
+<div class="codelines"></div>
+<div class="expl"><p class="note muted">Click or hover on any line of code — its complete explanation appears here.</p></div>
+</div>
+<div class="outbox"><span class="muted">Expected output — one line per experiment:</span><pre>32
+72
+9
+-9
+3
+3.5
+44</pre></div>
+<script type="text/plain" class="src">
+using System;
+
+class Program
+{
+    static void Main()
+    {
+        // Implicit: small type to bigger type, automatic
+        int students = 32;
+        double count = students;
+        Console.WriteLine(count);
+
+        // Explicit cast: truncates, never rounds
+        double temp = 72.9;
+        int whole = (int)temp;
+        Console.WriteLine(whole);
+
+        // Truncation goes toward zero
+        Console.WriteLine((int)9.99);
+        Console.WriteLine((int)-9.99);
+
+        // The integer-division trap
+        int points = 7;
+        int games = 2;
+        double wrong = points / games;
+        double right = (double)points / games;
+        Console.WriteLine(wrong);
+        Console.WriteLine(right);
+
+        // The overflow surprise
+        // (byte)300 on the constant would not even compile!
+        int big = 300;
+        byte b = (byte)big;
+        Console.WriteLine(b);
+    }
+}
+</script>
+<script type="application/json" class="notes">
+[
+"The Console tools.",
+"",
+"Every cast from Scene 5, verified in one program.",
+"Opens the class.",
+"Start.",
+"Opens Main.",
+"Case 1: going UP the ladder (int to double) is always safe...",
+"32 students...",
+"...slide into a double with NO cast syntax. C# allows it silently because nothing can be lost.",
+"Prints 32.",
+"",
+"Case 2: going DOWN the ladder needs the cast - and it cuts.",
+"72.9 degrees...",
+"(int) chops off the .9. TRUNCATES, never rounds - this scene's critical sentence.",
+"Prints 72, not 73.",
+"",
+"Truncation always moves TOWARD ZERO.",
+"Prints 9 - the .99 is simply discarded.",
+"Prints -9, not -10. Toward zero from both sides.",
+"",
+"The trap from this scene's prediction question.",
+"Both variables are ints...",
+"...on purpose.",
+"The RIGHT side runs first: int / int is INTEGER division, so 7 / 2 = 3. Only then is 3 stored in the double. Prints 3.",
+"The fix: cast ONE side to double BEFORE dividing. Now it is double division: 3.5.",
+"Prints 3.",
+"Prints 3.5.",
+"",
+"Scene 5's last surprise.",
+"Fun fact: written as (byte)300 on the constant, C# refuses to even compile. With a variable, it happens at runtime.",
+"300 does not fit in a byte (0 to 255)...",
+"...so the cast keeps only what fits: 300 wraps modulo 256.",
+"Prints 44.",
+"Closes Main().",
+"Closes the class."
+]
+</script>
+</details>
+  <div class="navrow"><button data-next="s4">← Back</button><button data-next="s6">Next →</button></div>
+</section>
+
+<section id="s6" class="story panel">
+  <div class="eyebrow">Scene 6 · Pick the right conversion tool</div>
+  <h2>Casting is for numeric types. Text needs Parse, Convert, or ToString.</h2>
+
+  <div class="tableWrap">
+    <table>
+      <thead><tr><th>You have</th><th>You want</th><th>Tool</th><th>Example</th></tr></thead>
+      <tbody>
+        <tr><td>string text</td><td>number</td><td>Parse / Convert</td><td><code>int.Parse(text)</code></td></tr>
+        <tr><td>user text</td><td>number safely</td><td>TryParse</td><td><code>int.TryParse(text, out int n)</code></td></tr>
+        <tr><td>any value</td><td>string</td><td>ToString</td><td><code>score.ToString()</code></td></tr>
+        <tr><td>small numeric type</td><td>larger compatible numeric type</td><td>implicit</td><td><code>double d = count;</code></td></tr>
+        <tr><td>larger numeric type</td><td>smaller numeric type</td><td>cast</td><td><code>int i = (int)average;</code></td></tr>
+        <tr><td>double</td><td>rounded int</td><td>Convert / Math.Round</td><td><code>Convert.ToInt32(3.7)</code> → 4</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card question">
+    <strong>Conversion finder</strong>
+    <div class="row">
+      <label>From
+        <select id="fromType">
+          <option>string</option><option>int</option><option>double</option>
+        </select>
+      </label>
+      <label>To
+        <select id="toType">
+          <option>int</option><option>double</option><option>string</option>
+        </select>
+      </label>
+      <button id="findConversion" type="button">Find tool</button>
+    </div>
+    <div id="conversionResult" class="card soft" style="margin-top:12px">Choose types and click Find tool.</div>
+  </div>
+
+  <div class="card teacher">
+    <strong>Cast vs Convert</strong>
+    <pre>(int)3.7              // 3
+Convert.ToInt32(3.7)   // 4</pre>
+    <p>Cast truncates; <code>Convert.ToInt32</code> rounds according to its conversion rules.</p>
+  </div>
+
+  <details class="card csharp"><summary>Show complete C# example — CastVsConvert.cs</summary>
+<div class="copyrow"><button type="button" class="copyBtn">Copy code</button></div>
+<div class="codewrap">
+<div class="codelines"></div>
+<div class="expl"><p class="note muted">Click or hover on any line of code — its complete explanation appears here.</p></div>
+</div>
+<div class="outbox"><span class="muted">Expected output:</span><pre>3
+4
+Score: 95</pre></div>
+<script type="text/plain" class="src">
+using System;
+
+class Program
+{
+    static void Main()
+    {
+        double d = 3.7;
+
+        // Cast truncates
+        Console.WriteLine((int)d);
+
+        // Convert rounds
+        Console.WriteLine(Convert.ToInt32(d));
+
+        // Any value to text: ToString
+        int score = 95;
+        string text = score.ToString();
+        Console.WriteLine("Score: " + text);
+    }
+}
+</script>
+<script type="application/json" class="notes">
+[
+"The Console tools - Convert lives in System too.",
+"",
+"Scene 6's cast-vs-Convert card, runnable.",
+"Opens the class.",
+"Start.",
+"Opens Main.",
+"One value, two tools about to disagree on it.",
+"",
+"Tool 1: the cast.",
+"(int)3.7 chops: prints 3.",
+"",
+"Tool 2: Convert.",
+"Convert.ToInt32(3.7) ROUNDS by its conversion rules: prints 4. Same value, different answer - choose the tool on purpose.",
+"",
+"And the opposite direction: any value into text.",
+"A number...",
+"...becomes the string 95. Every type has ToString().",
+"Glue text to text: prints Score: 95.",
+"Closes Main().",
+"Closes the class."
+]
+</script>
+</details>
+  <div class="navrow"><button data-next="s5">← Back</button><button data-next="s7">Next →</button></div>
+</section>
+
+<section id="s7" class="story panel">
+  <div class="eyebrow">Scene 7 · Real users make mistakes</div>
+  <h2><code>TryParse</code>: safe input without crashing</h2>
+
+  <pre>bool success = int.TryParse(text, out int number);</pre>
+
+  <div class="grid2">
+    <div class="card">
+      <h3><code>Parse</code></h3>
+      <p>Assumes the text is valid. Invalid text throws an exception.</p>
+    </div>
+    <div class="card good">
+      <h3><code>TryParse</code></h3>
+      <p>Returns <code>true</code> or <code>false</code>. The parsed number comes out through the <code>out</code> variable.</p>
+    </div>
+  </div>
+
+  <div class="card question">
+    <strong>Try it like a student</strong>
+    <div class="row">
+      <label>Input <input id="safeInput" value="21"></label>
+      <button id="safeRun" type="button">TryParse</button>
+    </div>
+    <div id="safeTerm" class="terminal" style="margin-top:12px"></div>
+  </div>
+
+  <div class="card teacher">
+    <strong>Instructor wording</strong>
+    <p>“TryParse does not promise that the input is good. It tries the conversion and reports whether it succeeded.”</p>
+  </div>
+
+  <div class="card question">
+    <strong>Predict</strong>
+    <p><code>bool ok = int.TryParse("abc", out int n);</code></p>
+    <button class="tryQ" data-a="false0">ok = false, n = 0</button>
+    <button class="tryQ" data-a="crash">Program crashes</button>
+    <button class="tryQ" data-a="true">ok = true</button>
+    <div id="tryFeedback" class="feedback"></div>
+  </div>
+
+  <details class="card csharp"><summary>Show complete C# example — SafeInput.cs</summary>
+<div class="copyrow"><button type="button" class="copyBtn">Copy code</button></div>
+<div class="codewrap">
+<div class="codelines"></div>
+<div class="expl"><p class="note muted">Click or hover on any line of code — its complete explanation appears here.</p></div>
+</div>
+<div class="outbox"><span class="muted">Two sample runs — the user types 21, then abc:</span><pre>How old are you? 21
+Next year you will be 22.
+
+How old are you? abc
+That was not a whole number.</pre></div>
+<script type="text/plain" class="src">
+using System;
+
+class Program
+{
+    static void Main()
+    {
+        Console.Write("How old are you? ");
+        string text = Console.ReadLine();
+
+        bool success = int.TryParse(text, out int age);
+
+        if (success)
+        {
+            Console.WriteLine($"Next year you will be {age + 1}.");
+        }
+        else
+        {
+            Console.WriteLine("That was not a whole number.");
+        }
+    }
+}
+</script>
+<script type="application/json" class="notes">
+[
+"The Console tools.",
+"",
+"Scene 7's safe-input pattern, complete.",
+"Opens the class.",
+"Start.",
+"Opens Main.",
+"Ask...",
+"...and receive TEXT, as always. The user might type 21 - or abc.",
+"",
+"The scene's headline line. TryParse TRIES the conversion: true/false lands in success, and the number (if any) comes out through the out variable age. Bad text means false and age = 0 - no crash, no exception.",
+"",
+"Branch on whether the conversion worked.",
+"Opens the success branch.",
+"Safe to do arithmetic - age is a real int here. Type 21 and it prints: Next year you will be 22.",
+"Closes the success branch.",
+"Otherwise...",
+"Opens the failure branch.",
+"No crash - just an honest message. This is why real programs use TryParse for user input.",
+"Closes the failure branch.",
+"Closes Main().",
+"Closes the class."
+]
+</script>
+</details>
+  <div class="navrow"><button data-next="s6">← Back</button><button data-next="s8">Next →</button></div>
+</section>
+
+<section id="s8" class="story panel">
+  <div class="eyebrow">Scene 8 · Put Input → Process → Output together</div>
+  <h2>Three mini-apps students can operate live</h2>
+
+  <div class="card">
+    <h3>🌡 Temperature Converter</h3>
+    <div class="row">
+      <label>Fahrenheit <input id="fahrenheit" type="number" value="68" step="any"></label>
+      <button id="tempRun" type="button">Convert</button>
+    </div>
+    <div id="tempOut" class="terminal" style="margin-top:12px"></div>
+    <details class="card csharp"><summary>Show complete C# example — TemperatureConverter.cs</summary>
+<div class="copyrow"><button type="button" class="copyBtn">Copy code</button></div>
+<div class="codewrap">
+<div class="codelines"></div>
+<div class="expl"><p class="note muted">Click or hover on any line of code — its complete explanation appears here.</p></div>
+</div>
+<div class="outbox"><span class="muted">Sample run — the user types 68:</span><pre>Temperature in Fahrenheit: 68
+68 F = 20.0 C</pre></div>
+<script type="text/plain" class="src">
+using System;
+
+class Program
+{
+    static void Main()
+    {
+        // INPUT
+        Console.Write("Temperature in Fahrenheit: ");
+        double fahrenheit = double.Parse(Console.ReadLine());
+
+        // PROCESS
+        double celsius = (fahrenheit - 32) * 5 / 9;
+
+        // OUTPUT
+        Console.WriteLine($"{fahrenheit} F = {celsius:F1} C");
+    }
+}
+</script>
+<script type="application/json" class="notes">
+[
+"The Console tools.",
+"",
+"Scene 1's whole story in one small app.",
+"Opens the class.",
+"Start.",
+"Opens Main.",
+"Stage 1 of 3.",
+"Prompt with Write, so the user's number lands on the same line.",
+"Scene 4's read-it-inside-out line: 1. ReadLine gives text, 2. double.Parse converts it, 3. the double lands in fahrenheit.",
+"",
+"Stage 2 of 3.",
+"The math. Parentheses first; everything here is double math, so no integer-division trap.",
+"",
+"Stage 3 of 3.",
+"{celsius:F1} formats to one decimal for DISPLAY - the stored value keeps its full precision.",
+"Closes Main().",
+"Closes the class."
+]
+</script>
+</details>
+  </div>
+
+  <div class="card">
+    <h3>🍽 Tip Calculator</h3>
+    <div class="row">
+      <label>Bill $ <input id="bill" type="number" value="80" step="0.01"></label>
+      <label>Tip % <input id="tipPct" type="number" value="20" step="any"></label>
+      <label>People <input id="people" type="number" value="4" step="1"></label>
+      <button id="tipRun" type="button">Calculate</button>
+    </div>
+    <div id="tipOut" class="terminal" style="margin-top:12px"></div>
+    <details class="card csharp"><summary>Show complete C# example — TipCalculator.cs</summary>
+<div class="copyrow"><button type="button" class="copyBtn">Copy code</button></div>
+<div class="codewrap">
+<div class="codelines"></div>
+<div class="expl"><p class="note muted">Click or hover on any line of code — its complete explanation appears here.</p></div>
+</div>
+<div class="outbox"><span class="muted">Sample run — the user types 80, 20, 4:</span><pre>Bill amount: 80
+Tip percent: 20
+How many people? 4
+Tip: 16.00
+Total: 96.00
+Per person: 24.00</pre></div>
+<script type="text/plain" class="src">
+using System;
+
+class Program
+{
+    static void Main()
+    {
+        // INPUT
+        Console.Write("Bill amount: ");
+        double bill = double.Parse(Console.ReadLine());
+        Console.Write("Tip percent: ");
+        double tipPercent = double.Parse(Console.ReadLine());
+        Console.Write("How many people? ");
+        int people = int.Parse(Console.ReadLine());
+
+        // PROCESS
+        double tip = bill * tipPercent / 100;
+        double total = bill + tip;
+        double perPerson = total / people;
+
+        // OUTPUT
+        Console.WriteLine($"Tip: {tip:F2}");
+        Console.WriteLine($"Total: {total:F2}");
+        Console.WriteLine($"Per person: {perPerson:F2}");
+    }
+}
+</script>
+<script type="application/json" class="notes">
+[
+"The Console tools.",
+"",
+"Three inputs, three calculations, three outputs - the same app as the simulator above.",
+"Opens the class.",
+"Start.",
+"Opens Main.",
+"Stage 1: three questions.",
+"Money has decimals...",
+"...so bill is a double: read text, parse to double, store.",
+"The tip percent...",
+"...can be 20 or 17.5 - double again.",
+"People...",
+"...is a COUNT: whole people only, so int.Parse. Choosing the right type for each input is the skill here.",
+"",
+"Stage 2: the math.",
+"Percent means per hundred: bill times percent, divided by 100.",
+"Total = bill plus tip.",
+"double / int is fine here: the int is promoted to double, so 96.00 / 4 = 24.0. No trap.",
+"",
+"Stage 3: report.",
+"F2 for money: always two decimals. Prints Tip: 16.00.",
+"Prints Total: 96.00.",
+"Prints Per person: 24.00.",
+"Closes Main().",
+"Closes the class."
+]
+</script>
+</details>
+  </div>
+
+  <div class="card">
+    <h3>📝 Grade Average</h3>
+    <div class="row">
+      <label>Exam 1 <input class="grade" type="number" value="85"></label>
+      <label>Exam 2 <input class="grade" type="number" value="92"></label>
+      <label>Exam 3 <input class="grade" type="number" value="88"></label>
+      <button id="gradeRun" type="button">Average</button>
+    </div>
+    <div id="gradeOut" class="terminal" style="margin-top:12px"></div>
+    <details class="card csharp"><summary>Show complete C# example — GradeAverage.cs</summary>
+<div class="copyrow"><button type="button" class="copyBtn">Copy code</button></div>
+<div class="codewrap">
+<div class="codelines"></div>
+<div class="expl"><p class="note muted">Click or hover on any line of code — its complete explanation appears here.</p></div>
+</div>
+<div class="outbox"><span class="muted">Sample run — the user types 85, 92, 88:</span><pre>Exam 1: 85
+Exam 2: 92
+Exam 3: 88
+Sum: 265
+Average: 88.33</pre></div>
+<script type="text/plain" class="src">
+using System;
+
+class Program
+{
+    static void Main()
+    {
+        // INPUT
+        Console.Write("Exam 1: ");
+        int exam1 = int.Parse(Console.ReadLine());
+        Console.Write("Exam 2: ");
+        int exam2 = int.Parse(Console.ReadLine());
+        Console.Write("Exam 3: ");
+        int exam3 = int.Parse(Console.ReadLine());
+
+        // PROCESS
+        int sum = exam1 + exam2 + exam3;
+        double average = sum / 3.0;
+
+        // OUTPUT
+        Console.WriteLine($"Sum: {sum}");
+        Console.WriteLine($"Average: {average:F2}");
+    }
+}
+</script>
+<script type="application/json" class="notes">
+[
+"The Console tools.",
+"",
+"The grade app - and the answer to this scene's teaching challenge is on line 17.",
+"Opens the class.",
+"Start.",
+"Opens Main.",
+"Stage 1.",
+"Ask for exam 1...",
+"...whole-number grades, so int.Parse.",
+"Exam 2...",
+"...same pattern.",
+"Exam 3...",
+"...same pattern. (Soon, a loop will replace this repetition.)",
+"",
+"Stage 2.",
+"int + int + int: sum is 265 for the sample grades.",
+"THE teaching challenge: sum / 3 would be INTEGER division (265 / 3 = 88, decimals lost). Writing 3.0 makes it double division: 88.333... Scene 5's trap, defeated.",
+"",
+"Stage 3.",
+"Prints Sum: 265.",
+"F2 displays two decimals: Average: 88.33.",
+"Closes Main().",
+"Closes the class."
+]
+</script>
+</details>
+    <div class="card question" style="margin-top:12px">
+      <strong>Teaching challenge</strong>
+      <p>Why is <code>sum / 3.0</code> safer for a decimal average than <code>sum / 3</code> when <code>sum</code> is an int?</p>
+    </div>
+  </div>
+
+  <div class="navrow"><button data-next="s7">← Back</button><button data-next="s9">Next →</button></div>
+</section>
+
+<section id="s9" class="story panel">
+  <div class="eyebrow">Scene 9 · Type detective</div>
+  <h2>Bug Hunt: ask one question on every line</h2>
+  <div class="card soft teacher">
+    <strong>Detective question:</strong>
+    <p>“What type does the right side produce, and does that type fit the variable on the left?”</p>
+  </div>
+
+  <div class="card">
+    <p>Click every line that contains a type/conversion error.</p>
+    <div id="bugHost"></div>
+    <div id="bugScore" class="score">Found: 0 / 4</div>
+  </div>
+
+  <div class="card teacher">
+    <strong>Common bugs to reinforce</strong>
+    <ul>
+      <li><code>Console.ReadLine("Question")</code> — ReadLine takes no prompt argument.</li>
+      <li><code>int tickets = Console.ReadLine();</code> — string cannot be implicitly assigned to int.</li>
+      <li><code>int whole = 4.8;</code> — double cannot be implicitly assigned to int.</li>
+      <li><code>int n = (int)"5";</code> — casting does not parse text.</li>
+    </ul>
+  </div>
+
+  <div class="navrow"><button data-next="s8">← Back</button><button data-next="s10">Next →</button></div>
+</section>
+
+<section id="s10" class="story panel">
+  <div class="eyebrow">Scene 10 · Bridge to GUI programming</div>
+  <h2>Same Input → Process → Output, different place on the screen</h2>
+
+  <div class="tableWrap">
+    <table>
+      <thead><tr><th>Console today</th><th>GUI later</th><th>What stays the same</th></tr></thead>
+      <tbody>
+        <tr><td><code>Console.ReadLine()</code></td><td><code>txtName.Text</code></td><td>Both produce a string</td></tr>
+        <tr><td><code>int.Parse(Console.ReadLine())</code></td><td><code>int.Parse(txtAge.Text)</code></td><td>Text → number</td></tr>
+        <tr><td><code>int.TryParse(text, out int n)</code></td><td><code>int.TryParse(txtAge.Text, out int n)</code></td><td>Safe conversion</td></tr>
+        <tr><td><code>Console.WriteLine($"Tip: {tip:F2}")</code></td><td><code>lblResult.Text = $"Tip: {tip:F2}"</code></td><td>Same output string</td></tr>
+        <tr><td>Press Enter</td><td>Click Button</td><td>Triggers the processing</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card teacher">
+    <strong>Instructor closing bridge</strong>
+    <p>“A TextBox's <code>.Text</code> is still text. So everything you learned today about Parse and TryParse moves directly into GUI programming.”</p>
+  </div>
+
+  <div class="flow">
+    <div class="flowbox"><strong>TextBox</strong><br><span class="muted">INPUT</span></div>
+    <div class="arrow">→</div>
+    <div class="flowbox"><strong>button click + calculation</strong><br><span class="muted">PROCESS</span></div>
+    <div class="arrow">→</div>
+    <div class="flowbox"><strong>Label / TextBlock</strong><br><span class="muted">OUTPUT</span></div>
+  </div>
+
+  <div class="navrow"><button data-next="s9">← Back</button><button data-next="s11">Next →</button></div>
+</section>
+
+<section id="s11" class="story panel">
+  <div class="eyebrow">Scene 11 · Final understanding check</div>
+  <h2>Can students explain the type at every step?</h2>
+
+  <div class="card question">
+    <strong>1. User types 5</strong>
+    <p><code>string t = Console.ReadLine(); Console.WriteLine(t + 5);</code></p>
+    <button class="finalQ" data-q="1" data-a="55">55</button>
+    <button class="finalQ" data-q="1" data-a="10">10</button>
+    <div id="fq1" class="feedback"></div>
+  </div>
+
+  <div class="card question">
+    <strong>2. Which reads a whole number?</strong>
+    <button class="finalQ" data-q="2" data-a="parse"><code>int n = int.Parse(Console.ReadLine());</code></button>
+    <button class="finalQ" data-q="2" data-a="read"><code>int n = Console.ReadLine();</code></button>
+    <div id="fq2" class="feedback"></div>
+  </div>
+
+  <div class="card question">
+    <strong>3. What is <code>(int)8.9</code>?</strong>
+    <button class="finalQ" data-q="3" data-a="8">8</button>
+    <button class="finalQ" data-q="3" data-a="9">9</button>
+    <div id="fq3" class="feedback"></div>
+  </div>
+
+  <div class="card question">
+    <strong>4. Which conversion is implicit?</strong>
+    <button class="finalQ" data-q="4" data-a="double"><code>double d = 10;</code></button>
+    <button class="finalQ" data-q="4" data-a="int"><code>int i = 3.5;</code></button>
+    <div id="fq4" class="feedback"></div>
+  </div>
+
+  <div class="card question">
+    <strong>5. Safest tool for unpredictable user text?</strong>
+    <button class="finalQ" data-q="5" data-a="try">TryParse</button>
+    <button class="finalQ" data-q="5" data-a="cast">Cast</button>
+    <div id="fq5" class="feedback"></div>
+  </div>
+
+  <div class="card soft teacher">
+    <strong>Final sentence to leave on screen</strong>
+    <p>“Input arrives as data, types determine what operations are legal, conversion gives us the type we need, processing does the work, and output communicates the result.”</p>
+  </div>
+
+  <div class="navrow"><button data-next="s10">← Back</button><button data-next="s1">Restart Lecture</button></div>
+</section>
+
+</div>
+
+<script>
+(function(){
+  const panels=[...document.querySelectorAll('.story')];
+  const tabs=[...document.querySelectorAll('.tab')];
+  function show(id){
+    panels.forEach(p=>p.classList.toggle('active',p.id===id));
+    tabs.forEach(t=>t.classList.toggle('active',t.dataset.tab===id));
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+  tabs.forEach(t=>t.addEventListener('click',()=>show(t.dataset.tab)));
+  document.querySelectorAll('[data-next]').forEach(b=>b.addEventListener('click',()=>show(b.dataset.next)));
+
+  document.querySelectorAll('.ipo').forEach(b=>b.addEventListener('click',()=>{
+    const text={
+      input:'INPUT: information enters while the program is running. Today, keyboard text comes through Console.ReadLine().',
+      process:'PROCESS: the program converts types, performs calculations, and makes decisions.',
+      output:'OUTPUT: information leaves the program. Today, Console.Write/WriteLine display it.'
+    };
+    document.getElementById('ipoText').textContent=text[b.dataset.v];
+  }));
+  document.querySelectorAll('.ipoQ').forEach(b=>b.addEventListener('click',()=>{
+    document.getElementById('ipoFeedback').textContent=b.dataset.a==='process'?'Correct — calculation is PROCESS.':'Not this one. The calculation is the PROCESS stage.';
+  }));
+
+  document.querySelectorAll('.writeQ').forEach(b=>b.addEventListener('click',()=>{
+    document.getElementById('writeFeedback').textContent=b.dataset.a==='same'?'Correct. Write leaves the cursor beside the prompt.':'No. ReadLine works after either Write or WriteLine; Write simply looks nicer for prompts.';
+  }));
+  document.querySelectorAll('.formatQ').forEach(b=>b.addEventListener('click',()=>{
+    document.getElementById('formatFeedback').textContent=b.dataset.a==='4.50'?'Correct. F2 displays two decimal places.':'Try again: F2 means fixed-point with two decimals.';
+  }));
+
+  document.getElementById('nameRun').addEventListener('click',()=>{
+    const name=document.getElementById('nameInput').value;
+    document.getElementById('nameTerm').innerHTML='What is your name? <span class="input">'+escapeHtml(name)+'</span><br><span class="result">Hello, '+escapeHtml(name)+'!</span>';
+  });
+  document.querySelectorAll('.readQ').forEach(b=>b.addEventListener('click',()=>{
+    document.getElementById('readFeedback').textContent=b.dataset.a==='string'?'Correct. ReadLine returns text — a string.':'No. Even digits typed by the user arrive as a string.';
+  }));
+
+  document.getElementById('parseDemo').addEventListener('click',()=>{
+    const t=document.getElementById('ageText').value;
+    const n=Number(t);
+    let html='Text operation: "'+escapeHtml(t)+'" + 1 → <span class="input">'+escapeHtml(t+'1')+'</span><br>';
+    if(Number.isInteger(n) && t.trim()!=='') html+='Parsed operation: '+n+' + 1 → <span class="result">'+(n+1)+'</span>';
+    else html+='<span class="error">int.Parse would fail for this input.</span>';
+    document.getElementById('parseTerm').innerHTML=html;
+  });
+  document.querySelectorAll('.parseQ').forEach(b=>b.addEventListener('click',()=>{
+    document.getElementById('parseFeedback').textContent=b.dataset.a==='error'?'Correct. Invalid numeric text causes a FormatException at runtime.':'No. Parse cannot turn arbitrary letters into an integer.';
+  }));
+
+  document.querySelectorAll('.castPredict').forEach(b=>b.addEventListener('click',()=>{
+    let msg='';
+    if(b.dataset.v==='9.99') msg='(int)9.99 → 9. The fraction is truncated.';
+    if(b.dataset.v==='-9.99') msg='(int)-9.99 → -9. Casting truncates toward zero.';
+    if(b.dataset.v==='division') msg='7 / 2 is int division first → 3, then 3 is stored as 3.0 in the double.';
+    document.getElementById('castFeedback').textContent=msg;
+  }));
+  document.querySelectorAll('.byteQ').forEach(b=>b.addEventListener('click',()=>{
+    document.getElementById('byteFeedback').textContent=b.dataset.a==='44'?'Correct for the unchecked/default example: 300 wraps modulo 256 to 44.':'Not in the unchecked/default casting example shown here.';
+  }));
+
+  document.getElementById('findConversion').addEventListener('click',()=>{
+    const f=document.getElementById('fromType').value, t=document.getElementById('toType').value;
+    let out='';
+    if(f===t) out='No conversion needed.';
+    else if(f==='string' && t==='int') out='Use int.Parse(text) or int.TryParse(text, out int n) for user input.';
+    else if(f==='string' && t==='double') out='Use double.Parse(text) or double.TryParse for user input.';
+    else if(t==='string') out='Use value.ToString() or interpolation such as $"Value: {value}".';
+    else if(f==='int' && t==='double') out='Implicit conversion: double d = i;';
+    else if(f==='double' && t==='int') out='Use an explicit cast for truncation: int i = (int)d; or Convert.ToInt32(d) if you want conversion with rounding behavior.';
+    document.getElementById('conversionResult').textContent=out;
+  });
+
+  document.getElementById('safeRun').addEventListener('click',()=>{
+    const s=document.getElementById('safeInput').value.trim();
+    const valid=/^[+-]?\d+$/.test(s) && Number.isSafeInteger(Number(s));
+    const n=valid?Number(s):0;
+    document.getElementById('safeTerm').innerHTML='Did it work? <span class="'+(valid?'result':'error')+'">'+valid+'</span><br>The number: '+n+'<br>Doubled: '+(n*2);
+  });
+  document.querySelectorAll('.tryQ').forEach(b=>b.addEventListener('click',()=>{
+    document.getElementById('tryFeedback').textContent=b.dataset.a==='false0'?'Correct. TryParse reports false and the out value is 0.':'TryParse is designed not to throw a FormatException for bad text.';
+  }));
+
+  document.getElementById('tempRun').addEventListener('click',()=>{
+    const f=Number(document.getElementById('fahrenheit').value);
+    const c=(f-32)*5/9;
+    document.getElementById('tempOut').innerHTML='INPUT: '+f+' F<br>PROCESS: ('+f+' - 32) × 5 / 9<br><span class="result">OUTPUT: '+c.toFixed(1)+' C</span>';
+  });
+  document.getElementById('tipRun').addEventListener('click',()=>{
+    const bill=Number(document.getElementById('bill').value), p=Number(document.getElementById('tipPct').value), people=Number(document.getElementById('people').value);
+    const tip=bill*p/100,total=bill+tip;
+    let out='Tip: $'+tip.toFixed(2)+'<br>Total: $'+total.toFixed(2);
+    if(people===0) out+='<br><span class="error">Cannot divide the total among 0 people.</span>';
+    else out+='<br><span class="result">Per person: $'+(total/people).toFixed(2)+'</span>';
+    document.getElementById('tipOut').innerHTML=out;
+  });
+  document.getElementById('gradeRun').addEventListener('click',()=>{
+    const vals=[...document.querySelectorAll('.grade')].map(x=>Number(x.value));
+    const sum=vals.reduce((a,b)=>a+b,0), avg=sum/vals.length;
+    document.getElementById('gradeOut').innerHTML='Sum: '+sum+'<br><span class="result">Average: '+avg.toFixed(2)+'</span>';
+  });
+
+  const bugs=[
+    ['Console.Write("Your name? ");',false,'Correct prompt.'],
+    ['string name = Console.ReadLine();',false,'Correct: ReadLine returns a string.'],
+    ['string food = Console.ReadLine("Favorite food? ");',true,'Bug: ReadLine takes no prompt argument. Print the prompt separately.'],
+    ['int tickets = Console.ReadLine();',true,'Bug: ReadLine returns string; parse it first.'],
+    ['double price = double.Parse(Console.ReadLine());',false,'Correct: text is parsed into a double.'],
+    ['int whole = 4.8;',true,'Bug: a double cannot be implicitly assigned to int.'],
+    ['int age = (int)"25";',true,'Bug: you cannot cast string to int; use int.Parse or TryParse.']
+  ];
+  const host=document.getElementById('bugHost'); let found=0;
+  bugs.forEach((x,i)=>{
+    const b=document.createElement('button'); b.type='button'; b.style.display='block'; b.style.width='100%'; b.style.textAlign='left'; b.style.margin='7px 0'; b.innerHTML='<code>'+escapeHtml(x[0])+'</code>';
+    b.addEventListener('click',()=>{
+      if(b.dataset.done)return; b.dataset.done='1';
+      if(x[1]){found++;b.classList.add('bad');b.innerHTML+='<div class="small">'+x[2]+'</div>';}
+      else{b.classList.add('good');b.innerHTML+='<div class="small">'+x[2]+'</div>';}
+      document.getElementById('bugScore').textContent='Found: '+found+' / 4';
+    });
+    host.appendChild(b);
+  });
+
+  const answers={1:'55',2:'parse',3:'8',4:'double',5:'try'};
+  document.querySelectorAll('.finalQ').forEach(b=>b.addEventListener('click',()=>{
+    const q=b.dataset.q;
+    document.getElementById('fq'+q).textContent=b.dataset.a===answers[q]?'Correct.':'Not quite. Trace the type produced by each expression.';
+  }));
+
+  function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));}
+})();
+</script>
+<script>
+(function(){
+var KW=/\b(using|class|static|void|string|int|double|float|decimal|bool|byte|char|long|var|out|if|else|new|return|true|false)\b/g;
+var TY=/\b(Console|Convert|System|Program|Math)\b/g;
+var NUM=/\b(\d+(\.\d+)?)\b/g;
+function esc(t){return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function splitComment(line){var inStr=false;for(var i=0;i<line.length-1;i++){var ch=line.charAt(i);if(ch==='"')inStr=!inStr;if(!inStr&&ch==='/'&&line.charAt(i+1)==='/')return[line.slice(0,i),line.slice(i)];}return[line,''];}
+function highlight(line){
+  var parts=splitComment(line),code=parts[0],comment=parts[1],strings=[];
+  code=code.replace(/\$?"([^"\\]|\\.)*"/g,function(m){strings.push(m);return'\u0001'+String.fromCharCode(64+strings.length)+'\u0001';});
+  code=esc(code).replace(KW,'<span class="tk-kw">$1</span>').replace(TY,'<span class="tk-typ">$1</span>').replace(NUM,'<span class="tk-num">$1</span>');
+  code=code.replace(/\u0001([A-Z])\u0001/g,function(m,c){return'<span class="tk-str">'+esc(strings[c.charCodeAt(0)-65])+'</span>';});
+  if(comment)code+='<span class="tk-com">'+esc(comment)+'</span>';
+  return code||'&nbsp;';
+}
+document.querySelectorAll('details.csharp').forEach(function(box){
+  var srcEl=box.querySelector('script.src'),notesEl=box.querySelector('script.notes');
+  if(!srcEl)return;
+  var raw=srcEl.textContent.replace(/^\n/,'').replace(/\s+$/,'');
+  var lines=raw.split('\n'),notes=[];
+  try{notes=JSON.parse(notesEl.textContent);}catch(e){}
+  var holder=box.querySelector('.codelines'),expl=box.querySelector('.expl'),pinned=null;
+  lines.forEach(function(text,idx){
+    var row=document.createElement('div');row.className='cl';row.tabIndex=0;
+    row.setAttribute('role','button');row.setAttribute('aria-label','Line '+(idx+1));
+    row.innerHTML='<span class="ln">'+(idx+1)+'</span><span class="ct">'+highlight(text)+'</span>';
+    holder.appendChild(row);
+    var note=(notes[idx]||'').trim()||(text.trim()===''?'A blank line separating two groups of statements.':'Part of the statement explained on the neighboring lines.');
+    function show(pin){
+      holder.querySelectorAll('.cl.active').forEach(function(el){el.classList.remove('active');});
+      row.classList.add('active');
+      expl.innerHTML='<span class="lineno">line '+(idx+1)+'</span><pre class="echo">'+(esc(text.trim())||'&nbsp;')+'</pre><p class="note">'+note+'</p>'
+        +'<p class="pinstate">'+(pin?'📌 pinned — click again or press Esc to release':'hover to preview · click to pin · ↑↓ to walk')+'</p>';
+    }
+    row.addEventListener('mouseenter',function(){if(!pinned)show(false);});
+    row.addEventListener('focus',function(){if(!pinned)show(false);});
+    row.addEventListener('click',function(){if(pinned===row){pinned=null;show(false);}else{pinned=row;show(true);}});
+    row.addEventListener('keydown',function(ev){
+      if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();row.click();}
+      else if(ev.key==='ArrowDown'&&row.nextElementSibling){ev.preventDefault();pinned=null;row.nextElementSibling.focus();}
+      else if(ev.key==='ArrowUp'&&row.previousElementSibling){ev.preventDefault();pinned=null;row.previousElementSibling.focus();}
+      else if(ev.key==='Escape'){pinned=null;show(false);}
+    });
+  });
+  var btn=box.querySelector('.copyBtn');
+  btn.addEventListener('click',function(){
+    var old=btn.textContent;
+    function done(){btn.textContent='Copied ✓';setTimeout(function(){btn.textContent=old;},1400);}
+    function fb(){var ta=document.createElement('textarea');ta.value=raw;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();try{document.execCommand('copy');done();}catch(e){}document.body.removeChild(ta);}
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(raw).then(done,fb);}else{fb();}
+  });
+});
+})();
+</script>
+</body>
+</html>
