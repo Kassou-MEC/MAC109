@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1" name="viewport"/>
+  <title>
+   MAC109 | Milestone 1 — Concise Instructor Script
+  </title>
+  <style>
+   :root {
+  font-family:system-ui,-apple-system,Segoe UI,sans-serif;
+  color-scheme:dark
+}
+
+body {
+  margin:0;
+  background:#0c1424;
+  color:#f1f5f9
+}
+
+.wrap {
+  max-width:950px;
+  margin:auto;
+  padding:24px
+}
+
+header {
+  display:flex;
+  justify-content:space-between;
+  gap:15px;
+  align-items:center;
+  flex-wrap:wrap
+}
+
+small,.muted {
+  color:#98aac5
+}
+
+h1 {
+  margin:8px 0;
+  font-size:clamp(22px,4vw,35px)
+}
+
+h2 {
+  margin:0 0 12px
+}
+
+p {
+  line-height:1.65
+}
+
+.card {
+  background:#172238;
+  border:1px solid #32445f;
+  border-radius:17px;
+  padding:24px;
+  margin-top:18px
+}
+
+.label {
+  color:#80bdff;
+  font-size:12px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  margin-bottom:7px
+}
+
+.speech {
+  font-size:21px;
+  line-height:1.55;
+  margin:0 0 22px
+}
+
+.question {
+  font-size:20px;
+  font-weight:650
+}
+
+button,a.btn {
+  background:#3477dc;
+  border:0;
+  border-radius:10px;
+  color:white;
+  padding:11px 17px;
+  font-weight:700;
+  cursor:pointer;
+  text-decoration:none;
+  display:inline-block
+}
+
+button.secondary,a.secondary {
+  background:#293953
+}
+
+button:disabled {
+  opacity:.4;
+  cursor:not-allowed
+}
+
+.answer {
+  margin-top:12px;
+  padding:12px;
+  background:#213c38;
+  border-left:4px solid #4dd6aa;
+  border-radius:8px
+}
+
+.controls {
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  margin-top:20px;
+  flex-wrap:wrap
+}
+
+.topnav {
+  display:flex;
+  gap:8px;
+  align-items:center;
+  flex-wrap:wrap
+}
+
+select {
+  background:#172238;
+  color:#f1f5f9;
+  border:1px solid #607089;
+  border-radius:9px;
+  padding:10px;
+  max-width:330px
+}
+
+pre {
+  padding:18px;
+  background:#09101b;
+  overflow-x:auto;
+  border-radius:11px;
+  font-size:13px;
+  line-height:1.55;
+  tab-size:4;
+  white-space:pre
+}
+
+code {
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace
+}
+
+.files {
+  display:none
+}
+
+.files.active {
+  display:block
+}
+
+.note {
+  color:#b9c8db;
+  font-size:14px
+}
+
+.pill {
+  background:#234369;
+  border-radius:99px;
+  padding:6px 12px;
+  font-size:13px
+}
+
+@media print {
+  body {
+  background:white;
+  color:black
+}
+
+.card {
+  background:white;
+  color:black;
+  border-color:#aaa
+}
+
+button,select,.topnav {
+  display:none!important
+}
+
+.files {
+  display:block!important
+}
+
+pre {
+  background:#eee;
+  color:black;
+  white-space:pre-wrap
+}
+
+
+}
+  </style>
+ </head>
+ <body>
+  <main class="wrap">
+   <header>
+    <div>
+     <small>
+      LaGuardia · MAC109 · Week 4 · VS Code + Avalonia
+     </small>
+     <h1>
+      Milestone 1 — Instructor Script
+     </h1>
+     <div class="muted">
+      12 short speaking prompts · one question per step · complete final code
+     </div>
+    </div>
+    <div class="topnav">
+     <a class="btn secondary" href="https://kassou-mec.github.io/MAC109/Milestone.html" target="_blank">
+      Original lesson ↗
+     </a>
+     <span class="pill" id="counter">
+      1 / 12
+     </span>
+    </div>
+   </header>
+   <div class="card">
+    <div class="topnav">
+     <label for="jump">
+      Jump to:
+     </label>
+     <select id="jump">
+     </select>
+     <button class="secondary" id="mode">
+      View complete code
+     </button>
+    </div>
+    <section id="lecture">
+     <div class="label" id="n">
+     </div>
+     <h2 id="title">
+     </h2>
+     <div class="label">
+      What to say
+     </div>
+     <p class="speech" id="say">
+     </p>
+     <div class="label">
+      Ask students
+     </div>
+     <p class="question" id="ask">
+     </p>
+     <button class="secondary" id="reveal">
+      Reveal expected answer
+     </button>
+     <div class="answer" hidden="" id="answer">
+     </div>
+     <div class="label" style="margin-top:24px">
+      Demonstrate
+     </div>
+     <p id="do">
+     </p>
+     <div class="controls">
+      <button class="secondary" id="prev">
+       ← Previous
+      </button>
+      <button id="next">
+       Next →
+      </button>
+     </div>
+    </section>
+    <section class="files" id="files">
+     <p class="note">
+      Companion working example for Student Management. This is an illustrative complete Avalonia code version of the milestones, not a verbatim export of the website’s dynamic step-by-step code. Keep your existing project Program.cs and App.cs from Week 3, and replace or adjust MainWindow.cs and add Student.cs. Namespaces must match MyStudioApp.
+     </p>
+     <h2>
+      Student.cs
+     </h2>
+     <button class="secondary" onclick="copyCode('student')">
+      Copy Student.cs
+     </button>
+     <pre><code id="student"></code></pre>
+     <h2>
+      MainWindow.cs (complete)
+     </h2>
+     <button class="secondary" onclick="copyCode('main')">
+      Copy MainWindow.cs
+     </button>
+     <pre><code id="main"></code></pre>
+    </section>
+   </div>
+   <p class="note">
+    Classroom rhythm: Say (20–30 sec) → Ask (10 sec) → demonstrate in the original tutorial → F5 → next step. Use the original website's Build It tab for exact incremental edits.
+   </p>
+  </main>
+  <script>
+   const steps = [
+  {
+    "title": "Your app’s window",
+    "say": "A window is the starting point. Today it becomes the first screen of our semester project.",
+    "ask": "Where does the app’s visible title come from?",
+    "answer": "The Window Title property.",
+    "do": "Set Title = \"Student Management\"; run with F5."
+  },
+  {
+    "title": "Three TextBoxes",
+    "say": "Our form needs three pieces of information: name, ID, and age. Each TextBox holds the text a user enters.",
+    "ask": "If the user types 20 into a TextBox, is its Text a number?",
+    "answer": "No. TextBox.Text is a string.",
+    "do": "Enter a name, ID, and age in the three fields."
+  },
+  {
+    "title": "Add, Clear, and status",
+    "say": "The Add button will save a record; Clear resets the form. The status text tells users what happened.",
+    "ask": "Does adding a button automatically make it do anything?",
+    "answer": "No. We must connect its Click event to a handler.",
+    "do": "Click the buttons and watch their handlers run."
+  },
+  {
+    "title": "Create Student.cs",
+    "say": "Instead of keeping unrelated values, we define one Student blueprint with Name, Id, and Age properties.",
+    "ask": "How many Student classes do we need for 50 students?",
+    "answer": "One class; then create 50 objects.",
+    "do": "Create Student.cs in the same MyStudioApp namespace."
+  },
+  {
+    "title": "Create an object",
+    "say": "We read the three fields and use new Student() to create one independent student record.",
+    "ask": "What does new Student() produce?",
+    "answer": "A new Student object (an instance of the class).",
+    "do": "Build the object from txtName.Text, txtId.Text and the age."
+  },
+  {
+    "title": "Remember every object",
+    "say": "A local variable remembers only one record at a time. List<Student> stores many Student objects.",
+    "ask": "What does students.Add(student) change?",
+    "answer": "It inserts the object into the data list.",
+    "do": "Add two objects, then check students.Count."
+  },
+  {
+    "title": "Display records",
+    "say": "The list stores the data; the ListBox displays readable rows. Both must stay synchronized.",
+    "ask": "Should we add Student objects or formatted strings to the ListBox?",
+    "answer": "Formatted strings, so the user sees useful information.",
+    "do": "Add a record to students and a readable text row to lstStudents."
+  },
+  {
+    "title": "Validate required fields",
+    "say": "Before saving, make sure Name and ID are not blank. if checks; return stops an invalid Add.",
+    "ask": "What should happen if Name is empty?",
+    "answer": "Show red feedback and stop without adding.",
+    "do": "Try Add with the Name field empty."
+  },
+  {
+    "title": "Convert age safely",
+    "say": "Age is a number, but TextBox.Text is text. int.TryParse checks conversion without crashing.",
+    "ask": "If Age is “twenty”, should we add the record?",
+    "answer": "No. Display an error and return.",
+    "do": "Test Age = 20, then Age = abc."
+  },
+  {
+    "title": "Write ClearForm()",
+    "say": "Repeated instructions belong in a reusable method. ClearForm() empties the form and can be called by Add and Clear.",
+    "ask": "Why not copy the same three clearing statements twice?",
+    "answer": "A method prevents duplication and is easier to maintain.",
+    "do": "Call ClearForm() after a successful Add and from Clear."
+  },
+  {
+    "title": "Two-column window",
+    "say": "The left side contains the form; the right side displays the saved records. The app becomes easier to use.",
+    "ask": "Which column should show the saved student list?",
+    "answer": "The right column in this milestone layout.",
+    "do": "Observe the form on the left and ListBox on the right."
+  },
+  {
+    "title": "Delete selected record",
+    "say": "A row index connects the visible ListBox row with the object in students. Delete both at the same index.",
+    "ask": "What is SelectedIndex when no row is selected?",
+    "answer": "-1; check it before removing anything.",
+    "do": "Select a row, click Delete, then verify the count decreases."
+  }
+];
+const codes={student:"namespace MyStudioApp;\n\npublic class Student\n{\n    public string Name { get; set; } = \"\";\n    public string Id { get; set; } = \"\";\n    public int Age { get; set; }\n}",main:"using System;\nusing System.Collections.Generic;\nusing System.Collections.ObjectModel;\nusing Avalonia;\nusing Avalonia.Controls;\nusing Avalonia.Layout;\nusing Avalonia.Media;\n\nnamespace MyStudioApp;\n\npublic class MainWindow : Window\n{\n    private readonly TextBox txtName = new() { Watermark = \"Name\" };\n    private readonly TextBox txtId = new() { Watermark = \"ID\" };\n    private readonly TextBox txtAge = new() { Watermark = \"Age\" };\n    private readonly ListBox lstStudents = new();\n    private readonly TextBlock lblStatus = new() { Text = \"Ready\" };\n    private readonly TextBlock lblCount = new() { Text = \"0 students\" };\n    private readonly List<Student> students = new();\n    private readonly ObservableCollection<string> rows = new();\n\n    public MainWindow()\n    {\n        Title = \"Student Management\";\n        lstStudents.ItemsSource = rows;\n        Width = 850;\n        Height = 520;\n\n        var btnAdd = new Button { Content = \"Add\" };\n        var btnClear = new Button { Content = \"Clear\" };\n        var btnDelete = new Button { Content = \"Delete selected\" };\n\n        btnAdd.Click += Add_Click;\n        btnClear.Click += Clear_Click;\n        btnDelete.Click += Delete_Click;\n\n        var form = new StackPanel { Spacing = 10 };\n        form.Children.Add(new TextBlock { Text = \"Student form\", FontSize = 22 });\n        form.Children.Add(new TextBlock { Text = \"Name\" });\n        form.Children.Add(txtName);\n        form.Children.Add(new TextBlock { Text = \"ID\" });\n        form.Children.Add(txtId);\n        form.Children.Add(new TextBlock { Text = \"Age\" });\n        form.Children.Add(txtAge);\n        form.Children.Add(btnAdd);\n        form.Children.Add(btnClear);\n        form.Children.Add(lblStatus);\n\n        var listPanel = new DockPanel { LastChildFill = true };\n        var heading = new StackPanel { Spacing = 8 };\n        heading.Children.Add(new TextBlock { Text = \"Saved students\", FontSize = 22 });\n        heading.Children.Add(lblCount);\n        heading.Children.Add(btnDelete);\n        DockPanel.SetDock(heading, Dock.Top);\n        listPanel.Children.Add(heading);\n        listPanel.Children.Add(lstStudents);\n\n        var grid = new Grid\n        {\n            ColumnDefinitions = new ColumnDefinitions(\"1*,1*\"),\n            ColumnSpacing = 24,\n            Margin = new Thickness(24)\n        };\n        Grid.SetColumn(form, 0);\n        Grid.SetColumn(listPanel, 1);\n        grid.Children.Add(form);\n        grid.Children.Add(listPanel);\n        Content = grid;\n    }\n\n    private void Add_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)\n    {\n        string name = txtName.Text?.Trim() ?? \"\";\n        string id = txtId.Text?.Trim() ?? \"\";\n\n        if (name.Length == 0 || id.Length == 0)\n        {\n            ShowStatus(\"Enter a name and an ID.\", false);\n            return;\n        }\n\n        if (!int.TryParse(txtAge.Text, out int age) || age < 0)\n        {\n            ShowStatus(\"Enter a valid non-negative age.\", false);\n            return;\n        }\n\n        Student student = new Student { Name = name, Id = id, Age = age };\n        students.Add(student);\n        rows.Add($\"{student.Name} | {student.Id} | {student.Age}\");\n        lblCount.Text = $\"{students.Count} students\";\n        ClearForm();\n        ShowStatus(\"Student added.\", true);\n    }\n\n    private void Clear_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)\n    {\n        ClearForm();\n        ShowStatus(\"Form cleared.\", true);\n    }\n\n    private void Delete_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)\n    {\n        int index = lstStudents.SelectedIndex;\n        if (index < 0)\n        {\n            ShowStatus(\"Select a student to delete.\", false);\n            return;\n        }\n\n        students.RemoveAt(index);\n        rows.RemoveAt(index);\n        lblCount.Text = $\"{students.Count} students\";\n        ShowStatus(\"Student deleted.\", true);\n    }\n\n    private void ClearForm()\n    {\n        txtName.Text = \"\";\n        txtId.Text = \"\";\n        txtAge.Text = \"\";\n        txtName.Focus();\n    }\n\n    private void ShowStatus(string message, bool success)\n    {\n        lblStatus.Text = message;\n        lblStatus.Foreground = success ? Brushes.Green : Brushes.Red;\n    }\n}"};
+let step=0;
+const $=id=>document.getElementById(id);
+for(let i=0;
+i<steps.length;
+i++){const o=document.createElement('option');
+o.value=i;
+o.textContent=(i+1)+'. '+steps[i].title;
+$('jump').appendChild(o)}function render(){const s=steps[step];
+$('counter').textContent=(step+1)+' / 12';
+$('n').textContent='STEP '+(step+1);
+['title','say','ask','do'].forEach(k=>$(k).textContent=s[k]);
+$('answer').textContent=s.answer;
+$('answer').hidden=true;
+$('reveal').textContent='Reveal expected answer';
+$('prev').disabled=step===0;
+$('next').disabled=step===11;
+$('jump').value=step}function move(n){step=Math.max(0,Math.min(11,step+n));
+render()}$('prev').onclick=()=>move(-1);
+$('next').onclick=()=>move(1);
+$('jump').onchange=e=>{step=+e.target.value;
+render()};
+$('reveal').onclick=()=>{const a=$('answer');
+a.hidden=!a.hidden;
+$('reveal').textContent=a.hidden?'Reveal expected answer':'Hide answer'};
+$('mode').onclick=()=>{const f=$('files');
+f.classList.toggle('active');
+$('lecture').style.display=f.classList.contains('active')?'none':'';
+$('mode').textContent=f.classList.contains('active')?'← Back to lecture':'View complete code'};
+for(const k in codes)$(k).textContent=codes[k];
+function copyCode(k){navigator.clipboard.writeText(codes[k])}document.addEventListener('keydown',e=>{if($('files').classList.contains('active')||e.target.tagName==='SELECT')return;
+if(e.key==='ArrowRight')move(1);
+if(e.key==='ArrowLeft')move(-1)});
+render();
+  </script>
+ </body>
+</html>
