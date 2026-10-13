@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>MAC 109 · Week 4: Your First App (Milestone 1)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f1220;--surface:#181c2e;--surface2:#222840;--border:#2f3654;
+  --ink:#eef0f8;--ink2:#c3c9dd;--muted:#9098b4;
+  --brand:#6d63ff;--brand2:#a45cff;--brand-soft:#2a2d55;--brand-ink:#c9c5ff;
+  --good:#22c58b;--good-soft:#12352b;--bad:#f06a60;--bad-soft:#3d1f23;--warn:#f5b83d;--warn-soft:#352b12;
+  --code-bg:#0a0d18;--code-bar:#151a2c;--code-border:#2a3150;--code-text:#e6e9f2;--code-ln:#5b627a;
+  --kw:#7aa2f7;--type:#2ac3de;--str:#e0af68;--com:#7f8aa8;--met:#c0caf5;--num:#ff9e64;--hl:#2c3350;--pin:#3b4a7a;
+  --sans:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --mono:'JetBrains Mono','Cascadia Code',Consolas,Menlo,monospace;
+  --radius:14px;--shadow:0 10px 30px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.5}
+body{padding-bottom:84px}
+a{color:var(--brand-ink)}
+b,strong{color:var(--ink)}
+code,.mono{font-family:var(--mono)}
+code{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:1px 6px;font-size:.9em;color:var(--brand-ink)}
+header{position:sticky;top:0;z-index:50;background:rgba(15,18,32,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--border)}
+.topbar{display:flex;align-items:center;gap:14px;padding:12px 24px}
+.logo{width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,var(--brand),var(--brand2));display:grid;place-items:center;font-weight:800;font-family:var(--mono);font-size:14px;color:#fff;flex:none}
+.ttl b{display:block;font-size:17px}
+.ttl span{color:var(--muted);font-size:13px}
+.right{margin-left:auto;display:flex;align-items:center;gap:12px;color:var(--muted);font-size:13px}
+.prog{width:140px;height:6px;border-radius:99px;background:var(--surface2);overflow:hidden}
+.prog i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--brand),var(--brand2));transition:width .3s}
+nav.tabs{display:flex;gap:2px;padding:0 16px;overflow-x:auto}
+.tab{background:none;border:0;color:var(--ink2);font:600 14px var(--sans);padding:12px 14px;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;display:flex;align-items:center;gap:8px}
+.tab .dot{width:7px;height:7px;border-radius:50%;background:var(--border)}
+.tab.active{color:var(--brand-ink);border-bottom-color:var(--brand)}
+.tab.active .dot{background:var(--brand)}
+.tab:hover{color:var(--ink)}
+main{max-width:1280px;margin:0 auto;padding:36px 32px}
+.slide{display:none;animation:fade .25s ease}
+.slide.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--brand-ink);margin-bottom:14px}
+h1{font-size:clamp(30px,4.4vw,52px);line-height:1.08;margin:0 0 18px;letter-spacing:-.02em;font-weight:800}
+h2{font-size:clamp(24px,3vw,36px);line-height:1.15;margin:0 0 16px;letter-spacing:-.015em;font-weight:800}
+h3{font-size:18px;margin:0 0 10px;font-weight:700}
+.grad{background:linear-gradient(90deg,var(--brand-ink),var(--brand2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{font-size:18px;color:var(--ink2);max-width:62ch}
+.hero{display:grid;grid-template-columns:1.2fr 1fr;gap:32px;align-items:start}
+@media(max-width:900px){.hero{grid-template-columns:1fr}}
+.pill{display:inline-block;background:var(--good-soft);color:var(--good);font-family:var(--mono);font-size:12px;padding:5px 12px;border-radius:99px;margin:18px 0 10px}
+.pill.brand{background:var(--brand-soft);color:var(--brand-ink)}
+.pill.warn{background:var(--warn-soft);color:var(--warn)}
+.objlist{list-style:none;padding:0;margin:0}
+.objlist li{padding:7px 0 7px 26px;position:relative;font-size:17px;color:var(--ink2)}
+.objlist li::before{content:'▸';position:absolute;left:4px;color:var(--brand)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow)}
+.card.g{border-color:#1f5a44;background:#101f1b}
+.card.w{border-color:#5a4a1f;background:#1f1a10}
+.card.b{border-color:#5a2a2a;background:#1f1010}
+.steplist{columns:2;column-gap:24px;list-style:none;padding:0;margin:0;counter-reset:s}
+.steplist li{counter-increment:s;padding:5px 0 5px 34px;position:relative;color:var(--ink2);break-inside:avoid}
+.steplist li::before{content:counter(s)'.';position:absolute;left:0;width:26px;text-align:right;color:var(--muted)}
+.tip{margin-top:16px;font-size:15px;color:var(--ink2)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+@media(max-width:900px){.grid2,.grid3{grid-template-columns:1fr}}
+.note{background:var(--surface2);border-left:4px solid var(--brand);padding:14px 18px;border-radius:0 10px 10px 0;margin:16px 0;color:var(--ink2)}
+.note.good{border-color:var(--good)}
+.note.bad{border-color:var(--bad)}
+.note.warn{border-color:var(--warn)}
+.kbd{display:inline-block;font-family:var(--mono);font-size:12px;background:var(--surface2);border:1px solid var(--border);border-bottom-width:3px;border-radius:6px;padding:1px 7px;color:var(--ink)}
+/* domain cards */
+.domains{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:18px 0}
+@media(max-width:900px){.domains{grid-template-columns:1fr 1fr}}
+.dom{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:18px;cursor:pointer;text-align:left;color:var(--ink);font:inherit;transition:.15s}
+.dom:hover{border-color:var(--pin);transform:translateY(-2px)}
+.dom.active{border-color:var(--brand);background:var(--brand-soft)}
+.dom .ico{font-size:30px}
+.dom b{display:block;font-size:17px;margin:8px 0 4px}
+.dom span{color:var(--muted);font-size:13px}
+.dom .mono{display:block;margin-top:10px;font-size:12px;color:var(--brand-ink)}
+table.vocab{width:100%;border-collapse:collapse;font-size:15px}
+table.vocab th,table.vocab td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--border)}
+table.vocab th{color:var(--muted);font-weight:600;font-size:13px;text-transform:uppercase;letter-spacing:.08em}
+table.vocab td code{font-size:13px}
+/* class diagram */
+.blueprint{display:grid;grid-template-columns:1fr auto 1fr;gap:18px;align-items:center;margin:20px 0}
+@media(max-width:900px){.blueprint{grid-template-columns:1fr}}
+.bp{background:var(--code-bg);border:1px solid var(--code-border);border-radius:12px;padding:16px;font-family:var(--mono);font-size:13px;color:var(--code-text)}
+.bp .h{color:var(--type);font-weight:600;margin-bottom:8px}
+.bp .r{color:var(--ink2)}
+.objs{display:grid;gap:10px}
+.obj{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-family:var(--mono);font-size:12.5px}
+.obj b{color:var(--str);display:block;font-size:12px;margin-bottom:4px}
+.arrow{font-size:34px;color:var(--brand);text-align:center}
+/* build it */
+.bhead{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.bnav{margin-left:auto;display:flex;align-items:center;gap:8px;color:var(--muted);font-family:var(--mono)}
+.ghostbtn{background:var(--surface);border:1px solid var(--border);color:var(--ink);padding:8px 14px;border-radius:9px;cursor:pointer;font:600 13px var(--sans)}
+.ghostbtn:hover{border-color:var(--brand)}
+.ghostbtn:disabled{opacity:.4;cursor:default}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}
+.chip{background:var(--surface);border:1px solid var(--border);color:var(--ink2);border-radius:99px;padding:7px 14px 7px 8px;cursor:pointer;font:600 13px var(--sans);display:flex;align-items:center;gap:9px}
+.chip i{font-style:normal;width:22px;height:22px;border-radius:50%;background:var(--surface2);display:grid;place-items:center;font-size:11px;font-family:var(--mono)}
+.chip.active{border-color:var(--brand);color:var(--brand-ink);background:var(--brand-soft)}
+.chip.active i{background:var(--brand);color:#fff}
+.chip.done i{background:var(--good-soft);color:var(--good)}
+.bcard{background:var(--surface);border:1px solid var(--border);border-left:4px solid var(--good);border-radius:12px;padding:18px 22px;display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:14px}
+@media(max-width:900px){.bcard{grid-template-columns:1fr}}
+.bgoal{font-size:17px;color:var(--ink2)}
+.btodo{margin:0;padding-left:20px;color:var(--ink2)}
+.btodo li{margin:4px 0}
+.legend{font-size:13px;color:var(--muted);margin:10px 0 14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.lg-new{background:var(--good-soft);color:var(--good);font-family:var(--mono);font-size:11px;padding:2px 8px;border-radius:6px}
+.build{display:grid;grid-template-columns:1.15fr 1fr;gap:20px;align-items:start}
+@media(max-width:1000px){.build{grid-template-columns:1fr}}
+/* code window */
+.codewin{background:var(--code-bg);border:1px solid var(--code-border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow)}
+.bar{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--code-bar);border-bottom:1px solid var(--code-border);font-size:13px}
+.dots{display:flex;gap:6px}.dots i{width:11px;height:11px;border-radius:50%;display:block}
+.dots i:nth-child(1){background:#ff5f57}.dots i:nth-child(2){background:#febc2e}.dots i:nth-child(3){background:#28c840}
+.fname{font-family:var(--mono);color:var(--ink);font-weight:600}
+.ftab{background:none;border:1px solid transparent;color:var(--muted);font:600 12px var(--mono);padding:4px 10px;border-radius:7px;cursor:pointer}
+.ftab.active{background:var(--surface2);color:var(--ink);border-color:var(--border)}
+.tag{background:var(--brand-soft);color:var(--brand-ink);font-family:var(--mono);font-size:11px;padding:3px 9px;border-radius:6px}
+.copy{margin-left:auto;background:var(--surface2);border:1px solid var(--border);color:var(--ink);font:600 12px var(--sans);padding:6px 12px;border-radius:7px;cursor:pointer}
+.copy:hover{border-color:var(--brand)}
+.src{margin:0;padding:12px 0;overflow:auto;font-family:var(--mono);font-size:13.2px;line-height:1.65;max-height:640px}
+.ln{display:flex;white-space:pre;padding:0 16px 0 0;border-left:3px solid transparent}
+.ln .n{width:44px;flex:none;text-align:right;padding-right:14px;color:var(--code-ln);user-select:none}
+.ln.new{background:rgba(34,197,139,.09);border-left-color:var(--good)}
+.ln.has{cursor:help}
+.ln.has:hover,.ln.hot{background:var(--hl)}
+.ln.bug{cursor:pointer}
+.ln.bug.found{background:var(--bad-soft);border-left-color:var(--bad)}
+.ln.wrong{background:rgba(245,184,61,.12)}
+.k{color:var(--kw)}.t{color:var(--type)}.s{color:var(--str)}.c{color:var(--com);font-style:italic}.m{color:var(--met)}.nu{color:var(--num)}.p{color:var(--code-text)}
+.explain{background:var(--surface);border:1px solid var(--border);border-left:4px solid var(--brand);border-radius:12px;padding:16px 18px;min-height:96px;margin-bottom:16px}
+.explain .lbl{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--muted);text-transform:uppercase;margin-bottom:6px}
+.explain .codeq{font-family:var(--mono);font-size:12.5px;color:var(--brand-ink);margin-bottom:6px;white-space:pre-wrap}
+.explain p{margin:0;color:var(--ink2);font-size:15px}
+.prevcap{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--muted);text-transform:uppercase;margin:0 0 8px}
+/* mock window */
+.wv-wrap{display:flex;justify-content:center}
+.wv{background:#f4f5f9;color:#1a1d2b;border-radius:10px;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.5);font-family:var(--sans);border:1px solid #d7dae6;width:100%;max-width:560px}
+.wv .tb{background:#e8eaf2;border-bottom:1px solid #d0d3df;padding:7px 12px;display:flex;align-items:center;gap:10px;font-size:13px;color:#2a2e3d}
+.wv .tb .ctl{margin-left:auto;display:flex;gap:12px;color:#6b7086;font-size:13px}
+.wv .body{padding:20px}
+.wv .h1{font-size:22px;font-weight:800;color:#483d8b;line-height:1.2}
+.wv .h2{font-size:12px;color:#708090;margin:2px 0 8px}
+.wv .in{display:block;width:100%;border:1px solid #c5c9d6;background:#fff;border-radius:5px;padding:7px 9px;font:14px var(--sans);margin:4px 0;color:#1a1d2b}
+.wv .in:focus{outline:2px solid #6d63ff;border-color:#6d63ff}
+.wv .row{display:flex;gap:10px;margin:6px 0}
+.wv .btn{background:#e6e8f0;border:1px solid #c5c9d6;border-radius:5px;padding:6px 14px;font:600 13px var(--sans);cursor:pointer;color:#1a1d2b}
+.wv .btn:hover{background:#dcdfea}
+.wv .st{font-size:13px;min-height:18px;margin-top:6px}
+.wv .cnt{font-size:13px;color:#1a1d2b;margin:4px 0}
+.wv .lb{background:#fff;border:1px solid #c5c9d6;border-radius:5px;height:150px;overflow:auto;font-size:13px}
+.wv .lb div{padding:5px 9px;border-bottom:1px solid #eef0f5;cursor:pointer}
+.wv .lb div.sel{background:#dcdcff;color:#2a2a6a}
+.wv .cols{display:flex;gap:22px;align-items:flex-start}
+.wv .cols .form{width:46%}
+.wv .cols .list{flex:1}
+.wv .cap{font-size:13px;color:var(--ink2);margin-top:10px}
+.winnote{font-size:13.5px;color:var(--ink2);margin-top:12px;text-align:center}
+/* quiz */
+.q{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:14px}
+.opts{display:grid;gap:8px;margin-top:10px}
+.opt{background:var(--surface2);border:1px solid var(--border);color:var(--ink);text-align:left;padding:10px 14px;border-radius:9px;cursor:pointer;font:500 14px var(--sans)}
+.opt:hover{border-color:var(--brand)}
+.opt.ok{border-color:var(--good);background:var(--good-soft)}
+.opt.no{border-color:var(--bad);background:var(--bad-soft)}
+.opt:disabled{cursor:default}
+.fb{margin-top:10px;font-size:14px;color:var(--ink2);display:none}
+.fb.show{display:block}
+.score{font-family:var(--mono);color:var(--brand-ink)}
+/* practice */
+.ex{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px}
+.ex .lvl{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--good)}
+.ex .lvl.m{color:var(--warn)}.ex .lvl.h{color:var(--bad)}
+.ex details{margin-top:12px}
+.ex summary{cursor:pointer;color:var(--brand-ink);font-weight:600}
+/* cheat sheet */
+.cheat{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:1000px){.cheat{grid-template-columns:1fr 1fr}}
+@media(max-width:700px){.cheat{grid-template-columns:1fr}}
+.cheat .card{padding:16px}
+.cheat pre{margin:8px 0 0;font-family:var(--mono);font-size:12px;color:var(--code-text);background:var(--code-bg);border:1px solid var(--code-border);border-radius:8px;padding:10px 12px;white-space:pre-wrap}
+.check{list-style:none;padding:0;margin:0}
+.check li{padding:8px 0 8px 32px;position:relative;color:var(--ink2);border-bottom:1px dashed var(--border)}
+.check li::before{content:'☐';position:absolute;left:4px;color:var(--brand-ink);font-size:18px;top:4px}
+/* footer */
+footer{position:fixed;bottom:0;left:0;right:0;background:rgba(15,18,32,.95);border-top:1px solid var(--border);backdrop-filter:blur(10px);z-index:50}
+.fbar{max-width:1280px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;gap:12px;color:var(--muted);font-size:13px}
+.fbtn{background:var(--surface);border:1px solid var(--border);color:var(--ink);padding:9px 18px;border-radius:9px;cursor:pointer;font:600 14px var(--sans)}
+.fbtn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+.fbtn:disabled{opacity:.4;cursor:default}
+.fbar .hint{margin-left:auto}
+.tree{font-family:var(--mono);font-size:13px;background:var(--code-bg);border:1px solid var(--code-border);border-radius:10px;padding:12px 16px;color:var(--ink2)}
+.tree .hi{color:var(--good);font-weight:600}
+.tree .dim{color:var(--muted)}
+.tree .ind{padding-left:22px}
+</style>
+</head>
+<body>
+<header>
+  <div class="topbar">
+    <div class="logo">C#</div>
+    <div class="ttl"><b>MAC 109 · Week 4: Your First App (Milestone 1)</b><span>LaGuardia Community College · MEC Department · Prof. K. Kassou · VS Code + Avalonia</span></div>
+    <div class="right"><span id="domBadge">Domain: not chosen yet</span><div class="prog"><i id="progBar"></i></div></div>
+  </div>
+  <nav class="tabs" id="tabs"></nav>
+</header>
+
+<main id="main">
+
+<!-- ========== 1. START ========== -->
+<section class="slide" data-key="start">
+  <div class="eyebrow">Week 4 · Lab 2 · Milestone 1</div>
+  <h1>Your first <span class="grad">app</span>:<br>a form, a class, and a list that remembers</h1>
+  <div class="hero">
+    <div>
+      <p class="sub">Last week you built a window that could greet you. Today that window becomes the <b>first screen of your semester project</b>: you pick a domain (students, books, orders…), you type information into a form, press <b>Add</b>, and the app <b>remembers every record</b> in a list. The same 12-step rhythm as Week 3: one new idea per step, press <span class="kbd">F5</span> after each one.</p>
+      <div class="pill">By the end of today you can</div>
+      <ul class="objlist">
+        <li>Write your <b>own class</b> in its own file (<code id="st-entity">Student</code>.cs) and explain <b>blueprint vs object</b></li>
+        <li>Create an object with <code>new</code> and fill it from TextBoxes</li>
+        <li>Keep many objects in a <code>List&lt;T&gt;</code> and show them in a <code>ListBox</code></li>
+        <li>Validate input with <code>if</code> / <code>return</code> and give red/green feedback</li>
+        <li>Write a <b>method of your own</b> and call it from two places</li>
+        <li>Lay out a window in <b>two columns</b> and delete a selected row</li>
+      </ul>
+    </div>
+    <div>
+      <div class="card">
+        <span class="pill brand" style="margin:0 0 10px">The 12-step build (Build It tab)</span>
+        <ol class="steplist">
+          <li><b>Your app's window</b> (Week 3 review)</li>
+          <li>+ The form: 3 TextBoxes</li>
+          <li>+ Add &amp; Clear buttons + status</li>
+          <li>+ <b>Your first class</b> (new file!)</li>
+          <li>+ Make an object from the form</li>
+          <li>+ Remember them all: List&lt;T&gt;</li>
+          <li>+ Show them: ListBox</li>
+          <li>+ Validation (if / return)</li>
+          <li>+ Numbers (TryParse again)</li>
+          <li>+ Your own method: ClearForm()</li>
+          <li>+ Two-column layout</li>
+          <li>+ Delete the selected row</li>
+        </ol>
+      </div>
+      <div class="card g" style="margin-top:14px">🥇 <b>This lab is a milestone.</b> When step 12 runs, you have the first real screen of your project. You will keep adding to <b>this same project</b> every week until the final demo.</div>
+      <div class="card w" style="margin-top:14px">🧭 <b>Same golden rule:</b> change a little → <b>Ctrl+S</b> → <b>F5</b> → look. Before you start, open the <b>Pick Your Domain</b> tab: every line of code on this page adapts to your choice.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== 2. PICK YOUR DOMAIN ========== -->
+<section class="slide" data-key="domain">
+  <div class="eyebrow">01 · Pick your domain</div>
+  <h2>One app, six flavors. <span class="grad">Which one is yours?</span></h2>
+  <p class="sub">Every project this semester follows the same shape: a <b>thing</b> you manage (the <em>entity</em>), the <b>facts</b> you store about it (the <em>fields</em>), and a <b>list</b> of them. Click a domain. The code, the live windows, the quiz, and the practice challenges on this page all switch to your vocabulary.</p>
+  <div class="domains" id="domains"></div>
+  <div class="grid2">
+    <div class="card">
+      <h3>Your vocabulary today</h3>
+      <table class="vocab" id="vocab"></table>
+    </div>
+    <div class="card">
+      <h3>Your project folder after today</h3>
+      <div class="tree" id="tree"></div>
+      <div class="note" style="margin-bottom:0">Keep the project name <b>MyStudioApp</b>: <b>Program.cs</b> (the engine) says <code>namespace MyStudioApp;</code> and we never touch the engine. Your app's real name goes in the window <b>Title</b>.</div>
+    </div>
+  </div>
+  <div class="note good">✅ Can't decide? Pick <b>Student Management</b> for today. You can change domain next week with a 10-minute rename; the <em>skills</em> are identical.</div>
+</section>
+
+<!-- ========== 3. CLASSES & OBJECTS ========== -->
+<section class="slide" data-key="classes">
+  <div class="eyebrow">02 · The one big idea of the week</div>
+  <h2>A class is a blueprint. An object is one real thing built from it.</h2>
+  <p class="sub">You already use classes without knowing it. <code>Window</code> is a class; your <code>MainWindow</code> is one object built from it. <code>TextBox</code> is a class; <code id="cl-txt1">txtName</code> is one object. Today you write a class of <b>your own</b>.</p>
+  <div class="blueprint">
+    <div class="bp" id="bpClass"></div>
+    <div class="arrow">→<br><span style="font:600 12px var(--sans);color:var(--muted)">new</span></div>
+    <div class="objs" id="bpObjs"></div>
+  </div>
+  <div class="grid3">
+    <div class="card">
+      <h3>The class (one file, written once)</h3>
+      <p style="color:var(--ink2)"><code id="cl-e1">Student</code> is a <b>new type</b>, just like <code>int</code> or <code>TextBox</code>. Inside it you list the facts every <span id="cl-e2">student</span> has. Each fact is a <b>property</b>: <code>public string Name { get; set; }</code>. <code>get; set;</code> means "you can read it and you can change it."</p>
+    </div>
+    <div class="card">
+      <h3>The object (as many as you want)</h3>
+      <p style="color:var(--ink2)"><code id="cl-new">Student s = new Student();</code> builds one. Then the <b>dot</b> reaches inside: <code id="cl-dot">s.Name = txtName.Text;</code>. Sound familiar? <code>Title = "..."</code> was the same move: a property, a dot, a value.</p>
+    </div>
+    <div class="card">
+      <h3>The list (a shelf for objects)</h3>
+      <p style="color:var(--ink2)"><code id="cl-list">List&lt;Student&gt; students</code> is a shelf that only accepts <span id="cl-e3">students</span>. <code>.Add(s)</code> puts one on the shelf, <code>.Count</code> tells you how many, <code>.RemoveAt(2)</code> takes the third one off. The <code>&lt;Student&gt;</code> part is the sign on the shelf.</p>
+    </div>
+  </div>
+  <div class="note"><b>Two lists that must stay in sync.</b> <code id="cl-l1">students</code> is the <em>data</em> (your objects, invisible). <code id="cl-l2">lstStudents</code> is the <em>ListBox</em> (text rows the user sees). Every time you add to one, add to the other. Every time you remove from one, remove from the other. Forgetting this is the #1 bug of Week 4.</div>
+</section>
+
+<!-- ========== 4. BUILD IT ========== -->
+<section class="slide" data-key="build">
+  <div class="eyebrow">03 · Build it, one step at a time</div>
+  <div class="bhead">
+    <h2 id="stepTitle" style="margin:0">Step 1</h2>
+    <div class="bnav"><button class="ghostbtn" id="stepPrev">◀ Step</button><span id="stepCounter">1 / 12</span><button class="ghostbtn" id="stepNext">Step ▶</button></div>
+  </div>
+  <div class="chips" id="chips"></div>
+  <div class="bcard">
+    <div><span class="pill brand" id="stepIdea" style="margin:0 0 10px"></span><div class="bgoal" id="stepGoal"></div></div>
+    <ol class="btodo" id="stepTodo"></ol>
+  </div>
+  <div class="legend"><span class="lg-new">+ NEW</span> lines added or changed in this step · hover any line for its explanation · <b>Copy</b> gives the complete file</div>
+  <div class="build">
+    <div class="codewin">
+      <div class="bar"><div class="dots"><i></i><i></i><i></i></div><span id="fileTabs"></span><span class="tag" id="fileTag">complete file · step 1</span><button class="copy" id="copyBtn">Copy</button></div>
+      <pre class="src" id="src"></pre>
+    </div>
+    <div>
+      <div class="explain"><div class="lbl">Explanation</div><div class="codeq" id="exq"></div><p id="exp">This is the whole file for this step. Hover each line.</p></div>
+      <div class="prevcap">▶ Run → your window</div>
+      <div class="wv-wrap" id="winHolder"></div>
+      <div class="winnote" id="winCap"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== 5. FIX-IT ========== -->
+<section class="slide" data-key="fixit">
+  <div class="eyebrow">04 · Fix-It</div>
+  <h2>🐞 Bug hunt: 4 bugs in one Add handler</h2>
+  <p class="sub">This is somebody's step 9. It has <b>4 bugs</b>: two stop it from compiling, one shows the wrong thing on screen, and one is a silent logic mistake. <b>Click a line</b> you think is wrong. Found all four? Press <b>Reveal</b> to read the fix for each.</p>
+  <div class="build">
+    <div class="codewin">
+      <div class="bar"><div class="dots"><i></i><i></i><i></i></div><span class="fname">MainWindow.cs</span><span class="tag">buggy · click the lines</span><button class="copy" id="revealBtn">Reveal</button></div>
+      <pre class="src" id="bugSrc"></pre>
+    </div>
+    <div>
+      <div class="explain"><div class="lbl">Found <span id="bugCount">0</span> / 4</div><div id="bugList" style="color:var(--ink2);font-size:15px">Click a line to test your guess.</div></div>
+      <div class="card">
+        <h3>The 5 errors of Week 4 (and the 1-minute fix)</h3>
+        <ul class="objlist" style="font-size:15px">
+          <li><b>List&lt;...&gt; has a red squiggle</b> → add <code>using System.Collections.Generic;</code></li>
+          <li><b>"Cannot convert int to string"</b> → <code>lblCount.Text = students.Count + " students";</code> (gluing with <code>+ ""</code> turns the number into text)</li>
+          <li><b>ListBox shows "MyStudioApp.Student"</b> → you added the <em>object</em>; add a <em>string</em> built from its properties instead</li>
+          <li><b>Click += Handler()</b> with parentheses → remove the <code>()</code>; you are naming the method, not calling it</li>
+          <li><b>Delete removes the wrong row / crashes</b> → remove from <em>both</em> lists using the same <code>index</code>, and check <code>index &lt; 0</code> first</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== 6. QUIZ ========== -->
+<section class="slide" data-key="quiz">
+  <div class="eyebrow">05 · Prove it to yourself</div>
+  <h2>Eight quick questions <span class="score" id="scoreTxt"></span></h2>
+  <p class="sub">Instant feedback, no grade. If you miss one, go back to that step in Build It and hover the line.</p>
+  <div id="quiz"></div>
+</section>
+
+<!-- ========== 7. PRACTICE ========== -->
+<section class="slide" data-key="practice">
+  <div class="eyebrow">06 · Practice</div>
+  <h2>Three upgrades for your app, easy → harder</h2>
+  <p class="sub">Each one adds a feature to <b>your step-12 app</b>. Try it alone first. The solution shows exactly which lines to add and where.</p>
+  <div id="practice"></div>
+</section>
+
+<!-- ========== 8. WRAP-UP ========== -->
+<section class="slide" data-key="wrap">
+  <div class="eyebrow">07 · Wrap-up</div>
+  <h2>Week 4: cheat sheet</h2>
+  <div class="cheat" id="cheat"></div>
+  <div class="grid2" style="margin-top:20px">
+    <div class="card g">
+      <h3>✅ Milestone 1 checklist (before you leave the lab)</h3>
+      <ul class="check" id="checklist"></ul>
+    </div>
+    <div class="card">
+      <h3>📦 Submit on Brightspace</h3>
+      <ol class="btodo" style="font-size:15px">
+        <li>Stop the app. In VS Code's Explorer, <b>right-click the bin and obj folders → Delete</b> (they are rebuilt automatically and make the ZIP huge).</li>
+        <li>In Finder / File Explorer, right-click the <b>MyStudioApp</b> folder → <b>Compress</b> / <b>Send to → Compressed folder</b>.</li>
+        <li>Rename the ZIP <code>LastName_Lab2_MyStudioApp.zip</code>.</li>
+        <li>Upload it to <b>Brightspace → Assignments → Lab 2: Milestone 1</b>.</li>
+      </ol>
+      <div class="note warn" style="margin-bottom:0">Next week your app learns to <b>edit</b> a row, <b>search</b>, and keep more than one screen. Bring this exact project.</div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer><div class="fbar"><button class="fbtn" id="backBtn">◀ Back</button><button class="fbtn primary" id="nextBtn">Next ▶</button><span id="posTxt"></span><span class="hint">← → keys move forward and back (in Build It: step by step)</span></div></footer>
+
+<script>
+/* ============ DOMAINS ============ */
+const DOMAINS = {
+  student:   {ico:'🎓', name:'Student Management System', E:'Student', plural:'students', app:'Student Manager',
+              f1:{prop:'Name',    v:'txtName',     hint:'Name',      ex:'Amina Haddad'},
+              f2:{prop:'Major',   v:'txtMajor',    hint:'Major',     ex:'Computer Science'},
+              f3:{prop:'Age',     v:'txtAge',      hint:'Age',       ex:'19'}},
+  library:   {ico:'📚', name:'Library System', E:'Book', plural:'books', app:'Library System',
+              f1:{prop:'Title',   v:'txtTitle',    hint:'Title',     ex:'Dune'},
+              f2:{prop:'Author',  v:'txtAuthor',   hint:'Author',    ex:'Frank Herbert'},
+              f3:{prop:'Pages',   v:'txtPages',    hint:'Pages',     ex:'412'}},
+  restaurant:{ico:'🍽️', name:'Restaurant Ordering System', E:'Order', plural:'orders', app:'Restaurant Orders',
+              f1:{prop:'Dish',    v:'txtDish',     hint:'Dish',      ex:'Chicken Tagine'},
+              f2:{prop:'Customer',v:'txtCustomer', hint:'Customer',  ex:'Table 4'},
+              f3:{prop:'Quantity',v:'txtQuantity', hint:'Quantity',  ex:'2'}},
+  hotel:     {ico:'🏨', name:'Hotel Reservation System', E:'Reservation', plural:'reservations', app:'Hotel Reservations',
+              f1:{prop:'Guest',   v:'txtGuest',    hint:'Guest',     ex:'Omar Benali'},
+              f2:{prop:'RoomType',v:'txtRoomType', hint:'Room type', ex:'Double'},
+              f3:{prop:'Nights',  v:'txtNights',   hint:'Nights',    ex:'3'}},
+  banking:   {ico:'🏦', name:'Banking System', E:'Account', plural:'accounts', app:'Banking System',
+              f1:{prop:'Owner',   v:'txtOwner',    hint:'Owner',     ex:'Sara Lee'},
+              f2:{prop:'AccountType',v:'txtAccountType',hint:'Account type',ex:'Checking'},
+              f3:{prop:'Balance', v:'txtBalance',  hint:'Balance',   ex:'500'}},
+  inventory: {ico:'📦', name:'Inventory System', E:'Item', plural:'items', app:'Inventory System',
+              f1:{prop:'Name',    v:'txtName',     hint:'Name',      ex:'USB-C Cable'},
+              f2:{prop:'Category',v:'txtCategory', hint:'Category',  ex:'Electronics'},
+              f3:{prop:'Quantity',v:'txtQuantity', hint:'Quantity',  ex:'25'}},
+};
+let domKey = 'student';
+try { const s = localStorage.getItem('mac109_lab2_domain'); if (s && DOMAINS[s]) domKey = s; } catch(e){}
+const D = () => {
+  const d = DOMAINS[domKey];
+  const elc = d.E.charAt(0).toLowerCase() + d.E.slice(1);
+  const Pl = d.plural.charAt(0).toUpperCase() + d.plural.slice(1);
+  return Object.assign({}, d, {elc, Pl, list:d.plural, lst:'lst'+Pl, n3: d.f3.prop.toLowerCase()});
+};
+
+/* ============ TABS ============ */
+const TABS = [['start','Start'],['domain','Pick Your Domain'],['classes','Classes & Objects'],['build','★ Build It'],['fixit','Fix-It'],['quiz','Quiz'],['practice','Practice'],['wrap','Wrap-Up']];
+let tabIdx = 0, step = 1;
+const $ = s => document.querySelector(s);
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function buildTabs(){
+  $('#tabs').innerHTML = TABS.map((t,i)=>`<button class="tab" data-i="${i}"><span class="dot"></span>${t[1]}</button>`).join('');
+  $('#tabs').querySelectorAll('.tab').forEach(b=>b.onclick=()=>goTab(+b.dataset.i));
+}
+function goTab(i){
+  tabIdx = Math.max(0,Math.min(TABS.length-1,i));
+  document.querySelectorAll('.slide').forEach((s,j)=>s.classList.toggle('active',j===tabIdx));
+  document.querySelectorAll('.tab').forEach((t,j)=>t.classList.toggle('active',j===tabIdx));
+  $('#progBar').style.width = ((tabIdx+1)/TABS.length*100)+'%';
+  $('#posTxt').textContent = `${tabIdx+1} / ${TABS.length} · ${TABS[tabIdx][1].replace('★ ','')}`;
+  $('#backBtn').disabled = tabIdx===0; $('#nextBtn').disabled = tabIdx===TABS.length-1;
+  window.scrollTo({top:0});
+}
+$('#backBtn').onclick=()=>goTab(tabIdx-1); $('#nextBtn').onclick=()=>goTab(tabIdx+1);
+document.addEventListener('keydown',e=>{
+  if(['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
+  if(e.key==='ArrowRight'){ if(TABS[tabIdx][0]==='build' && step<12) goStep(step+1); else goTab(tabIdx+1); }
+  if(e.key==='ArrowLeft'){ if(TABS[tabIdx][0]==='build' && step>1) goStep(step-1); else goTab(tabIdx-1); }
+});
+
+/* ============ DOMAIN UI ============ */
+function renderDomains(){
+  $('#domains').innerHTML = Object.entries(DOMAINS).map(([k,d])=>`<button class="dom ${k===domKey?'active':''}" data-k="${k}"><div class="ico">${d.ico}</div><b>${d.name}</b><span>${d.E} · ${d.f1.prop}, ${d.f2.prop}, ${d.f3.prop}</span><span class="mono">class ${d.E} · List&lt;${d.E}&gt; ${d.plural}</span></button>`).join('');
+  $('#domains').querySelectorAll('.dom').forEach(b=>b.onclick=()=>{ domKey=b.dataset.k; try{localStorage.setItem('mac109_lab2_domain',domKey)}catch(e){}; renderAll(); });
+  const d = D();
+  $('#domBadge').textContent = `Domain: ${d.ico} ${d.name}`;
+  $('#vocab').innerHTML = `<tr><th>Idea</th><th>In your app</th><th>In code</th></tr>
+    <tr><td>The thing you manage (entity)</td><td>a ${d.elc}</td><td><code>public class ${d.E}</code> in <b>${d.E}.cs</b></td></tr>
+    <tr><td>Fact 1 (text)</td><td>${d.f1.hint}</td><td><code>public string ${d.f1.prop}</code> ← <code>${d.f1.v}</code></td></tr>
+    <tr><td>Fact 2 (text)</td><td>${d.f2.hint}</td><td><code>public string ${d.f2.prop}</code> ← <code>${d.f2.v}</code></td></tr>
+    <tr><td>Fact 3 (number)</td><td>${d.f3.hint}</td><td><code>public int ${d.f3.prop}</code> ← <code>${d.f3.v}</code> + TryParse</td></tr>
+    <tr><td>All of them (data)</td><td>the ${d.plural}</td><td><code>List&lt;${d.E}&gt; ${d.list}</code></td></tr>
+    <tr><td>All of them (on screen)</td><td>the list box</td><td><code>ListBox ${d.lst}</code></td></tr>
+    <tr><td>The window title</td><td>${d.app}</td><td><code>Title = "${d.app}";</code></td></tr>`;
+  $('#tree').innerHTML = `<div>📁 MyStudioApp/</div><div class="ind">📄 MyStudioApp.csproj <span class="dim">(from Week 3, untouched)</span></div><div class="ind">📄 Program.cs <span class="dim">(the engine, untouched)</span></div><div class="ind">📄 MainWindow.cs <span class="dim">(yours: replaced today)</span></div><div class="ind hi">📄 ${d.E}.cs ← NEW today (step 4)</div><div class="ind dim">📁 bin/  obj/ (auto-generated)</div>`;
+  // Classes tab
+  ['st-entity','cl-e1'].forEach(id=>$('#'+id).textContent=d.E);
+  $('#cl-e2').textContent=d.elc; $('#cl-e3').textContent=d.plural; $('#cl-txt1').textContent=d.f1.v;
+  $('#cl-new').textContent=`${d.E} ${d.elc} = new ${d.E}();`; $('#cl-dot').textContent=`${d.elc}.${d.f1.prop} = ${d.f1.v}.Text;`;
+  $('#cl-list').innerHTML=`List&lt;${d.E}&gt; ${d.list}`; $('#cl-l1').textContent=d.list; $('#cl-l2').textContent=d.lst;
+  $('#bpClass').innerHTML = `<div class="h">class ${d.E}  <span style="color:var(--muted);font-weight:400">· the blueprint (${d.E}.cs)</span></div><div class="r">string ${d.f1.prop}</div><div class="r">string ${d.f2.prop}</div><div class="r">int ${d.f3.prop}</div>`;
+  const ex = [[d.f1.ex,d.f2.ex,d.f3.ex],['…','…','…'],['…','…','…']];
+  $('#bpObjs').innerHTML = ex.map((r,i)=>`<div class="obj"><b>${d.elc}${i+1}  ·  one object</b>${d.f1.prop} = "${r[0]}"  ·  ${d.f2.prop} = "${r[1]}"  ·  ${d.f3.prop} = ${r[2]}</div>`).join('');
+}
+
+/* ============ CODE MODEL ============ */
+// Each line: [text, from, to, explanation]. Visible when from <= step <= to.
+function mainLines(){
+  const d=D(), f1=d.f1,f2=d.f2,f3=d.f3, E=d.E, v=d.elc, L=d.list, LB=d.lst, n3=d.n3;
+  const A=[];
+  const l=(t,from=1,x='',to=99)=>A.push([t,from,to,x]);
+  l('using System.Collections.Generic;',6,`List<T> lives in this namespace. Without this line, List<${E}> gets a red squiggle.`);
+  l('using Avalonia;');
+  l('using Avalonia.Controls;',1,'Window, TextBox, TextBlock, Button, StackPanel, ListBox: all the controls.');
+  l('using Avalonia.Interactivity;',3,'RoutedEventArgs: the "e" in every click handler.');
+  l('using Avalonia.Layout;',3,'Orientation.Horizontal for the button row.');
+  l('using Avalonia.Media;',1,'Brushes for colors.');
+  l('');
+  l('namespace MyStudioApp;',1,'Must match the engine (Program.cs) and your new class file.');
+  l('');
+  l('public class MainWindow : Window',1,'Your window IS a Window. Everything a window can do comes free.');
+  l('{');
+  l('    // Fields: declared above the constructor so every method can reach them',2);
+  l(`    TextBox ${f1.v} = new TextBox { Watermark = "${f1.hint}" };`,2,'A field (above the constructor) so the click handlers can read it later. Watermark is the gray hint text shown while the box is empty.');
+  l(`    TextBox ${f2.v} = new TextBox { Watermark = "${f2.hint}" };`,2,'Second text field. Same pattern: type, name, new, braces with properties.');
+  l(`    TextBox ${f3.v} = new TextBox { Watermark = "${f3.hint}" };`,2,`A TextBox always gives you text, even for ${f3.hint}. Step 9 turns it into a number.`);
+  l('    TextBlock lblStatus = new TextBlock { Text = "" };',3,'The status line. Every button will write here so the user always knows what just happened.');
+  l(`    TextBlock lblCount = new TextBlock { Text = "0 ${L}" };`,6,'Shows how many objects are on the shelf. Updated every time the list changes.');
+  l(`    ListBox ${LB} = new ListBox { Height = 220 };`,7,`A ListBox shows rows of text and lets the user select one. Height keeps it from growing forever.`);
+  l(`    List<${E}> ${L} = new List<${E}>();`,6,`The shelf. It only accepts ${E} objects. new List<${E}>() creates it empty. Note the () at the end!`);
+  l('',2);
+  l('    public MainWindow()',1,'The constructor: runs once when the window is created. We build the screen here.');
+  l('    {');
+  l(`        Title = "${d.app}";`,1,'Your app finally has a name. A property, an equals sign, a value: the move you learned in Week 3.');
+  l('        Width = 760;');
+  l('        Height = 520;');
+  l('        WindowStartupLocation = WindowStartupLocation.CenterScreen;',1,'An enum: a fixed menu of choices (CenterScreen, CenterOwner, Manual).');
+  l('');
+  l('        var lblTitle = new TextBlock',1,'A local variable (var) because only the constructor needs it. Fields are for things handlers must reach.');
+  l('        {');
+  l(`            Text = "${d.app}",`);
+  l('            FontSize = 26,');
+  l('            FontWeight = FontWeight.Bold,');
+  l('            Foreground = Brushes.DarkSlateBlue');
+  l('        };');
+  l('');
+  l(`        var lblSubtitle = new TextBlock { Text = "Milestone 1: add ${L} to a list", FontSize = 14, Foreground = Brushes.SlateGray };`,1,'Same object initializer, written on one line. Both styles are legal; use the multi-line one when it gets long.');
+  l('',3);
+  l(`        var btnAdd = new Button { Content = "Add ${E}" };`,3,'Content is what the button shows. A button is a local variable: only the constructor touches it.');
+  l('        var btnClear = new Button { Content = "Clear" };',3);
+  l('        var btnDelete = new Button { Content = "Delete Selected" };',12,'The third button lives under the list, not in the form row.');
+  l('        btnAdd.Click += BtnAdd_Click;',3,'The wiring line. "When Click happens, run BtnAdd_Click." No parentheses: you are naming the method, not calling it.');
+  l('        btnClear.Click += BtnClear_Click;',3,'Second event, second handler. One button, one method, same name pattern.');
+  l('        btnDelete.Click += BtnDelete_Click;',12);
+  l('',3);
+  l('        var buttonRow = new StackPanel',3,'A horizontal shelf for the two buttons so they sit side by side.');
+  l('        {',3);
+  l('            Orientation = Orientation.Horizontal,',3,'Default is vertical (a stack). Horizontal puts children in a row.');
+  l('            Spacing = 10,',3);
+  l('            Children = { btnAdd, btnClear }',3,'Children is the list of things inside the panel, in order.');
+  l('        };',3);
+  l('',11);
+  l('        var form = new StackPanel',11,'Left column: everything the user types into. A panel inside a panel is how layouts are built.');
+  l('        {',11);
+  l('            Width = 300,',11,'Without a Width the form would stretch; 300 keeps the TextBoxes a sensible size.');
+  l('            Spacing = 8,',11);
+  l(`            Children = { ${f1.v}, ${f2.v}, ${f3.v}, buttonRow, lblStatus }`,11,'These used to live directly in Content. Now they live in the left column.');
+  l('        };',11);
+  l('',11);
+  l('        var listPanel = new StackPanel',11,'Right column: the count and the ListBox.');
+  l('        {',11);
+  l('            Spacing = 8,',11);
+  l(`            Children = { lblCount, ${LB} }`,11,'',11);
+  l(`            Children = { lblCount, ${LB}, btnDelete }`,12,'The Delete button sits right under the list it works on.');
+  l('        };',11);
+  l('',11);
+  l('        var columns = new StackPanel',11,'A horizontal panel holding the two columns. Three panels, one layout.');
+  l('        {',11);
+  l('            Orientation = Orientation.Horizontal,',11);
+  l('            Spacing = 24,',11);
+  l('            Children = { form, listPanel }',11);
+  l('        };',11);
+  l('');
+  l('        Content = new StackPanel',1,'Content is the one thing inside the window. A StackPanel lets that one thing hold many.');
+  l('        {');
+  l('            Margin = new Thickness(20),',1,'Breathing room between the window edge and your controls.');
+  l('            Spacing = 10,');
+  l('            Children = { lblTitle, lblSubtitle }',1,'Only the header for now.',1);
+  l(`            Children = { lblTitle, lblSubtitle, ${f1.v}, ${f2.v}, ${f3.v} }`,2,'Declaring a field is not enough: a control is invisible until it is in Children somewhere.',2);
+  l(`            Children = { lblTitle, lblSubtitle, ${f1.v}, ${f2.v}, ${f3.v}, buttonRow, lblStatus }`,3,'The button row and the status line join the stack.',5);
+  l(`            Children = { lblTitle, lblSubtitle, ${f1.v}, ${f2.v}, ${f3.v}, buttonRow, lblStatus, lblCount }`,6,'',6);
+  l(`            Children = { lblTitle, lblSubtitle, ${f1.v}, ${f2.v}, ${f3.v}, buttonRow, lblStatus, lblCount, ${LB} }`,7,'The ListBox must be in Children to show up, like every other control.',10);
+  l('            Children = { lblTitle, lblSubtitle, columns }',11,'The window now holds a header plus one "columns" panel. All the detail moved inside it.');
+  l('        };');
+  l('    }');
+  l('',3);
+  l('    void BtnAdd_Click(object? sender, RoutedEventArgs e)',3,'The handler. Runs every time the Add button is clicked. Same signature as Week 3: sender and e, always.');
+  l('    {',3);
+  l('        lblStatus.Text = "Add clicked. Nothing is saved yet.";',3,'Honest feedback: the button works, but there is nowhere to put the data yet.',4);
+  l(`        if (string.IsNullOrWhiteSpace(${f1.v}.Text))`,8,`True when the box is empty or only spaces. Reads as: "if the ${f1.hint.toLowerCase()} is blank".`);
+  l('        {',8);
+  l(`            lblStatus.Text = "Please type a ${f1.hint.toLowerCase()}.";`,8);
+  l('            lblStatus.Foreground = Brushes.Red;',8,'Red for problems. Changing a property on a control updates the screen immediately.');
+  l('            return;',8,'Stop here. Nothing below this line runs. No object, no Add, no row. This is how validation protects the list.');
+  l('        }',8);
+  l('',8);
+  l(`        bool ${n3}Ok = int.TryParse(${f3.v}.Text, out int ${n3});`,9,`Week 2 skill in a GUI. TryParse never crashes: it returns true/false and puts the number in ${n3}.`);
+  l(`        if (${n3}Ok == false)`,9,'If the text was not a whole number, complain and stop.');
+  l('        {',9);
+  l(`            lblStatus.Text = "${f3.hint} must be a whole number.";`,9);
+  l('            lblStatus.Foreground = Brushes.Red;',9);
+  l('            return;',9);
+  l('        }',9);
+  l('',9);
+  l(`        ${E} ${v} = new ${E}();`,5,`new builds one object from your blueprint. ${v} is the variable that holds it. Compare: new TextBox().`);
+  l(`        ${v}.${f1.prop} = ${f1.v}.Text;`,5,`The dot reaches inside the object. Copy the TextBox text into the object's ${f1.prop} property.`);
+  l(`        ${v}.${f2.prop} = ${f2.v}.Text;`,5);
+  l(`        ${v}.${f3.prop} = ${n3};`,9,`${f3.prop} is an int, so it gets the number TryParse produced, not the raw text.`);
+  l('',5);
+  l(`        ${L}.Add(${v});`,6,'Put the object on the shelf. It will still be there when the next click happens, because the list is a field.');
+  l(`        ${LB}.Items.Add(${v}.${f1.prop} + "  ·  " + ${v}.${f2.prop});`,7,'Items.Add puts one visible row in the ListBox. We add TEXT built from the object, not the object itself.',8);
+  l(`        ${LB}.Items.Add(${v}.${f1.prop} + "  ·  " + ${v}.${f2.prop} + "  ·  " + ${v}.${f3.prop});`,9,'The row now shows the number too. + with a string glues the int in as text.');
+  l(`        lblCount.Text = ${L}.Count + " ${L}";`,6,`Count is how many objects are on the shelf. + " ${L}" turns the number into text for the label.`);
+  l(`        lblStatus.Text = "Added " + ${v}.${f1.prop} + "!";`,5,'Read the object back to prove it holds the data.');
+  l('        lblStatus.Foreground = Brushes.Green;',8,'Green for success. Without this, the label stays red after a previous error.');
+  l('        ClearForm();',10,'Call your own method. After a successful add, the form empties itself, ready for the next one.');
+  l('    }',3);
+  l('',3);
+  l('    void BtnClear_Click(object? sender, RoutedEventArgs e)',3,'The Clear handler. Same shape as every handler.');
+  l('    {',3);
+  l(`        ${f1.v}.Text = "";`,3,'Setting Text to the empty string empties the box.',9);
+  l(`        ${f2.v}.Text = "";`,3,'',9);
+  l(`        ${f3.v}.Text = "";`,3,'',9);
+  l(`        ${f1.v}.Focus();`,3,'Put the cursor back in the first box so the user can keep typing.',9);
+  l('        ClearForm();',10,'The same four lines used to live here. Now they live in ClearForm() and we just call it.');
+  l('    }',3);
+  l('',12);
+  l('    void BtnDelete_Click(object? sender, RoutedEventArgs e)',12);
+  l('    {',12);
+  l(`        int index = ${LB}.SelectedIndex;`,12,'Which row is highlighted? 0 is the first row. -1 means nothing is selected.');
+  l('        if (index < 0)',12,'Guard first: deleting with nothing selected would crash.');
+  l('        {',12);
+  l(`            lblStatus.Text = "Select a ${v} in the list first.";`,12);
+  l('            lblStatus.Foreground = Brushes.Red;',12);
+  l('            return;',12);
+  l('        }',12);
+  l(`        ${L}.RemoveAt(index);`,12,'Remove the object from the data shelf…');
+  l(`        ${LB}.Items.RemoveAt(index);`,12,'…and the row from the screen, using the SAME index. The two lists stay in sync.');
+  l(`        lblCount.Text = ${L}.Count + " ${L}";`,12);
+  l('        lblStatus.Text = "Deleted.";',12);
+  l('        lblStatus.Foreground = Brushes.Green;',12);
+  l('    }',12);
+  l('',10);
+  l('    void ClearForm()',10,'Your first method that is NOT an event handler. No sender, no e: it takes nothing and returns nothing (void).');
+  l('    {',10);
+  l(`        ${f1.v}.Text = "";`,10);
+  l(`        ${f2.v}.Text = "";`,10);
+  l(`        ${f3.v}.Text = "";`,10);
+  l(`        ${f1.v}.Focus();`,10);
+  l('    }',10,'Write it once, call it from two places. If you ever add a fourth TextBox, you fix one method, not two handlers.');
+  l('}');
+  return A;
+}
+function entityLines(){
+  const d=D();
+  return [
+    ['namespace MyStudioApp;',4,99,'Same namespace as the engine and MainWindow, so they can see each other without any extra using.'],
+    ['',4,99,''],
+    [`// One ${d.E} = one row in your app. This class is the blueprint.`,4,99,''],
+    [`public class ${d.E}`,4,99,`A class of your own. ${d.E} is now a type you can use anywhere in the project, exactly like TextBox.`],
+    ['{',4,99,''],
+    [`    public string ${d.f1.prop} { get; set; } = "";`,4,99,'A property: a named fact every object will carry. get = you can read it, set = you can change it. = "" starts it empty instead of null.'],
+    [`    public string ${d.f2.prop} { get; set; } = "";`,4,99,''],
+    [`    public int ${d.f3.prop} { get; set; }`,4,99,'An int property. Numbers start at 0 automatically, so no = needed.'],
+    ['}',4,99,''],
+  ];
+}
+const STEPS = [
+  {title:"Your app's window", idea:'Week 3 review', goal:'Replace last week\'s greeting window with a clean window named after your app. Nothing new here: Title, size, a header. Make sure it runs before you add anything.', todo:['Open your <b>MyStudioApp</b> project from Week 3 in VS Code.','Select all in <b>MainWindow.cs</b>, delete, paste this code.','Press <b>F5</b>. A window with your app\'s name and a header appears.'], cap:'Week 3 skills only: Title, Width, Height, a TextBlock header inside a StackPanel.'},
+  {title:'The form: three TextBoxes', idea:'Watermark + fields', goal:'Give the user three boxes to type into. They are fields (above the constructor) because the Add button will need to read them later.', todo:['Add the three <b>TextBox</b> fields above the constructor.','Add them to <b>Children</b> or they stay invisible.','<b>F5</b>. Click into a box: the gray Watermark disappears while you type.'], cap:'The Watermark is a hint, not a value. Text is still "" until the user types.'},
+  {title:'Add & Clear buttons + a status line', idea:'two events, one status label', goal:'Wire two buttons. Add only reports that it was clicked (there is nowhere to save yet). Clear empties the boxes. The status line is where every button will talk to the user.', todo:['Add <b>lblStatus</b> as a field, the two buttons, the <b>buttonRow</b>, and both handlers.','Add <code>using Avalonia.Interactivity;</code> and <code>using Avalonia.Layout;</code>.','<b>F5</b>. Type something, press Clear: boxes empty. Press Add: status changes.'], cap:'Try the Add button. It works, but admits it has nothing to save. That is step 5\'s job.'},
+  {title:'Your first class (a new file!)', idea:'class + properties', goal:'Create the blueprint for the thing your app manages. One file, one class, three properties. No window code in here at all.', todo:['In Explorer, right-click the project folder → <b>New File…</b> → name it <b><span class="dEnt"></span>.cs</b>.','Paste this code. Press <b>Ctrl+S</b>.','<b>F5</b>. The window looks exactly the same. The class exists but nobody uses it yet.'], cap:'No visible change. The class is a blueprint; until step 5 nothing is built from it.', file:'entity'},
+  {title:'Make an object from the form', idea:'new + the dot', goal:'When Add is clicked, build one object from your class and copy the TextBox texts into it. Then read it back in the status line to prove it holds the data.', todo:['In <b>BtnAdd_Click</b>, replace the old status line with the four new lines.','<b>F5</b>. Fill the form, press Add: the status repeats the name back.','Press Add again: a new object each time. Where does the old one go? Nowhere yet…'], cap:'Each click builds a fresh object, reports it, and forgets it. Step 6 fixes the forgetting.'},
+  {title:'Remember them all: List<T>', idea:'List<T>, Add, Count', goal:'Add a shelf that holds every object ever added. Because the list is a field, it survives between clicks. A count label proves it.', todo:['Add <code>using System.Collections.Generic;</code> at the top.','Add the <b>List</b> field and the <b>lblCount</b> field; put lblCount in Children.','<b>F5</b>. Press Add three times: the count goes 1, 2, 3.'], cap:'The count grows. The objects are safe on the shelf, but still invisible. Step 7 shows them.'},
+  {title:'Show them: ListBox', idea:'ListBox + Items.Add', goal:'Put a ListBox under the count and add one text row per object. The user finally sees the data.', todo:['Add the <b>ListBox</b> field and put it in Children.','In BtnAdd_Click, add the <b>Items.Add</b> line.','<b>F5</b>. Add a few records. Click a row: it highlights (selection, free from ListBox).'], cap:'Two lists now: the data list (objects) and the ListBox (rows). Keep them in sync, always.'},
+  {title:'Validation: if / return', idea:'if + return + colors', goal:'Refuse to add a record with an empty name. Red message for problems, green for success.', todo:['Add the <b>if</b> block at the very top of BtnAdd_Click.','Add the green Foreground line after the success message.','<b>F5</b>. Press Add with an empty name: red, nothing added. Fill it: green.'], cap:'return is the key word: when the input is bad, the handler stops before anything is saved.'},
+  {title:'Numbers from a TextBox', idea:'TryParse (Week 2!)', goal:`Turn the third box into a real number with TryParse, reject anything that is not a whole number, and store it in the object's int property.`, todo:['Add the <b>TryParse</b> block after the name check.','Set the number property and extend the <b>Items.Add</b> text.','<b>F5</b>. Type "abc" in the number box: red. Type 19: added.'], cap:'The same TryParse you used in the console. A TextBox is just Console.ReadLine with a border.'},
+  {title:'Your own method: ClearForm()', idea:'write a method, call it twice', goal:'After a successful Add the form should empty itself. That is the same code Clear runs. Instead of copying it, move it into a method and call it from both places.', todo:['Add the <b>ClearForm()</b> method at the bottom of the class.','Replace the four lines in BtnClear_Click with <code>ClearForm();</code>.','Add <code>ClearForm();</code> at the end of BtnAdd_Click. <b>F5</b>: add a record, the boxes empty.'], cap:'Same behavior, less code. A method is a named block you can run from anywhere in the class.'},
+  {title:'Two columns', idea:'panels inside panels', goal:'Form on the left, list on the right. Three new StackPanels: form, listPanel, and a horizontal columns panel that holds both.', todo:['Add the <b>form</b>, <b>listPanel</b>, and <b>columns</b> panels above Content.','Shrink Content\'s Children to just <code>lblTitle, lblSubtitle, columns</code>.','<b>F5</b>. Your app looks like real software now.'], cap:'Every control is still in Children somewhere, just deeper. Layout = panels inside panels.'},
+  {title:'Delete the selected row', idea:'SelectedIndex + RemoveAt', goal:'Let the user select a row and delete it. Remove from BOTH lists with the same index, and guard against nothing being selected.', todo:['Add <b>btnDelete</b>, wire it, and put it in listPanel\'s Children.','Add the <b>BtnDelete_Click</b> handler.','<b>F5</b>. Add three records, select the middle one, Delete: count drops to 2. 🎉 Milestone 1 done.'], cap:'🎉 Milestone 1. Select a row and press Delete. Then try Delete with nothing selected.'},
+];
+
+/* ============ HIGHLIGHTER ============ */
+const KW = /\b(using|namespace|public|class|void|var|new|if|else|return|out|true|false|null|int|string|bool|double|get|set|object|foreach|in|this|private|static)\b/g;
+function hl(line){
+  let s = esc(line);
+  const ci = s.indexOf('//');
+  let comment = '';
+  if (ci >= 0) { comment = `<span class="c">${s.slice(ci)}</span>`; s = s.slice(0,ci); }
+  const parts = s.split(/(&quot;.*?&quot;|"[^"]*")/g);
+  s = parts.map((p,i)=>{
+    if (i%2===1) return `<span class="s">${p}</span>`;
+    return p.replace(KW,'<span class="k">$1</span>')
+            .replace(/\b([A-Z][A-Za-z0-9_]*)\b/g,'<span class="t">$1</span>')
+            .replace(/\b(\d+)\b/g,'<span class="nu">$1</span>');
+  }).join('');
+  return s + comment;
+}
+function renderCode(el, lines, stepN, opts={}){
+  const vis = lines.filter(([t,from,to])=>stepN>=from && stepN<=to);
+  el.innerHTML = vis.map(([t,from,to,x],i)=>{
+    const isNew = from===stepN && t.trim()!=='';
+    return `<div class="ln ${isNew?'new':''} ${x?'has':''}" data-x="${esc(x)}" data-t="${esc(t.trim())}"><span class="n">${i+1}</span><span class="p">${hl(t)}</span></div>`;
+  }).join('');
+  el.querySelectorAll('.ln.has').forEach(ln=>{
+    ln.onmouseenter=()=>{ $('#exq').textContent=ln.dataset.t; $('#exp').textContent=ln.dataset.x; };
+  });
+  el.onmouseleave=()=>{ $('#exq').textContent=''; $('#exp').textContent=opts.idle||'Hover any line.'; };
+  return vis.map(v=>v[0]).join('\n');
+}
+
+/* ============ BUILD IT ============ */
+let curFile = 'main', fullText = '';
+function goStep(n){
+  step = Math.max(1,Math.min(12,n));
+  const S = STEPS[step-1], d = D();
+  curFile = S.file || 'main';
+  $('#stepTitle').textContent = `Step ${step}: ${S.title}`;
+  $('#stepCounter').textContent = `${step} / 12`;
+  $('#stepPrev').disabled = step===1; $('#stepNext').disabled = step===12;
+  $('#stepIdea').textContent = 'New idea: ' + S.idea;
+  $('#stepGoal').innerHTML = S.goal;
+  $('#stepTodo').innerHTML = S.todo.map(t=>`<li>${t}</li>`).join('');
+  document.querySelectorAll('.dEnt').forEach(e=>e.textContent=d.E);
+  document.querySelectorAll('#chips .chip').forEach((c,i)=>{ c.classList.toggle('active',i===step-1); c.classList.toggle('done',i<step-1); });
+  renderFile();
+  renderWin();
+}
+function renderFile(){
+  const d=D();
+  const tabs = [['main','MainWindow.cs']];
+  if (step>=4) tabs.push(['entity', d.E+'.cs']);
+  $('#fileTabs').innerHTML = tabs.map(([k,n])=>`<button class="ftab ${k===curFile?'active':''}" data-f="${k}">${n}</button>`).join('');
+  $('#fileTabs').querySelectorAll('.ftab').forEach(b=>b.onclick=()=>{curFile=b.dataset.f;renderFile();});
+  const lines = curFile==='entity' ? entityLines() : mainLines();
+  $('#fileTag').textContent = `complete file · step ${step}`;
+  fullText = renderCode($('#src'), lines, step, {idle:`This is the whole ${curFile==='entity'?d.E+'.cs':'MainWindow.cs'} for step ${step}. Hover each line.`});
+  $('#exq').textContent=''; $('#exp').textContent=`This is the whole ${curFile==='entity'?d.E+'.cs':'MainWindow.cs'} for step ${step}. Hover each line.`;
+}
+$('#copyBtn').onclick=()=>{ navigator.clipboard.writeText(fullText).then(()=>{ $('#copyBtn').textContent='Copied ✓'; setTimeout(()=>$('#copyBtn').textContent='Copy',1400); }); };
+$('#stepPrev').onclick=()=>goStep(step-1); $('#stepNext').onclick=()=>goStep(step+1);
+function buildChips(){
+  $('#chips').innerHTML = STEPS.map((s,i)=>`<button class="chip"><i>${i+1}</i>${s.title}</button>`).join('');
+  $('#chips').querySelectorAll('.chip').forEach((c,i)=>c.onclick=()=>goStep(i+1));
+}
+
+/* ============ LIVE WINDOW SIMULATION ============ */
+let recs = [], selIdx = -1;
+function renderWin(){
+  const d=D(), s=step;
+  recs = []; selIdx = -1;
+  const hasForm=s>=2, hasBtns=s>=3, hasCount=s>=6, hasList=s>=7, cols=s>=11, hasDel=s>=12;
+  const formHtml = hasForm ? `
+    <input class="in" id="w1" placeholder="${d.f1.hint}"><input class="in" id="w2" placeholder="${d.f2.hint}"><input class="in" id="w3" placeholder="${d.f3.hint}">
+    ${hasBtns?`<div class="row"><button class="btn" id="wAdd">Add ${d.E}</button><button class="btn" id="wClear">Clear</button></div><div class="st" id="wSt"></div>`:''}` : '';
+  const listHtml = (hasCount?`<div class="cnt" id="wCnt">0 ${d.list}</div>`:'') + (hasList?`<div class="lb" id="wLb"></div>`:'') + (hasDel?`<div class="row"><button class="btn" id="wDel">Delete Selected</button></div>`:'');
+  const body = cols ? `<div class="cols"><div class="form">${formHtml}</div><div class="list">${listHtml}</div></div>` : formHtml + listHtml;
+  $('#winHolder').innerHTML = `<div class="wv"><div class="tb">🪟 ${d.app}<span class="ctl"><span>—</span><span>☐</span><span>✕</span></span></div><div class="body"><div class="h1">${d.app}</div><div class="h2">Milestone 1: add ${d.list} to a list</div>${body}</div></div>`;
+  $('#winCap').innerHTML = STEPS[s-1].cap;
+  const st=(msg,color)=>{ const e=$('#wSt'); if(!e) return; e.textContent=msg; e.style.color=color||'#1a1d2b'; };
+  const refresh=()=>{ const c=$('#wCnt'); if(c) c.textContent=`${recs.length} ${d.list}`; const lb=$('#wLb'); if(lb){ lb.innerHTML=recs.map((r,i)=>`<div class="${i===selIdx?'sel':''}" data-i="${i}">${esc(r)}</div>`).join(''); lb.querySelectorAll('div').forEach(x=>x.onclick=()=>{selIdx=+x.dataset.i;refresh();}); } };
+  const clear=()=>{ ['w1','w2','w3'].forEach(id=>{const e=$('#'+id); if(e) e.value='';}); const f=$('#w1'); if(f) f.focus(); };
+  if ($('#wClear')) $('#wClear').onclick=clear;
+  if ($('#wAdd')) $('#wAdd').onclick=()=>{
+    const v1=$('#w1').value, v2=$('#w2').value, v3=$('#w3').value;
+    if (s<=4) return st('Add clicked. Nothing is saved yet.');
+    if (s>=8 && v1.trim()==='') return st(`Please type a ${d.f1.hint.toLowerCase()}.`,'#c62828');
+    let num=null;
+    if (s>=9){ if(!/^-?\d+$/.test(v3.trim())) return st(`${d.f3.hint} must be a whole number.`,'#c62828'); num=parseInt(v3,10); }
+    if (s>=6) recs.push(v1 + '  ·  ' + v2 + (s>=9?'  ·  '+num:''));
+    refresh();
+    st('Added ' + v1 + '!', s>=8?'#2e7d32':'#1a1d2b');
+    if (s>=10) clear();
+  };
+  if ($('#wDel')) $('#wDel').onclick=()=>{
+    if (selIdx<0) return st(`Select a ${d.elc} in the list first.`,'#c62828');
+    recs.splice(selIdx,1); selIdx=-1; refresh(); st('Deleted.','#2e7d32');
+  };
+}
+
+/* ============ FIX-IT ============ */
+function bugLines(){
+  const d=D(), f1=d.f1,f2=d.f2,f3=d.f3,E=d.E,v=d.elc,L=d.list,LB=d.lst,n3=d.n3;
+  // [text, bugExplanation or '']
+  return [
+    ['using Avalonia;',`<b>Bug 1 (compile error):</b> the usings start here, but <code>using System.Collections.Generic;</code> is missing, so <code>List&lt;${E}&gt;</code> on line 17 is a red squiggle. Add it as the first line of the file.`],
+    ['using Avalonia.Controls;',''],
+    ['using Avalonia.Interactivity;',''],
+    ['using Avalonia.Layout;',''],
+    ['using Avalonia.Media;',''],
+    ['',''],
+    ['namespace MyStudioApp;',''],
+    ['',''],
+    ['public class MainWindow : Window',''],
+    ['{',''],
+    [`    TextBox ${f1.v} = new TextBox { Watermark = "${f1.hint}" };`,''],
+    [`    TextBox ${f2.v} = new TextBox { Watermark = "${f2.hint}" };`,''],
+    [`    TextBox ${f3.v} = new TextBox { Watermark = "${f3.hint}" };`,''],
+    ['    TextBlock lblStatus = new TextBlock { Text = "" };',''],
+    [`    TextBlock lblCount = new TextBlock { Text = "0 ${L}" };`,''],
+    [`    ListBox ${LB} = new ListBox { Height = 220 };`,''],
+    [`    List<${E}> ${L} = new List<${E}>();`,''],
+    ['',''],
+    ['    public MainWindow()',''],
+    ['    {',''],
+    [`        Title = "${d.app}";`,''],
+    [`        var btnAdd = new Button { Content = "Add ${E}" };`,''],
+    ['        btnAdd.Click += BtnAdd_Click();',`<b>Bug 2 (compile error):</b> the parentheses. <code>+= BtnAdd_Click</code> names the method to run later. <code>BtnAdd_Click()</code> tries to call it right now, with no arguments, and the compiler refuses.`],
+    ['',''],
+    ['        Content = new StackPanel',''],
+    ['        {',''],
+    ['            Margin = new Thickness(20),',''],
+    [`            Children = { ${f1.v}, ${f2.v}, ${f3.v}, btnAdd, lblStatus, lblCount, ${LB} }`,''],
+    ['        };',''],
+    ['    }',''],
+    ['',''],
+    ['    void BtnAdd_Click(object? sender, RoutedEventArgs e)',''],
+    ['    {',''],
+    [`        bool ${n3}Ok = int.TryParse(${f3.v}.Text, out int ${n3});`,''],
+    [`        if (${n3}Ok == false)`,''],
+    ['        {',''],
+    [`            lblStatus.Text = "${f3.hint} must be a whole number.";`,''],
+    ['            lblStatus.Foreground = Brushes.Red;',`<b>Bug 4 (logic):</b> there is no <code>return;</code> after the error message. The handler complains in red… and then keeps going and adds the record anyway with ${n3} = 0. Validation without <code>return</code> is just decoration.`],
+    ['        }',''],
+    [`        ${E} ${v} = new ${E}();`,''],
+    [`        ${v}.${f1.prop} = ${f1.v}.Text;`,''],
+    [`        ${v}.${f2.prop} = ${f2.v}.Text;`,''],
+    [`        ${v}.${f3.prop} = ${n3};`,''],
+    [`        ${L}.Add(${v});`,''],
+    [`        ${LB}.Items.Add(${v});`,`<b>Bug 3 (wrong on screen):</b> it compiles, but every row says <code>MyStudioApp.${E}</code>. You added the <em>object</em>; a ListBox shows an object by its type name. Add a <em>string</em> built from its properties: <code>${v}.${f1.prop} + "  ·  " + ${v}.${f2.prop}</code>.`],
+    [`        lblCount.Text = ${L}.Count + " ${L}";`,''],
+    [`        lblStatus.Text = "Added " + ${v}.${f1.prop} + "!";`,''],
+    ['        lblStatus.Foreground = Brushes.Green;',''],
+    ['    }',''],
+    ['}',''],
+  ];
+}
+let found = new Set();
+function renderBugs(reveal=false){
+  const B = bugLines(); found = reveal ? new Set(B.map((b,i)=>b[1]?i:-1).filter(i=>i>=0)) : found;
+  $('#bugSrc').innerHTML = B.map(([t,x],i)=>`<div class="ln bug ${found.has(i)?'found':''}" data-i="${i}"><span class="n">${i+1}</span><span class="p">${hl(t)}</span></div>`).join('');
+  $('#bugSrc').querySelectorAll('.ln').forEach(ln=>ln.onclick=()=>{
+    const i=+ln.dataset.i;
+    if (B[i][1]) { found.add(i); renderBugs(); }
+    else { ln.classList.add('wrong'); setTimeout(()=>ln.classList.remove('wrong'),600); }
+  });
+  $('#bugCount').textContent = found.size;
+  $('#bugList').innerHTML = found.size ? [...found].sort((a,b)=>a-b).map(i=>`<p style="margin:0 0 10px">Line ${i+1}: ${B[i][1]}</p>`).join('') : 'Click a line to test your guess.';
+}
+$('#revealBtn').onclick=()=>renderBugs(true);
+
+/* ============ QUIZ ============ */
+function quizData(){
+  const d=D(), E=d.E, v=d.elc, L=d.list, LB=d.lst, f1=d.f1;
+  return [
+    {q:`What is <code>${E}.cs</code>?`, a:1, o:[`One ${v} with real data in it`,`A blueprint: the list of facts every ${v} has`,`A window that shows ${L}`,`The engine that starts the app`], x:`A class is a blueprint. It describes what every ${v} has (${f1.prop}, ${d.f2.prop}, ${d.f3.prop}) but holds no data itself. Objects hold data.`},
+    {q:`In <code>${E} ${v} = new ${E}();</code> what does <code>new</code> do?`, a:0, o:[`Builds one real object from the blueprint`,`Creates a new file`,`Adds the ${v} to the ListBox`,`Declares a new class`], x:`new runs the blueprint and gives you one object. You already did this with new TextBox() and new Button().`},
+    {q:`Why is <code>${L}</code> a <b>field</b> (above the constructor) and not a <code>var</code> inside BtnAdd_Click?`, a:2, o:[`Fields are faster`,`var is not allowed for lists`,`A local variable would be thrown away when the handler ends; a field survives between clicks`,`Because it starts with a lowercase letter`], x:`Anything declared inside a method dies when the method returns. The list must remember records across many clicks, so it lives in the class.`},
+    {q:`<code>lblCount.Text = ${L}.Count;</code> gives an error. Why?`, a:1, o:[`Count needs parentheses`,`Count is an int and Text wants a string; glue it with <code>+ " ${L}"</code>`,`lblCount is not in Children`,`You must use ${LB}.Count instead`], x:`Text is a string. An int is not a string. Adding a string to it (+ " ${L}") converts the whole expression into text.`},
+    {q:`What does <code>return;</code> do inside the validation <code>if</code>?`, a:3, o:[`Returns the user to the first TextBox`,`Sends the error message to the console`,`Restarts the handler`,`Stops the handler immediately; nothing below it runs`], x:`return leaves the method right there. The lines that build the object and add it to the list never execute. That is the whole point of validating first.`},
+    {q:`What is the difference between <code>${L}</code> and <code>${LB}</code>?`, a:0, o:[`${L} holds the objects (data); ${LB} shows text rows on screen`,`They are the same thing with two names`,`${L} is for display; ${LB} is for data`,`${LB} is faster`], x:`Two lists, two jobs. The data list holds ${E} objects. The ListBox holds strings the user can see. Add to both, remove from both, same index.`},
+    {q:`<code>${LB}.SelectedIndex</code> is <b>-1</b>. What does that mean?`, a:2, o:[`The last row is selected`,`The list is empty`,`Nothing is selected`,`An error happened`], x:`Rows are numbered from 0. -1 is the "no selection" signal. Deleting with index -1 would crash, so the guard checks index < 0 first.`},
+    {q:`Which line makes a <b>visible</b> row appear in the ListBox?`, a:1, o:[`${L}.Add(${v});`,`${LB}.Items.Add(${v}.${f1.prop} + "  ·  " + ${v}.${d.f2.prop});`,`${v}.${f1.prop} = ${f1.v}.Text;`,`lblCount.Text = ${L}.Count + " ${L}";`], x:`Items.Add on the ListBox is the only line that touches the screen's list. ${L}.Add stores the object invisibly.`},
+  ];
+}
+let answered = 0, correct = 0;
+function renderQuiz(){
+  answered=0; correct=0; $('#scoreTxt').textContent='';
+  $('#quiz').innerHTML = quizData().map((q,i)=>`<div class="q"><h3>${i+1}. ${q.q}</h3><div class="opts">${q.o.map((o,j)=>`<button class="opt" data-q="${i}" data-j="${j}">${o}</button>`).join('')}</div><div class="fb" id="fb${i}">${q.x}</div></div>`).join('');
+  const Q = quizData();
+  $('#quiz').querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
+    const i=+b.dataset.q, j=+b.dataset.j, q=Q[i];
+    const sib=[...$('#quiz').querySelectorAll(`.opt[data-q="${i}"]`)];
+    if (sib[0].disabled) return;
+    sib.forEach(s=>s.disabled=true);
+    sib[q.a].classList.add('ok'); if (j!==q.a) b.classList.add('no'); else correct++;
+    answered++; $('#fb'+i).classList.add('show');
+    $('#scoreTxt').textContent = `· ${correct} / ${answered} correct`;
+  });
+}
+
+/* ============ PRACTICE ============ */
+function practiceData(){
+  const d=D(), E=d.E, v=d.elc, L=d.list, LB=d.lst, f1=d.f1, f3=d.f3, n3=d.n3;
+  return [
+    {lvl:'Easy', cls:'', title:`Average ${f3.hint}`, goal:`Add a label under the count that shows the average ${f3.hint.toLowerCase()} of all ${L} (e.g. "Average ${f3.hint.toLowerCase()}: 21.5"). Update it after every Add and Delete.`, hint:`You need to visit every object on the shelf. <code>foreach (${E} x in ${L})</code> runs the block once per object, with <code>x</code> being the current one. Sum the ${f3.prop}s, divide by <code>${L}.Count</code> (guard against 0!).`, code:
+`// 1) New field, next to lblCount:
+TextBlock lblAverage = new TextBlock { Text = "Average ${f3.hint.toLowerCase()}: -" };
+
+// 2) Put it in listPanel's Children, after lblCount:
+Children = { lblCount, lblAverage, ${LB}, btnDelete }
+
+// 3) New method at the bottom of the class:
+void UpdateAverage()
+{
+    if (${L}.Count == 0)
+    {
+        lblAverage.Text = "Average ${f3.hint.toLowerCase()}: -";
+        return;
+    }
+    int total = 0;
+    foreach (${E} x in ${L})
+    {
+        total = total + x.${f3.prop};
+    }
+    double average = (double)total / ${L}.Count;
+    lblAverage.Text = "Average ${f3.hint.toLowerCase()}: " + average;
+}
+
+// 4) Call UpdateAverage(); right after each lblCount.Text = ... line
+//    (in BtnAdd_Click and in BtnDelete_Click).`},
+    {lvl:'Medium', cls:'m', title:`Search by ${f1.hint.toLowerCase()}`, goal:`Add a search box and a Search button above the ListBox. Searching rebuilds the ListBox with only the ${L} whose ${f1.prop} contains the typed text. An empty search shows everything again.`, hint:`Clear the ListBox with <code>${LB}.Items.Clear()</code>, then loop over the data list and re-add only the matches. <code>x.${f1.prop}.Contains(txtSearch.Text)</code> is true when the text appears inside the ${f1.hint.toLowerCase()}. Never remove from <code>${L}</code> here: searching changes what is shown, not what is stored.`, code:
+`// 1) New fields:
+TextBox txtSearch = new TextBox { Watermark = "Search ${f1.hint.toLowerCase()}" };
+
+// 2) In the constructor, a button + wiring + a row:
+var btnSearch = new Button { Content = "Search" };
+btnSearch.Click += BtnSearch_Click;
+var searchRow = new StackPanel
+{
+    Orientation = Orientation.Horizontal,
+    Spacing = 10,
+    Children = { txtSearch, btnSearch }
+};
+// and put searchRow in listPanel's Children, before lblCount.
+
+// 3) The handler:
+void BtnSearch_Click(object? sender, RoutedEventArgs e)
+{
+    ${LB}.Items.Clear();
+    foreach (${E} x in ${L})
+    {
+        if (x.${f1.prop}.Contains(txtSearch.Text))
+        {
+            ${LB}.Items.Add(x.${f1.prop} + "  ·  " + x.${d.f2.prop} + "  ·  " + x.${f3.prop});
+        }
+    }
+    lblStatus.Text = "Showing " + ${LB}.Items.Count + " of " + ${L}.Count;
+    lblStatus.Foreground = Brushes.Green;
+}
+// Careful: after a search, SelectedIndex no longer matches ${L}.
+// Press Search with an empty box before deleting. (Next week we fix this properly.)`},
+    {lvl:'Harder', cls:'h', title:`Edit the selected ${v}`, goal:`Add a "Load" button under the list that copies the selected ${v} back into the three TextBoxes, and an "Update" button in the form that saves the edited values back into that same object and refreshes its row.`, hint:`You need to remember <em>which</em> row was loaded: a new int field <code>editIndex = -1</code>. Load sets it from SelectedIndex and fills the boxes from <code>${L}[editIndex]</code>. Update validates like Add, then changes the existing object's properties and replaces the ListBox row with <code>${LB}.Items[editIndex] = "..."</code>.`, code:
+`// 1) New field:
+int editIndex = -1;
+
+// 2) Buttons: btnLoad goes under the list, btnUpdate goes in buttonRow.
+var btnLoad = new Button { Content = "Load Selected" };
+var btnUpdate = new Button { Content = "Update" };
+btnLoad.Click += BtnLoad_Click;
+btnUpdate.Click += BtnUpdate_Click;
+
+// 3) Handlers:
+void BtnLoad_Click(object? sender, RoutedEventArgs e)
+{
+    int index = ${LB}.SelectedIndex;
+    if (index < 0)
+    {
+        lblStatus.Text = "Select a ${v} first.";
+        lblStatus.Foreground = Brushes.Red;
+        return;
+    }
+    editIndex = index;
+    ${E} x = ${L}[index];
+    ${f1.v}.Text = x.${f1.prop};
+    ${d.f2.v}.Text = x.${d.f2.prop};
+    ${f3.v}.Text = x.${f3.prop} + "";
+    lblStatus.Text = "Editing row " + (index + 1) + ". Change the boxes, then press Update.";
+    lblStatus.Foreground = Brushes.DarkSlateBlue;
+}
+
+void BtnUpdate_Click(object? sender, RoutedEventArgs e)
+{
+    if (editIndex < 0)
+    {
+        lblStatus.Text = "Load a ${v} first.";
+        lblStatus.Foreground = Brushes.Red;
+        return;
+    }
+    bool ${n3}Ok = int.TryParse(${f3.v}.Text, out int ${n3});
+    if (${n3}Ok == false || string.IsNullOrWhiteSpace(${f1.v}.Text))
+    {
+        lblStatus.Text = "Check the ${f1.hint.toLowerCase()} and the ${f3.hint.toLowerCase()}.";
+        lblStatus.Foreground = Brushes.Red;
+        return;
+    }
+    ${E} x = ${L}[editIndex];
+    x.${f1.prop} = ${f1.v}.Text;
+    x.${d.f2.prop} = ${d.f2.v}.Text;
+    x.${f3.prop} = ${n3};
+    ${LB}.Items[editIndex] = x.${f1.prop} + "  ·  " + x.${d.f2.prop} + "  ·  " + x.${f3.prop};
+    lblStatus.Text = "Updated " + x.${f1.prop} + ".";
+    lblStatus.Foreground = Brushes.Green;
+    editIndex = -1;
+    ClearForm();
+}
+// Note: no "new" in Update. We change the object that already exists.`},
+  ];
+}
+function renderPractice(){
+  $('#practice').innerHTML = practiceData().map((p,i)=>`<div class="ex"><div class="lvl ${p.cls}">${p.lvl}</div><h3>${i+1}. ${p.title}</h3><p style="color:var(--ink2);margin:0">${p.goal}</p><details><summary>Hint</summary><p style="color:var(--ink2)">${p.hint}</p></details><details><summary>Show a solution (the lines to add)</summary><div class="codewin" style="margin-top:10px"><div class="bar"><div class="dots"><i></i><i></i><i></i></div><span class="fname">MainWindow.cs</span><span class="tag">additions</span></div><pre class="src">${p.code.split('\n').map((t,j)=>`<div class="ln"><span class="n">${j+1}</span><span class="p">${hl(t)}</span></div>`).join('')}</pre></div></details></div>`).join('');
+}
+
+/* ============ WRAP-UP ============ */
+function renderWrap(){
+  const d=D(), E=d.E, v=d.elc, L=d.list, LB=d.lst;
+  const C=[
+    ['Your own class', `// ${E}.cs\npublic class ${E}\n{\n    public string ${d.f1.prop} { get; set; } = "";\n    public int ${d.f3.prop} { get; set; }\n}`],
+    ['Object: new + the dot', `${E} ${v} = new ${E}();\n${v}.${d.f1.prop} = ${d.f1.v}.Text;\nlblStatus.Text = "Added " + ${v}.${d.f1.prop};`],
+    ['List<T>', `using System.Collections.Generic;\nList<${E}> ${L} = new List<${E}>();\n${L}.Add(${v});\n${L}.Count        // how many\n${L}.RemoveAt(i)  // remove #i\n${L}[i]           // get #i`],
+    ['ListBox', `ListBox ${LB} = new ListBox { Height = 220 };\n${LB}.Items.Add("text row");\n${LB}.Items.RemoveAt(i);\n${LB}.Items.Clear();\n${LB}.SelectedIndex   // -1 = none`],
+    ['Validate then return', `if (string.IsNullOrWhiteSpace(${d.f1.v}.Text))\n{\n    lblStatus.Text = "Please type a ${d.f1.hint.toLowerCase()}.";\n    lblStatus.Foreground = Brushes.Red;\n    return;\n}`],
+    ['Numbers (TryParse)', `bool ok = int.TryParse(${d.f3.v}.Text, out int n);\nif (ok == false) { ...; return; }\n${v}.${d.f3.prop} = n;`],
+    ['Your own method', `void ClearForm()\n{\n    ${d.f1.v}.Text = "";\n    ${d.f1.v}.Focus();\n}\n// call it:  ClearForm();`],
+    ['Two columns', `var columns = new StackPanel\n{\n    Orientation = Orientation.Horizontal,\n    Spacing = 24,\n    Children = { form, listPanel }\n};`],
+    ['Int → text', `lblCount.Text = ${L}.Count + " ${L}";\n// + with a string converts the number`],
+  ];
+  $('#cheat').innerHTML = C.map(([t,c])=>`<div class="card"><h3 style="font-size:15px">${t}</h3><pre>${esc(c)}</pre></div>`).join('');
+  $('#checklist').innerHTML = [
+    `My window is titled <b>${d.app}</b> and <b>${E}.cs</b> exists with 3 properties`,
+    `Add with a blank ${d.f1.hint.toLowerCase()} shows a red message and adds nothing`,
+    `Add with "abc" as ${d.f3.hint.toLowerCase()} shows a red message and adds nothing`,
+    `A good Add shows green, a new row, the count goes up, the form clears`,
+    `Delete with nothing selected shows red; Delete with a row selected removes it and the count goes down`,
+    `Form on the left, list on the right`,
+    `Program.cs is untouched; bin and obj deleted; ZIP uploaded to Brightspace`,
+  ].map(t=>`<li>${t}</li>`).join('');
+}
+
+/* ============ INIT ============ */
+function renderAll(){ renderDomains(); goStep(step); renderBugs(); renderQuiz(); renderPractice(); renderWrap(); }
+buildTabs(); buildChips(); renderAll(); goTab(0);
+</script>
+</body>
+</html>
