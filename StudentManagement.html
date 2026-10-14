@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>MAC 109 · Week 4: Building Student Management, one piece at a time</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f1220;--surface:#181c2e;--surface2:#222840;--border:#2f3654;
+  --ink:#eef0f8;--ink2:#c3c9dd;--muted:#9098b4;
+  --brand:#6d63ff;--brand2:#a45cff;--brand-soft:#2a2d55;--brand-ink:#c9c5ff;
+  --good:#22c58b;--good-soft:#12352b;--bad:#f06a60;--bad-soft:#3d1f23;--warn:#f5b83d;--warn-soft:#352b12;
+  --code-bg:#0a0d18;--code-bar:#151a2c;--code-border:#2a3150;--code-text:#e6e9f2;--code-ln:#5b627a;
+  --kw:#7aa2f7;--type:#2ac3de;--str:#e0af68;--com:#7f8aa8;--num:#ff9e64;--hl:#2c3350;
+  --sans:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --mono:'JetBrains Mono','Cascadia Code',Consolas,Menlo,monospace;
+  --radius:14px;--shadow:0 10px 30px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.5}
+body{padding-bottom:80px}
+code{font-family:var(--mono);background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:1px 6px;font-size:.9em;color:var(--brand-ink)}
+b,strong{color:var(--ink)}
+header{position:sticky;top:0;z-index:50;background:rgba(15,18,32,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--border)}
+.topbar{display:flex;align-items:center;gap:14px;padding:12px 24px}
+.logo{width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,var(--brand),var(--brand2));display:grid;place-items:center;font-weight:800;font-family:var(--mono);font-size:14px;color:#fff;flex:none}
+.ttl b{display:block;font-size:17px}.ttl span{color:var(--muted);font-size:13px}
+.right{margin-left:auto;display:flex;align-items:center;gap:12px;color:var(--muted);font-size:13px}
+.prog{width:160px;height:6px;border-radius:99px;background:var(--surface2);overflow:hidden}
+.prog i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--brand),var(--brand2));transition:width .3s}
+nav.tabs{display:flex;gap:2px;padding:0 16px;overflow-x:auto}
+.tab{background:none;border:0;color:var(--ink2);font:600 13px var(--sans);padding:10px 11px;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;display:flex;align-items:center;gap:7px}
+.tab i{font-style:normal;width:20px;height:20px;border-radius:50%;background:var(--surface2);display:grid;place-items:center;font-size:10.5px;font-family:var(--mono);color:var(--muted)}
+.tab.active{color:var(--brand-ink);border-bottom-color:var(--brand)}.tab.active i{background:var(--brand);color:#fff}
+.tab.done i{background:var(--good-soft);color:var(--good)}
+.tab:hover{color:var(--ink)}
+main{max-width:1280px;margin:0 auto;padding:30px 32px;min-height:calc(100vh - 200px)}
+.slide{display:none;animation:fade .25s ease}.slide.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--brand-ink);margin-bottom:10px}
+h1{font-size:clamp(30px,4.4vw,52px);line-height:1.08;margin:0 0 18px;letter-spacing:-.02em;font-weight:800}
+h2{font-size:clamp(22px,2.8vw,34px);line-height:1.15;margin:0 0 10px;letter-spacing:-.015em;font-weight:800}
+h3{font-size:17px;margin:0 0 8px;font-weight:700}
+.grad{background:linear-gradient(90deg,var(--brand-ink),var(--brand2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{font-size:18px;color:var(--ink2);max-width:76ch;margin:0 0 18px}
+.lead.big{font-size:21px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow)}
+.card.g{border-color:#1f5a44;background:#101f1b}.card.w{border-color:#5a4a1f;background:#1f1a10}.card.b{border-color:#5a2a2a;background:#1f1010}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media(max-width:900px){.grid2,.grid3{grid-template-columns:1fr}}
+.pill{display:inline-block;background:var(--brand-soft);color:var(--brand-ink);font-family:var(--mono);font-size:12px;padding:5px 12px;border-radius:99px;margin:0 0 10px}
+.pill.good{background:var(--good-soft);color:var(--good)}.pill.warn{background:var(--warn-soft);color:var(--warn)}
+.objlist{list-style:none;padding:0;margin:0}
+.objlist li{padding:6px 0 6px 26px;position:relative;font-size:16px;color:var(--ink2)}
+.objlist li::before{content:'▸';position:absolute;left:4px;color:var(--brand)}
+.note{background:var(--surface2);border-left:4px solid var(--brand);padding:12px 16px;border-radius:0 10px 10px 0;margin:14px 0;color:var(--ink2);font-size:15px}
+.note.good{border-color:var(--good)}.note.bad{border-color:var(--bad)}.note.warn{border-color:var(--warn)}
+.kbd{display:inline-block;font-family:var(--mono);font-size:12px;background:var(--surface2);border:1px solid var(--border);border-bottom-width:3px;border-radius:6px;padding:1px 7px;color:var(--ink)}
+.step{display:grid;grid-template-columns:1.15fr 1fr;gap:20px;align-items:start}
+@media(max-width:1000px){.step{grid-template-columns:1fr}}
+.idea{background:linear-gradient(135deg,#1b1f3a,#171a2c);border:1px solid var(--brand);border-radius:12px;padding:14px 18px;margin:0 0 14px}
+.idea .w{font-family:var(--mono);color:var(--brand-ink);font-size:11px;letter-spacing:.14em;text-transform:uppercase}
+.idea .d{font-size:16px;color:var(--ink2);margin-top:4px}
+.where{display:flex;align-items:center;gap:10px;margin:14px 0 6px;font-size:13px;color:var(--muted)}
+.where b{background:var(--warn-soft);color:var(--warn);font-family:var(--mono);font-size:11px;padding:3px 9px;border-radius:6px;letter-spacing:.06em}
+.codewin{background:var(--code-bg);border:1px solid var(--code-border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow)}
+.bar{display:flex;align-items:center;gap:10px;padding:8px 14px;background:var(--code-bar);border-bottom:1px solid var(--code-border);font-size:13px}
+.dots{display:flex;gap:6px}.dots i{width:10px;height:10px;border-radius:50%;display:block}
+.dots i:nth-child(1){background:#ff5f57}.dots i:nth-child(2){background:#febc2e}.dots i:nth-child(3){background:#28c840}
+.fname{font-family:var(--mono);color:var(--ink);font-weight:600}
+.tag{background:var(--brand-soft);color:var(--brand-ink);font-family:var(--mono);font-size:11px;padding:3px 9px;border-radius:6px}
+.copy{margin-left:auto;background:var(--surface2);border:1px solid var(--border);color:var(--ink);font:600 12px var(--sans);padding:5px 12px;border-radius:7px;cursor:pointer}
+.copy:hover{border-color:var(--brand)}
+.src{margin:0;padding:10px 0;overflow:auto;font-family:var(--mono);font-size:13.2px;line-height:1.62;max-height:560px}
+.ln{display:flex;white-space:pre;padding:0 16px 0 0;border-left:3px solid transparent}
+.ln .n{width:40px;flex:none;text-align:right;padding-right:12px;color:var(--code-ln);user-select:none}
+.ln.has{cursor:help}.ln.has:hover{background:var(--hl);border-left-color:var(--brand)}
+.ln.new{background:rgba(34,197,139,.09);border-left-color:var(--good)}
+.ln.ctx{opacity:.5}
+.k{color:var(--kw)}.t{color:var(--type)}.s{color:var(--str)}.c{color:var(--com);font-style:italic}.nu{color:var(--num)}.p{color:var(--code-text)}
+.explain{background:var(--surface);border:1px solid var(--border);border-left:4px solid var(--brand);border-radius:12px;padding:12px 16px;min-height:76px;margin-bottom:12px}
+.explain .lbl{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--muted);text-transform:uppercase;margin-bottom:5px}
+.explain .q{font-family:var(--mono);font-size:12.5px;color:var(--brand-ink);margin-bottom:5px;white-space:pre-wrap}
+.explain p{margin:0;color:var(--ink2);font-size:14.5px}
+.prevcap{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--muted);text-transform:uppercase;margin:0 0 8px}
+.cap{font-size:14.5px;color:var(--ink2);margin-top:10px}
+.legend{font-size:12.5px;color:var(--muted);margin:0 0 8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.lg-new{background:var(--good-soft);color:var(--good);font-family:var(--mono);font-size:11px;padding:2px 8px;border-radius:6px}
+.lg-ctx{background:var(--surface2);color:var(--muted);font-family:var(--mono);font-size:11px;padding:2px 8px;border-radius:6px}
+details.full{margin-top:14px;border:1px dashed var(--border);border-radius:12px}
+details.full summary{cursor:pointer;padding:10px 14px;color:var(--brand-ink);font-weight:600;font-size:14px;list-style:none;display:flex;align-items:center;gap:10px}
+details.full summary::before{content:'▸';color:var(--muted)}details.full[open] summary::before{content:'▾'}
+details.full .inner{padding:0 10px 10px}
+.wv{background:#f4f5f9;color:#1a1d2b;border-radius:10px;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.5);border:1px solid #d7dae6;width:100%;margin:0 auto;font-family:var(--sans)}
+.wv .tb{background:#e8eaf2;border-bottom:1px solid #d0d3df;padding:7px 12px;display:flex;align-items:center;gap:10px;font-size:13px}
+.wv .tb .ctl{margin-left:auto;color:#6b7086}
+.wv .body{padding:18px;min-height:120px}
+.wv .h{font-size:19px;font-weight:700;color:#1a1d2b;margin:0 0 6px}
+.wv .lab{font-size:13px;color:#1a1d2b;margin:6px 0 2px}
+.wv .in{display:block;width:100%;border:1px solid #c5c9d6;background:#fff;border-radius:5px;padding:6px 9px;font:13px var(--sans);margin:4px 0;color:#1a1d2b}
+.wv .in.ph{color:#9aa0b4}
+.wv .btn{display:inline-block;background:#e6e8f0;border:1px solid #c5c9d6;border-radius:5px;padding:5px 14px;font:600 13px var(--sans);margin:4px 6px 4px 0;color:#1a1d2b}
+.wv .st{font-size:13px;min-height:18px;margin:6px 0}
+.wv .ok{color:#2e7d32}.wv .err{color:#c62828}
+.wv .lb{background:#fff;border:1px solid #c5c9d6;border-radius:5px;min-height:100px;font-size:13px;margin-top:4px}
+.wv .lb div{padding:4px 9px;border-bottom:1px solid #eef0f5}
+.wv .lb div.sel{background:#dcdcff}
+.wv .cols{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.wv .empty{color:#9aa0b4;font-size:12px;text-align:center;padding:30px 0}
+.wv .hi{outline:3px solid #22c58b;outline-offset:3px;border-radius:4px;box-shadow:0 0 0 6px rgba(34,197,139,.15)}
+.wv .hi-box{outline:3px dashed #22c58b;outline-offset:6px;border-radius:4px}
+.tree{font-family:var(--mono);font-size:13px;background:var(--code-bg);border:1px solid var(--code-border);border-radius:10px;padding:12px 16px;color:var(--ink2)}
+.tree .hi{color:var(--good);font-weight:600}.tree .dim{color:var(--muted)}.tree .ind{padding-left:22px}
+.cheat{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:1000px){.cheat{grid-template-columns:1fr 1fr}}
+.cheat .card{padding:14px}
+.cheat pre{margin:8px 0 0;font-family:var(--mono);font-size:12px;color:var(--code-text);background:var(--code-bg);border:1px solid var(--code-border);border-radius:8px;padding:10px 12px;white-space:pre-wrap}
+footer{position:fixed;bottom:0;left:0;right:0;background:rgba(15,18,32,.95);border-top:1px solid var(--border);backdrop-filter:blur(10px);z-index:50}
+.fbar{max-width:1280px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;gap:12px;color:var(--muted);font-size:13px}
+.fbtn{background:var(--surface);border:1px solid var(--border);color:var(--ink);padding:9px 18px;border-radius:9px;cursor:pointer;font:600 14px var(--sans)}
+.fbtn.primary{background:var(--brand);border-color:var(--brand);color:#fff}.fbtn:disabled{opacity:.4;cursor:default}
+.fbar .hint{margin-left:auto}
+</style>
+</head>
+<body>
+<header>
+  <div class="topbar">
+    <div class="logo">C#</div>
+    <div class="ttl"><b>MAC 109 · Week 4: Building Student Management, one piece at a time</b><span>LaGuardia Community College · MEC Department · Prof. K. Kassou · VS Code + Avalonia</span></div>
+    <div class="right"><span>Each tab: the whole file, new lines in green → the window grows</span><div class="prog"><i id="progBar"></i></div></div>
+  </div>
+  <nav class="tabs" id="tabs"></nav>
+</header>
+<main id="main"></main>
+<footer><div class="fbar"><button class="fbtn" id="backBtn">◀ Back</button><button class="fbtn primary" id="nextBtn">Next ▶</button><span id="posTxt"></span><span class="hint">← → keys move between tabs</span></div></footer>
+
+<script>
+/* ---------- helpers ---------- */
+const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const attr = s => esc(s).replace(/"/g,'&quot;');
+const KW = /\b(using|namespace|public|private|readonly|class|void|var|new|if|else|return|out|true|false|null|int|string|bool|double|get|set|object|foreach|in|this|static|override|base|is)\b/g;
+function hl(line){
+  let s = esc(line); const ci = s.indexOf('//'); let comment='';
+  if (ci>=0){ comment = `<span class="c">${s.slice(ci)}</span>`; s = s.slice(0,ci); }
+  const parts = s.split(/(\$?&quot;.*?&quot;|\$?"[^"]*")/g);
+  s = parts.map((p,i)=> i%2 ? `<span class="s">${p}</span>` : p.replace(KW,'<span class="k">$1</span>').replace(/\b([A-Z][A-Za-z0-9_]*)\b/g,'<span class="t">$1</span>').replace(/\b(\d+)\b/g,'<span class="nu">$1</span>')).join('');
+  return s + comment;
+}
+// Lines starting with '~' are context (dimmed, already in the file). Others are NEW unless opts.plain.
+function codeWin(fname, code, notes={}, tag='', opts={}){
+  const raw = code.split('\n');
+  const body = raw.map((t0,i)=>{
+    const ctx = t0.startsWith('~'); const t = ctx ? t0.slice(1) : t0;
+    const key = Object.keys(notes).find(k=>t.includes(k));
+    const isNew = opts.newIdx ? opts.newIdx.has(i) : (!ctx && !opts.plain && t.trim()!=='');
+    return `<div class="ln ${key?'has':''} ${isNew?'new':''} ${ctx?'ctx':''}" data-x="${key?attr(notes[key]):''}" data-t="${attr(t.trim())}"><span class="n">${opts.plain?i+1:''}</span><span class="p">${hl(t)}</span></div>`;
+  }).join('');
+  const clean = raw.filter(t=>!t.startsWith('~')).join('\n');
+  return `<div class="codewin" data-code="${attr(opts.plain?code:clean)}"><div class="bar"><div class="dots"><i></i><i></i><i></i></div><span class="fname">${fname}</span>${tag?`<span class="tag">${tag}</span>`:''}<button class="copy">Copy</button></div><pre class="src">${body}</pre></div>`;
+}
+function win(title, body, w=420){ return `<div class="wv" style="max-width:${w}px"><div class="tb">🪟 ${title}<span class="ctl">— ☐ ✕</span></div><div class="body">${body}</div></div>`; }
+function explainBox(idle){ return `<div class="explain"><div class="lbl">Explanation</div><div class="q"></div><p>${idle}</p></div>`; }
+
+/* ---------- the app, assembled from a state so the final file is exact ---------- */
+const FLD = {
+  txtName:'    private readonly TextBox txtName = new() { Watermark = "Name" };',
+  txtId:  '    private readonly TextBox txtId = new() { Watermark = "ID" };',
+  txtAge: '    private readonly TextBox txtAge = new() { Watermark = "Age" };',
+  lst:    '    private readonly ListBox lstStudents = new();',
+  status: '    private readonly TextBlock lblStatus = new() { Text = "Ready" };',
+  count:  '    private readonly TextBlock lblCount = new() { Text = "0 students" };',
+  list:   '    private readonly List<Student> students = new();',
+  rows:   '    private readonly ObservableCollection<string> rows = new();',
+};
+const FORMLINES = {
+  heading:'        form.Children.Add(new TextBlock { Text = "Student form", FontSize = 22 });',
+  lName:'        form.Children.Add(new TextBlock { Text = "Name" });', txtName:'        form.Children.Add(txtName);',
+  lId:'        form.Children.Add(new TextBlock { Text = "ID" });', txtId:'        form.Children.Add(txtId);',
+  lAge:'        form.Children.Add(new TextBlock { Text = "Age" });', txtAge:'        form.Children.Add(txtAge);',
+  btnAdd:'        form.Children.Add(btnAdd);', btnClear:'        form.Children.Add(btnClear);', status:'        form.Children.Add(lblStatus);',
+};
+const SIG = n => `    private void ${n}(object? sender, Avalonia.Interactivity.RoutedEventArgs e)`;
+function compose(st){
+  const u = ['using System;', st.gen?'using System.Collections.Generic;':null, st.obs?'using System.Collections.ObjectModel;':null, 'using Avalonia;','using Avalonia.Controls;','using Avalonia.Layout;', st.media?'using Avalonia.Media;':null].filter(Boolean);
+  const fields = ['txtName','txtId','txtAge','lst','status','count','list','rows'].filter(k=>st.fields.includes(k)).map(k=>FLD[k]);
+  let c = `    public MainWindow()\n    {\n        Title = "Student Management";\n${st.items?'        lstStudents.ItemsSource = rows;\n':''}        Width = 850;\n        Height = 520;\n`;
+  const btns = []; if (st.btns.includes('add')) btns.push('        var btnAdd = new Button { Content = "Add" };'); if (st.btns.includes('clear')) btns.push('        var btnClear = new Button { Content = "Clear" };'); if (st.btns.includes('del')) btns.push('        var btnDelete = new Button { Content = "Delete selected" };');
+  if (btns.length) c += '\n' + btns.join('\n') + '\n';
+  const w = []; if (st.wire.includes('add')) w.push('        btnAdd.Click += Add_Click;'); if (st.wire.includes('clear')) w.push('        btnClear.Click += Clear_Click;'); if (st.wire.includes('del')) w.push('        btnDelete.Click += Delete_Click;');
+  if (w.length) c += '\n' + w.join('\n') + '\n';
+  if (st.form.length===0){ c += '    }\n'; return u.join('\n') + '\n\nnamespace MyStudioApp;\n\npublic class MainWindow : Window\n{\n' + c + '}'; }
+  c += '\n        var form = new StackPanel { Spacing = 10 };\n' + ['heading','lName','txtName','lId','txtId','lAge','txtAge','btnAdd','btnClear','status'].filter(k=>st.form.includes(k)).map(k=>FORMLINES[k]).join('\n') + '\n';
+  if (st.list>=1){
+    c += '\n        var listPanel = new DockPanel { LastChildFill = true };\n        var heading = new StackPanel { Spacing = 8 };\n        heading.Children.Add(new TextBlock { Text = "Saved students", FontSize = 22 });\n';
+    if (st.list>=2) c += '        heading.Children.Add(lblCount);\n        heading.Children.Add(btnDelete);\n';
+    c += '        DockPanel.SetDock(heading, Dock.Top);\n        listPanel.Children.Add(heading);\n';
+    if (st.list>=3) c += '        listPanel.Children.Add(lstStudents);\n';
+    c += '\n        var grid = new Grid\n        {\n            ColumnDefinitions = new ColumnDefinitions("1*,1*"),\n            ColumnSpacing = 24,\n            Margin = new Thickness(24)\n        };\n        Grid.SetColumn(form, 0);\n        Grid.SetColumn(listPanel, 1);\n        grid.Children.Add(form);\n        grid.Children.Add(listPanel);\n        Content = grid;\n';
+  } else c += '        Content = form;\n';
+  c += '    }\n';
+  const methods = [st.add, st.clear, st.del, st.clearForm, st.showStatus].filter(Boolean);
+  return u.join('\n') + '\n\nnamespace MyStudioApp;\n\npublic class MainWindow : Window\n{\n' + fields.join('\n') + '\n\n' + c + (methods.length? '\n' + methods.join('\n') : '') + '}';
+}
+const ADD = {
+  v1:`${SIG('Add_Click')}
+    {
+        lblStatus.Text = "Add clicked for " + txtName.Text;
+    }
+`,
+  v2:`${SIG('Add_Click')}
+    {
+        int.TryParse(txtAge.Text, out int age);
+        Student student = new Student { Name = txtName.Text, Id = txtId.Text, Age = age };
+        lblStatus.Text = $"Added {student.Name} | {student.Id} | {student.Age}";
+    }
+`,
+  v3:`${SIG('Add_Click')}
+    {
+        int.TryParse(txtAge.Text, out int age);
+        Student student = new Student { Name = txtName.Text, Id = txtId.Text, Age = age };
+        students.Add(student);
+        lblCount.Text = $"{students.Count} students";
+        lblStatus.Text = $"Added {student.Name} | {student.Id} | {student.Age}";
+    }
+`,
+  v4:`${SIG('Add_Click')}
+    {
+        int.TryParse(txtAge.Text, out int age);
+        Student student = new Student { Name = txtName.Text, Id = txtId.Text, Age = age };
+        students.Add(student);
+        rows.Add($"{student.Name} | {student.Id} | {student.Age}");
+        lblCount.Text = $"{students.Count} students";
+        lblStatus.Text = "Student added.";
+    }
+`,
+  v5:`${SIG('Add_Click')}
+    {
+        string name = txtName.Text?.Trim() ?? "";
+        string id = txtId.Text?.Trim() ?? "";
+
+        if (name.Length == 0 || id.Length == 0)
+        {
+            lblStatus.Text = "Enter a name and an ID.";
+            return;
+        }
+
+        int.TryParse(txtAge.Text, out int age);
+        Student student = new Student { Name = name, Id = id, Age = age };
+        students.Add(student);
+        rows.Add($"{student.Name} | {student.Id} | {student.Age}");
+        lblCount.Text = $"{students.Count} students";
+        lblStatus.Text = "Student added.";
+    }
+`,
+  v6:`${SIG('Add_Click')}
+    {
+        string name = txtName.Text?.Trim() ?? "";
+        string id = txtId.Text?.Trim() ?? "";
+
+        if (name.Length == 0 || id.Length == 0)
+        {
+            lblStatus.Text = "Enter a name and an ID.";
+            return;
+        }
+
+        if (!int.TryParse(txtAge.Text, out int age) || age < 0)
+        {
+            lblStatus.Text = "Enter a valid non-negative age.";
+            return;
+        }
+
+        Student student = new Student { Name = name, Id = id, Age = age };
+        students.Add(student);
+        rows.Add($"{student.Name} | {student.Id} | {student.Age}");
+        lblCount.Text = $"{students.Count} students";
+        lblStatus.Text = "Student added.";
+    }
+`,
+  v7:`${SIG('Add_Click')}
+    {
+        string name = txtName.Text?.Trim() ?? "";
+        string id = txtId.Text?.Trim() ?? "";
+
+        if (name.Length == 0 || id.Length == 0)
+        {
+            lblStatus.Text = "Enter a name and an ID.";
+            return;
+        }
+
+        if (!int.TryParse(txtAge.Text, out int age) || age < 0)
+        {
+            lblStatus.Text = "Enter a valid non-negative age.";
+            return;
+        }
+
+        Student student = new Student { Name = name, Id = id, Age = age };
+        students.Add(student);
+        rows.Add($"{student.Name} | {student.Id} | {student.Age}");
+        lblCount.Text = $"{students.Count} students";
+        ClearForm();
+        lblStatus.Text = "Student added.";
+    }
+`,
+  v8:`${SIG('Add_Click')}
+    {
+        string name = txtName.Text?.Trim() ?? "";
+        string id = txtId.Text?.Trim() ?? "";
+
+        if (name.Length == 0 || id.Length == 0)
+        {
+            ShowStatus("Enter a name and an ID.", false);
+            return;
+        }
+
+        if (!int.TryParse(txtAge.Text, out int age) || age < 0)
+        {
+            ShowStatus("Enter a valid non-negative age.", false);
+            return;
+        }
+
+        Student student = new Student { Name = name, Id = id, Age = age };
+        students.Add(student);
+        rows.Add($"{student.Name} | {student.Id} | {student.Age}");
+        lblCount.Text = $"{students.Count} students";
+        ClearForm();
+        ShowStatus("Student added.", true);
+    }
+`};
+const CLEAR = { v1:`${SIG('Clear_Click')}\n    {\n        ClearForm();\n        lblStatus.Text = "Form cleared.";\n    }\n`, v2:`${SIG('Clear_Click')}\n    {\n        ClearForm();\n        ShowStatus("Form cleared.", true);\n    }\n` };
+const DEL = `${SIG('Delete_Click')}
+    {
+        int index = lstStudents.SelectedIndex;
+        if (index < 0)
+        {
+            ShowStatus("Select a student to delete.", false);
+            return;
+        }
+
+        students.RemoveAt(index);
+        rows.RemoveAt(index);
+        lblCount.Text = $"{students.Count} students";
+        ShowStatus("Student deleted.", true);
+    }
+`;
+const CLEARFORM = `    private void ClearForm()\n    {\n        txtName.Text = "";\n        txtId.Text = "";\n        txtAge.Text = "";\n        txtName.Focus();\n    }\n`;
+const SHOWSTATUS = `    private void ShowStatus(string message, bool success)\n    {\n        lblStatus.Text = message;\n        lblStatus.Foreground = success ? Brushes.Green : Brushes.Red;\n    }\n`;
+
+/* ---------- preview ---------- */
+function preview(o){
+  const H = k => (o.hi||[]).includes(k) ? ' hi' : '';
+  const v = o.vals||['','',''];
+  const inp=(ph,val,k)=>val?`<input class="in${H(k)}" value="${val}">`:`<div class="in ph${H(k)}">${ph}</div>`;
+  let form = '';
+  if (o.form){
+    form += `<div class="h${H('heading')}">Student form</div>`;
+    if (o.form.includes('name')) form += `<div class="lab${H('name')}">Name</div>${inp('Name',v[0],'name')}`;
+    if (o.form.includes('id')) form += `<div class="lab${H('id')}">ID</div>${inp('ID',v[1],'id')}`;
+    if (o.form.includes('age')) form += `<div class="lab${H('age')}">Age</div>${inp('Age',v[2],'age')}`;
+    if (o.form.includes('btns')) form += `<span class="btn${H('add')}">Add</span><span class="btn${H('clear')}">Clear</span>`;
+    if (o.form.includes('status')) form += `<div class="st ${o.cls||''}${H('status')}">${o.status??'Ready'}</div>`;
+  }
+  let list = '';
+  if (o.list){
+    list += `<div class="h${H('ltitle')}">Saved students</div>`;
+    if (o.list>=2) list += `<div class="lab${H('count')}">${o.count??'0 students'}</div><span class="btn${H('del')}">Delete selected</span>`;
+    if (o.list>=3) list += `<div class="lb${H('lb')}">${(o.rows||[]).map((r,i)=>`<div class="${i===o.sel?'sel':''}">${r}</div>`).join('')}</div>`;
+  }
+  if (!o.form && !o.list) return win('Student Management', `<div class="empty">empty, 850 × 520</div>`, 420);
+  if (!o.list) return win('Student Management', form, 420);
+  return win('Student Management', `<div class="cols"><div>${form}</div><div${H('right')?' class="hi-box"':''}>${list}</div></div>`, 560);
+}
+
+/* ---------- tabs ---------- */
+const T = [];
+function tab(o){ T.push(o); }
+function diffNew(prevCode, curCode){
+  const prev = prevCode ? prevCode.split('\n') : [];
+  const counts = {}; prev.forEach(l=>{ counts[l]=(counts[l]||0)+1; });
+  const idx = new Set();
+  curCode.split('\n').forEach((l,i)=>{ if (l.trim()==='') return; if (counts[l]>0) counts[l]--; else idx.add(i); });
+  return idx;
+}
+let prevComposed = '';
+function stepHtml(o, idx){
+  let main = '';
+  if (o.state || o.rawCode){
+    const code = o.rawCode || compose(o.state);
+    const newIdx = diffNew(prevComposed, code);
+    prevComposed = code;
+    main = codeWin('MainWindow.cs', code, o.notes||{}, `complete file at tab ${idx} · ${code.split('\n').length} lines · paste over yours · F5`, {plain:true, newIdx});
+  } else if (o.blocks){
+    main = o.blocks.map(b=>codeWin(b.file||'MainWindow.cs', b.code, o.notes||{}, b.tag||'complete file · paste · F5', {plain:true, newIdx: b.allNew ? new Set(b.code.split('\n').map((l,i)=>l.trim()?i:-1).filter(i=>i>=0)) : new Set()})).join('');
+  }
+  const extra = o.extraCode ? `<div style="margin-top:12px">${codeWin(o.extraCode.file, o.extraCode.code, o.notes||{}, o.extraCode.tag||'', {plain:true, newIdx:new Set(o.extraCode.code.split('\n').map((l,i)=>l.trim()?i:-1).filter(i=>i>=0))})}</div>` : '';
+  return `<div class="eyebrow">Tab ${idx} · ${o.eyebrow||''}</div><h2>${o.title}</h2><p class="lead">${o.lead}</p>
+  <div class="step"><div>
+    ${o.idea?`<div class="idea"><div class="w">New idea: ${o.idea[0]}</div><div class="d">${o.idea[1]}</div></div>`:''}
+    <div class="legend"><span class="lg-new">+ NEW</span> lines added or changed in this tab · everything else is from earlier tabs · hover any line · <b>Copy</b> gives the complete file</div>
+    ${main}${extra}
+  </div><div>${explainBox(o.idle||'Hover any line of the file.')}<div class="prevcap">▶ F5 → the window now</div>${o.win}${o.cap?`<div class="cap">${o.cap}</div>`:''}</div></div>`;
+}
+
+/* ===== TAB 0: START ===== */
+tab({short:'Start', html:`<div class="eyebrow">Week 4 · Lecture</div>
+<h1>Student Management,<br>built <span class="grad">one small piece</span> at a time</h1>
+<div class="grid2">
+<div><p class="lead big">The final app is three files and about 150 lines. Nobody learns from 150 lines at once. So every tab in this lecture adds a <b>few green lines</b> to the same file, and shows you exactly what those lines put on the screen. The file is complete and runnable on every tab. Press <span class="kbd">F5</span> after every tab.</p>
+<span class="pill good">How each tab works</span>
+<ul class="objlist">
+<li><b>New idea</b>: one sentence on the concept</li>
+<li><b>The complete file</b> at that step, always runnable: Copy → paste over MainWindow.cs → F5</li>
+<li><b>Preview</b>: the window after F5, with the new part outlined in green</li>
+<li>Only the lines <b>added in this tab</b> are green; everything else you already have. Hover any line for its explanation</li>
+</ul>
+<div class="note">Program.cs is the engine from Week 3. It never changes. Everything today goes in <b>MainWindow.cs</b>, plus one new file, <b>Student.cs</b>.</div></div>
+<div class="card"><span class="pill">The 18 pieces</span>
+<ol style="margin:0;padding-left:22px;color:var(--ink2);font-size:14.5px;line-height:1.75;columns:2;column-gap:18px">
+<li>The window</li><li>Name box</li><li>ID &amp; Age boxes</li><li>Add &amp; Clear buttons</li><li>Status line</li><li>Two columns</li><li>Count &amp; Delete button</li><li>The ListBox</li><li>Wire the Add button</li><li>Student.cs</li><li>Build a Student</li><li>Remember: List</li><li>Show: rows</li><li>Safe input</li><li>Age check</li><li>ClearForm + Clear</li><li>ShowStatus colors</li><li>Delete selected ✓</li>
+</ol></div></div>`});
+
+/* ===== TAB 1: WINDOW ===== */
+tab({short:'Window', eyebrow:'the frame', title:'1 · The window, the way you built it in Week 3', lead:'Review. A class that IS a Window; a constructor that sets Title, Width, Height and puts one StackPanel in <code>Content</code>, exactly like last week. The panel holds only a heading for now.',
+idea:[': Window · Content = new StackPanel { … }','A window holds exactly one thing: Content. In Week 3 that one thing was a StackPanel built in a single statement, with its children listed inside <code>Children = { … }</code>. Same here. The next tab shows the second way of writing it, which the final app uses.'],
+rawCode:`using System;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Layout;
+
+namespace MyStudioApp;
+
+public class MainWindow : Window
+{
+    public MainWindow()
+    {
+        Title = "Student Management";
+        Width = 850;
+        Height = 520;
+
+        Content = new StackPanel
+        {
+            Margin = new Thickness(24),
+            Spacing = 10,
+            Children = { new TextBlock { Text = "Student form", FontSize = 22 } }
+        };
+    }
+}`,
+notes:{'using Avalonia.Controls;':'Where Window, TextBox, Button, StackPanel… live.','using Avalonia.Layout;':'Not needed yet (it holds Orientation). The final file has it, so we keep it from the start.','namespace MyStudioApp;':'The family name shared by Program.cs, MainWindow.cs and (soon) Student.cs, so they see each other.','public class MainWindow : Window':'": Window" means MainWindow IS a Window. Title, Width, Height and the close button come free.','public MainWindow()':'The constructor. Runs once, when Program.cs says new MainWindow(). We build the screen inside it.','Title = "Student Management";':'A property of Window. Property, equals, value.','Content = new StackPanel':'The Week 3 move: build a StackPanel and hand it to the window in one statement.','Margin = new Thickness(24),':'Breathing room from the window edge.','Spacing = 10,':'10 pixels between children.','Children = { new TextBlock { Text = "Student form", FontSize = 22 } }':'The list of things inside the panel. One heading for now, built inline.'},
+win: preview({form:[], hi:['heading']}), cap:'A window with a heading, built exactly the Week 3 way. Next tab: the same panel written line by line, so we can keep adding to it.'});
+
+/* ===== TAB 2: NAME BOX ===== */
+const ST2 = {fields:['txtName'], btns:[], wire:[], form:['heading','lName','txtName'], list:0};
+tab({short:'Name box', eyebrow:'first control', title:'2 · The same panel, written line by line, plus the Name box', lead:'Two changes. First, the StackPanel gets a <b>name</b> (<code>form</code>) and its children are added one per line with <code>Children.Add</code>: same panel, same screen, but now we can keep adding to it tab after tab, and later put it inside a Grid. Second, a TextBox as a <b>field</b>, because the Add button will need to read it.',
+idea:['var form … Children.Add … Content = form · field','Week 3\'s one statement <code>Content = new StackPanel { Children = { … } }</code> becomes three steps: <b>build and name</b> the panel (<code>var form = new StackPanel</code>), <b>fill</b> it (<code>form.Children.Add(…)</code>, one control per line), <b>hand it</b> to the window (<code>Content = form;</code>). Same result. And a <b>field</b> is a variable above the constructor that every method can reach.'],
+notes:{'private readonly TextBox txtName = new() { Watermark = "Name" };':'private: only this class sees it. readonly: always this same box. new(): short for new TextBox(). Watermark: the gray hint shown while empty.','var form = new StackPanel { Spacing = 10 };':'A local (var): only the constructor uses the panel. Spacing 10 = 10 pixels between children.','form.Children.Add(new TextBlock { Text = "Student form", FontSize = 22 });':'A heading built inline, with no variable, because nothing will ever change it.','form.Children.Add(new TextBlock { Text = "Name" });':'A small label above the box.','form.Children.Add(txtName);':'The TextBox is a field, so here we just name it.','Content = form;':'A window holds exactly one thing. For now that thing is the form. In Week 3 you wrote this as ONE statement: Content = new StackPanel { Children = { … } }. Here it is split: build the panel and name it (var form = …), fill it (Children.Add), then hand it to the window (Content = form). Same result; the name lets us put the form inside a Grid in tab 6.'},
+state:ST2, win: preview({form:['name'], hi:['name']}), cap:'The heading looks the same as tab 1; only the Name box is new on screen. (The Margin moved out for now; it comes back on the Grid in tab 6.) Click in the box: the gray "Name" disappears while you type.'});
+
+/* ===== TAB 3: ID & AGE ===== */
+const ST3 = {...ST2, fields:['txtName','txtId','txtAge'], form:['heading','lName','txtName','lId','txtId','lAge','txtAge']};
+tab({short:'ID & Age', eyebrow:'same pattern ×2', title:'3 · The ID and Age boxes', lead:'Two more fields, two more labels, two more Add lines. Exactly the pattern of tab 2, repeated.',
+idea:['repeat the pattern','When you can predict the next lines before reading them, you have learned the pattern. ID is text, not a number: it is never added or multiplied.'],
+notes:{'private readonly TextBox txtId':'The ID box. Even though IDs look like numbers, a TextBox always gives text, and that is fine for an ID.','private readonly TextBox txtAge':'The Age box also gives text. Tab 11 turns it into a number.','form.Children.Add(txtAge);':'Added last, so it is lowest on the shelf.'},
+state:ST3, win: preview({form:['name','id','age'], hi:['id','age']}), cap:'Three boxes. Try swapping two Add lines and running: the screen swaps them too.'});
+
+/* ===== TAB 4: BUTTONS ===== */
+const ST4 = {...ST3, btns:['add','clear'], form:[...ST3.form,'btnAdd','btnClear']};
+tab({short:'Buttons', eyebrow:'locals', title:'4 · The Add and Clear buttons', lead:'Buttons are created in the constructor as <b>locals</b> (<code>var</code>), because no other method will ever touch them. They do nothing yet: nothing is wired.',
+idea:['local vs field','Only the constructor needs the button objects, so <code>var</code> is enough. The TextBoxes are fields because handlers will read them. Where you declare a thing decides who can use it.'],
+notes:{'var btnAdd = new Button { Content = "Add" };':'Content is what the button shows. var = local: it lives only inside the constructor.','var btnClear = new Button { Content = "Clear" };':'Second button, same shape.','form.Children.Add(btnAdd);':'On the shelf, under the Age box.'},
+state:ST4, win: preview({form:['name','id','age','btns'], hi:['add','clear']}), cap:'Click them: nothing happens. A button with no handler is just a picture of a button. Tab 9 fixes that.'});
+
+/* ===== TAB 5: STATUS ===== */
+const ST5 = {...ST4, fields:[...ST4.fields,'status'], form:[...ST4.form,'status']};
+tab({short:'Status', eyebrow:'feedback', title:'5 · The status line', lead:'A TextBlock that will tell the user what just happened. A field, because every handler will write to it.',
+idea:['a label the handlers talk through','Every button will end by writing here: "Student added.", "Enter a name and an ID."… One place to look, always.'],
+notes:{'private readonly TextBlock lblStatus = new() { Text = "Ready" };':'lbl = label (a TextBlock). "Ready" is what it says before any click.','form.Children.Add(lblStatus);':'Last on the shelf: under the buttons.'},
+state:ST5, win: preview({form:['name','id','age','btns','status'], hi:['status']}), cap:'The left half of the app is complete. Everything on it is still silent.'});
+
+/* ===== TAB 6: TWO COLUMNS ===== */
+const ST6 = {...ST5, list:1};
+tab({short:'Columns', eyebrow:'layout', title:'6 · Two columns: the form left, a list panel right', lead:'A Grid with two equal columns. The form moves into column 0; a new DockPanel with a "Saved students" heading goes into column 1. <code>Content = grid;</code> replaces <code>Content = form;</code>.',
+idea:['Grid · DockPanel','Grid: define columns ("1*,1*" = two equal shares), tell each child its column, add the children. DockPanel: the heading is pinned to the top; later, the ListBox will fill whatever is left.'],
+notes:{'var listPanel = new DockPanel { LastChildFill = true };':'The right column. LastChildFill: whichever child is added LAST stretches to fill the remaining space (tab 8 adds it).','var heading = new StackPanel { Spacing = 8 };':'The top of the right column is itself a small shelf: a title now, a count and a button in tab 7.','DockPanel.SetDock(heading, Dock.Top);':'Pin the heading to the top edge. Odd shape: DockPanel.SetDock(child, side), not heading.Dock = …','ColumnDefinitions = new ColumnDefinitions("1*,1*"),':'Two columns. "1*" = one share each, so equal halves. "2*,1*" would make the form twice as wide.','ColumnSpacing = 24,':'The gap between the columns.','Margin = new Thickness(24)':'Breathing room between the window edge and everything.','Grid.SetColumn(form, 0);':'Columns are numbered from 0. form goes left.','Grid.SetColumn(listPanel, 1);':'listPanel goes right.','grid.Children.Add(form);':'Assigning a column is not enough: the child must still be added.','Content = grid;':'The grid is now the window\'s one thing; the form lives inside it.'},
+state:ST6, win: preview({form:['name','id','age','btns','status'], list:1, hi:['right']}), cap:'Change <code>"1*,1*"</code> to <code>"2*,1*"</code>, run, look, change it back. That is what the numbers mean.'});
+
+/* ===== TAB 7: COUNT & DELETE ===== */
+const ST7 = {...ST6, fields:[...ST6.fields,'count'], btns:['add','clear','del'], list:2};
+tab({short:'Count', eyebrow:'right column', title:'7 · The count label and the Delete button', lead:'Two more things in the right-hand heading: a label that will say "3 students", and the Delete button (a local, like the others, unwired for now).',
+idea:['same shapes, right side','Nothing new in C#: a field for the label (handlers will change it), a local for the button, two Add lines on the heading shelf.'],
+notes:{'private readonly TextBlock lblCount = new() { Text = "0 students" };':'Starts at "0 students". Tabs 12 and 18 update it.','var btnDelete = new Button { Content = "Delete selected" };':'Third button. Wired in tab 18.','heading.Children.Add(btnDelete);':'The Delete button sits above the list it works on.'},
+state:ST7, win: preview({form:['name','id','age','btns','status'], list:2, hi:['count','del']}), cap:'The right column has a title, a count and a button. It is missing the list itself.'});
+
+/* ===== TAB 8: LISTBOX ===== */
+const ST8 = {...ST7, fields:[...ST7.fields,'lst'], list:3};
+tab({short:'ListBox', eyebrow:'the list', title:'8 · The ListBox fills the rest', lead:'One field and one Add line. Because it is the <b>last child</b> of the DockPanel, the ListBox takes all the space under the heading and grows with the window. The screen is now complete.',
+idea:['ListBox · LastChildFill','A ListBox shows rows of text and lets the user select one. In a DockPanel with LastChildFill, the last child added gets everything that is left.'],
+notes:{'private readonly ListBox lstStudents = new();':'A ListBox with no properties set: new() alone is fine. lst = ListBox.','listPanel.Children.Add(lstStudents);':'Last child → fills the rest. Drag the window taller after F5 and watch it grow while the heading stays put.'},
+state:ST8, win: preview({form:['name','id','age','btns','status'], list:3, hi:['lb']}), cap:'🎉 The whole screen, exactly as the final app. From here on, no new controls: only behavior.'});
+
+/* ===== TAB 9: WIRE ADD ===== */
+const ST9 = {...ST8, wire:['add'], add:ADD.v1};
+tab({short:'Wire Add', eyebrow:'first event', title:'9 · Wire the Add button to a handler', lead:'One wiring line in the constructor, one method under it. Click Add and the status line reports what was in the Name box. Nothing is saved yet.',
+idea:['Click += handler','"When Click happens, run Add_Click." No parentheses: you name the method, you do not call it. The handler must be a method of this class with the (sender, e) signature.'],
+notes:{'btnAdd.Click += Add_Click;':'The wiring line. Click is an event of the button; += attaches our method to it.','private void Add_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)':'The handler. private: only this class calls it. void: returns nothing. sender and e come from Avalonia. The long name Avalonia.Interactivity.RoutedEventArgs is used instead of a using line at the top: same type, different spelling.','lblStatus.Text = "Add clicked for " + txtName.Text;':'Works because txtName and lblStatus are fields. A local declared in the constructor would be invisible here.'},
+state:ST9, win: preview({form:['name','id','age','btns','status'], list:3, vals:['Amina','1001','19'], status:'Add clicked for Amina', hi:['status']}), cap:'The button talks. Try: move <code>txtName</code> into the constructor as <code>var txtName = …</code>; the handler turns red. Move it back.'});
+
+/* ===== TAB 10: STUDENT.CS ===== */
+tab({short:'Student.cs', eyebrow:'new file', title:'10 · Student.cs: the blueprint for one student', lead:'A new file with a class of your own. It describes what every student <em>has</em>: a Name, an Id, an Age. It holds no data itself; tab 11 builds real students from it.',
+idea:['class · property','A class is a blueprint; an object is one real thing built from it with <code>new</code>. Each line inside is a <b>property</b>: a named fact with <code>get; set;</code> (readable and changeable). <code>Title = "…"</code> worked because Window has a Title property; now you write properties.'],
+extraCode:{file:'Student.cs', tag:'NEW FILE · Explorer ▸ right-click the project ▸ New File… ▸ Student.cs', code:`namespace MyStudioApp;
+
+public class Student
+{
+    public string Name { get; set; } = "";
+    public string Id { get; set; } = "";
+    public int Age { get; set; }
+}`},
+notes:{'namespace MyStudioApp;':'Same family name as MainWindow.cs, so MainWindow can say new Student() with no using line.','public class Student':'public so another file can use it. Student is now a type, like int or TextBox.','public string Name { get; set; } = "";':'A property. get = readable (student.Name), set = changeable (student.Name = …). = "" starts it empty instead of null.','public string Id { get; set; } = "";':'Text, not int: an ID is never added or multiplied and may one day contain letters.','public int Age { get; set; }':'A number. Ints start at 0 by themselves, so no = 0.'},
+state:ST9, win:`<div class="tree"><div>📁 MyStudioApp/</div><div class="ind">📄 Program.cs <span class="dim">(engine, untouched)</span></div><div class="ind">📄 MainWindow.cs <span class="dim">(tabs 1–9 so far)</span></div><div class="ind hi">📄 Student.cs ← new</div></div>`, cap:'F5: the window looks exactly the same. A blueprint is invisible until something is built from it. MainWindow.cs (above) has no green lines this tab: nothing changed in it yet.'});
+
+/* ===== TAB 11: BUILD A STUDENT ===== */
+const ST11 = {...ST9, add:ADD.v2};
+tab({short:'new Student', eyebrow:'object', title:'11 · Build a Student from the three boxes', lead:'Add_Click now creates one object with an <b>object initializer</b> and reads it back with <b>string interpolation</b>. Two new spellings, both used everywhere in the final file.',
+idea:['new Student { … } · $"…{x}…"','Object initializer: build and fill in one statement, same shape as <code>new TextBox { Watermark = "Name" }</code>. Interpolation: a <code>$</code> before the quote lets you drop values inside <code>{ }</code> instead of gluing with +.'],
+notes:{'int.TryParse(txtAge.Text, out int age);':'Week 2: text → int. age gets the number (or 0 if the text was not a number; tab 15 checks that).','Student student = new Student { Name = txtName.Text, Id = txtId.Text, Age = age };':'Capital Student = the blueprint, lowercase student = this one object. The braces set three properties while building. The long way would be four lines: new Student(); then student.Name = …; student.Id = …; student.Age = ….','lblStatus.Text = $"Added {student.Name} | {student.Id} | {student.Age}";':'The $ turns on interpolation: each {…} is replaced by its value. Without $, the braces would print as-is. The dot reads a property back out of the object.'},
+state:ST11, win: preview({form:['name','id','age','btns','status'], list:3, vals:['Amina','1001','19'], status:'Added Amina | 1001 | 19', hi:['status']}), cap:'The object exists for the length of one click, then is forgotten. Tab 12 gives it a home.'});
+
+/* ===== TAB 12: LIST ===== */
+const ST12 = {...ST11, gen:true, fields:[...ST11.fields,'list'], add:ADD.v3};
+tab({short:'List', eyebrow:'remember', title:'12 · Remember every student: List&lt;Student&gt;', lead:'A shelf that holds Student objects. It is a field, so it survives between clicks. Each Add puts the new object on it; the count label shows how many.',
+idea:['List<T> · Add · Count','<code>List&lt;Student&gt;</code> is a container that grows as you add to it and only accepts Students. <code>.Add(x)</code> puts one on the shelf, <code>.Count</code> says how many. It lives in <code>System.Collections.Generic</code>.'],
+notes:{'using System.Collections.Generic;':'Required for List<T>. Forget it and List turns red.','private readonly List<Student> students = new();':'The shelf. Only Students allowed. new() creates it empty. A field: it lives as long as the window.','students.Add(student);':'On the shelf. The object now outlives the click.','lblCount.Text = $"{students.Count} students";':'Count is an int; interpolation turns it into text. This exact line is in the final file.'},
+state:ST12, win: preview({form:['name','id','age','btns','status'], list:3, vals:['Sara','1003','20'], status:'Added Sara | 1003 | 20', count:'3 students', hi:['count']}), cap:'Three Adds: 1, 2, 3 students. The objects are safe on the shelf. Invisible, but safe.'});
+
+/* ===== TAB 13: ROWS ===== */
+const ST13 = {...ST12, obs:true, fields:[...ST12.fields,'rows'], items:true, add:ADD.v4};
+tab({short:'Rows', eyebrow:'show', title:'13 · Show them: rows + ItemsSource', lead:'A second list holds one line of text per student, and the ListBox is told to display it. From now on, adding to <code>rows</code> paints a row; you never touch <code>lstStudents</code> again.',
+idea:['ObservableCollection · ItemsSource','An ObservableCollection is a list that <b>announces its changes</b>. <code>lstStudents.ItemsSource = rows;</code> (done once) means "ListBox, show whatever is in rows". Two lists, two jobs: <code>students</code> = the objects (data), <code>rows</code> = the text (display). Add to both.'],
+notes:{'using System.Collections.ObjectModel;':'Where ObservableCollection lives. A different using than List.','private readonly ObservableCollection<string> rows = new();':'A list of strings that announces every change. Same Add / Count / RemoveAt as List.','lstStudents.ItemsSource = rows;':'THE CONNECTION, made once. The ListBox now mirrors rows automatically.','rows.Add($"{student.Name} | {student.Id} | {student.Age}");':'Build one line of text from the object and add it to rows… and a row appears in the ListBox.','lblStatus.Text = "Student added.";':'The status no longer needs to repeat the data: the row shows it.'},
+state:ST13, win: preview({form:['name','id','age','btns','status'], list:3, status:'Student added.', count:'3 students', rows:['Amina | 1001 | 19','Omar | 1002 | 22','Sara | 1003 | 20'], hi:['lb']}), cap:'Rows appear as you add. Click one: it highlights (selection comes free with ListBox; tab 18 uses it).'});
+
+/* ===== TAB 14: SAFE INPUT ===== */
+const ST14 = {...ST13, add:ADD.v5};
+tab({short:'Safe input', eyebrow:'check 1', title:'14 · Read the boxes safely, refuse empty ones', lead:'A box the user never touched has <code>Text</code> equal to <b>null</b> (nothing at all). Two small symbols make reading it safe, and an <code>if</code> with <code>return</code> stops the handler when Name or ID is empty.',
+idea:['?.  ??  Trim  Length  ||  return','<code>Text?.Trim()</code>: trim only if not null. <code>?? ""</code>: if still null, use "". <code>Length == 0</code>: empty. <code>||</code>: or. <code>return;</code>: leave the handler now; nothing below runs.'],
+notes:{'string name = txtName.Text?.Trim() ?? "";':'Left to right: txtName.Text (maybe null) → ?.Trim() (remove spaces at both ends, but only if not null) → ?? "" (if the result is null, use "" instead). name is now always a real string.','string id = txtId.Text?.Trim() ?? "";':'Same for the ID.','if (name.Length == 0 || id.Length == 0)':'"If the name is empty OR the id is empty." Because we trimmed, "   " counts as empty too.','return;':'The emergency exit. No object, no Add, no row. Forget this line and the error shows… and the record is saved anyway.','Student student = new Student { Name = name, Id = id, Age = age };':'Build from the cleaned variables, not straight from the boxes.'},
+state:ST14, win: preview({form:['name','id','age','btns','status'], list:3, vals:['   ','','19'], status:'Enter a name and an ID.', count:'0 students', hi:['status']}), cap:'Three spaces as the name, empty ID, press Add: the message appears and the count stays at 0. (Red color comes in tab 17.)'});
+
+/* ===== TAB 15: AGE CHECK ===== */
+const ST15 = {...ST14, add:ADD.v6};
+tab({short:'Age check', eyebrow:'check 2', title:'15 · Refuse an age that is not a number, or negative', lead:'The plain TryParse line becomes a check. <code>!</code> means "not": if TryParse fails, or the number is negative, say so and stop.',
+idea:['!TryParse(...) || age < 0','TryParse returns true/false and fills <code>age</code> through <code>out</code>. The <code>!</code> flips the answer: "if it is NOT a number". <code>||</code> adds the second condition. Both failures get the same message.'],
+notes:{'if (!int.TryParse(txtAge.Text, out int age) || age < 0)':'Read: "if NOT (text is a whole number) OR age is negative". If TryParse fails, C# does not even look at age < 0. Note: age is declared right here, inside the condition, and is still usable below.','return;':'Same emergency exit as tab 14. Both checks must pass to reach the object.'},
+state:ST15, win: preview({form:['name','id','age','btns','status'], list:3, vals:['Amina','1001','-5'], status:'Enter a valid non-negative age.', count:'0 students', hi:['status']}), cap:'Age "abc" → message. Age "-5" → message. Age "19" → added.'});
+
+/* ===== TAB 16: CLEARFORM ===== */
+const ST16 = {...ST15, wire:['add','clear'], add:ADD.v7, clear:CLEAR.v1, clearForm:CLEARFORM};
+tab({short:'ClearForm', eyebrow:'your own method', title:'16 · ClearForm(): written once, called twice', lead:'After a good Add the boxes should empty; the Clear button should empty them too. Instead of writing four lines twice, write a method and call it from both handlers. The Clear button finally gets wired.',
+idea:['a method that is not a handler','<code>private void ClearForm()</code> takes nothing and returns nothing. Write it once; call it with <code>ClearForm();</code> from anywhere in the class. Add a fourth box one day: fix one method, not two handlers.'],
+notes:{'btnClear.Click += Clear_Click;':'The Clear button existed since tab 4. Now it does something.','ClearForm();':'Call your own method: one line instead of four.','private void Clear_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)':'Second handler, same shape as Add_Click.','private void ClearForm()':'No sender, no e: not a handler, a helper. void = gives nothing back.','txtName.Text = "";':'Setting Text to "" empties a box.','txtName.Focus();':'Cursor back into the first box, ready for the next student.'},
+state:ST16, win: preview({form:['name','id','age','btns','status'], list:3, status:'Student added.', count:'1 students', rows:['Amina | 1001 | 19'], hi:['name','id','age']}), cap:'Add a student: the row appears and the boxes empty themselves. Press Clear while typing: same thing.'});
+
+/* ===== TAB 17: SHOWSTATUS ===== */
+const ST17 = {...ST16, media:true, add:ADD.v8, clear:CLEAR.v2, showStatus:SHOWSTATUS};
+tab({short:'Colors', eyebrow:'green / red', title:'17 · ShowStatus: one helper picks the color', lead:'Five places set the status text. Route them all through one method that takes the message and a yes/no, and chooses green or red with a <b>ternary</b>.',
+idea:['parameters · the ? : operator','<code>ShowStatus(string message, bool success)</code> takes two values. <code>success ? Brushes.Green : Brushes.Red</code> reads "success? then Green, otherwise Red": an if/else in one expression.'],
+notes:{'using Avalonia.Media;':'Brushes live here.','ShowStatus("Enter a name and an ID.", false);':'This text, and false = it is a problem → red.','ShowStatus("Student added.", true);':'true = success → green.','ShowStatus("Form cleared.", true);':'Clearing is a success too.','private void ShowStatus(string message, bool success)':'Two parameters: a string and a bool. Not a handler.','lblStatus.Foreground = success ? Brushes.Green : Brushes.Red;':'The ternary. Written long: if (success) Foreground = Green; else Foreground = Red;'},
+state:ST17, win: preview({form:['name','id','age','btns','status'], list:3, status:'Enter a name and an ID.', cls:'err', count:'1 students', rows:['Amina | 1001 | 19'], hi:['status']}), cap:'Red for problems, green for success. Change the two colors once and every message follows.'});
+
+/* ===== TAB 18: DELETE ===== */
+const ST18 = {...ST17, wire:['add','clear','del'], del:DEL};
+tab({short:'Delete ✓', eyebrow:'last piece', title:'18 · Delete the selected row. The app is finished.', lead:'Wire the last button. The ListBox says which row is highlighted (-1 = none). Guard that, then remove from <b>both</b> lists with the same index; the ListBox updates itself.',
+idea:['SelectedIndex · RemoveAt','Rows are numbered from 0; <code>SelectedIndex</code> is -1 when nothing is selected, and <code>RemoveAt(-1)</code> would crash, so check first. Remove from <code>students</code> (data) and <code>rows</code> (display) with the same index to keep them in step.'],
+notes:{'btnDelete.Click += Delete_Click;':'The Delete button existed since tab 7. Now it does something.','int index = lstStudents.SelectedIndex;':'Which row is highlighted? 0 = first. -1 = nothing selected.','if (index < 0)':'Guard first. RemoveAt(-1) crashes.','students.RemoveAt(index);':'Remove the object from the data…','rows.RemoveAt(index);':'…and the text from the display, same index. Because of ItemsSource the row disappears by itself.','lblCount.Text = $"{students.Count} students";':'Count went down; say so.'},
+state:ST18, win: preview({form:['name','id','age','btns','status'], list:3, status:'Student deleted.', cls:'ok', count:'2 students', rows:['Amina | 1001 | 19','Sara | 1003 | 20'], hi:['lb','count']}), cap:'🎉 Milestone 1. The file on the left is the complete, final MainWindow.cs. Test: Delete with nothing selected → red. Select Omar, Delete → gone, "2 students".'});
+
+/* ===== TAB 19: FILES ===== */
+tab({short:'All files', html:`<div class="eyebrow">Tab 19 · the three files</div><h2>The finished app: three files</h2>
+<p class="lead">Program.cs (the engine, from Week 3, untouched), Student.cs (tab 10), MainWindow.cs (tabs 1–18). Hover any line in MainWindow.cs: the note says which tab added it.</p>
+<div class="step"><div>
+${codeWin('MainWindow.cs', compose(ST18), {
+'using System.Collections.Generic;':'Tab 12.','using System.Collections.ObjectModel;':'Tab 13.','using Avalonia.Media;':'Tab 17.','private readonly TextBox txtName':'Tab 2.','private readonly TextBox txtId':'Tab 3.','private readonly TextBox txtAge':'Tab 3.','private readonly ListBox lstStudents':'Tab 8.','private readonly TextBlock lblStatus':'Tab 5.','private readonly TextBlock lblCount':'Tab 7.','private readonly List<Student> students':'Tab 12.','private readonly ObservableCollection<string> rows':'Tab 13.','Title = "Student Management";':'Tab 1.','lstStudents.ItemsSource = rows;':'Tab 13.','var btnAdd':'Tab 4.','var btnDelete':'Tab 7.','btnAdd.Click':'Tab 9.','btnClear.Click':'Tab 16.','btnDelete.Click':'Tab 18.','var form = new StackPanel':'Tab 2.','form.Children.Add(new TextBlock { Text = "ID" });':'Tab 3.','form.Children.Add(btnAdd);':'Tab 4.','form.Children.Add(lblStatus);':'Tab 5.','var listPanel':'Tab 6.','heading.Children.Add(lblCount);':'Tab 7.','listPanel.Children.Add(lstStudents);':'Tab 8.','var grid = new Grid':'Tab 6.','Content = grid;':'Tab 6.','private void Add_Click':'Tab 9; body from tabs 11–17.','string name = txtName.Text?.Trim()':'Tab 14.','if (!int.TryParse':'Tab 15.','Student student = new Student {':'Tab 11.','students.Add(student);':'Tab 12.','rows.Add(':'Tab 13.','ClearForm();':'Tab 16.','ShowStatus("Student added."':'Tab 17.','private void Clear_Click':'Tab 16.','private void Delete_Click':'Tab 18.','private void ClearForm()':'Tab 16.','private void ShowStatus':'Tab 17.'}, 'complete · Milestone 1', {plain:true})}
+</div><div>${explainBox('Hover any line of MainWindow.cs.')}
+<div style="margin-bottom:12px">${codeWin('Student.cs', `namespace MyStudioApp;
+
+public class Student
+{
+    public string Name { get; set; } = "";
+    public string Id { get; set; } = "";
+    public int Age { get; set; }
+}`, {}, 'tab 10', {plain:true})}</div>
+<div class="card g"><h3>✅ Test it like a user</h3><ul class="objlist" style="font-size:14.5px">
+<li>Add with everything empty → red "Enter a name and an ID."</li>
+<li>Name + ID, age "abc" → red "Enter a valid non-negative age."</li>
+<li>Name + ID + 19 → green, a row, "1 students", form empties</li>
+<li>Add two more, select the middle one, Delete → gone, "2 students"</li>
+<li>Delete with nothing selected → red</li></ul></div>
+<div class="note" style="margin-bottom:0">Program.cs: the Week 3 engine. The only line that matters to you is <code>desktop.MainWindow = new MainWindow();</code>: it builds one MainWindow and shows it.</div>
+</div></div>`});
+
+/* ===== TAB 20: WRAP ===== */
+tab({short:'Cheat sheet', html:`<div class="eyebrow">Tab 20 · wrap-up</div><h2>Every new symbol from today, on one page</h2>
+<div class="cheat">
+${[['Field (tab 2)',`private readonly TextBox txtName = new() { Watermark = "Name" };\n// private: only this class · readonly: always this box\n// new(): short for new TextBox()`],
+['Shelf + Add (tab 2)',`var form = new StackPanel { Spacing = 10 };\nform.Children.Add(txtName);\nform.Children.Add(new TextBlock { Text = "Name" });`],
+['DockPanel (tabs 6, 8)',`var p = new DockPanel { LastChildFill = true };\nDockPanel.SetDock(heading, Dock.Top);\np.Children.Add(heading);\np.Children.Add(lstStudents); // fills the rest`],
+['Grid (tab 6)',`var g = new Grid { ColumnDefinitions = new ColumnDefinitions("1*,1*") };\nGrid.SetColumn(form, 0);  Grid.SetColumn(listPanel, 1);\ng.Children.Add(form);     g.Children.Add(listPanel);`],
+['Event (tab 9)',`btnAdd.Click += Add_Click;\nprivate void Add_Click(object? sender,\n    Avalonia.Interactivity.RoutedEventArgs e) { … }`],
+['Object + $ (tab 11)',`Student s = new Student { Name = name, Id = id, Age = age };\nlblStatus.Text = $"Added {s.Name} | {s.Id} | {s.Age}";`],
+['Two lists (tabs 12, 13)',`List<Student> students = new();              // data\nObservableCollection<string> rows = new();  // display\nlstStudents.ItemsSource = rows;             // connect once`],
+['Safe read + checks (tabs 14, 15)',`string name = txtName.Text?.Trim() ?? "";\nif (name.Length == 0 || id.Length == 0) { …; return; }\nif (!int.TryParse(txtAge.Text, out int age) || age < 0) { …; return; }`],
+['Helpers (tabs 16, 17, 18)',`void ClearForm() { txtName.Text = ""; … }\nvoid ShowStatus(string m, bool ok)\n{ lblStatus.Text = m; lblStatus.Foreground = ok ? Brushes.Green : Brushes.Red; }\nint i = lstStudents.SelectedIndex; // -1 = none`]].map(([t,c])=>`<div class="card"><h3 style="font-size:14.5px">${t}</h3><pre>${esc(c)}</pre></div>`).join('')}
+</div>
+<div class="grid2" style="margin-top:18px">
+<div class="card b"><h3>❌ The 5 errors you will meet</h3><ul class="objlist" style="font-size:14.5px">
+<li><b>List / ObservableCollection red</b> → missing <code>using System.Collections.Generic;</code> / <code>…ObjectModel;</code> (two different lines)</li>
+<li><b>"The name 'Student' does not exist"</b> → Student.cs missing, misspelled, or wrong namespace</li>
+<li><b>ListBox stays empty</b> → forgot <code>lstStudents.ItemsSource = rows;</code></li>
+<li><b>"Cannot convert int to string"</b> → <code>lblCount.Text = students.Count;</code> needs <code>$"{students.Count} students"</code></li>
+<li><b>Delete crashes</b> → remove from both lists with the same index, guard <code>index &lt; 0</code></li></ul></div>
+<div class="card g"><h3>✅ The habit</h3><p style="color:var(--ink2)">Change a little → <span class="kbd">Ctrl+S</span> → <span class="kbd">F5</span> → look. Every tab today was that rhythm. The red squiggle is always on the line you just typed.</p><p style="color:var(--ink2);margin:0">Next: open <b>MilestoneScript</b> and rebuild it from memory in 12 steps.</p></div>
+</div>`});
+
+/* ---------- render ---------- */
+const main = document.getElementById('main');
+main.innerHTML = T.map((t,i)=>`<section class="slide" data-i="${i}">${t.html || stepHtml(t,i)}</section>`).join('');
+document.getElementById('tabs').innerHTML = T.map((t,i)=>`<button class="tab" data-i="${i}"><i>${i}</i>${t.short}</button>`).join('');
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>go(+b.dataset.i));
+let cur = 0;
+function go(i){
+  cur = Math.max(0,Math.min(T.length-1,i));
+  document.querySelectorAll('.slide').forEach((s,j)=>s.classList.toggle('active',j===cur));
+  document.querySelectorAll('.tab').forEach((b,j)=>{ b.classList.toggle('active',j===cur); b.classList.toggle('done',j<cur); });
+  document.getElementById('progBar').style.width=((cur+1)/T.length*100)+'%';
+  document.getElementById('posTxt').textContent=`${cur+1} / ${T.length} · ${T[cur].short}`;
+  document.getElementById('backBtn').disabled=cur===0; document.getElementById('nextBtn').disabled=cur===T.length-1;
+  const act=document.querySelector('.tab.active'); if(act) act.scrollIntoView({inline:'center',block:'nearest'});
+  window.scrollTo({top:0});
+  const src=document.querySelector('.slide.active .src'); const first=src&&src.querySelector('.ln.new');
+  if (src) src.scrollTop = first ? Math.max(0, first.offsetTop - src.clientHeight/3) : 0;
+}
+document.getElementById('backBtn').onclick=()=>go(cur-1); document.getElementById('nextBtn').onclick=()=>go(cur+1);
+document.addEventListener('keydown',e=>{ if(['INPUT','TEXTAREA'].includes(document.activeElement.tagName))return; if(e.key==='ArrowRight')go(cur+1); if(e.key==='ArrowLeft')go(cur-1); });
+document.querySelectorAll('.codewin').forEach(w=>{
+  const slide = w.closest('.slide'); const box = slide.querySelector('.explain');
+  w.querySelector('.copy').onclick=()=>navigator.clipboard.writeText(w.dataset.code).then(()=>{const b=w.querySelector('.copy'); b.textContent='Copied ✓'; setTimeout(()=>b.textContent='Copy',1400);});
+  if (!box) return;
+  const q = box.querySelector('.q'), p = box.querySelector('p'), idle = p.textContent;
+  w.querySelectorAll('.ln.has').forEach(ln=>ln.onmouseenter=()=>{ q.textContent=ln.dataset.t; p.textContent=ln.dataset.x; });
+  w.querySelector('.src').onmouseleave=()=>{ q.textContent=''; p.textContent=idle; };
+});
+window.__final = compose(ST18);
+go(0);
+</script>
+</body>
+</html>
