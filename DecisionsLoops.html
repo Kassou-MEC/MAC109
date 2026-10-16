@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MAC109 · Decisions &amp; Loops in C#</title>
+<style>
+  :root{
+    --bg:#0f1117; --bg2:#161a24; --bg3:#1d2230; --line:#2a3042;
+    --text:#e6e9f0; --muted:#9aa3b5; --accent:#7c9cff; --accent2:#5ee0b0;
+    --warn:#ffb86b; --err:#ff6b8b; --kw:#c792ea; --str:#c3e88d; --num:#f78c6c;
+    --type:#82aaff; --cmt:#6b7a90; --shadow:0 10px 30px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:radial-gradient(1200px 600px at 10% -10%,#1b2140 0%,var(--bg) 60%);color:var(--text);font-family:"Segoe UI",system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;line-height:1.55}
+  a{color:var(--accent)}
+  header{padding:28px 32px 18px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,rgba(124,156,255,.08),transparent)}
+  header .course{font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent2);font-weight:700}
+  header h1{margin:6px 0 4px;font-size:30px;font-weight:800;letter-spacing:-.01em}
+  header p{margin:0;color:var(--muted);max-width:900px}
+  nav{position:sticky;top:0;z-index:20;display:flex;gap:6px;flex-wrap:wrap;padding:10px 32px;background:rgba(15,17,23,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  nav button{background:var(--bg3);border:1px solid var(--line);color:var(--text);padding:8px 14px;border-radius:999px;cursor:pointer;font-size:14px;font-weight:600;transition:.15s}
+  nav button:hover{border-color:var(--accent);color:var(--accent)}
+  nav button.active{background:var(--accent);color:#0f1117;border-color:var(--accent)}
+  nav .spacer{flex:1}
+  nav .prog{align-self:center;color:var(--muted);font-size:13px}
+
+  .layout{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:24px;padding:24px 32px;max-width:1500px;margin:0 auto}
+  @media(max-width:1050px){.layout{grid-template-columns:1fr}.explain{position:static!important;max-height:none!important}}
+
+  section.topic{display:none}
+  section.topic.active{display:block;animation:fade .25s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  h2{font-size:26px;margin:0 0 6px;font-weight:800}
+  h2 small{display:block;font-size:14px;color:var(--muted);font-weight:500;margin-top:4px}
+  h3{font-size:19px;margin:30px 0 8px;color:var(--accent2)}
+  .lead{color:var(--muted);margin:0 0 18px;font-size:16px}
+
+  .def{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:10px;padding:14px 18px;margin:14px 0}
+  .def b{color:var(--accent)}
+  .tip{background:rgba(94,224,176,.07);border:1px solid rgba(94,224,176,.3);border-radius:10px;padding:12px 16px;margin:14px 0;font-size:15px}
+  .tip::before{content:"💡 ";}
+  .warn{background:rgba(255,184,107,.08);border:1px solid rgba(255,184,107,.35);border-radius:10px;padding:12px 16px;margin:14px 0;font-size:15px}
+  .warn::before{content:"⚠️ ";}
+
+  .ex{background:var(--bg2);border:1px solid var(--line);border-radius:14px;margin:18px 0 26px;overflow:hidden;box-shadow:var(--shadow)}
+  .ex .head{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:var(--bg3)}
+  .ex .head .n{background:var(--accent);color:#0f1117;font-weight:800;border-radius:8px;padding:2px 9px;font-size:13px}
+  .ex .head h4{margin:0;font-size:16px;flex:1}
+  .ex .head .copy{background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:8px;padding:5px 10px;cursor:pointer;font-size:12px}
+  .ex .head .copy:hover{color:var(--accent2);border-color:var(--accent2)}
+  .ex .desc{padding:10px 16px 0;color:var(--muted);font-size:15px}
+  .ex .hint{padding:6px 16px 0;font-size:12px;color:var(--muted);font-style:italic}
+  .code{font-family:"Cascadia Code","Fira Code",Consolas,Menlo,monospace;font-size:14px;padding:10px 0 12px;overflow-x:auto;counter-reset:ln}
+  .cl{display:flex;padding:1px 16px;white-space:pre;cursor:pointer;border-left:3px solid transparent;transition:background .1s}
+  .cl .src{white-space:pre;flex:none}
+  .cl::before{counter-increment:ln;content:counter(ln);width:28px;color:#4b5568;text-align:right;margin-right:16px;flex:none;user-select:none}
+  .cl:hover,.cl.hot{background:rgba(124,156,255,.14);border-left-color:var(--accent)}
+  .cl.pinned{background:rgba(94,224,176,.14);border-left-color:var(--accent2)}
+  .cl.hl{background:rgba(255,184,107,.10)}
+  .kw{color:var(--kw)} .str{color:var(--str)} .num{color:var(--num)} .ty{color:var(--type)} .cmt{color:var(--cmt);font-style:italic}
+
+  .term{margin:0 16px 16px;background:#05070b;border:1px solid #223;border-radius:10px;font-family:Consolas,Menlo,monospace;font-size:13.5px}
+  .term .bar{display:flex;gap:6px;padding:8px 12px;border-bottom:1px solid #223;font-family:system-ui;font-size:12px;color:var(--muted)}
+  .term .bar i{width:10px;height:10px;border-radius:50%;display:inline-block}
+  .term pre{margin:0;padding:12px 14px;white-space:pre-wrap;color:#d7ffe6}
+  .term .in{color:var(--warn)}
+
+  /* explanation panel */
+  .explain{position:sticky;top:70px;align-self:start;max-height:calc(100vh - 90px);overflow:auto;background:var(--bg2);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow)}
+  .explain .ph{padding:12px 16px;border-bottom:1px solid var(--line);background:var(--bg3);font-weight:700;display:flex;align-items:center;gap:8px;font-size:14px}
+  .explain .ph .dot{width:9px;height:9px;border-radius:50%;background:var(--accent2);box-shadow:0 0 10px var(--accent2)}
+  .explain .body{padding:16px}
+  .explain .exname{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  .explain .lcode{font-family:Consolas,Menlo,monospace;font-size:13.5px;background:#05070b;border:1px solid #223;border-radius:8px;padding:8px 10px;margin:8px 0 12px;white-space:pre-wrap;word-break:break-all;color:#e6e9f0}
+  .explain .etext{font-size:15px}
+  .explain .etext code{background:var(--bg3);padding:1px 6px;border-radius:5px;font-family:Consolas,Menlo,monospace;font-size:13px;color:var(--accent2)}
+  .explain .etext b{color:var(--warn)}
+  .explain .idle{color:var(--muted);font-size:15px}
+  .explain .idle ul{padding-left:18px;margin:10px 0}
+  .explain .pinmsg{margin-top:12px;font-size:12px;color:var(--muted)}
+
+  /* interactive widgets */
+  .widget{background:var(--bg2);border:1px dashed var(--accent);border-radius:14px;padding:16px 18px;margin:18px 0}
+  .widget h4{margin:0 0 10px;font-size:16px}
+  .widget label{display:inline-flex;align-items:center;gap:6px;margin-right:16px;font-family:Consolas,monospace;font-size:14px;cursor:pointer}
+  .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  .btn{background:var(--accent);color:#0f1117;border:none;border-radius:8px;padding:8px 14px;font-weight:700;cursor:pointer}
+  .btn.sec{background:var(--bg3);color:var(--text);border:1px solid var(--line)}
+  .btn:hover{filter:brightness(1.1)}
+  .pill{display:inline-block;padding:4px 12px;border-radius:999px;font-family:Consolas,monospace;font-weight:700}
+  .pill.t{background:rgba(94,224,176,.2);color:var(--accent2)} .pill.f{background:rgba(255,107,139,.2);color:var(--err)}
+  table.tt{border-collapse:collapse;margin-top:10px;font-family:Consolas,monospace;font-size:14px}
+  table.tt td,table.tt th{border:1px solid var(--line);padding:6px 14px;text-align:center}
+  table.tt th{background:var(--bg3)}
+  .stepper .vars{display:flex;gap:14px;margin:10px 0;flex-wrap:wrap}
+  .stepper .v{background:var(--bg3);border:1px solid var(--line);border-radius:10px;padding:8px 14px;font-family:Consolas,monospace}
+  .stepper .v span{color:var(--accent2);font-weight:700}
+  .stepper .log{background:#05070b;border:1px solid #223;border-radius:8px;padding:10px;font-family:Consolas,monospace;font-size:13px;min-height:60px;max-height:160px;overflow:auto;white-space:pre-wrap;color:#d7ffe6}
+  .phase{font-size:14px;margin:6px 0;color:var(--muted)}
+  .phase b{color:var(--warn)}
+  input[type=number],input[type=text]{background:#05070b;border:1px solid var(--line);color:var(--text);padding:7px 10px;border-radius:8px;font-family:Consolas,monospace;width:90px}
+
+  /* quiz */
+  .q{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:14px 18px;margin:14px 0}
+  .q .qt{font-weight:700;margin-bottom:8px}
+  .q .qt code,.q .opt code{font-family:Consolas,monospace;background:var(--bg3);padding:1px 6px;border-radius:5px;color:var(--accent2)}
+  .q .opt{display:block;background:var(--bg3);border:1px solid var(--line);border-radius:8px;padding:8px 12px;margin:6px 0;cursor:pointer;text-align:left;color:var(--text);width:100%;font-size:14px}
+  .q .opt:hover{border-color:var(--accent)}
+  .q .opt.ok{border-color:var(--accent2);background:rgba(94,224,176,.12)}
+  .q .opt.no{border-color:var(--err);background:rgba(255,107,139,.12)}
+  .q .fb{margin-top:8px;font-size:14px;color:var(--muted);display:none}
+  .score{font-size:18px;font-weight:800;margin-top:14px}
+
+  .cmp{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:800px){.cmp{grid-template-columns:1fr}}
+  .cmp .card{background:var(--bg3);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+  .cmp .card h5{margin:0 0 6px;color:var(--accent)}
+  .cmp .card ul{margin:0;padding-left:18px;font-size:14px;color:var(--muted)}
+  .footer{text-align:center;color:var(--muted);font-size:13px;padding:30px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="course">MAC109 · Introduction to Visual C# Programming · LaGuardia Community College</div>
+  <h1>Decision Structures, Logic &amp; Loops</h1>
+  <p>How a program <b>chooses</b> what to do, and how it <b>repeats</b> work. Hover over any line of code and its full explanation appears in the panel on the right. Click a line to pin it.</p>
+</header>
+
+<nav id="nav"></nav>
+
+<div class="layout">
+  <main id="main"></main>
+
+  <aside class="explain" id="explain">
+    <div class="ph"><span class="dot"></span> Line Explainer</div>
+    <div class="body" id="ebody">
+      <div class="idle">
+        <b>Hover any line of C# code</b> to see what it does.<br><br>
+        <ul>
+          <li>🖱️ <b>Hover</b> a line → explanation appears here</li>
+          <li>📌 <b>Click</b> a line → pin it (click again to unpin)</li>
+          <li>📋 <b>Copy</b> button → full program ready for VS Code</li>
+        </ul>
+        Every example is a complete <code>Program.cs</code>: paste it, press Run, compare with the terminal output shown.
+      </div>
+    </div>
+  </aside>
+</div>
+
+<div class="footer">MAC109 — Decision Structures, Logic &amp; Loops · Prof. Khalid Kassou · MEC Department, LaGuardia CC (CUNY)</div>
+
+<script>
+/* =========================================================
+   LECTURE DATA
+   Each example = complete runnable Program.cs.
+   lines: [codeString, explanationHtml]
+   ========================================================= */
+const SECTIONS = [
+/* ------------------------------------------------------- */
+{ id:"intro", tab:"① Overview", title:"Why Decisions and Loops?",
+  sub:"Up to now every program ran top to bottom, once. Today programs start to think and repeat.",
+  html:`
+  <div class="def"><b>Control flow</b> is the order in which the statements of a program are executed. Without control flow, a program is just a straight list. With it, a program can <b>branch</b> (decide) and <b>loop</b> (repeat).</div>
+  <div class="cmp">
+    <div class="card"><h5>Decision structures (branching)</h5><ul><li><code>if</code>, <code>if-else</code>, <code>else if</code> ladder</li><li>nested <code>if</code></li><li><code>switch</code></li><li>ternary operator <code>? :</code></li></ul></div>
+    <div class="card"><h5>Loops (iteration)</h5><ul><li><code>while</code> — repeat while a condition is true</li><li><code>do-while</code> — run at least once</li><li><code>for</code> — counted loop</li><li><code>foreach</code> — walk through a collection</li><li><code>break</code> / <code>continue</code></li></ul></div>
+  </div>
+  <h3>The one idea behind everything today</h3>
+  <div class="def">Every decision and every loop is driven by a <b>condition</b>: an expression whose value is either <b>true</b> or <b>false</b> — the C# type <b>bool</b>.</div>
+  <div class="tip">Rule of thumb: a <b>decision</b> asks a question <i>once</i>. A <b>loop</b> asks the same question <i>again and again</i> until the answer is false.</div>
+  `,
+  examples:[
+  { title:"A bool is just a question with a yes/no answer", desc:"Before writing any if or loop, make sure you can read a condition and say whether it is true or false.",
+    lines:[
+["using System;","Imports the <code>System</code> namespace so we can use <code>Console</code> for output. Every console program starts with this line."],
+["","Blank lines are ignored by the compiler. They just make the code easier to read."],
+["class Program","Declares a class named <code>Program</code>. In C#, all code lives inside a class."],
+["{","Opening brace of the class body. Every <code>{</code> must have a matching <code>}</code>."],
+["    static void Main()","The <b>entry point</b>. When you press Run, execution begins at the first line inside <code>Main</code>."],
+["    {","Opening brace of the Main method body."],
+["        int age = 20;","Declares an integer variable <code>age</code> and stores 20 in it."],
+["        bool isAdult = age >= 18;","A <b>bool</b> variable. The expression <code>age >= 18</code> is evaluated: 20 ≥ 18 is <b>true</b>, so <code>isAdult</code> stores <code>True</code>. A condition is just a value!"],
+["        bool hasDiscount = age < 12;","<code>age < 12</code> → 20 &lt; 12 is <b>false</b>. So <code>hasDiscount</code> = <code>False</code>."],
+["","Spacing between declaration and output."],
+["        Console.WriteLine(\"Adult? \" + isAdult);","Prints the text and the bool. C# prints bools with a capital letter: <code>True</code> / <code>False</code>."],
+["        Console.WriteLine(\"Discount? \" + hasDiscount);","Prints <code>Discount? False</code>."],
+["    }","Closes Main. The program ends here."],
+["}","Closes the Program class."]],
+    out:"Adult? True\nDiscount? False" }
+  ]
+},
+/* ------------------------------------------------------- */
+{ id:"if", tab:"② if / else", title:"The if Statement Family",
+  sub:"if · if-else · else-if ladder · nested if · the ternary operator",
+  html:`
+  <div class="def"><b>if statement:</b> runs a block of code <i>only</i> when its condition is <b>true</b>. If the condition is false, the block is skipped entirely.</div>
+  <div class="def"><b>if-else:</b> runs one of <i>two</i> blocks — never both, never neither.</div>
+  <div class="def"><b>else-if ladder:</b> tests conditions from top to bottom and runs the <b>first</b> block whose condition is true. Order matters!</div>
+  `,
+  examples:[
+  { title:"Simple if — do something, or do nothing", desc:"The message inside the block only prints when the condition is true. The last line always prints.",
+    lines:[
+["using System;","Gives access to <code>Console</code>."],
+["","" ],
+["class Program","The container class for our program."],
+["{",""],
+["    static void Main()","Program starts here."],
+["    {",""],
+["        int temperature = 95;","A variable holding today's temperature (°F). Change it to 60 and run again — the warning disappears."],
+["","" ],
+["        if (temperature > 90)","The <b>if keyword</b>, then a condition inside <b>parentheses</b>. <code>95 > 90</code> is true, so the block below will run. Note: <b>no semicolon</b> after the parenthesis!"],
+["        {","Start of the if block. Everything between these braces belongs to the if."],
+["            Console.WriteLine(\"Heat warning! Stay hydrated.\");","Runs only when the condition is true. Indented to show it is inside the if."],
+["        }","End of the if block."],
+["","" ],
+["        Console.WriteLine(\"Have a nice day.\");","Outside the if, so it <b>always</b> runs regardless of temperature."],
+["    }",""],
+["}",""]],
+    out:"Heat warning! Stay hydrated.\nHave a nice day." },
+
+  { title:"if-else — exactly one of two paths", desc:"The % (modulo) operator gives the remainder of a division. A number is even when the remainder of dividing by 2 is 0.",
+    lines:[
+["using System;",""],["",""],["class Program",""],["{",""],
+["    static void Main()",""],["    {",""],
+["        Console.Write(\"Enter a whole number: \");","<code>Console.Write</code> (without Line) keeps the cursor on the same line so the user types right after the prompt."],
+["        int number = int.Parse(Console.ReadLine());","Reads the typed text and converts it to an <code>int</code>. (Week 2: casting and parsing.)"],
+["","" ],
+["        if (number % 2 == 0)","<code>%</code> is <b>remainder</b>. For 14: <code>14 % 2</code> = 0, and <code>0 == 0</code> is true. Note <b><code>==</code></b> (compare) is NOT <code>=</code> (assign)!"],
+["        {",""],
+["            Console.WriteLine(number + \" is even.\");","Runs when the remainder is 0."],
+["        }",""],
+["        else","<b>else</b> has no condition — it is the \"otherwise\" path, taken when the if condition was false."],
+["        {",""],
+["            Console.WriteLine(number + \" is odd.\");","Runs when the remainder is 1."],
+["        }",""],
+["    }",""],["}",""]],
+    out:"Enter a whole number: <span class='in'>14</span>\n14 is even." },
+
+  { title:"else-if ladder — many possibilities, one answer", desc:"The classic letter-grade program. Conditions are checked from the top; the first true one wins and the rest are skipped.",
+    lines:[
+["using System;",""],["",""],["class Program",""],["{",""],
+["    static void Main()",""],["    {",""],
+["        Console.Write(\"Enter your score (0-100): \");","Prompt the user."],
+["        int score = int.Parse(Console.ReadLine());","Store the score as an int."],
+["        string grade;","Declared but <b>not yet assigned</b>. C# requires that every path below assigns it before it is used."],
+["","" ],
+["        if (score >= 90)","First test. 87 ≥ 90 is false → skip to the next <code>else if</code>."],
+["        {",""],
+["            grade = \"A\";",""],
+["        }",""],
+["        else if (score >= 80)","Second test. Only reached because the first was false. 87 ≥ 80 is <b>true</b> → assign \"B\" and <b>skip everything else</b> in the ladder."],
+["        {",""],
+["            grade = \"B\";","This is the line that runs for 87."],
+["        }",""],
+["        else if (score >= 70)","Not even checked for 87, because an earlier branch already matched."],
+["        {",""],
+["            grade = \"C\";",""],
+["        }",""],
+["        else if (score >= 60)",""],
+["        {",""],
+["            grade = \"D\";",""],
+["        }",""],
+["        else","The final <code>else</code> catches everything below 60. It guarantees <code>grade</code> is always assigned."],
+["        {",""],
+["            grade = \"F\";",""],
+["        }",""],
+["","" ],
+["        Console.WriteLine(\"Your grade is \" + grade);","Prints the chosen letter."],
+["    }",""],["}",""]],
+    out:"Enter your score (0-100): <span class='in'>87</span>\nYour grade is B",
+    after:`<div class="warn"><b>Order matters.</b> If you wrote <code>if (score >= 60)</code> first, a score of 95 would get a "D" — because 95 ≥ 60 is true and the ladder stops at the first match. Always go from the most specific/highest condition to the most general.</div>` },
+
+  { title:"Nested if — a decision inside a decision", desc:"Sometimes the second question only makes sense if the first answer was yes.",
+    lines:[
+["using System;",""],["",""],["class Program",""],["{",""],
+["    static void Main()",""],["    {",""],
+["        string username = \"khalid\";","The expected username."],
+["        string password = \"mac109\";","The expected password (real apps never store passwords like this — it's just for the lesson)."],
+["","" ],
+["        Console.Write(\"Username: \");",""],
+["        string u = Console.ReadLine();","What the user typed as username."],
+["        Console.Write(\"Password: \");",""],
+["        string p = Console.ReadLine();","What the user typed as password."],
+["","" ],
+["        if (u == username)","<b>Outer if</b>: is the username right? Strings can be compared with <code>==</code> in C#."],
+["        {",""],
+["            if (p == password)","<b>Inner if</b>: only checked when the username was correct. Note the deeper indentation."],
+["            {",""],
+["                Console.WriteLine(\"Welcome, \" + u + \"!\");","Both checks passed."],
+["            }",""],
+["            else","Belongs to the <b>inner</b> if (same indentation level)."],
+["            {",""],
+["                Console.WriteLine(\"Wrong password.\");","Username OK, password wrong."],
+["            }",""],
+["        }",""],
+["        else","Belongs to the <b>outer</b> if."],
+["        {",""],
+["            Console.WriteLine(\"Unknown user.\");","Username wrong — we never even looked at the password."],
+["        }",""],
+["    }",""],["}",""]],
+    out:"Username: <span class='in'>khalid</span>\nPassword: <span class='in'>abc</span>\nWrong password.",
+    after:`<div class="tip">Each <code>else</code> pairs with the <b>nearest</b> unmatched <code>if</code>. Consistent indentation makes this obvious — VS Code does it for you (Shift+Alt+F to format).</div>` },
+
+  { title:"The ternary operator — a tiny if-else that returns a value", desc:"When all you want is to choose between two values, the ternary operator fits on one line.",
+    lines:[
+["using System;",""],["",""],["class Program",""],["{",""],
+["    static void Main()",""],["    {",""],
+["        int a = 42;",""],
+["        int b = 17;",""],
+["","" ],
+["        int max = (a > b) ? a : b;","Read it as: <b>is a &gt; b ?</b> then <b>a</b>, otherwise <b>b</b>. Three parts: <code>condition ? valueIfTrue : valueIfFalse</code>. 42 &gt; 17 is true → <code>max</code> = 42."],
+["        string parity = (a % 2 == 0) ? \"even\" : \"odd\";","Choosing between two strings. 42 % 2 == 0 → \"even\"."],
+["","" ],
+["        Console.WriteLine(\"Max = \" + max);",""],
+["        Console.WriteLine(a + \" is \" + parity);",""],
+["    }",""],["}",""]],
+    out:"Max = 42\n42 is even",
+    after:`<div class="tip">Use the ternary only for <i>simple</i> two-way choices of a value. If you need several statements in each branch, use a normal <code>if-else</code> — readability first.</div>` }
+  ]
+},
+/* ------------------------------------------------------- */
+{ id:"switch", tab:"③ switch", title:"The switch Statement",
+  sub:"Compare one value against many specific cases — cleaner than a long else-if ladder.",
+  html:`
+  <div class="def"><b>switch:</b> takes one expression and jumps to the <b>case</b> whose value matches. Each case ends with <b>break</b>. If nothing matches, the <b>default</b> case runs.</div>
+  <div class="cmp">
+    <div class="card"><h5>Use else-if when…</h5><ul><li>you test <b>ranges</b> (<code>score >= 90</code>)</li><li>each test is a different kind of question</li></ul></div>
+    <div class="card"><h5>Use switch when…</h5><ul><li>you compare <b>one</b> variable to <b>exact values</b></li><li>there are many cases (menus, days, codes)</li></ul></div>
+  </div>`,
+  examples:[
+  { title:"switch on an int — day of the week", desc:"One variable, seven exact values, one default.",
+    lines:[
+["using System;",""],["",""],["class Program",""],["{",""],
+["    static void Main()",""],["    {",""],
+["        Console.Write(\"Enter a day number (1-7): \");",""],
+["        int day = int.Parse(Console.ReadLine());","The value we will switch on."],
+["","" ],
+["        switch (day)","<b>switch keyword</b> + the expression in parentheses. C# will compare <code>day</code> against each <code>case</code> label below."],
+["        {","The switch body."],
+["            case 1:","A <b>case label</b>: \"if day equals 1, start here\". Note the <b>colon</b>, not a semicolon."],
+["                Console.WriteLine(\"Monday\");",""],
+["                break;","<b>break</b> exits the switch. In C# every non-empty case <b>must</b> end with <code>break</code> (or <code>return</code>) — the compiler will complain otherwise."],
+["            case 2:",""],
+["                Console.WriteLine(\"Tuesday\");",""],
+["                break;",""],
+["            case 3:",""],
+["                Console.WriteLine(\"Wednesday\");",""],
+["                break;",""],
+["            case 4:",""],
+["                Console.WriteLine(\"Thursday\");",""],
+["                break;",""],
+["            case 5:","day = 5 matches here."],
+["                Console.WriteLine(\"Friday\");","This runs."],
+["                break;","…and this jumps out of the switch."],
+["            case 6:",""],
+["                Console.WriteLine(\"Saturday\");",""],
+["                break;",""],
+["            case 7:",""],
+["                Console.WriteLine(\"Sunday\");",""],
+["                break;",""],
+["            default:","Runs when <b>no case matched</b> (e.g. 0 or 9). Always include a default — it's your safety net."],
+["                Console.WriteLine(\"Invalid day number.\");",""],
+["                break;","Even default needs a break."],
+["        }","End of switch."],
+["    }",""],["}",""]],
+    out:"Enter a day number (1-7): <span class='in'>5</span>\nFriday" },
+
+  { title:"Stacking cases + switch on a string", desc:"Several case labels can share one block. And switch works on strings, not just numbers.",
+    lines:[
+["using System;",""],["",""],["class Program",""],["{",""],
+["    static void Main()",""],["    {",""],
+["        Console.Write(\"Enter a command (start/stop/pause): \");",""],
+["        string cmd = Console.ReadLine().ToLower();","<code>.ToLower()</code> converts to lowercase so \"START\", \"Start\" and \"start\" all match the same case."],
+["","" ],
+["        switch (cmd)","Switching on a <b>string</b>. Cases must be string literals in quotes."],
+["        {",""],
+["            case \"start\":","Two labels stacked…"],
+["            case \"go\":","…share the same block: either word leads to the same code. This is the only allowed \"fall-through\" in C# — empty cases."],
+["                Console.WriteLine(\"Engine started.\");",""],
+["                break;",""],
+["            case \"stop\":",""],
+["                Console.WriteLine(\"Engine stopped.\");",""],
+["                break;",""],
+["            case \"pause\":",""],
+["                Console.WriteLine(\"Paused.\");",""],
+["                break;",""],
+["            default:",""],
+["                Console.WriteLine(\"Unknown command: \" + cmd);","Echo the bad input back to the user — a friendly error message."],
+["                break;",""],
+["        }",""],
+["    }",""],["}",""]],
+    out:"Enter a command (start/stop/pause): <span class='in'>Go</span>\nEngine started." },
+
+  { title:"Modern C#: the switch expression", desc:"Since C# 8, a switch can be written as an expression that produces a value. You'll see this style in real code; use whichever is clearer.",
+    lines:[
+["using System;",""],["",""],["class Program",""],["{",""],
+["    static void Main()",""],["    {",""],
+["        int month = 10;",""],
+["","" ],
+["        string season = month switch","<b>switch expression</b>: the value goes <i>before</i> the keyword, and the whole thing produces a result stored in <code>season</code>."],
+["        {",""],
+["            12 or 1 or 2 => \"Winter\",","<code>=></code> means \"gives\". <code>or</code> combines several values. No <code>case</code>, no <code>break</code>, comma-separated."],
+["            3 or 4 or 5 => \"Spring\",",""],
+["            6 or 7 or 8 => \"Summer\",",""],
+["            9 or 10 or 11 => \"Fall\",","10 matches here → \"Fall\"."],
+["            _ => \"Invalid month\"","The underscore <code>_</code> is the default (\"anything else\"). Must be last."],
+["        };","Note the <b>semicolon</b> — it's an assignment statement."],
+["","" ],
+["        Console.WriteLine(\"Month \" + month + \" is in \" + season);",""],
+["    }",""],["}",""]],
+    out:"Month 10 is in Fall" }
+  ]
+},
+/* ------------------------------------------------------- */
+{ id:"logic", tab:"④ Logic & Operators", title:"Building Conditions: Relational &amp; Logical Operators",
+  sub:"Comparing values, combining questions, and how C# takes shortcuts.",
+  html:`
+  <h3>Relational operators — compare two values, get a bool</h3>
+  <table class="tt"><tr><th>Operator</th><th>Meaning</th><th>Example</th><th>Result</th></tr>
+  <tr><td>==</td><td>equal to</td><td>5 == 5</td><td>True</td></tr>
+  <tr><td>!=</td><td>not equal</td><td>5 != 5</td><td>False</td></tr>
+  <tr><td>&gt;</td><td>greater than</td><td>7 &gt; 3</td><td>True</td></tr>
+  <tr><td>&lt;</td><td>less than</td><td>7 &lt; 3</td><td>False</td></tr>
+  <tr><td>&gt;=</td><td>greater or equal</td><td>3 &gt;= 3</td><td>True</td></tr>
+  <tr><td>&lt;=</td><td>less or equal</td><td>4 &lt;= 3</td><td>False</td></tr></table>
+  <div class="warn">The #1 beginner bug: <code>if (x = 5)</code> instead of <code>if (x == 5)</code>. In C# this is a compile error (good!) because <code>x = 5</code> is an int, not a bool.</div>
+  <h3>Logical operators — combine bools</h3>
+  <table class="tt"><tr><th>Operator</th><th>Name</th><th>True when…</th></tr>
+  <tr><td>&amp;&amp;</td><td>AND</td><td><b>both</b> sides are true</td></tr>
+  <tr><td>||</td><td>OR</td><td><b>at least one</b> side is true</td></tr>
+  <tr><td>!</td><td>NOT</td><td>flips true ↔ false</td></tr></table>
+  `,
+  widget:"truth",
+  examples:[
+  { title:"Relational operators in action", desc:"Each comparison is evaluated and printed as True or False.",
+    lines:[
+["using System;",""],["",""],["class Program",""],["{",""],
+["    static void Main()",""],["    {",""],
+["        int x = 10;",""],
+["        int y = 20;",""],
+["","" ],
+["        Console.WriteLine(\"x == y : \" + (x == y));","Parentheses around <code>(x == y)</code> are required: without them C# would first glue the string and <code>x</code> together and then fail to compare a string to an int."],
+["        Console.WriteLine(\"x != y : \" + (x != y));","10 ≠ 20 → True."],
+["        Console.WriteLine(\"x <  y : \" + (x < y));","True."],
+["        Console.WriteLine(\"x >  y : \" + (x > y));","False."],
+["        Console.WriteLine(\"x <= 10: \" + (x <= 10));","10 ≤ 10 → True (the \"or equal\" part saves it)."],
+["        Console.WriteLine(\"y >= 21: \" + (y >= 21));","20 ≥ 21 → False."],
+["    }",""],["}",""]],
+    out:"x == y : False\nx != y : True\nx <  y : True\nx >  y : False\nx <= 10: True\ny >= 21: False" },
+
+  { title:"&& and || — combining questions", desc:"A movie ticket discount: you qualify if you are a child OR a senior, AND it's a weekday.",
+    lines:[
+["using System;",""],["",""],["class Program",""],["{",""],
+["    static void Main()",""],["    {",""],
+["        Console.Write(\"Age: \");",""],
+["        int age = int.Parse(Console.ReadLine());",""],
+["        Console.Write(\"Is it a weekday? (yes/no): \");",""],
+["        bool weekday = Console.ReadLine() == \"yes\";","A neat trick: the comparison itself produces the bool. Typing \"yes\" → <code>true</code>."],
+["","" ],
+["        bool ageGroup = (age < 12) || (age >= 65);","<b>OR</b>: true if the person is under 12 <i>or</i> 65+. For 70: false || true → <b>true</b>."],
+["        bool eligible = ageGroup && weekday;","<b>AND</b>: both must hold. true && true → <b>true</b>."],
+["","" ],
+["        if (eligible)","A bool variable can be used directly as the condition — no need to write <code>eligible == true</code>."],
+["        {",""],
+["            Console.WriteLine(\"Discount ticket: $8\");",""],
+["        }",""],
+["        else",""],
+["        {",""],
+["            Console.WriteLine(\"Regular ticket: $15\");",""],
+["        }",""],
+["","" ],
+["        if (!weekday)","<b>NOT</b>: <code>!weekday</code> is true when weekday is false. Here weekday is true so this block is skipped."],
+["        {",""],
+["            Console.WriteLine(\"Weekend prices apply.\");",""],
+["        }",""],
+["    }",""],["}",""]],
+    out:"Age: <span class='in'>70</span>\nIs it a weekday? (yes/no): <span class='in'>yes</span>\nDiscount ticket: $8" },
+
+  { title:"Short-circuit evaluation — C# stops as soon as it knows", desc:"With &&, if the left side is false the right side is never evaluated. This lets us guard against errors like dividing by zero.",
+    lines:[
+["using System;",""],["",""],["class Program",""],["{",""],
+["    static void Main()",""],["    {",""],
+["        int total = 100;",""],
+["        int count = 0;","Zero items — dividing by this would crash."],
+["","" ],
+["        if (count != 0 && total / count > 10)","Left side <code>count != 0</code> is <b>false</b>. Because of <b>short-circuit</b>, C# never evaluates <code>total / count</code> — no crash! Swap the two sides and the program throws DivideByZeroException."],
+["        {",""],
+["            Console.WriteLine(\"Average is above 10.\");",""],
+["        }",""],
+["        else",""],
+["        {",""],
+["            Console.WriteLine(\"No items, or average too low.\");","This runs."],
+["        }",""],
+["","" ],
+["        bool loggedIn = true;",""],
+["        if (loggedIn || CheckServer())","With <b>||</b>, if the left side is <b>true</b> the result is already known, so <code>CheckServer()</code> is skipped — notice it never prints."],
+["        {",""],
+["            Console.WriteLine(\"Access granted.\");",""],
+["        }",""],
+["    }",""],
+["","" ],
+["    static bool CheckServer()","A second method in the same class. We'll study methods in depth later; for now it's just a function that returns a bool."],
+["    {",""],
+["        Console.WriteLine(\"(contacting server...)\");","This line would prove the method ran — but it never does."],
+["        return true;",""],
+["    }",""],["}",""]],
+    out:"No items, or average too low.\nAccess granted." }
+  ]
+},
+/* ------------------------------------------------------- */
+{ id:"while", tab:"⑤ while / do-while", title:"Loops Part 1: while and do-while",
+  sub:"Repeat while a condition stays true — when you don't know in advance how many times.",
+  html:`
+  <div class="def"><b>while loop:</b> checks the condition <b>first</b>. If true, runs the body, then checks again. Repeats until the condition is false. If it's false the very first time, the body never runs.</div>
+  <div class="def"><b>do-while loop:</b> runs the body <b>first</b>, then checks the condition. The body always executes <b>at least once</b>. Perfect for menus and input validation.</div>
+  <h3>The 3 ingredients of every loop</h3>
+  <div class="cmp">
+    <div class="card"><h5>1. Initialization</h5><ul><li>set up the variable the loop depends on</li><li><code>int count = 1;</code></li></ul></div>
+    <div class="card"><h5>2. Condition</h5><ul><li>checked before each repetition</li><li><code>count <= 5</code></li></ul></div>
+    <div class="card"><h5>3. Update</h5><ul><li>moves toward making the condition false</li><li><code>count++;</code></li></ul></div>
+  </div>
+  <div class="warn">Forget the <b>update</b> and you get an <b>infinite loop</b> — the program never stops. (Ctrl+C in the terminal to kill it.)</div>`,
+  examples:[
+  { title:"while — a countdown", desc:"Watch the three ingredients: initialize, test, update.",
+    lines:[
+["using System;",""],["",""],["class Program",""],["{",""],
+["    static void Main()",""],["    {",""],
+["        int count = 5;","<b>① Initialization</b>: the loop control variable starts at 5."],
+["","" ],
+["        while (count > 0)","<b>② Condition</b>: tested <i>before</i> every iteration. 5>0 ✓, 4>0 ✓, 3>0 ✓, 2>0 ✓, 1>0 ✓, 0>0 ✗ → stop."],
+["        {",""],
+["            Console.WriteLine(count);","Body: runs 5 times, printing 5,4,3,2,1."],
+["            count--;","<b>③ Update</b>: <code>count--</code> means <code>count = count - 1</code>. Without this line, count stays 5 forever → infinite loop."],
+["        }","Jump back up to the <code>while</code> and test again."],
+["","" ],
+["        Console.WriteLine(\"Liftoff!\");","Runs once, after the loop finishes."],
+["    }",""],["}",""]],
+    out:"5\n4\n3\n2\n1\nLiftoff!" },
+
+  { title:"while with a sentinel — keep asking until the user says stop", desc:"We don't know how many numbers the user will enter. A special value (-1, the sentinel) ends the loop.",
+    lines:[
+["using System;",""],["",""],["class Program",""],["{",""],
+["    static void Main()",""],["    {",""],
+["        int sum = 0;","An <b>accumulator</b>: starts at 0 and collects the running total."],
+["        int number = 0;","Must be initialized before the while can test it."],
+["","" ],
+["        Console.WriteLine(\"Enter numbers to add. Type -1 to finish.\");",""],
+["","" ],
+["        while (number != -1)","Keep looping as long as the user has not typed the sentinel -1."],
+["        {",""],
+["            Console.Write(\"> \");",""],
+["            number = int.Parse(Console.ReadLine());","Read the next number. This also updates the loop variable — it's the \"update\" step."],
+["","" ],
+["            if (number != -1)","A decision <i>inside</i> a loop. Don't add -1 itself to the sum."],
+["            {",""],
+["                sum = sum + number;","Accumulate. Could also be written <code>sum += number;</code>."],
+["            }",""],
+["        }",""],
+["","" ],
+["        Console.WriteLine(\"Total: \" + sum);",""],
+["    }",""],["}",""]],
+    out:"Enter numbers to add. Type -1 to finish.\n> <span class='in'>10</span>\n> <span class='in'>25</span>\n> <span class='in'>7</span>\n> <span class='in'>-1</span>\nTotal: 42" },
+
+  { title:"do-while — a menu that shows at least once", desc:"A menu must be displayed before we can know what the user chose, so do-while is the natural fit.",
+    lines:[
+["using System;",""],["",""],["class Program",""],["{",""],
+["    static void Main()",""],["    {",""],
+["        int choice;","Declared before the loop so the condition at the bottom can see it."],
+["","" ],
+["        do","<b>do</b> — start the body immediately, no condition check yet."],
+["        {",""],
+["            Console.WriteLine(\"1) New game\");",""],
+["            Console.WriteLine(\"2) Load game\");",""],
+["            Console.WriteLine(\"3) Quit\");",""],
+["            Console.Write(\"Choose: \");",""],
+["            choice = int.Parse(Console.ReadLine());","Assign the user's choice."],
+["","" ],
+["            switch (choice)","A switch inside a loop — very common in menu programs."],
+["            {",""],
+["                case 1:",""],
+["                    Console.WriteLine(\"Starting a new game...\");",""],
+["                    break;","Exits the <b>switch</b> only — not the loop!"],
+["                case 2:",""],
+["                    Console.WriteLine(\"Loading...\");",""],
+["                    break;",""],
+["                case 3:",""],
+["                    Console.WriteLine(\"Goodbye!\");",""],
+["                    break;",""],
+["                default:",""],
+["                    Console.WriteLine(\"Invalid choice, try again.\");",""],
+["                    break;",""],
+["            }",""],
+["        }",""],
+["        while (choice != 3);","<b>Condition at the end</b>, followed by a <b>semicolon</b>. Loop again unless the user picked 3."],
+["    }",""],["}",""]],
+    out:"1) New game\n2) Load game\n3) Quit\nChoose: <span class='in'>9</span>\nInvalid choice, try again.\n1) New game\n2) Load game\n3) Quit\nChoose: <span class='in'>3</span>\nGoodbye!" }
+  ]
+},
+/* ------------------------------------------------------- */
+{ id:"for", tab:"⑥ for / foreach", title:"Loops Part 2: for and foreach",
+  sub:"When you know how many times — or you have a collection to walk through.",
+  html:`
+  <div class="def"><b>for loop:</b> packs all three ingredients into one line: <code>for (initialization; condition; update)</code>. Best when the number of repetitions is known.</div>
+  <div class="def"><b>foreach loop:</b> visits every element of an array or collection, one by one, with no counter to manage.</div>`,
+  widget:"stepper",
+  examples:[
+  { title:"for — print 1 to 10", desc:"The header does the setup, the test, and the update. The body just does the work.",
+    lines:[
+["using System;",""],["",""],["class Program",""],["{",""],
+["    static void Main()",""],["    {",""],
+["        for (int i = 1; i <= 10; i++)","Three parts separated by semicolons: <b>① <code>int i = 1</code></b> runs once at the start. <b>② <code>i <= 10</code></b> is tested before each iteration. <b>③ <code>i++</code></b> runs <i>after</i> each iteration. Order per loop: test → body → update → test…"],
+["        {",""],
+["            Console.Write(i + \" \");","Prints the current value of <code>i</code> followed by a space, all on one line."],
+["        }","After the body, <code>i++</code> fires, then the condition is tested again."],
+["","" ],
+["        Console.WriteLine();","Empty WriteLine = just move to a new line."],
+["        Console.WriteLine(\"Done. i is no longer accessible here.\");","<code>i</code> was declared inside the for header, so it only exists inside the loop (its <b>scope</b>)."],
+["    }",""],["}",""]],
+    out:"1 2 3 4 5 6 7 8 9 10 \nDone. i is no longer accessible here." },
+
+  { title:"for with an accumulator — sum 1..N", desc:"The same accumulator pattern as before, now with a counted loop.",
+    lines:[
+["using System;",""],["",""],["class Program",""],["{",""],
+["    static void Main()",""],["    {",""],
+["        Console.Write(\"Sum up to which number? \");",""],
+["        int n = int.Parse(Console.ReadLine());",""],
+["        int sum = 0;","Accumulator starts at 0."],
+["","" ],
+["        for (int i = 1; i <= n; i++)","Runs exactly <code>n</code> times. For n = 5: i = 1, 2, 3, 4, 5."],
+["        {",""],
+["            sum += i;","<code>sum += i</code> is shorthand for <code>sum = sum + i</code>. Trace: 0+1=1, 1+2=3, 3+3=6, 6+4=10, 10+5=15."],
+["        }",""],
+["","" ],
+["        Console.WriteLine(\"1 + 2 + ... + \" + n + \" = \" + sum);",""],
+["    }",""],["}",""]],
+    out:"Sum up to which number? <span class='in'>5</span>\n1 + 2 + ... + 5 = 15" },
+
+  { title:"Counting backwards and stepping by 2", desc:"The update part can be anything: subtract, add 2, multiply…",
+    lines:[
+["using System;",""],["",""],["class Program",""],["{",""],
+["    static void Main()",""],["    {",""],
+["        Console.WriteLine(\"Even numbers from 10 down to 0:\");",""],
+["        for (int i = 10; i >= 0; i -= 2)","Start at 10, continue while i ≥ 0, and <code>i -= 2</code> subtracts 2 each time: 10, 8, 6, 4, 2, 0."],
+["        {",""],
+["            Console.Write(i + \" \");",""],
+["        }",""],
+["        Console.WriteLine();",""],
+["","" ],
+["        Console.WriteLine(\"Powers of 2 below 100:\");",""],
+["        for (int p = 1; p < 100; p *= 2)","<code>p *= 2</code> doubles each time: 1, 2, 4, 8, 16, 32, 64 — 128 fails the test <code>p &lt; 100</code>."],
+["        {",""],
+["            Console.Write(p + \" \");",""],
+["        }",""],
+["        Console.WriteLine();",""],
+["    }",""],["}",""]],
+    out:"Even numbers from 10 down to 0:\n10 8 6 4 2 0 \nPowers of 2 below 100:\n1 2 4 8 16 32 64 " },
+
+  { title:"foreach — walk through an array", desc:"An array holds several values of the same type. foreach gives you each one in turn.",
+    lines:[
+["using System;",""],["",""],["class Program",""],["{",""],
+["    static void Main()",""],["    {",""],
+["        string[] courses = { \"MAC109\", \"MAT115\", \"ENG101\", \"MAC286\" };","An <b>array</b> of 4 strings. <code>string[]</code> means \"array of string\". (Full array lesson coming soon.)"],
+["","" ],
+["        Console.WriteLine(\"Using foreach:\");",""],
+["        foreach (string course in courses)","Read as: <b>for each</b> <code>course</code> <b>in</b> <code>courses</code>. On every pass, <code>course</code> holds the next element. No index, no counter, no off-by-one errors."],
+["        {",""],
+["            Console.WriteLine(\" - \" + course);",""],
+["        }",""],
+["","" ],
+["        Console.WriteLine(\"Using for (when you need the index):\");",""],
+["        for (int i = 0; i < courses.Length; i++)","Arrays start at <b>index 0</b>, so the last index is <code>Length - 1</code>. That's why the test is <code>&lt;</code> not <code>&lt;=</code>."],
+["        {",""],
+["            Console.WriteLine((i + 1) + \". \" + courses[i]);","<code>courses[i]</code> accesses the element at position i. We print i+1 so humans see 1..4."],
+["        }",""],
+["    }",""],["}",""]],
+    out:"Using foreach:\n - MAC109\n - MAT115\n - ENG101\n - MAC286\nUsing for (when you need the index):\n1. MAC109\n2. MAT115\n3. ENG101\n4. MAC286" }
+  ]
+},
+/* ------------------------------------------------------- */
+{ id:"control", tab:"⑦ break / continue / nested", title:"Loop Control &amp; Nested Loops",
+  sub:"Leaving early, skipping an iteration, loops inside loops — and the classic mistakes.",
+  html:`
+  <div class="def"><b>break:</b> immediately exits the <b>innermost</b> loop (or switch). Execution continues after the loop.</div>
+  <div class="def"><b>continue:</b> skips the rest of the current iteration and jumps straight to the next test/update.</div>
+  <div class="def"><b>Nested loops:</b> a loop inside a loop. The inner loop runs completely for <i>each</i> iteration of the outer loop. 3 outer × 4 inner = 12 body executions.</div>`,
+  examples:[
+  { title:"break — stop searching once found", desc:"No point continuing a search after you've found what you want.",
+    lines:[
+["using System;",""],["",""],["class Program",""],["{",""],
+["    static void Main()",""],["    {",""],
+["        int[] ids = { 1042, 2077, 3310, 4099, 5120 };","An array of student IDs."],
+["        int target = 3310;","The ID we are looking for."],
+["        int position = -1;","-1 means \"not found yet\". A valid index is never negative, so -1 is a safe \"no result\" value."],
+["","" ],
+["        for (int i = 0; i < ids.Length; i++)",""],
+["        {",""],
+["            Console.WriteLine(\"Checking index \" + i);","Shows how far the loop got — notice it stops at index 2."],
+["            if (ids[i] == target)",""],
+["            {",""],
+["                position = i;","Remember where we found it."],
+["                break;","<b>break</b>: leave the for loop right now. Indices 3 and 4 are never checked."],
+["            }",""],
+["        }","Execution lands here after break."],
+["","" ],
+["        if (position == -1)",""],
+["        {",""],
+["            Console.WriteLine(\"Not found.\");",""],
+["        }",""],
+["        else",""],
+["        {",""],
+["            Console.WriteLine(\"Found \" + target + \" at index \" + position);",""],
+["        }",""],
+["    }",""],["}",""]],
+    out:"Checking index 0\nChecking index 1\nChecking index 2\nFound 3310 at index 2" },
+
+  { title:"continue — skip, don't stop", desc:"Print 1 to 10 but skip the multiples of 3.",
+    lines:[
+["using System;",""],["",""],["class Program",""],["{",""],
+["    static void Main()",""],["    {",""],
+["        for (int i = 1; i <= 10; i++)",""],
+["        {",""],
+["            if (i % 3 == 0)","Is i a multiple of 3? True for 3, 6, 9."],
+["            {",""],
+["                continue;","<b>continue</b>: abandon the rest of this iteration. Jump to <code>i++</code> and re-test. The WriteLine below is skipped for 3, 6, 9 — but the loop keeps going."],
+["            }",""],
+["            Console.Write(i + \" \");","Only reached when i is not a multiple of 3."],
+["        }",""],
+["        Console.WriteLine();",""],
+["    }",""],["}",""]],
+    out:"1 2 4 5 7 8 10 " },
+
+  { title:"Nested loops — a multiplication table", desc:"The outer loop picks the row; the inner loop prints every column of that row.",
+    lines:[
+["using System;",""],["",""],["class Program",""],["{",""],
+["    static void Main()",""],["    {",""],
+["        for (int row = 1; row <= 4; row++)","<b>Outer loop</b>: row = 1, 2, 3, 4. Each time, the whole inner loop runs from start to finish."],
+["        {",""],
+["            for (int col = 1; col <= 4; col++)","<b>Inner loop</b>: for the current row, col goes 1..4. Total body executions = 4 × 4 = 16."],
+["            {",""],
+["                Console.Write((row * col).ToString().PadLeft(4));","<code>.PadLeft(4)</code> right-aligns each number in 4 characters so the columns line up."],
+["            }","Inner loop finishes → back to the outer loop."],
+["            Console.WriteLine();","New line after each row. Inside the outer loop, outside the inner one — indentation tells you which."],
+["        }",""],
+["    }",""],["}",""]],
+    out:"   1   2   3   4\n   2   4   6   8\n   3   6   9  12\n   4   8  12  16" },
+
+  { title:"The two classic loop bugs (don't run the first one!)", desc:"Off-by-one and the infinite loop. Learn to spot them before the compiler… because the compiler won't.",
+    lines:[
+["using System;",""],["",""],["class Program",""],["{",""],
+["    static void Main()",""],["    {",""],
+["        // BUG 1: infinite loop (update is missing)","A <b>comment</b>. The code below is commented out on purpose so the program still runs."],
+["        // int n = 0;",""],
+["        // while (n < 3)","n is 0 and never changes → <code>n &lt; 3</code> is true forever → this loop <b>never ends</b>."],
+["        // {",""],
+["        //     Console.WriteLine(\"Hello\");","Would print Hello forever. Fix: add <code>n++;</code> inside the braces."],
+["        // }",""],
+["","" ],
+["        // BUG 2: off-by-one","\"Off-by-one\": the loop runs one time too many or too few."],
+["        int[] scores = { 90, 80, 70 };","3 elements → valid indices are 0, 1, 2."],
+["        for (int i = 0; i <= scores.Length; i++)","<b><code>&lt;=</code> is the bug.</b> Length is 3, so i will reach 3 — and <code>scores[3]</code> doesn't exist → <b>IndexOutOfRangeException</b> crash. Correct: <code>i &lt; scores.Length</code>."],
+["        {",""],
+["            Console.WriteLine(scores[i]);","Prints 90, 80, 70… then crashes on the 4th attempt."],
+["        }",""],
+["    }",""],["}",""]],
+    out:"90\n80\n70\nUnhandled exception. System.IndexOutOfRangeException: Index was outside the bounds of the array.",
+    after:`<div class="tip">Checklist before you run a loop: <b>Does the variable start where I think? Does the update move toward the exit? Is my comparison <code>&lt;</code> or <code>&lt;=</code> — and which one do I actually want?</b></div>` }
+  ]
+},
+/* ------------------------------------------------------- */
+{ id:"quiz", tab:"⑧ Check Yourself", title:"Check Yourself",
+  sub:"Instant feedback. Nothing is recorded — this is for you.",
+  html:`<div id="quizbox"></div>`,
+  examples:[]
+}
+];
+
+/* =========================================================
+   QUIZ DATA
+   ========================================================= */
+const QUIZ = [
+ { q:"What does <code>if (x % 2 == 0)</code> test?", a:["x is positive","x is even","x equals 2","x is a decimal"], c:1, fb:"<code>%</code> gives the remainder; remainder 0 when dividing by 2 means even." },
+ { q:"In an else-if ladder, how many branches can run?", a:["All whose conditions are true","Exactly one — the first true (or else)","None","Always two"], c:1, fb:"The ladder stops at the first match. That's why order matters." },
+ { q:"Which loop guarantees its body runs at least once?", a:["while","for","do-while","foreach"], c:2, fb:"do-while checks the condition <i>after</i> the body." },
+ { q:"<code>for (int i = 0; i &lt; 5; i++)</code> — how many times does the body run?", a:["4","5","6","Infinite"], c:1, fb:"i = 0,1,2,3,4 → five times. i=5 fails the test." },
+ { q:"What is true about <code>false &amp;&amp; CheckServer()</code>?", a:["CheckServer() runs, result false","CheckServer() never runs, result false","It's a compile error","Result is true"], c:1, fb:"Short-circuit: the left side is false so the AND is already decided." },
+ { q:"Inside a loop, <code>continue</code> will…", a:["Exit the loop","Restart the program","Skip to the next iteration","Pause the loop"], c:2, fb:"continue abandons the current iteration only; break leaves the loop." },
+ { q:"Which is the off-by-one bug for an array of Length 4?", a:["for (int i = 0; i &lt; 4; i++)","for (int i = 0; i &lt;= 4; i++)","foreach (var x in arr)","for (int i = 3; i &gt;= 0; i--)"], c:1, fb:"<code>&lt;=</code> makes i reach 4, but the last valid index is 3." },
+ { q:"In a <code>switch</code>, what happens if no case matches and there is no default?", a:["Compile error","The first case runs","Nothing runs; execution continues after the switch","The program crashes"], c:2, fb:"A missing default simply means nothing happens for unmatched values." }
+];
+
+/* =========================================================
+   RENDERING
+   ========================================================= */
+const KW = /\b(using|class|static|void|int|string|bool|double|char|if|else|switch|case|default|break|continue|while|do|for|foreach|in|return|var|true|false|new|or)\b/g;
+function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function hl(line){
+  const s = esc(line);
+  const re = /(\/\/.*$)|(&quot;(?:[^&]|&(?!quot;))*&quot;|"(?:[^"\\]|\\.)*")|(\b\d+(?:\.\d+)?\b)|(\b[A-Z][A-Za-z0-9]*\b)|(\b(?:using|class|static|void|int|string|bool|double|char|if|else|switch|case|default|break|continue|while|do|for|foreach|in|return|var|true|false|new|or)\b)/g;
+  return s.replace(re,(m,c,str,num,ty,kw)=>{
+    if(c) return `<span class="cmt">${c}</span>`;
+    if(str) return `<span class="str">${str}</span>`;
+    if(num) return `<span class="num">${num}</span>`;
+    if(ty) return `<span class="ty">${ty}</span>`;
+    if(kw) return `<span class="kw">${kw}</span>`;
+    return m;
+  });
+}
+
+const nav = document.getElementById("nav");
+const main = document.getElementById("main");
+let exCounter = 0;
+
+SECTIONS.forEach((sec,si)=>{
+  const b = document.createElement("button");
+  b.textContent = sec.tab; b.dataset.id = sec.id;
+  b.onclick = ()=>show(sec.id);
+  nav.appendChild(b);
+
+  const s = document.createElement("section");
+  s.className = "topic"; s.id = "sec-"+sec.id;
+  let h = `<h2>${sec.title}<small>${sec.sub}</small></h2>${sec.html||""}`;
+  if(sec.widget==="truth") h += truthWidget();
+  if(sec.widget==="stepper") h += stepperWidget();
+  sec.examples.forEach(ex=>{
+    exCounter++;
+    const code = ex.lines.map(l=>l[0]).join("\n");
+    h += `<div class="ex" data-ex="${exCounter}">
+      <div class="head"><span class="n">Example ${exCounter}</span><h4>${ex.title}</h4><button class="copy" data-code="${esc(code).replace(/"/g,"&quot;")}">📋 Copy Program.cs</button></div>
+      <div class="desc">${ex.desc}</div>
+      <div class="hint">Hover a line → explanation on the right. Click to pin.</div>
+      <div class="code">${ex.lines.map((l,i)=>`<div class="cl" data-ex="${exCounter}" data-i="${i}"><span class="src">${hl(l[0])||" "}</span></div>`).join("")}</div>
+      <div class="term"><div class="bar"><i style="background:#ff5f56"></i><i style="background:#ffbd2e"></i><i style="background:#27c93f"></i>&nbsp; Terminal output</div><pre>${ex.out}</pre></div>
+      ${ex.after||""}
+    </div>`;
+  });
+  s.innerHTML = h;
+  main.appendChild(s);
+});
+const sp = document.createElement("span"); sp.className="spacer"; nav.appendChild(sp);
+const prog = document.createElement("span"); prog.className="prog"; prog.id="prog"; nav.appendChild(prog);
+
+/* index examples for lookup */
+const EX = {}; let k=0;
+SECTIONS.forEach(sec=>sec.examples.forEach(ex=>{k++;EX[k]=ex;}));
+
+function show(id){
+  document.querySelectorAll("section.topic").forEach(s=>s.classList.toggle("active",s.id==="sec-"+id));
+  document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b.dataset.id===id));
+  const idx = SECTIONS.findIndex(s=>s.id===id);
+  document.getElementById("prog").textContent = `Part ${idx+1} of ${SECTIONS.length}`;
+  window.scrollTo({top:0});
+  localStorage.setItem("mac109w5tab",id);
+  if(id==="quiz") buildQuiz();
+}
+
+/* ---------- explainer panel ---------- */
+const ebody = document.getElementById("ebody");
+const idleHTML = ebody.innerHTML;
+let pinned = null;
+function explain(exId,i){
+  const ex = EX[exId]; const line = ex.lines[i];
+  let text = line[1];
+  if(!text){
+    const t = line[0].trim();
+    if(t==="") text = "A blank line — ignored by the compiler, used only for readability.";
+    else if(t==="{") text = "Opening brace: starts a block of code. Everything until the matching <code>}</code> belongs together.";
+    else if(t==="}") text = "Closing brace: ends the block that was opened by the matching <code>{</code>.";
+    else if(t==="};") text = "Closes the block and ends the statement with a semicolon.";
+    else if(t.startsWith("using")) text = "Imports the <code>System</code> namespace so <code>Console</code> is available.";
+    else if(t.startsWith("class")) text = "Declares the <code>Program</code> class that holds our code.";
+    else if(t.startsWith("static void Main")) text = "The entry point: execution starts on the first line inside <code>Main</code>.";
+    else if(t.startsWith("Console.Write(")) text = "Prints a prompt and keeps the cursor on the same line so the user types next to it.";
+    else if(t.startsWith("Console.WriteLine")) text = "Prints the text to the terminal and moves to a new line.";
+    else if(t==="break;") text = "<code>break</code> leaves the enclosing <code>switch</code> (or loop) immediately.";
+    else if(t.startsWith("case ")) text = "A <code>case</code> label: the code below runs when the switched value equals this one.";
+    else if(t.startsWith("else")) text = "The <code>else</code> path: taken when the preceding <code>if</code> condition was false.";
+    else if(t.startsWith("grade =")) text = "Assigns the letter for this branch. Only one of these assignments ever runs.";
+    else text = "Part of the program structure — see the lines around it.";
+  }
+  ebody.innerHTML = `<div class="exname">Example ${exId} · line ${i+1}</div>
+    <div class="lcode">${hl(line[0].trim())||"(blank)"}</div>
+    <div class="etext">${text}</div>
+    <div class="pinmsg">${pinned?"📌 Pinned — click the line again to unpin.":"Click the line to pin this explanation."}</div>`;
+}
+main.addEventListener("mouseover",e=>{
+  const cl = e.target.closest(".cl"); if(!cl||pinned) return;
+  explain(cl.dataset.ex, +cl.dataset.i);
+});
+main.addEventListener("mouseleave",()=>{ if(!pinned) ebody.innerHTML = idleHTML; });
+main.addEventListener("click",e=>{
+  const cp = e.target.closest(".copy");
+  if(cp){ const exId=cp.closest(".ex").dataset.ex; const code=EX[exId].lines.map(l=>l[0]).join("\n");
+    navigator.clipboard.writeText(code).then(()=>{cp.textContent="✅ Copied!";setTimeout(()=>cp.textContent="📋 Copy Program.cs",1500);}); return; }
+  const cl = e.target.closest(".cl"); if(!cl) return;
+  if(pinned===cl){ pinned.classList.remove("pinned"); pinned=null; explain(cl.dataset.ex,+cl.dataset.i); return; }
+  if(pinned) pinned.classList.remove("pinned");
+  pinned = cl; cl.classList.add("pinned");
+  explain(cl.dataset.ex,+cl.dataset.i);
+});
+
+/* ---------- Truth table widget ---------- */
+function truthWidget(){
+  return `<div class="widget" id="truth"><h4>🧪 Try it: logical operators</h4>
+  <div class="row"><label><input type="checkbox" id="pA"> A</label><label><input type="checkbox" id="pB"> B</label></div>
+  <table class="tt"><tr><th>A</th><th>B</th><th>A &amp;&amp; B</th><th>A || B</th><th>!A</th><th>!(A &amp;&amp; B)</th></tr>
+  <tr id="ttrow"><td></td><td></td><td></td><td></td><td></td><td></td></tr></table>
+  <div class="phase" id="ttphrase"></div></div>`;
+}
+function updTruth(){
+  const A = document.getElementById("pA").checked, B = document.getElementById("pB").checked;
+  const vals=[A,B,A&&B,A||B,!A,!(A&&B)];
+  const row=document.getElementById("ttrow");
+  [...row.children].forEach((td,i)=>td.innerHTML=`<span class="pill ${vals[i]?'t':'f'}">${vals[i]?'True':'False'}</span>`);
+  document.getElementById("ttphrase").innerHTML=`In C#: <b>bool a = ${A}; bool b = ${B};</b> → <code>a &amp;&amp; b</code> is ${A&&B}, <code>a || b</code> is ${A||B}.`;
+}
+document.addEventListener("change",e=>{ if(e.target.id==="pA"||e.target.id==="pB") updTruth(); });
+
+/* ---------- For-loop stepper widget ---------- */
+function stepperWidget(){
+  return `<div class="widget stepper" id="stepper"><h4>🎬 Step through a for loop</h4>
+  <div class="row"><code style="font-family:Consolas,monospace">for (int i = <input type="number" id="s0" value="1">; i &lt;= <input type="number" id="s1" value="5">; i += <input type="number" id="s2" value="1">) { sum += i; }</code></div>
+  <div class="vars"><div class="v">i = <span id="vi">?</span></div><div class="v">sum = <span id="vs">0</span></div><div class="v">iterations = <span id="vn">0</span></div></div>
+  <div class="phase" id="sphase">Press <b>Reset</b> then <b>Step</b> to watch test → body → update.</div>
+  <div class="row"><button class="btn" id="sStep">Step ▶</button><button class="btn sec" id="sRun">Run all ⏩</button><button class="btn sec" id="sReset">Reset ↺</button></div>
+  <div class="log" id="slog"></div></div>`;
+}
+let st=null;
+function sReset(){
+  st={i:+document.getElementById("s0").value,end:+document.getElementById("s1").value,step:+document.getElementById("s2").value,sum:0,n:0,phase:"test",done:false,log:""};
+  st.log=`init:  i = ${st.i}\n`; sDraw("Initialization done. Next: <b>test</b> the condition.");
+}
+function sDraw(msg){
+  document.getElementById("vi").textContent=st.i; document.getElementById("vs").textContent=st.sum; document.getElementById("vn").textContent=st.n;
+  document.getElementById("sphase").innerHTML=msg; const lg=document.getElementById("slog"); lg.textContent=st.log; lg.scrollTop=lg.scrollHeight;
+}
+function sStep(){
+  if(!st) sReset();
+  if(st.done) return;
+  if(st.n>200){ st.done=true; sDraw("Stopped after 200 iterations — looks like an <b>infinite loop</b>! (step ≤ 0?)"); return; }
+  if(st.phase==="test"){
+    const ok = st.i<=st.end; st.log+=`test:  ${st.i} <= ${st.end} → ${ok}\n`;
+    if(ok){ st.phase="body"; sDraw(`<b>Test</b>: ${st.i} ≤ ${st.end} is true → run the body.`); }
+    else { st.done=true; st.log+="exit:  loop finished\n"; sDraw(`<b>Test</b>: ${st.i} ≤ ${st.end} is false → <b>loop ends</b>. Final sum = ${st.sum} after ${st.n} iterations.`); }
+  } else if(st.phase==="body"){
+    st.sum+=st.i; st.n++; st.log+=`body:  sum += ${st.i} → sum = ${st.sum}\n`; st.phase="update"; sDraw(`<b>Body</b>: sum becomes ${st.sum}. Next: <b>update</b>.`);
+  } else {
+    st.i+=st.step; st.log+=`update: i += ${st.step} → i = ${st.i}\n`; st.phase="test"; sDraw(`<b>Update</b>: i is now ${st.i}. Next: <b>test</b> again.`);
+  }
+}
+document.addEventListener("click",e=>{
+  if(e.target.id==="sStep") sStep();
+  if(e.target.id==="sReset") sReset();
+  if(e.target.id==="sRun"){ if(!st||st.done) sReset(); let g=0; while(!st.done&&g++<700) sStep(); }
+});
+
+/* ---------- Quiz ---------- */
+let quizBuilt=false;
+function buildQuiz(){
+  if(quizBuilt) return; quizBuilt=true;
+  const box=document.getElementById("quizbox"); let score=0, answered=0;
+  QUIZ.forEach((q,qi)=>{
+    const d=document.createElement("div"); d.className="q";
+    d.innerHTML=`<div class="qt">${qi+1}. ${q.q}</div>`+q.a.map((o,oi)=>`<button class="opt" data-o="${oi}">${o}</button>`).join("")+`<div class="fb"></div>`;
+    d.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{
+      if(d.dataset.done) return; d.dataset.done=1; answered++;
+      const ok=+b.dataset.o===q.c; if(ok) score++;
+      b.classList.add(ok?"ok":"no"); d.querySelectorAll(".opt")[q.c].classList.add("ok");
+      const fb=d.querySelector(".fb"); fb.style.display="block"; fb.innerHTML=(ok?"✅ Correct. ":"❌ Not quite. ")+q.fb;
+      document.getElementById("qscore").textContent=`Score: ${score} / ${answered}`+(answered===QUIZ.length?`  —  ${score===QUIZ.length?"Perfect! 🎉":score>=QUIZ.length*0.7?"Nice work 👍":"Review the sections and try again 💪"}`:"");
+    });
+    box.appendChild(d);
+  });
+  const sc=document.createElement("div"); sc.className="score"; sc.id="qscore"; sc.textContent="Score: 0 / 0"; box.appendChild(sc);
+}
+
+/* ---------- init ---------- */
+show(localStorage.getItem("mac109w5tab")||"intro");
+updTruth();
+sReset();
+</script>
+</body>
+</html>
