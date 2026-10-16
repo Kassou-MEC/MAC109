@@ -1,0 +1,256 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>MAC109 • Decisions & Loops — Interactive Instructor Script</title><style>
+:root{--bg:#0a1020;--surface:#111b30;--panel:#17243d;--edge:#304360;--text:#eef5ff;--muted:#a9bbd3;--cyan:#67e8f9;--mint:#74f2ba;--violet:#c4a2ff;--orange:#ffbd7b;--pink:#ff91b2}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font:16px/1.6 Inter,ui-sans-serif,system-ui,Arial;background:radial-gradient(ellipse at 0 0,#192952,var(--bg) 55%);color:var(--text)}button,input{font:inherit}button{cursor:pointer}header{padding:34px max(24px,5vw);background:linear-gradient(115deg,#142c50 0%,#161d39 65%,#13253b);border-bottom:1px solid var(--edge)}.tag{font-size:12px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--mint)}h1{font-size:clamp(30px,4vw,48px);margin:8px 0;letter-spacing:-.04em;line-height:1.1}.sub{color:var(--muted);max-width:850px;margin:10px 0}.top{position:sticky;top:0;z-index:10;background:#0b1426f2;backdrop-filter:blur(12px);border-bottom:1px solid var(--edge);display:flex;align-items:center;gap:12px;padding:12px max(20px,5vw);flex-wrap:wrap}.top select,.top button{background:#1e304c;color:var(--text);border:1px solid #405674;border-radius:10px;padding:9px 14px}.top button:hover{border-color:var(--cyan)}#counter{color:var(--muted);font-size:13px;margin-left:auto}.wrap{width:min(1200px,94%);margin:30px auto 80px}.section{display:none}.section.active{display:block;animation:rise .25s ease}@keyframes rise{from{opacity:.4;transform:translateY(8px)}to{opacity:1;transform:none}}.chapter{font-weight:800;color:var(--cyan);font-size:12px;letter-spacing:.15em;text-transform:uppercase}h2{font-size:clamp(27px,3vw,38px);margin:6px 0 12px;letter-spacing:-.03em}.goal{color:var(--muted);font-size:17px;margin:0 0 24px}.stack{display:grid;gap:18px}.card{background:linear-gradient(145deg,#182945,#121d31);border:1px solid var(--edge);border-radius:18px;overflow:hidden;box-shadow:0 10px 28px #0002}.cardHead{padding:14px 20px;border-bottom:1px solid var(--edge);display:flex;gap:12px;align-items:center}.cardHead h3{margin:0;font-size:17px}.bubble{display:inline-flex;flex:0 0 auto;background:#244771;color:var(--cyan);font-size:11px;letter-spacing:.08em;font-weight:800;border-radius:7px;padding:4px 9px}.content{padding:19px 22px}.say{font-size:19px;line-height:1.6;color:#fff;margin:0}.say strong{color:var(--mint)}.question{background:#173446;border-left:4px solid var(--cyan);border-radius:9px;padding:15px 18px;font-size:19px;font-weight:700}.answer{margin-top:12px;background:#193b35;border:1px solid #30675a;border-radius:10px;padding:13px 16px;display:none}.answer.open{display:block}.answer strong{color:var(--mint)}.btn{background:linear-gradient(135deg,#70e6dc,#80aaff);color:#071726;border:none;border-radius:10px;padding:9px 14px;font-weight:850;margin-top:12px}.btn.alt{background:#253957;color:#dceafd;border:1px solid #476185}.codeWrap{background:#080f1c;margin:14px 0 6px;border-radius:13px;border:1px solid #324562;overflow:hidden}.codeBar{padding:9px 14px;background:#142038;border-bottom:1px solid #30415b;color:#a9bfda;font-size:12px;display:flex;justify-content:space-between;align-items:center}.copy{background:#263f60;color:#fff;border:1px solid #557091;border-radius:7px;padding:4px 10px;font-size:12px}.code{padding:17px 18px;font:15px/1.75 'Cascadia Code',Consolas,Monaco,monospace;white-space:pre;overflow:auto;tab-size:4;margin:0;color:#ecf3ff}.kw{color:#c792ea;font-weight:700}.type{color:#7bd4ff}.str{color:#b9ee8a}.num{color:#ffbb7c}.comment{color:#8097b5;font-style:italic}.method{color:#78e8dd}.operator{color:#ff90b6}.output{margin-top:13px;background:#081b17;color:#a2f2c5;padding:12px 16px;border-radius:10px;font:14px/1.6 Consolas,monospace;white-space:pre-wrap}.prompt{color:var(--orange);font-weight:750}.hint{color:var(--muted);font-size:14px;margin:12px 0 0}.steps{padding-left:22px;margin:0}.steps li{margin:7px 0}.two{display:grid;grid-template-columns:1fr 1fr;gap:15px}.mini{background:#132540;padding:14px;border-radius:12px;border:1px solid #344a69}.mini strong{color:var(--cyan)}.challenge{border-color:#546184}.footerNav{display:flex;justify-content:space-between;gap:12px;margin:30px 0}.footerNav button{background:#253955;color:#fff;border:1px solid #49617c;border-radius:11px;padding:11px 18px}.footerNav button:disabled{opacity:.3;cursor:default}.progress{height:4px;background:#203149}.progress>div{height:100%;background:linear-gradient(90deg,var(--cyan),var(--mint));transition:width .25s}body.light{--bg:#edf4fc;--surface:#fff;--panel:#fff;--edge:#b8c9e0;--text:#192945;--muted:#526782;background:#edf4fc}body.light header{background:#dce9fb}body.light .card{background:#fff}body.light .say{color:#1d2e49}body.light .top{background:#f0f5fcee}body.light .question{background:#d6f3fa;color:#153149}body.light .answer{background:#e0f6ec;color:#214c3f}body.light .mini{background:#ebf3fe}body.light .top select,body.light .top button{background:#e2edfa;color:#17304d}body.light .goal{color:#485d7a}@media(max-width:720px){.two{grid-template-columns:1fr}.content{padding:16px}.wrap{width:95%}.top{padding:10px}.say{font-size:17px}.question{font-size:17px}}@media print{.top,.footerNav,.btn,.copy{display:none!important}.section{display:block!important;break-after:page}.card{break-inside:avoid}body{background:white;color:#111}.say{color:#111}.answer{display:block}}
+</style></head><body><header><div class="tag">LaGuardia Community College · MAC109 · Instructor Edition</div><h1>Decisions, Logic &amp; Loops</h1><p class="sub">An interactive, classroom-ready teaching script. Speak naturally, pause for predictions, reveal answers, and walk through color-highlighted C# examples. Aligned with the original eight-part lecture. Every code example includes using System, the Program class, and Main.</p><div class="tag" style="color:#aac6ff">Instructor narrative · Student questions · Answer reveals · Live code</div></header><div class="top"><label for="pick">Lesson</label><select id="pick"></select><button onclick="go(current-1)">← Back</button><button onclick="go(current+1)">Next →</button><button onclick="document.body.classList.toggle('light')">◐ Theme</button><button onclick="window.print()">⎙ Print</button><span id="counter"></span></div><div class="progress"><div id="bar"></div></div><main class="wrap" id="root"></main><script>
+const lessons=[
+{title:'Why decisions and loops?',goal:'Introduce control flow and Boolean expressions before showing any branching.',blocks:[
+['say','“Until now, our programs have mainly followed instructions from top to bottom. But imagine a program that decides whether a student passed, or repeats a question until the user enters a valid answer. Today we will give programs these two abilities: <strong>decide</strong> and <strong>repeat</strong>.”'],
+['ask','“When a student score is 82, is the expression score >= 70 true or false?”','True. A condition produces a Boolean value: true or false.'],
+['code','Our first Boolean condition',`int age = 20;
+bool isAdult = age >= 18;
+bool hasDiscount = age < 12;
+Console.WriteLine("Adult? " + isAdult);
+Console.WriteLine("Discount? " + hasDiscount);`,'Adult? True\nDiscount? False'],
+['say','“A decision checks a condition to choose a path. A loop checks a condition repeatedly. Keep that distinction in mind for the entire lecture.”'],
+['ask','“If we change age from 20 to 10, what are the two output values?”','Adult? False; Discount? True. Ask a volunteer to explain each comparison.'] ]},
+{title:'The if / else family',goal:'Build from one-way decisions to multiple branches and a simple ternary choice.',blocks:[
+['say','“Suppose the weather is extremely hot. Should every person see a heat warning, or only when the temperature is high? That is why we need if.”'],
+['code','Simple if: one optional action',`int temperature = 95;
+if (temperature > 90)
+{
+    Console.WriteLine("Heat warning!");
+}
+Console.WriteLine("Have a nice day.");`,'Heat warning!\nHave a nice day.'],
+['ask','“What prints if temperature becomes 70? Why?”','Only “Have a nice day.” The if body is skipped, but the final statement is outside the if.'],
+['say','“Now we want exactly one of two outcomes. That is if–else. The percent symbol gives the remainder after division. When a number divided by 2 has remainder zero, it is even.”'],
+['code','if–else: even versus odd',`int number = 7;
+if (number % 2 == 0)
+{
+    Console.WriteLine("Even");
+}
+else
+{
+    Console.WriteLine("Odd");
+}`,'Odd'],
+['ask','“Why is 7 odd? What changes if the number is 12?”','7 % 2 is 1, so Odd. 12 % 2 is 0, so Even.'],
+['say','“When we have several possibilities, use else if. Conditions are checked from the top downward, and the first true branch wins. For a nested if, one decision is inside another. For a very short choice of a value, we may use the ternary operator.”'],
+['code','Else-if ladder: grade classification',`int score = 84;
+if (score >= 90)
+    Console.WriteLine("A");
+else if (score >= 80)
+    Console.WriteLine("B");
+else if (score >= 70)
+    Console.WriteLine("C");
+else
+    Console.WriteLine("Below C");`,'B'],
+['ask','“If score is 95, how many branches run? What if we put score >= 70 at the top?”','Only one branch runs. Putting >= 70 first would incorrectly classify 95 as C, so order matters.'],
+['code','Nested if and ternary at a glance',`bool hasID = true;
+int age = 20;
+if (age >= 18)
+{
+    if (hasID)
+        Console.WriteLine("Entry allowed");
+}
+string status = age >= 18 ? "Adult" : "Minor";
+Console.WriteLine(status);`,'Entry allowed\nAdult'],
+['ask','“What happens if hasID is false but age remains 20?”','Entry allowed disappears, but Adult still prints. The two decisions test different conditions.'] ]},
+{title:'switch and switch expressions',goal:'Use switch for specific discrete values and distinguish it from range-based conditions.',blocks:[
+['say','“Think of a menu where the user enters 1, 2, or 3. Writing many else-if statements is possible, but switch often expresses these exact matches more clearly.”'],
+['code','switch statement: menu selection',`int choice = 2;
+switch (choice)
+{
+    case 1:
+        Console.WriteLine("Start");
+        break;
+    case 2:
+        Console.WriteLine("Settings");
+        break;
+    case 3:
+        Console.WriteLine("Exit");
+        break;
+    default:
+        Console.WriteLine("Invalid option");
+        break;
+}`,'Settings'],
+['ask','“Why does Settings print instead of Start? What would choice = 9 print?”','Only case 2 matches. For 9, default prints Invalid option. break ends the matching switch case.'],
+['say','“Newer C# also offers a switch expression. It directly produces a value. Notice the arrows, the underscore for the fallback, and the semicolon at the end.”'],
+['code','switch expression: a season',`int month = 10;
+string season = month switch
+{
+    12 or 1 or 2 => "Winter",
+    3 or 4 or 5 => "Spring",
+    6 or 7 or 8 => "Summer",
+    9 or 10 or 11 => "Fall",
+    _ => "Invalid month"
+};
+Console.WriteLine(season);`,'Fall'],
+['ask','“Would you choose switch or if–else to test score >= 90, score >= 80, and score >= 70?”','if–else is a natural fit for these numeric ranges. switch is often simpler for specific known values.'] ]},
+{title:'Relational operators',goal:'Recognize comparisons and predict the Boolean result of each expression.',blocks:[
+['say','“Before we combine decisions, we must know how to compare values. In C#, a comparison produces either true or false. Remember: = assigns a value, but == compares two values.”'],
+['code','Compare two numbers',`int x = 10;
+int y = 20;
+Console.WriteLine(x == y);
+Console.WriteLine(x != y);
+Console.WriteLine(x < y);
+Console.WriteLine(x >= y);`,'False\nTrue\nTrue\nFalse'],
+['ask','“What does != mean? Is x <= 10 true when x is exactly 10?”','!= means not equal. Yes, <= means less than or equal to, so equality counts.'],
+['say','“A comparison is one yes-or-no question. Next, we will connect questions using logic.”'] ]},
+{title:'Logic',goal:'Teach Boolean logic (AND, OR, NOT), truth tables, operator precedence, and short-circuit evaluation.',blocks:[
+['say','“Imagine a student logging into the computer lab. The program may need to know two things: Is the student registered? Does the student have a valid ID? Logical operators combine these true-or-false questions.”'],
+['say','“Use && for AND: BOTH conditions must be true. Use || for OR: AT LEAST ONE must be true. Use ! for NOT: it reverses true and false. Ask students to say the rule aloud before showing code.”'],
+['code','Logical AND (&&): both requirements',`bool registered = true;
+bool hasID = false;
+if (registered && hasID)
+{
+    Console.WriteLine("Access granted");
+}
+else
+{
+    Console.WriteLine("Access denied");
+}`,'Access denied'],
+['ask','“The student is registered but forgot an ID. Why is access denied? What single change would grant access?”','AND needs both values true. Set hasID = true to get Access granted.'],
+['code','Logical OR (||): either condition is enough',`bool isFaculty = false;
+bool isStudent = true;
+if (isFaculty || isStudent)
+{
+    Console.WriteLine("Campus access allowed");
+}
+else
+{
+    Console.WriteLine("No access");
+}`,'Campus access allowed'],
+['ask','“Will the OR condition be true if both values are false? What if both are true?”','False when both are false. True when either one or both are true.'],
+['code','Logical NOT (!): reverse a condition',`bool isClosed = false;
+if (!isClosed)
+{
+    Console.WriteLine("Lab is open");
+}
+Console.WriteLine(!true);`,'Lab is open\nFalse'],
+['ask','“What is the value of !false? Why does !isClosed enter the if block?”','!false is true. isClosed is false, so !isClosed is true.'],
+['say','“Let’s build the truth table verbally. With A and B, the four combinations are true/true, true/false, false/true, and false/false. Ask students to predict AND and OR for each row.”'],
+['code','Truth table: AND and OR',`bool a = true;
+bool b = false;
+Console.WriteLine(a && b);
+Console.WriteLine(a || b);
+Console.WriteLine(!a);`,'False\nTrue\nFalse'],
+['ask','“If A is false and B is true, what are A && B and A || B?”','AND is false, and OR is true.'],
+['say','“Logic also has order. ! is evaluated before &&, and && before ||. Parentheses make a complicated rule easier to read. Ask the class which part should be evaluated first.”'],
+['code','Combine logical operators with parentheses',`int age = 17;
+bool hasPermission = true;
+bool isMember = false;
+bool canEnter = (age >= 18 && isMember) || hasPermission;
+Console.WriteLine(canEnter);`,'True'],
+['ask','“Even though age is 17, why does canEnter print True? What happens if hasPermission becomes false?”','The right-hand OR operand hasPermission is true. If false, both OR sides are false, so canEnter is false.'],
+['say','“One more useful idea: C# stops checking when the result is already certain. For &&, if the left side is false, the right side is skipped; for ||, if the left side is true, the right side is skipped. This is short-circuit logic.”'],
+['code','Short-circuit: safely avoid dividing by zero',`int count = 0;
+if (count > 0 && 10 / count > 2)
+{
+    Console.WriteLine("Large ratio");
+}
+Console.WriteLine("Done");`,'Done'],
+['ask','“Why does this program not crash with division by zero? Would swapping the two sides be safe?”','The left side is false, so && skips the division. Swapping the sides would evaluate the division first and cause an exception.'],
+['say','“Class recap: && = both, || = at least one, ! = opposite. Challenge students to invent a real-world rule that needs two conditions.”'] ]},
+{title:'while and do-while',goal:'Trace condition-first and condition-last loops; explain initialization, test, and update.',blocks:[
+['say','“A decision asks a question one time. A loop asks again and again. Every loop needs a starting point, a condition, and a way to make progress.”'],
+['code','while: condition is checked first',`int count = 1;
+while (count <= 3)
+{
+    Console.WriteLine(count);
+    count++;
+}
+Console.WriteLine("Finished");`,'1\n2\n3\nFinished'],
+['ask','“Tell me the value of count just before each test. Why does the loop stop?”','Tests see 1, 2, 3, then 4. When count is 4, count <= 3 is false.'],
+['ask','“If count begins at 5, how many times does the while body execute?”','Zero. while checks before its first iteration.'],
+['say','“A do–while loop is different: it always runs the body first and checks afterward. This is useful for menus that must appear at least once.”'],
+['code','do–while: body runs at least once',`int choice = 3;
+do
+{
+    Console.WriteLine("Menu displayed");
+    choice++;
+}
+while (choice < 3);`,'Menu displayed'],
+['ask','“Even though the condition is false, why does the message appear once?”','Because do–while checks the condition after executing the body. Note the semicolon after while (...).'],
+['say','“One dangerous mistake is forgetting to update the variable. If the condition stays true forever, the loop may never stop.”'] ]},
+{title:'for and foreach',goal:'Practice counted loops, arrays, indexes, and step-by-step tracing.',blocks:[
+['say','“When we know how many times to repeat something, for is convenient. It puts initialization, condition, and update together: for (start; test; change).”'],
+['code','for: print 1 through 5',`for (int i = 1; i <= 5; i++)
+{
+    Console.WriteLine(i);
+}`,'1\n2\n3\n4\n5'],
+['ask','“Predict the sequence of i values tested. Is the loop body executed when i = 6?”','Tests are 1, 2, 3, 4, 5, 6. The body runs for 1 through 5, but not for 6.'],
+['code','for: count from zero',`for (int i = 0; i < 4; i++)
+{
+    Console.Write(i + " ");
+}`,'0 1 2 3 '],
+['ask','“How many times does this code run? Why is it not three?”','Four iterations: i = 0, 1, 2, 3. Starting at zero does not mean only three values.'],
+['say','“For an array, foreach makes our code easier to read because we don’t need to track an index ourselves. Use for instead if you need the element position.”'],
+['code','foreach: visit every course',`string[] courses = { "MAC109", "MAT115", "ENG101" };
+foreach (string course in courses)
+{
+    Console.WriteLine(course);
+}`,'MAC109\nMAT115\nENG101'],
+['ask','“Would you use for or foreach to display each course? What if you need the index number?”','foreach is ideal for every value; for is useful when you need indexes.'] ]},
+{title:'break, continue, and nested loops',goal:'Contrast leaving a loop, skipping one iteration, and running a loop inside a loop.',blocks:[
+['say','“Sometimes a loop should finish earlier. break leaves the loop completely; continue skips the remaining work in the current iteration but allows the loop to continue.”'],
+['code','break: stop once a match is found',`int[] ids = { 1042, 2077, 3310, 4099 };
+foreach (int id in ids)
+{
+    if (id == 3310)
+    {
+        Console.WriteLine("Found!");
+        break;
+    }
+    Console.WriteLine("Checking " + id);
+}`,'Checking 1042\nChecking 2077\nFound!'],
+['ask','“Does Checking 4099 ever print? Why?”','No. break exits the loop when id is 3310.'],
+['code','continue: skip only one pass',`for (int i = 1; i <= 5; i++)
+{
+    if (i == 3)
+        continue;
+    Console.Write(i + " ");
+}`,'1 2 4 5 '],
+['ask','“Did continue end the loop when i became 3?”','No. It skipped printing 3, then the for loop continued with 4 and 5.'],
+['say','“Nested loops work like a clock: for each outer step, the inner loop runs through all its steps.”'],
+['code','Nested loops: 2 rows × 3 columns',`for (int row = 1; row <= 2; row++)
+{
+    for (int col = 1; col <= 3; col++)
+    {
+        Console.Write("(" + row + "," + col + ") ");
+    }
+    Console.WriteLine();
+}`,'(1,1) (1,2) (1,3) \n(2,1) (2,2) (2,3) '],
+['ask','“How many ordered pairs print? How many would print with 4 rows and 5 columns?”','2 × 3 = 6 pairs; 4 × 5 = 20 pairs.'],
+['code','Spot the off-by-one error',`int[] scores = { 90, 80, 70 };
+for (int i = 0; i <= scores.Length; i++)
+{
+    Console.WriteLine(scores[i]);
+}`,'90\n80\n70\nThen IndexOutOfRangeException'],
+['ask','“Which one character must we change to fix the crash?”','Change <= to <. Valid indexes for a three-element array are 0, 1, and 2—not 3.'] ]},
+{title:'Check yourself — classroom exit ticket',goal:'Finish with short predictions, peer explanations, and a final take-away.',blocks:[
+['say','“Before we finish, you will answer a few questions without running the code. I am looking for your reasoning, not just a correct guess.”'],
+['ask','“What does x % 2 == 0 test?”','Whether x is even.'],
+['ask','“How many branches can run in one if / else-if / else ladder?”','At most one branch. In a complete ladder with a final else, exactly one.'],
+['ask','“Which runs at least once: while, do–while, or for?”','do–while.'],
+['ask','“How many iterations does for (int i = 0; i < 5; i++) perform?”','Five: i = 0, 1, 2, 3, 4.'],
+['ask','“Does false && CheckServer() call CheckServer()?”','No; && short-circuits.'],
+['ask','“What is the difference between break and continue?”','break exits the loop; continue skips to the next iteration.'],
+['ask','“Why does i <= array.Length create an array indexing problem?”','It allows i to equal Length, which is not a valid index. Last valid index is Length − 1.'],
+['say','“Here is the key idea to take home: conditions decide whether a block runs. Loops decide whether it runs again. Before executing your code, try to predict the output, one line at a time.”'],
+['code','Final challenge: predict the output',`int total = 0;
+for (int i = 1; i <= 5; i++)
+{
+    if (i % 2 == 0)
+        continue;
+    total += i;
+}
+Console.WriteLine(total);`,'9'],
+['ask','“Why is the final answer 9 rather than 15?”','The even values 2 and 4 are skipped. We add 1 + 3 + 5 = 9.'] ]}
+];
+function escapeHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function highlight(code){return code.split('\n').map(line=>{let re=/(\/\/.*$)|("(?:\\.|[^"\\])*")|(\b\d+\b)|(\b(?:using|class|static|void|int|string|bool|double|char|if|else|switch|case|default|break|continue|while|do|for|foreach|in|return|var|true|false|or)\b)|(\b(?:Console|WriteLine|Write|Length)\b)|(&&|\|\||==|!=|>=|<=|=>|\+\+|\+=|[<>%!])/g;let out='',last=0,m;while((m=re.exec(line))){out+=escapeHtml(line.slice(last,m.index));let cls=m[1]?'comment':m[2]?'str':m[3]?'num':m[4]?'kw':m[5]?'method':'operator';out+='<span class="'+cls+'">'+escapeHtml(m[0])+'</span>';last=re.lastIndex}return out+escapeHtml(line.slice(last))}).join('\n')}
+function completeProgram(snippet){
+  const indented=snippet.split('\n').map(line=>line ? '        '+line : '').join('\n');
+  return 'using System;\n\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n'+indented+'\n    }\n}';
+}
+function card(kind,...data){if(kind==='say')return `<article class="card"><div class="cardHead"><span class="bubble">SAY</span><h3>Instructor narrative</h3></div><div class="content"><p class="say">${data[0]}</p></div></article>`;if(kind==='ask')return `<article class="card challenge"><div class="cardHead"><span class="bubble">ASK</span><h3>Pause · Students predict</h3></div><div class="content"><div class="question">${escapeHtml(data[0])}</div><button class="btn" onclick="let a=this.nextElementSibling;a.classList.toggle('open');this.textContent=a.classList.contains('open')?'Hide answer':'Reveal answer'">Reveal answer</button><div class="answer"><strong>Expected answer:</strong> ${escapeHtml(data[1])}</div><p class="hint">Teaching move: ask for a prediction, invite one explanation, then reveal.</p></div></article>`;if(kind==='code'){let c=completeProgram(data[1]);return `<article class="card"><div class="cardHead"><span class="bubble">CODE</span><h3>${escapeHtml(data[0])}</h3></div><div class="content"><p class="hint">Read the code with students. Ask them to predict the terminal output before revealing it. Complete runnable C# example: imports the System namespace, declares Program, and defines the Main entry point. Read the highlighted statements with students and predict the output.</p><div class="codeWrap"><div class="codeBar"><span>C# · Program.cs — complete program</span><button class="copy" onclick="navigator.clipboard.writeText(decodeURIComponent(this.dataset.code)).then(()=>this.textContent='Copied!')" data-code="${encodeURIComponent(c)}">Copy C#</button></div><pre class="code">${highlight(c)}</pre></div><button class="btn alt" onclick="let a=this.nextElementSibling;a.classList.toggle('open');this.textContent=a.classList.contains('open')?'Hide output':'Show output'">Show output</button><div class="answer"><strong>Expected console output</strong><div class="output">${escapeHtml(data[2])}</div></div></div></article>`}}
+let current=0;let root=document.getElementById('root'),pick=document.getElementById('pick');lessons.forEach((l,i)=>pick.insertAdjacentHTML('beforeend',`<option value="${i}">${i+1}. ${escapeHtml(l.title)}</option>`));pick.onchange=()=>go(+pick.value);root.innerHTML=lessons.map((l,i)=>`<section class="section" id="lesson${i}"><div class="chapter">Part ${i+1} of ${lessons.length}</div><h2>${escapeHtml(l.title)}</h2><p class="goal"><b>Teaching goal:</b> ${escapeHtml(l.goal)}</p><div class="stack">${l.blocks.map(b=>card(...b)).join('')}</div><div class="footerNav"><button onclick="go(${i-1})" ${i===0?'disabled':''}>← Previous lesson</button><button onclick="go(${i+1})" ${i===lessons.length-1?'disabled':''}>Next lesson →</button></div></section>`).join('');function go(i){if(i<0||i>=lessons.length)return;current=i;document.querySelectorAll('.section').forEach((s,j)=>s.classList.toggle('active',j===i));pick.value=i;document.getElementById('counter').textContent=`${i+1} / ${lessons.length}`;document.getElementById('bar').style.width=((i+1)/lessons.length*100)+'%';window.scrollTo({top:0,behavior:'smooth'})}document.addEventListener('keydown',e=>{if(e.target.tagName==='SELECT')return;if(e.key==='ArrowRight')go(current+1);if(e.key==='ArrowLeft')go(current-1)});go(0);
+</script></body></html>
