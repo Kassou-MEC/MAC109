@@ -1,0 +1,1485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>MAC 109 · Classes &amp; Objects</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f1220;--surface:#181c2e;--surface2:#222840;--border:#2f3654;
+  --ink:#eef0f8;--ink2:#c3c9dd;--muted:#9098b4;
+  --brand:#6d63ff;--brand2:#a45cff;--brand-soft:#2a2d55;--brand-ink:#c9c5ff;
+  --good:#22c58b;--good-soft:#12352b;--bad:#f06a60;--bad-soft:#3d1f23;--warn:#f5b83d;--warn-soft:#352b12;
+  --code-bg:#0a0d18;--code-bar:#151a2c;--code-border:#2a3150;--code-text:#e6e9f2;--code-ln:#5b627a;
+  --kw:#7aa2f7;--type:#2ac3de;--str:#e0af68;--com:#7f8aa8;--met:#c0caf5;--num:#ff9e64;--hl:#2c3350;--pin:#3b4a7a;
+  --sans:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --mono:'JetBrains Mono','Cascadia Code',Consolas,Menlo,monospace;
+  --radius:14px;--shadow:0 10px 30px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16.5px;line-height:1.55;overflow:hidden;-webkit-font-smoothing:antialiased}
+button,input,select{font-family:var(--sans)}
+b{font-weight:700}
+#app{display:flex;flex-direction:column;height:100vh}
+#top{background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;padding:10px 22px;flex:0 0 auto}
+#top .logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;font-family:var(--mono);font-weight:700;display:flex;align-items:center;justify-content:center;font-size:15px;flex:0 0 auto}
+#top .ttl{font-weight:700;font-size:15px}
+#top .ttl small{display:block;color:var(--muted);font-weight:500;font-size:12.5px}
+#top .right{margin-left:auto;color:var(--muted);font-size:12.5px;display:flex;align-items:center;gap:14px}
+#progressWrap{width:140px;height:6px;background:var(--surface2);border-radius:3px;overflow:hidden}
+#progressBar{height:100%;background:linear-gradient(90deg,var(--brand),var(--brand2));width:0;transition:width .3s}
+#tabstrip{background:var(--surface);display:flex;overflow-x:auto;flex:0 0 auto;border-bottom:1px solid var(--border);padding:0 14px;scrollbar-width:thin;gap:2px}
+.tab{background:transparent;color:var(--ink2);border:none;border-bottom:3px solid transparent;padding:10px 11px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:7px}
+.tab .dot{width:8px;height:8px;border-radius:50%;background:var(--border)}
+.tab:hover{color:var(--brand-ink)}
+.tab.active{color:#8b83ff;border-bottom-color:#8b83ff}
+.tab.active .dot{background:#8b83ff}
+.tab.done .dot{background:var(--good)}
+#stage{flex:1 1 auto;overflow:hidden;position:relative}
+.slide{position:absolute;inset:0;overflow-y:auto;padding:34px max(40px,calc((100% - 1200px)/2)) 110px;display:none;animation:slidein .3s ease}
+.slide.active{display:block}
+@keyframes slidein{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.slide{animation:none}*{transition:none!important}}
+#bottom{background:var(--surface);border-top:1px solid var(--border);display:flex;align-items:center;gap:12px;padding:10px 22px;flex:0 0 auto}
+#bottom button{background:var(--brand);color:#fff;border:none;padding:9px 18px;border-radius:10px;cursor:pointer;font-size:13.5px;font-weight:600}
+#bottom button.ghost{background:var(--surface2);color:var(--ink)}
+#bottom button:disabled{opacity:.35;cursor:default}
+#bottom .where{color:var(--muted);font-size:13px}
+#bottom .grow{flex:1}
+#bottom .hint{color:var(--muted);font-size:12.5px}
+@media(max-width:700px){#bottom .hint,#top .right,#top .ttl small{display:none}.slide{padding:22px 16px 110px}}
+
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#8b83ff;margin-bottom:10px;font-weight:600}
+h1{font-size:clamp(30px,4.2vw,46px);font-weight:800;line-height:1.12;margin-bottom:14px;letter-spacing:-.02em}
+h2{font-size:clamp(24px,3vw,32px);font-weight:800;margin-bottom:8px;letter-spacing:-.015em;line-height:1.2}
+h3{font-size:17px;font-weight:700}
+h3.sec{font-size:20px;margin:28px 0 6px}
+.sub{color:var(--ink2);max-width:80ch;font-size:16.5px;margin-bottom:20px}
+.grad{background:linear-gradient(90deg,#8b83ff,#c77dff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+@media(max-width:1000px){.grid4{grid-template-columns:1fr 1fr}}
+@media(max-width:860px){.grid2,.grid3,.grid4{grid-template-columns:1fr}}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow)}
+.card p{color:var(--ink2);font-size:15px;margin-top:6px}
+.pill{display:inline-block;font-family:var(--mono);font-size:11.5px;background:var(--brand-soft);color:var(--brand-ink);border-radius:20px;padding:3px 11px;margin-bottom:8px;font-weight:600}
+.pill.g{background:var(--good-soft);color:#7ff0c3}.pill.w{background:var(--warn-soft);color:#fcd67a}.pill.r{background:var(--bad-soft);color:#ffb3ac}
+code.inline,.card code,.sub code,li code,td code,.note code,.tip code,.why code,.q code,.fwhy code{font-family:var(--mono);background:var(--surface2);border:1px solid var(--border);padding:0 6px;border-radius:6px;font-size:.86em;color:var(--brand-ink)}
+.note{background:var(--warn-soft);border:1px solid #5c4a1a;border-radius:12px;padding:12px 16px;color:#fbe3a6;font-size:14.5px;margin-top:16px}
+.tip{background:var(--good-soft);border:1px solid #235e4a;border-radius:12px;padding:12px 16px;color:#bff5dd;font-size:14.5px;margin-top:16px}
+.objlist li{list-style:none;padding:6px 0 6px 28px;position:relative;font-size:15.5px}
+.objlist li::before{content:"▸";position:absolute;left:8px;color:#8b83ff;font-weight:700}
+.checklist li{list-style:none;padding:9px 0 9px 32px;position:relative;font-size:15px;border-bottom:1px dashed var(--border)}
+.checklist li::before{content:"✓";position:absolute;left:4px;color:var(--good);font-weight:800}
+.kbd{font-family:var(--mono);background:var(--surface2);border:1px solid var(--border);border-bottom-width:2px;border-radius:5px;padding:1px 7px;font-size:12.5px}
+.hero{display:grid;grid-template-columns:1.15fr 1fr;gap:28px;align-items:start}
+@media(max-width:900px){.hero{grid-template-columns:1fr}}
+
+/* code + explanation */
+.ex{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(290px,1fr);gap:16px;align-items:start;margin:14px 0 24px}
+@media(max-width:900px){.ex{grid-template-columns:1fr}}
+.codewin{background:var(--code-bg);border:1px solid var(--code-border);border-radius:var(--radius);overflow:hidden;box-shadow:0 14px 34px rgba(0,0,0,.35)}
+.codewin .bar{background:var(--code-bar);padding:9px 14px;font-family:var(--mono);font-size:12px;color:#aab1c8;display:flex;gap:8px;align-items:center;border-bottom:1px solid var(--code-border);flex-wrap:wrap}
+.dots i{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:5px}
+.fname{font-weight:700;color:#e6e9f2}
+.ftabs{display:flex;gap:4px}
+.ftab{background:transparent;border:1px solid transparent;color:#8a92ad;border-radius:7px;padding:3px 10px;font-family:var(--mono);font-size:12px;cursor:pointer;font-weight:600}
+.ftab.on{background:#262c48;border-color:#3d4661;color:#fff}
+.tag{font-size:10.5px;background:#2f3650;color:#c0caf5;border-radius:20px;padding:2px 9px;font-family:var(--sans);font-weight:600}
+.btns{margin-left:auto;display:flex;gap:6px}
+.btns button{background:#2f3650;border:1px solid #3d4661;color:#e6e9f2;border-radius:7px;padding:3px 11px;font-size:11.5px;cursor:pointer;font-weight:600}
+.btns button:hover{background:#3b4463}
+.btns button.run{background:var(--good);border-color:var(--good);color:#fff}
+.codewin pre{padding:10px 0 12px;font-family:var(--mono);font-size:14px;line-height:1.7;overflow:auto;color:var(--code-text);max-height:640px}
+.cl{display:flex;padding:0 14px 0 0;white-space:pre;border-left:3px solid transparent}
+.cl .ln{width:44px;color:var(--code-ln);text-align:right;padding-right:16px;flex:0 0 auto;user-select:none}
+.cl .src{white-space:pre;flex:1 1 auto}
+.cl.explain{cursor:pointer}
+.cl.explain:hover,.cl.explain.hot{background:var(--hl);border-left-color:#8b83ff}
+.cl.explain.pinned{background:var(--pin);border-left-color:#ffd166}
+.cl.explain:focus-visible{outline:none;background:var(--hl);border-left-color:#8b83ff}
+.cl.step{background:rgba(255,176,32,.16);border-left-color:#ffb020}
+.k{color:var(--kw)}.t{color:var(--type)}.s{color:var(--str)}.c{color:var(--com);font-style:italic}.m{color:var(--met)}.n{color:var(--num)}.p{color:var(--code-text)}
+.explain-panel{position:sticky;top:6px}
+.expl{background:var(--surface);border:1px solid var(--border);border-left:5px solid #8b83ff;border-radius:var(--radius);padding:16px 18px;min-height:150px;box-shadow:var(--shadow)}
+.expl.pinned{border-left-color:#e0a800}
+.expl .lbl{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.pinbadge{display:none;background:var(--warn-soft);color:#fcd67a;border-radius:20px;padding:1px 8px;letter-spacing:0;text-transform:none;font-family:var(--sans);font-weight:600}
+.expl.pinned .pinbadge{display:inline-block}
+.expl .codeq{font-family:var(--mono);font-size:13px;color:var(--brand-ink);background:var(--brand-soft);border-radius:8px;padding:6px 10px;margin-bottom:10px;white-space:pre-wrap;word-break:break-word}
+.expl .why{font-size:15.5px;color:var(--ink);line-height:1.65}
+.expl .why b{color:var(--brand-ink)}
+.expl.idle .codeq{display:none}
+.expl.idle .why{color:var(--muted)}
+.term{background:#0b0d16;border:1px solid #2a2f44;border-radius:var(--radius);padding:12px 16px 14px;font-family:var(--mono);font-size:13.5px;line-height:1.8;color:#d8dcea;margin-top:12px;min-height:80px}
+.term .thead{font-size:10.5px;letter-spacing:.12em;color:#6b7390;font-weight:700;margin-bottom:4px}
+.term .tline{white-space:pre-wrap;animation:pop .25s ease;min-height:1.8em}
+.term .placeholder{color:#5f6785;font-style:italic}
+.term .tdone{color:#5f6785;font-style:italic;font-family:var(--sans);font-size:12px}
+@keyframes pop{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:none}}
+
+/* flip */
+.flip{perspective:900px;cursor:pointer;min-height:170px}
+.flip .inner{position:relative;width:100%;height:100%;min-height:170px;transition:transform .5s;transform-style:preserve-3d}
+.flip.flipped .inner{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;border-radius:var(--radius);border:1px solid var(--border);padding:18px;display:flex;flex-direction:column;justify-content:center;box-shadow:var(--shadow)}
+.face.front{background:var(--surface)}
+.face.front .big{font-family:var(--mono);font-size:24px;font-weight:700;color:var(--brand-ink)}
+.face.front small{color:var(--muted);margin-top:8px;font-size:12.5px}
+.face.back{background:linear-gradient(135deg,#4a42c9,#7c3aed);color:#fff;transform:rotateY(180deg);border:none}
+.face.back p{font-size:14px;line-height:1.5}
+.face.back code{background:rgba(0,0,0,.25);border-radius:5px;padding:0 5px;font-family:var(--mono);font-size:12.5px}
+
+/* blueprint visual */
+.bp{display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin:6px 0 20px}
+.bp-class{background:repeating-linear-gradient(0deg,#16284a 0 23px,#1b3159 23px 24px),repeating-linear-gradient(90deg,#16284a 0 23px,#1b3159 23px 24px);background-blend-mode:lighten;border:2px dashed #5d8bd6;border-radius:14px;padding:16px 20px;font-family:var(--mono);color:#cfe1ff;min-width:230px}
+.bp-class b{display:block;color:#fff;font-size:16px;margin-bottom:6px}
+.bp-class div{font-size:13px;opacity:.9}
+.bp-arrow{font-family:var(--mono);color:#ffb020;font-size:14px;text-align:center}
+.bp-arrow span{display:block;font-size:30px;line-height:1}
+.bp-objs{display:flex;gap:12px;flex-wrap:wrap}
+.bp-obj{background:var(--surface);border:2px solid var(--good);border-radius:14px;padding:12px 16px;font-family:var(--mono);font-size:13px;min-width:150px;box-shadow:var(--shadow)}
+.bp-obj b{display:block;color:#7ff0c3;margin-bottom:4px}
+
+/* anatomy */
+.anat{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,1fr);gap:18px;align-items:start}
+@media(max-width:900px){.anat{grid-template-columns:1fr}}
+.anat-code{background:var(--code-bg);border:1px solid var(--code-border);border-radius:var(--radius);padding:16px 18px;font-family:var(--mono);font-size:14.5px;line-height:1.8;white-space:pre;overflow-x:auto}
+.zone{border-radius:6px;cursor:pointer;padding:2px 4px;margin:0 -4px;display:inline-block;border:1px dashed transparent}
+.zone:hover{border-color:#8b83ff}
+.zone.on{background:#2c3350;border-color:#ffb020}
+.zone.z1{color:#7aa2f7}.zone.z2{color:#2ac3de}.zone.z3{color:#e0af68}.zone.z4{color:#9ece6a}.zone.z5{color:#ff9e64}.zone.z6{color:#c0caf5}
+
+/* factory */
+.fac{display:grid;grid-template-columns:320px minmax(0,1fr);gap:18px;align-items:start}
+@media(max-width:900px){.fac{grid-template-columns:1fr}}
+.fac-form label{display:block;font-family:var(--mono);font-size:12.5px;font-weight:700;color:var(--ink2);margin-top:10px}
+.fac-form input{width:100%;background:var(--surface2);color:var(--ink);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:14.5px;margin-top:4px}
+.bigbtn{margin-top:14px;width:100%;background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;border:none;border-radius:10px;padding:11px;font-family:var(--mono);font-weight:700;font-size:14px;cursor:pointer}
+.bigbtn.ghosty{background:var(--surface2);color:var(--ink);border:1px solid var(--border);font-family:var(--sans);font-size:13px;padding:8px}
+.genline{margin-top:12px;font-family:var(--mono);font-size:12.5px;background:var(--code-bg);border:1px solid var(--code-border);border-radius:9px;padding:9px 11px;color:var(--code-text);white-space:pre-wrap;word-break:break-word;min-height:42px}
+.heap{background:repeating-linear-gradient(45deg,#121627 0 12px,#141a2e 12px 24px);border:1px solid var(--border);border-radius:var(--radius);padding:14px;min-height:240px}
+.heap-h{font-family:var(--mono);font-size:11px;letter-spacing:.12em;color:var(--muted);font-weight:700;margin-bottom:10px}
+.objs{display:flex;flex-wrap:wrap;gap:12px}
+.obj{background:var(--surface);border:2px solid var(--c,#22c58b);border-radius:14px;padding:12px 14px;min-width:200px;box-shadow:var(--shadow);animation:born .45s cubic-bezier(.2,1.6,.4,1)}
+@keyframes born{from{transform:scale(.4);opacity:0}to{transform:none;opacity:1}}
+.obj .oh{display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:12px;color:var(--c,#7ff0c3);font-weight:700;margin-bottom:6px}
+.obj .vn{background:var(--c,#22c58b);color:#0b0d16;border-radius:6px;padding:0 7px}
+.obj .fld{font-family:var(--mono);font-size:13px;color:var(--ink2);display:flex;justify-content:space-between;gap:10px}
+.obj .fld b{color:var(--ink);font-weight:600}
+.obj .fld.flash b{animation:flash 1s}
+@keyframes flash{0%{color:#ffb020}100%{color:var(--ink)}}
+.obj .ob{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.obj .ob button{background:var(--surface2);border:1px solid var(--border);color:var(--ink);border-radius:7px;padding:3px 9px;font-family:var(--mono);font-size:11.5px;cursor:pointer}
+.obj .ob button:hover{border-color:var(--c)}
+.flog{margin-top:12px}
+
+/* memory stepper */
+.mem{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow);margin-bottom:24px}
+.memctl{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.memctl button{background:var(--surface2);color:var(--ink);border:1px solid var(--border);border-radius:9px;padding:7px 14px;cursor:pointer;font-weight:600;font-size:13px}
+.memctl button.go{background:#ffb020;color:#1b1400;border-color:#ffb020}
+.memctl button:disabled{opacity:.35;cursor:default}
+.memctl .ms{font-family:var(--mono);color:var(--muted);font-size:13px}
+.memgrid{display:grid;grid-template-columns:220px minmax(0,1fr);gap:14px}
+@media(max-width:800px){.memgrid{grid-template-columns:1fr}}
+.mcol h4{font-family:var(--mono);font-size:11px;letter-spacing:.12em;color:var(--muted);margin-bottom:8px}
+.var{display:flex;align-items:center;justify-content:space-between;background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:7px 10px;margin-bottom:8px;font-family:var(--mono);font-size:14px;animation:pop .3s}
+.var .ref{border-radius:6px;padding:0 8px;font-size:12.5px;color:#0b0d16;font-weight:700}
+.var .val{color:var(--num);font-weight:700}
+.mobjs{display:flex;gap:12px;flex-wrap:wrap}
+.mobj{border:2px solid var(--c);border-radius:12px;padding:10px 14px;min-width:190px;font-family:var(--mono);font-size:13px;background:#12162a;animation:pop .3s}
+.mobj .oh{color:var(--c);font-weight:700;margin-bottom:4px}
+.mobj .who{color:var(--muted);font-size:11.5px;margin-top:6px}
+.mobj .fld.ch b{color:#ffb020}
+.mobj .fld{display:flex;justify-content:space-between;gap:10px;color:var(--ink2)}
+.mobj .fld b{color:var(--ink);font-weight:600}
+.memnote{margin-top:12px;color:var(--ink2);font-size:15px;min-height:48px}
+.memout{margin-top:6px}
+
+/* tables */
+.bridge{width:100%;border-collapse:separate;border-spacing:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);font-size:14.5px}
+.bridge th{background:var(--surface2);text-align:left;padding:11px 14px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2)}
+.bridge td{padding:10px 14px;border-top:1px solid var(--border);vertical-align:top;color:var(--ink2)}
+.bridge td b{color:var(--ink)}
+.bridge td.arrow{color:#8b83ff;font-weight:800;text-align:center;width:36px}
+.bridge td code{white-space:nowrap}
+
+/* window preview */
+.prevbox{margin-top:12px}
+.prevcap-top{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;color:var(--muted);font-weight:700;margin-bottom:6px}
+.prevcap{font-size:13.5px;color:var(--ink2);margin-top:6px}
+.wv-wrap{position:relative;width:100%}
+.wv{transform-origin:top left;border-radius:9px;overflow:hidden;box-shadow:0 18px 40px rgba(0,0,0,.5);font-family:'Segoe UI',Inter,system-ui,sans-serif;border:1px solid #9aa0b4;background:#fff}
+.wv-title{height:32px;display:flex;align-items:center;gap:8px;padding-left:10px;background:#eeeeee;color:#1b1b1b;font-size:12.5px;border-bottom:1px solid #dcdcdc}
+.wv-tt{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wv-btns{display:flex;height:100%}
+.wv-btns i{font-style:normal;width:40px;display:flex;align-items:center;justify-content:center;color:#444;font-size:12px}
+.wv-body{overflow:hidden;color:#1b1b1b;font-size:14px;background:#fff}
+.wv-stack{display:flex;flex-direction:column;align-items:stretch}
+.wv-text{line-height:1.3}
+.wv-btn{align-self:flex-start;background:#fdfdfd;border:1px solid #d0d0d0;border-bottom-color:#bcbcbc;border-radius:4px;padding:5px 11px;font-size:14px;color:#1b1b1b;cursor:pointer;font-family:inherit;text-align:center}
+.wv-btn:hover{filter:brightness(.97)}
+.wv-btn:active{filter:brightness(.92)}
+.wv-box{background:#fff;border:1px solid #c8c8c8;border-bottom:1px solid #8a8a8a;border-radius:4px;padding:6px 10px;font-size:14px;color:#1b1b1b;font-family:inherit;outline:none;width:100%}
+.wv-box:focus{border-bottom:2px solid #0067c0}
+.wv-list{border:1px solid #d0d0d0;border-radius:4px;overflow-y:auto;background:#fff}
+.wv-list div{padding:6px 10px;font-size:14px;cursor:pointer}
+.wv-list div:hover{background:#f0f0f0}
+.wv-list div.sel{background:#cce4f7}
+
+/* GUI examples */
+.guiex{margin-bottom:30px}
+.guiex h3{font-size:19px;margin-bottom:4px}
+.guiex>p{color:var(--ink2);margin-bottom:6px;max-width:80ch}
+
+/* bug, quiz, practice */
+.cl.bugline{cursor:pointer}
+.cl.bugline.found{background:#3a1f22;border-left-color:var(--bad)}
+.cl.bugline.wrongpick{background:#1e3a2c;border-left-color:var(--good)}
+.buglabel{margin-left:14px;font-family:var(--sans);font-size:11.5px;border-radius:5px;padding:1px 8px}
+.buglabel.err{background:var(--bad);color:#fff}
+.buglabel.ok{background:var(--good);color:#fff}
+.score{font-family:var(--mono);color:var(--brand-ink);font-weight:600}
+.q{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;margin-bottom:14px;box-shadow:var(--shadow)}
+.q h3{margin-bottom:12px;font-size:16px}
+.q .opt{display:block;width:100%;text-align:left;background:var(--surface2);color:var(--ink);border:1px solid var(--border);border-radius:9px;padding:10px 14px;margin-bottom:8px;cursor:pointer;font-size:14.5px}
+.q .opt:hover:not(:disabled){border-color:#8b83ff;background:var(--brand-soft)}
+.q .opt.right{border-color:var(--good);background:var(--good-soft);color:#bff5dd;font-weight:600}
+.q .opt.wrong{border-color:var(--bad);background:var(--bad-soft);color:#ffc9c4}
+.q .why{margin-top:10px;font-size:14px;color:var(--ink2);display:none}
+.q .why.show{display:block}
+#quizScore{font-family:var(--mono);color:var(--brand-ink);font-size:15px;font-weight:600}
+.prac{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;margin-bottom:16px;box-shadow:var(--shadow)}
+.prac-head{display:flex;gap:14px;align-items:flex-start}
+.prac-n{width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;flex:0 0 auto;font-family:var(--mono)}
+.prac-head p{color:var(--ink2);font-size:15px;margin-top:4px}
+.prac-head ul{margin:6px 0 0 18px;color:var(--ink2);font-size:14.5px}
+.prac .term{max-width:560px;margin-left:52px}
+@media(max-width:700px){.prac .term{margin-left:0}}
+details.sol{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);margin-top:12px}
+details.sol summary{cursor:pointer;padding:12px 16px;font-size:15px;color:var(--ink2);list-style:none}
+details.sol summary::-webkit-details-marker{display:none}
+details.sol summary::before{content:"▸  ";color:#8b83ff;font-weight:800}
+details.sol[open] summary::before{content:"▾  "}
+details.sol .ex{padding:0 14px;margin-top:2px}
+.cheat{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media(max-width:1000px){.cheat{grid-template-columns:1fr 1fr}}
+@media(max-width:700px){.cheat{grid-template-columns:1fr}}
+.cheat .card{padding:14px 16px}
+.cheat .card h3{font-size:14px;margin-bottom:6px}
+.cheat pre{font-family:var(--mono);font-size:12.5px;color:var(--brand-ink);background:var(--code-bg);border:1px solid var(--code-border);border-radius:8px;padding:8px 10px;white-space:pre;overflow-x:auto;line-height:1.55}
+.used{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+@media(max-width:900px){.used{grid-template-columns:1fr 1fr}}
+.used div{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:10px 12px;font-size:13.5px;color:var(--ink2)}
+.used code{display:block;margin-bottom:4px}
+#mem .var,#mem .mobj,#mem .tline{animation:none}
+#mem .mobj .fld.ch b{background:rgba(255,176,32,.18);border-radius:4px;padding:0 4px}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="top">
+    <div class="logo">C#</div>
+    <div class="ttl">MAC 109 · Classes &amp; Object Instantiation<small>LaGuardia Community College · MEC Department · Prof. K. Kassou</small></div>
+    <div class="right"><span>Hover any code line · explanation appears on the right</span><div id="progressWrap" aria-hidden="true"><div id="progressBar"></div></div></div>
+  </div>
+  <nav id="tabstrip" aria-label="Sections"></nav>
+  <main id="stage"></main>
+  <div id="bottom">
+    <button id="prevBtn" class="ghost" type="button">◀ Back</button>
+    <button id="nextBtn" type="button">Next ▶</button>
+    <span class="where" id="where"></span>
+    <div class="grow"></div>
+    <span class="hint">← → keys move between sections · click a code line to pin its explanation</span>
+  </div>
+</div>
+
+<template id="slides">
+
+<section data-tab="Start">
+  <p class="eyebrow">Lecture · Object-Oriented Programming</p>
+  <h1>Classes &amp; Objects:<br>design your <span class="grad">own types</span>, then build them with <code class="inline" style="font-size:.8em">new</code></h1>
+  <div class="hero">
+    <div>
+      <p class="sub">So far you've used types other people wrote: <code>string</code>, <code>Button</code>, <code>TextBox</code>. Today you write your <b>own</b>. A <b>class</b> describes a kind of thing (a Student, a Book, a BankAccount), and <b>instantiation</b> means building real <b>objects</b> from it. This is the heart of C#, and the heart of your semester app: every student in your roster will be an object.</p>
+      <p class="pill">By the end of today you can</p>
+      <ul class="objlist">
+        <li>Explain <b>class</b> vs <b>object</b> (blueprint vs real thing) and what <b>instantiation</b> means</li>
+        <li>Write a class with <b>fields</b>, <b>properties</b> and <b>methods</b></li>
+        <li>Create objects with <code>new</code>, a <b>constructor</b>, or an <b>object initializer</b></li>
+        <li>Predict what happens when two variables refer to the <b>same object</b></li>
+        <li>Protect data with <b>private</b> and read-only properties (<b>encapsulation</b>)</li>
+        <li>Override <b>ToString()</b> and keep many objects in a <b>List</b></li>
+        <li>Recognize every GUI control as an object, and put <b>your</b> objects in a window</li>
+      </ul>
+    </div>
+    <div>
+      <div class="card"><span class="pill g">How this page works</span><p>Every code box is a <b>complete program</b>. <b>Hover</b> any line and its explanation appears on the right; <b>click</b> a line to pin it. <b>▶ Run</b> shows the real output (each program was compiled and run), and <b>Copy</b> gives you the whole file for VS Code.</p></div>
+      <div class="card" style="margin-top:14px"><span class="pill">The running example</span><p>Most examples use the <b>Student</b> class from your Student Management app: <code>Name</code>, <code>Id</code>, <code>Age</code>. Other examples come from the other course domains: <b>Library</b>, <b>Banking</b>, <b>Hotel</b>, <b>Inventory</b>, <b>Restaurant</b>.</p></div>
+      <div class="tip">🧭 Running these in VS Code: create a <b>Console App</b> (Ctrl+Shift+P ▸ .NET: New Project ▸ Console App), replace everything in <b>Program.cs</b> with a copied example, press <b>F5</b>.</div>
+    </div>
+  </div>
+</section>
+
+<section data-tab="Big Idea">
+  <p class="eyebrow">01 · The big idea</p>
+  <h2>A class is a <span class="grad">blueprint</span>. An object is a <span class="grad">house built from it</span>.</h2>
+  <p class="sub">An architect draws <b>one</b> blueprint and the builder makes <b>many</b> houses from it. Every house has the same rooms, but each has its own paint color and its own family. In C#, the blueprint is a <b>class</b>, each house is an <b>object</b>, and building one is <b>instantiation</b>, done with the keyword <code>new</code>.</p>
+  <div class="bp">
+    <div class="bp-class"><b>class Student</b><div>Name : string</div><div>Id &nbsp;&nbsp;: int</div><div>Age &nbsp;: int</div><div style="margin-top:6px;color:#9fd0ff">Introduce()</div></div>
+    <div class="bp-arrow"><span>⟹</span>new Student()<br>× 3</div>
+    <div class="bp-objs">
+      <div class="bp-obj"><b>object #1</b>Name: "Maria"<br>Id: 1001<br>Age: 19</div>
+      <div class="bp-obj"><b>object #2</b>Name: "Ahmed"<br>Id: 1002<br>Age: 22</div>
+      <div class="bp-obj"><b>object #3</b>Name: "Lin"<br>Id: 1003<br>Age: 20</div>
+    </div>
+  </div>
+  <h3 style="margin-bottom:10px">Vocabulary: flip each card (guess first!)</h3>
+  <div class="grid4">
+    <div class="flip" tabindex="0" role="button"><div class="inner"><div class="face front"><span class="big">class</span><small>▸ click to flip</small></div><div class="face back"><p>A <b>blueprint</b> for a kind of thing: what data it has and what it can do. Writing a class creates no objects.</p></div></div></div>
+    <div class="flip" tabindex="0" role="button"><div class="inner"><div class="face front"><span class="big">object</span><small>▸ click to flip</small></div><div class="face back"><p>One real <b>thing</b> built from a class, with its own values. Also called an <b>instance</b>.</p></div></div></div>
+    <div class="flip" tabindex="0" role="button"><div class="inner"><div class="face front"><span class="big">new</span><small>▸ click to flip</small></div><div class="face back"><p>The keyword that <b>instantiates</b> (builds) an object: <code>new Student()</code>. Every object starts with <b>new</b>.</p></div></div></div>
+    <div class="flip" tabindex="0" role="button"><div class="inner"><div class="face front"><span class="big">constructor</span><small>▸ click to flip</small></div><div class="face back"><p>A special method with the class's name that runs automatically on <b>new</b>, to set the object up.</p></div></div></div>
+    <div class="flip" tabindex="0" role="button"><div class="inner"><div class="face front"><span class="big">field</span><small>▸ click to flip</small></div><div class="face back"><p>A variable that lives <b>inside</b> each object: <code>public int Age;</code></p></div></div></div>
+    <div class="flip" tabindex="0" role="button"><div class="inner"><div class="face front"><span class="big">property</span><small>▸ click to flip</small></div><div class="face back"><p>A named value with <b>get</b>/<b>set</b> that can guard its data: <code>public int Age { get; set; }</code>. <code>Text</code> and <code>Width</code> are properties.</p></div></div></div>
+    <div class="flip" tabindex="0" role="button"><div class="inner"><div class="face front"><span class="big">method</span><small>▸ click to flip</small></div><div class="face back"><p>Something an object can <b>do</b>: <code>s1.Introduce();</code></p></div></div></div>
+    <div class="flip" tabindex="0" role="button"><div class="inner"><div class="face front"><span class="big">reference</span><small>▸ click to flip</small></div><div class="face back"><p>What an object variable really holds: an <b>arrow</b> to the object, not the object itself.</p></div></div></div>
+  </div>
+  <h3 class="sec">Surprise: you've been using objects for weeks</h3>
+  <div class="used">
+    <div><code>"Maria".Length</code>Every string is an object with properties.</div>
+    <div><code>new Button { Content = "Save" }</code>Instantiating Avalonia's Button class.</div>
+    <div><code>txtName.Text</code>Reading a property of a TextBox object.</div>
+    <div><code>new Thickness(20)</code>Calling a constructor with an argument.</div>
+    <div><code>new MainWindow()</code>Program.cs instantiates <b>your</b> window class.</div>
+    <div><code>btnGo.Click += …</code>Events belong to objects too.</div>
+    <div><code>name.ToUpper()</code>Calling a method on an object.</div>
+    <div><code>List&lt;string&gt;</code>Collections are objects that hold objects.</div>
+  </div>
+</section>
+
+<section data-tab="First Class">
+  <p class="eyebrow">02 · Your first class</p>
+  <h2>Write a class, then <span class="grad">instantiate</span> it with <code class="inline" style="font-size:.8em">new</code></h2>
+  <p class="sub">Click each colored part of the class to learn its name. Then hover the full program below.</p>
+  <div class="anat">
+<div class="anat-code"><span class="zone z1" data-z="0">class</span> <span class="zone z2" data-z="1">Student</span>
+<span class="zone z6" data-z="2">{</span>
+    <span class="zone z3" data-z="3">public</span> <span class="zone z4" data-z="4">string Name = "";</span>
+    <span class="zone z3" data-z="3">public</span> <span class="zone z4" data-z="4">int Id;</span>
+    <span class="zone z3" data-z="3">public</span> <span class="zone z4" data-z="4">int Age;</span>
+<span class="zone z6" data-z="2">}</span>
+
+<span class="zone z2" data-z="5">Student</span> s1 = <span class="zone z5" data-z="6">new Student()</span>;
+s1<span class="zone z5" data-z="7">.</span>Name = "Maria";</div>
+    <div class="expl" id="zInfo"><div class="lbl" id="zLbl">Click a colored part ←</div><div class="why" id="zText">Every class follows this shape: the keyword <b>class</b>, a name, and a body in braces holding the data each object will carry.</div></div>
+  </div>
+  <div class="ex" data-ex="first"></div>
+  <div class="note">🧠 <b>Two places, two jobs:</b> the <b>class</b> (top) <i>describes</i> a student; <b>Main</b> (bottom) <i>creates and uses</i> one. In bigger projects the class gets its own file, <b>Student.cs</b>, just like in your Student Management app.</div>
+</section>
+
+<section data-tab="Many Objects">
+  <p class="eyebrow">03 · One class, many objects</p>
+  <h2>Each object keeps <span class="grad">its own data</span></h2>
+  <p class="sub">Three <code>new</code>s = three separate students. Changing one never changes the others. Run it and check that only Ahmed got older.</p>
+  <div class="ex" data-ex="many"></div>
+  <h3 class="sec">What's inside a brand-new object?</h3>
+  <p class="sub">Before you set anything, every field holds its type's <b>default value</b>: numbers are <code>0</code>, bools are <code>false</code>, and a string is whatever you initialized it to (we use <code>""</code>).</p>
+  <div class="ex" data-ex="defaults"></div>
+</section>
+
+<section data-tab="★ Object Factory">
+  <p class="eyebrow">04 · Try it: the object factory</p>
+  <h2>Press <code class="inline" style="font-size:.8em">new</code> and watch objects <span class="grad">appear in memory</span></h2>
+  <p class="sub">Fill in the form and instantiate Students. Each one gets its own box in memory (the <b>heap</b>). Then call methods on individual objects and see that only <b>that</b> object changes.</p>
+  <div class="fac">
+    <div class="card fac-form">
+      <span class="pill">class Student</span>
+      <label>Variable name<input id="fVar" value="s1" spellcheck="false"></label>
+      <label>Name<input id="fName" value="Maria" spellcheck="false"></label>
+      <label>Id<input id="fId" value="1001"></label>
+      <label>Age<input id="fAge" value="19"></label>
+      <button class="bigbtn" id="fNew" type="button">new Student(…)</button>
+      <div class="genline" id="fGen">// the C# for your next object appears here</div>
+      <button class="bigbtn ghosty" id="fReset" type="button">↺ Clear memory</button>
+    </div>
+    <div>
+      <div class="heap"><div class="heap-h">HEAP · OBJECTS IN MEMORY (<span id="fCount">0</span>)</div><div class="objs" id="fObjs"><span style="color:var(--muted)">Nothing here yet. The class alone builds nothing. Press <b>new</b>!</span></div></div>
+      <div class="term flog"><div class="thead">CONSOLE OUTPUT</div><div id="fLog"><div class="placeholder">Method calls print here.</div></div></div>
+    </div>
+  </div>
+</section>
+
+<section data-tab="Methods">
+  <p class="eyebrow">05 · Methods: what objects can do</p>
+  <h2>Methods use <span class="grad">the object's own data</span></h2>
+  <p class="sub">A method written inside the class can read and change that object's fields. Call it with the dot: <code>s1.Introduce()</code> runs with Maria's data, <code>s2.Introduce()</code> with Ahmed's. Methods can also take <b>parameters</b> and <b>return</b> values, just like the methods you wrote earlier.</p>
+  <div class="ex" data-ex="methods"></div>
+  <div class="grid3">
+    <div class="card"><span class="pill">void method</span><p>Does something, returns nothing: <code>Introduce()</code>, <code>HaveBirthday()</code>.</p></div>
+    <div class="card"><span class="pill">returning method</span><p>Answers a question: <code>int YearsUntil(int targetAge)</code> gives back an int.</p></div>
+    <div class="card"><span class="pill g">GUI link</span><p>Controls have methods too: <code>txtName.Focus()</code> moves the cursor into that one TextBox object.</p></div>
+  </div>
+</section>
+
+<section data-tab="Properties">
+  <p class="eyebrow">06 · Properties: the professional way to expose data</p>
+  <h2>Fields store data. <span class="grad">Properties</span> control access to it.</h2>
+  <p class="sub">From the outside, a property looks exactly like a field: <code>s.Name = "Maria"</code>. The difference is inside: a property has a <b>get</b> (runs when read) and a <b>set</b> (runs when assigned), so the class decides what's allowed. Every GUI setting you've used is a property: <code>Title</code>, <code>Width</code>, <code>Text</code>, <code>Content</code>.</p>
+  <div class="ex" data-ex="autoprop"></div>
+  <h3 class="sec">A property that protects its data</h3>
+  <p class="sub">A full property with a <b>private</b> field behind it. The <b>set</b> checks every new value and rejects impossible ages. Nobody can put a student into an impossible state.</p>
+  <div class="ex" data-ex="props"></div>
+  <table class="bridge">
+    <thead><tr><th>You write</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td><code>public int Age;</code></td><td><b>Field</b>: raw storage, no checks.</td></tr>
+      <tr><td><code>public int Age { get; set; }</code></td><td><b>Auto-property</b>: readable and writable; C# creates the hidden storage.</td></tr>
+      <tr><td><code>public string Label { get { return …; } }</code></td><td><b>Read-only, computed</b> property: no set.</td></tr>
+      <tr><td><code>private int age;</code> + <code>public int Age { get {…} set {…} }</code></td><td><b>Full property</b> guarding a private field.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section data-tab="Constructors">
+  <p class="eyebrow">07 · Constructors: setting an object up as it's born</p>
+  <h2>A <span class="grad">constructor</span> runs automatically on every <code class="inline" style="font-size:.8em">new</code></h2>
+  <p class="sub">Without a constructor you write <code>new Student()</code> and then set each value. With one, you pass the values straight into <code>new</code>, and the class can <b>require</b> them. How to spot a constructor: <b>same name as the class</b>, and <b>no return type</b> (not even void).</p>
+  <div class="ex" data-ex="ctor"></div>
+  <h3 class="sec">Several constructors (overloading) and <code class="inline">this</code></h3>
+  <p class="sub">A class can offer several constructors with different parameter lists. C# picks the one that matches your arguments. <code>this</code> means "the object being built right now".</p>
+  <div class="ex" data-ex="ctor2"></div>
+  <div class="tip">🪟 <b>GUI link:</b> <code>new Thickness(20)</code> and <code>new Thickness(10, 20)</code> are two overloaded constructors of Avalonia's Thickness class. Your <code>public MainWindow()</code> is the constructor of your window class, which is why it runs once when the window opens.</div>
+</section>
+
+<section data-tab="Initializers">
+  <p class="eyebrow">08 · Object initializers: the GUI shape</p>
+  <h2><code class="inline" style="font-size:.8em">new Student { … }</code>: create <span class="grad">and</span> set in one statement</h2>
+  <p class="sub">An <b>object initializer</b> calls the constructor, then sets the properties listed in braces. Commas separate them; no semicolons inside. You've written this shape in every GUI lab: <code>new Button { Content = "Save" }</code>.</p>
+  <div class="ex" data-ex="init"></div>
+  <table class="bridge">
+    <thead><tr><th>Your own class</th><th></th><th>An Avalonia class</th></tr></thead>
+    <tbody>
+      <tr><td><code>new Student()</code></td><td class="arrow">↔</td><td><code>new Button()</code></td></tr>
+      <tr><td><code>s1.Name = "Maria";</code></td><td class="arrow">↔</td><td><code>btnSave.Content = "Save";</code></td></tr>
+      <tr><td><code>new Student { Name = "Ahmed", Age = 22 }</code></td><td class="arrow">↔</td><td><code>new TextBlock { Text = "Hi", FontSize = 20 }</code></td></tr>
+      <tr><td><code>new Student("Maria", 1001, 19)</code></td><td class="arrow">↔</td><td><code>new Thickness(20)</code></td></tr>
+      <tr><td><code>s1.Introduce();</code></td><td class="arrow">↔</td><td><code>txtName.Focus();</code></td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section data-tab="References">
+  <p class="eyebrow">09 · References: variables hold arrows, not objects</p>
+  <h2><code class="inline" style="font-size:.8em">b = a</code> copies the <span class="grad">arrow</span>, not the student</h2>
+  <p class="sub">An object variable holds a <b>reference</b>: an arrow to where the object lives. Copying the variable copies the arrow, so both variables point at the <b>same</b> object. Press <b>Step ▶</b> and watch memory change line by line (the current line glows orange in the code).</p>
+  <div class="mem" id="mem">
+    <div class="memctl"><button type="button" id="mBack">◀ Back</button><button type="button" class="go" id="mStep">Step ▶</button><button type="button" id="mReset">↺ Reset</button><span class="ms" id="mPos"></span></div>
+    <div class="memgrid">
+      <div class="mcol"><h4>VARIABLES (STACK)</h4><div id="mVars"></div></div>
+      <div class="mcol"><h4>OBJECTS (HEAP)</h4><div class="mobjs" id="mObjs"></div></div>
+    </div>
+    <div class="memnote" id="mNote"></div>
+    <div class="term memout"><div class="thead">OUTPUT SO FAR</div><div id="mOut"></div></div>
+  </div>
+  <div class="ex" data-ex="refs" id="refsEx"></div>
+  <div class="grid2">
+    <div class="card"><span class="pill">Value types</span><p><code>int</code>, <code>double</code>, <code>decimal</code>, <code>bool</code>, <code>char</code>: the variable holds the value. Copying makes an independent copy.</p></div>
+    <div class="card"><span class="pill w">Reference types</span><p>Classes (Student, Button, List…): the variable holds an arrow. Copying shares the object. A variable that points to nothing holds <b>null</b>; using it crashes with a <i>NullReferenceException</i>.</p></div>
+  </div>
+  <div class="tip">🪟 <b>GUI link:</b> <code>Children = { lblInfo, btnSave }</code> stores <b>references</b>. When a click handler later changes <code>lblInfo.Text</code>, the screen updates, because the window and your field point to the <b>same</b> TextBlock object.</div>
+</section>
+
+<section data-tab="Encapsulation">
+  <p class="eyebrow">10 · Encapsulation: objects protect their own data</p>
+  <h2><span class="grad">private</span> data, <span class="grad">public</span> methods with rules</h2>
+  <p class="sub"><b>Encapsulation</b> means the class keeps its data private and offers public methods that enforce the rules. Outside code can't set a balance to a million dollars; it has to call <code>Deposit</code> and <code>Withdraw</code>, which check every request. (Banking domain.)</p>
+  <div class="ex" data-ex="bank"></div>
+  <div class="grid3">
+    <div class="card"><span class="pill">public</span><p>Anyone can use it: methods and properties that form the class's "front desk".</p></div>
+    <div class="card"><span class="pill r">private</span><p>Only code inside the class. <b>The default</b>: if you forget <code>public</code>, it's private.</p></div>
+    <div class="card"><span class="pill g">Why bother?</span><p>Bugs can only happen in one place (inside the class), and the object can never end up in an impossible state.</p></div>
+  </div>
+</section>
+
+<section data-tab="ToString & Lists">
+  <p class="eyebrow">11 · Showing objects, and keeping many of them</p>
+  <h2><code class="inline" style="font-size:.8em">ToString()</code> decides how an object <span class="grad">looks as text</span></h2>
+  <p class="sub">Every class inherits a <code>ToString()</code> method that just returns the class name. <b>Override</b> it and your objects print nicely, and, very important for your GUI, that's the text a <b>ListBox</b> shows for each object.</p>
+  <div class="ex" data-ex="tostring"></div>
+  <h3 class="sec">A List of objects: your roster</h3>
+  <p class="sub"><code>List&lt;Student&gt;</code> holds as many Student objects as you add. Your Milestone app uses <code>ObservableCollection&lt;Student&gt;</code>, which works the same way but also updates the ListBox automatically (see the GUI tab).</p>
+  <div class="ex" data-ex="list"></div>
+</section>
+
+<section data-tab="static">
+  <p class="eyebrow">12 · static vs instance</p>
+  <h2>Belongs to <span class="grad">each object</span>, or to <span class="grad">the class</span>?</h2>
+  <p class="sub">Normal members (Name, Introduce) belong to <b>each object</b>: you need an object to use them. A <b>static</b> member belongs to the <b>class itself</b>: there's one copy, used through the class name. Now <code>static void Main</code>, <code>Math.Max</code> and <code>Console.WriteLine</code> make sense!</p>
+  <div class="ex" data-ex="static"></div>
+  <table class="bridge">
+    <thead><tr><th></th><th>Instance (no static)</th><th>static</th></tr></thead>
+    <tbody>
+      <tr><td><b>Belongs to</b></td><td>each object</td><td>the class</td></tr>
+      <tr><td><b>How many copies</b></td><td>one per object</td><td>exactly one</td></tr>
+      <tr><td><b>Called with</b></td><td><code>s1.Introduce()</code>, <code>txtName.Text</code></td><td><code>Student.Count</code>, <code>Math.Max(3, 9)</code>, <code>int.Parse("5")</code></td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section data-tab="Mini Project">
+  <p class="eyebrow">13 · Putting it all together</p>
+  <h2>A tiny <span class="grad">library system</span></h2>
+  <p class="sub">One class using everything from today: properties, a constructor, methods with rules, a ToString override, and a List of objects. (Library domain.) Hover every line; you can now explain all of them.</p>
+  <div class="ex" data-ex="library"></div>
+  <div class="tip">🎯 <b>Your turn:</b> add a <code>public int TimesBorrowed { get; set; }</code> property, increase it inside <code>CheckOut()</code>, and show it in <code>ToString()</code>.</div>
+</section>
+
+<section data-tab="★ Classes in GUI">
+  <p class="eyebrow">14 · Classes and objects in your GUI</p>
+  <h2>Every control is an object, and <span class="grad">your objects</span> belong in windows too</h2>
+  <p class="sub">A GUI is a tree of objects: a Window object whose Content is a StackPanel object holding TextBlock, TextBox and Button objects. Below, three complete GUI examples, from built-in objects to your own Student objects in a ListBox. Use the file tabs to see every file; each one is complete. The windows on the right are <b>live previews</b>: click them.</p>
+  <table class="bridge" style="margin-bottom:24px">
+    <thead><tr><th>Concept today</th><th>Where it shows up in your GUI</th></tr></thead>
+    <tbody>
+      <tr><td><b>class</b></td><td><code>Button</code>, <code>TextBox</code>, <code>Window</code> are classes; <code>public class MainWindow : Window</code> is <b>yours</b></td></tr>
+      <tr><td><b>new</b> / instantiation</td><td><code>new Button { … }</code>; Program.cs runs <code>new MainWindow()</code></td></tr>
+      <tr><td><b>constructor</b></td><td><code>public MainWindow() { … }</code> sets up the window once</td></tr>
+      <tr><td><b>properties</b></td><td><code>Title</code>, <code>Width</code>, <code>Text</code>, <code>Content</code>, <code>ItemsSource</code></td></tr>
+      <tr><td><b>methods</b></td><td><code>txtName.Focus()</code>, <code>students.Add(s)</code>, <code>student.HaveBirthday()</code></td></tr>
+      <tr><td><b>fields</b></td><td>controls and objects a click handler needs, declared above the constructor</td></tr>
+      <tr><td><b>ToString()</b></td><td>the text a <b>ListBox</b> shows for each of your objects</td></tr>
+      <tr><td><b>references</b></td><td><code>Children = { … }</code> and <code>ItemsSource = students</code> point to the same objects you change</td></tr>
+    </tbody>
+  </table>
+  <div class="guiex">
+    <h3>GUI 1 · One class, three Button objects</h3>
+    <p>Three <code>new Button</code>s = three independent objects, each with its own property values. Two ways to set them: the dot, and an object initializer.</p>
+    <div class="ex" data-gui="gui0"></div>
+  </div>
+  <div class="guiex">
+    <h3>GUI 2 · Your Student object inside a window</h3>
+    <p>A <code>Student</code> object lives as a field of the window. The button calls a <b>method on your object</b>, then redisplays it with <code>ToString()</code>. Pattern: <b>change the object → refresh the screen</b>.</p>
+    <div class="ex" data-gui="gui1"></div>
+  </div>
+  <div class="guiex">
+    <h3>GUI 3 · A roster: instantiate a Student on every click</h3>
+    <p>This is the core of your Milestone app. Each click builds a <b>new</b> Student from the TextBoxes and adds it to an <code>ObservableCollection</code>; the ListBox shows each object through its <code>ToString()</code>.</p>
+    <div class="ex" data-gui="gui2"></div>
+  </div>
+  <div class="note">📁 <b>Project layout:</b> <b>Program.cs</b> (engine, never touch) · <b>Student.cs</b> (your class: in VS Code, Explorer ▸ New File ▸ Student.cs) · <b>MainWindow.cs</b> (your window). All three files say <code>namespace MyStudioApp;</code>, so they can see each other.</div>
+</section>
+
+<section data-tab="Bug Hunt">
+  <p class="eyebrow">15 · Find the bugs</p>
+  <h2>🐞 4 classic class &amp; object errors</h2>
+  <p class="sub" style="margin-bottom:10px">This program won't compile. Hover to inspect each line, then <b>click</b> the lines you think are broken. <span id="bugScore" class="score">Found: 0 / 4</span></p>
+  <div class="ex">
+    <div class="codewin"><div class="bar"><span class="dots"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i></span><span class="fname">Program.cs</span><span class="tag">4 errors hiding</span></div><pre id="bugCode"></pre></div>
+    <div class="explain-panel"><div class="expl idle" id="bugExpl"><div class="lbl">Bug hunt</div><div class="codeq"></div><div class="why">Hints: How many arguments does the constructor need? Is something missing a keyword? Is everything public? Which <i>object</i> is being changed?</div></div></div>
+  </div>
+  <h3 style="margin-bottom:4px">✅ The fixed program</h3>
+  <div class="ex" data-ex="bugfixed"></div>
+</section>
+
+<section data-tab="Quiz">
+  <p class="eyebrow">16 · Knowledge check</p>
+  <h2>Prove it to yourself</h2>
+  <p class="sub">Predict, then click. Every answer comes with an explanation.</p>
+  <div id="quizHost"></div>
+  <p id="quizScore">Score: 0 / 12</p>
+</section>
+
+<section data-tab="Practice">
+  <p class="eyebrow">17 · Your turn</p>
+  <h2>Three classes to write, <span class="grad">one per domain</span></h2>
+  <p class="sub">Write each program in VS Code first. Your output should match the expected output. Open the solution when you're done or stuck; it's complete, runnable and explained line by line.</p>
+  <div id="pracHost"></div>
+</section>
+
+<section data-tab="Wrap-Up">
+  <p class="eyebrow">18 · Before you leave</p>
+  <h2>Cheat sheet</h2>
+  <div class="cheat" style="margin-bottom:18px">
+    <div class="card"><h3>A class</h3><pre>class Student
+{
+    public string Name { get; set; } = "";
+    public int Id { get; set; }
+    public int Age { get; set; }
+}</pre></div>
+    <div class="card"><h3>Instantiation</h3><pre>Student s1 = new Student();
+s1.Name = "Maria";
+
+Student s2 = new Student
+{
+    Name = "Ahmed", Id = 1002, Age = 22
+};</pre></div>
+    <div class="card"><h3>Constructor</h3><pre>public Student(string name, int id)
+{
+    Name = name;
+    Id = id;
+}
+// use: new Student("Lin", 1003)</pre></div>
+    <div class="card"><h3>Method</h3><pre>public void HaveBirthday()
+{
+    Age = Age + 1;
+}
+// use: s1.HaveBirthday();</pre></div>
+    <div class="card"><h3>Guarded property</h3><pre>private int age;
+public int Age
+{
+    get { return age; }
+    set { if (value >= 0) age = value; }
+}</pre></div>
+    <div class="card"><h3>ToString</h3><pre>public override string ToString()
+{
+    return $"{Name} (#{Id})";
+}
+// used by WriteLine and ListBox</pre></div>
+    <div class="card"><h3>References</h3><pre>Student b = a;   // same object!
+a == b           // same object?
+Student c = new Student(); // new one</pre></div>
+    <div class="card"><h3>List of objects</h3><pre>List&lt;Student&gt; list = new List&lt;Student&gt;();
+list.Add(new Student { Name = "Lin" });
+foreach (Student s in list) { … }</pre></div>
+    <div class="card"><h3>In the GUI</h3><pre>ObservableCollection&lt;Student&gt; students
+    = new ObservableCollection&lt;Student&gt;();
+lstStudents.ItemsSource = students;
+students.Add(new Student(name, id, age));</pre></div>
+  </div>
+  <div class="grid2">
+    <div><ul class="checklist">
+      <li>Explain class vs object vs instantiation, in your own words.</li>
+      <li>Write a class with fields or properties, a constructor and methods.</li>
+      <li>Create objects three ways: <code>new</code> + dot, constructor, initializer.</li>
+      <li>Predict output when two variables share one object.</li>
+      <li>Use <code>private</code> + public methods/properties to protect data.</li>
+      <li>Override <code>ToString()</code> and loop over a <code>List</code> of objects.</li>
+      <li>Point to every class, object, property and constructor in MainWindow.cs.</li>
+    </ul></div>
+    <div class="card"><span class="pill">Next in your app</span><h3>Student.cs is a class you now fully understand</h3><p>In the Student Management milestone, <b>Student.cs</b> is today's class, <code>new Student(…)</code> runs on every Add click, and the ListBox shows each object through <code>ToString()</code>. When you open that code, every line should feel familiar.</p></div>
+  </div>
+</section>
+
+</template>
+
+<script>
+var CODE={"autoprop": "using System;\n\nclass Student\n{\n    public string Name { get; set; } = \"\";\n    public int Id { get; set; }\n    public int Age { get; set; }\n\n    public string Label\n    {\n        get\n        {\n            return Name + \" (#\" + Id + \")\";\n        }\n    }\n}\n\nclass Program\n{\n    static void Main()\n    {\n        Student s = new Student();\n        s.Name = \"Maria\";\n        s.Id = 1001;\n        s.Age = 19;\n\n        Console.WriteLine(s.Name);\n        Console.WriteLine(s.Label);\n\n        s.Name = \"Maria Lopez\";\n        Console.WriteLine(s.Label);\n\n        // s.Label = \"Hacked\";   // error: Label has no set\n    }\n}", "bank": "using System;\n\nclass BankAccount\n{\n    private decimal balance;\n\n    public string Owner { get; set; }\n\n    public decimal Balance\n    {\n        get\n        {\n            return balance;\n        }\n    }\n\n    public BankAccount(string owner, decimal openingDeposit)\n    {\n        Owner = owner;\n        balance = openingDeposit;\n    }\n\n    public void Deposit(decimal amount)\n    {\n        if (amount <= 0)\n        {\n            Console.WriteLine(\"Deposit must be positive.\");\n            return;\n        }\n        balance = balance + amount;\n        Console.WriteLine($\"Deposited ${amount:F2}. Balance: ${balance:F2}\");\n    }\n\n    public void Withdraw(decimal amount)\n    {\n        if (amount > balance)\n        {\n            Console.WriteLine($\"Insufficient funds for ${amount:F2}.\");\n            return;\n        }\n        balance = balance - amount;\n        Console.WriteLine($\"Withdrew ${amount:F2}. Balance: ${balance:F2}\");\n    }\n}\n\nclass Program\n{\n    static void Main()\n    {\n        BankAccount acct = new BankAccount(\"Maria\", 100m);\n\n        acct.Deposit(50m);\n        acct.Withdraw(30m);\n        acct.Withdraw(500m);\n        acct.Deposit(-20m);\n\n        // acct.balance = 1000000m;   // error: balance is private\n        // acct.Balance = 1000000m;   // error: Balance has no set\n\n        Console.WriteLine($\"{acct.Owner} has ${acct.Balance:F2}\");\n    }\n}", "bug": "using System;\n\nclass Student\n{\n    string Name = \"\";\n    public int Age;\n\n    public Student(string name, int age)\n    {\n        Name = name;\n        Age = age;\n    }\n}\n\nclass Program\n{\n    static void Main()\n    {\n        Student s1 = new Student();\n        Student s2 = Student(\"Ahmed\", 22);\n        s2.Name = \"Ahmed Ali\";\n        Student.Age = 23;\n        Console.WriteLine(s2.Age);\n    }\n}", "bugfixed": "using System;\n\nclass Student\n{\n    public string Name = \"\";\n    public int Age;\n\n    public Student(string name, int age)\n    {\n        Name = name;\n        Age = age;\n    }\n}\n\nclass Program\n{\n    static void Main()\n    {\n        Student s1 = new Student(\"Maria\", 19);\n        Student s2 = new Student(\"Ahmed\", 22);\n        s2.Name = \"Ahmed Ali\";\n        s2.Age = 23;\n        Console.WriteLine(s1.Name + \", \" + s1.Age);\n        Console.WriteLine(s2.Name + \", \" + s2.Age);\n    }\n}", "ctor": "using System;\n\nclass Student\n{\n    public string Name { get; set; }\n    public int Id { get; set; }\n    public int Age { get; set; }\n\n    public Student(string name, int id, int age)\n    {\n        Name = name;\n        Id = id;\n        Age = age;\n        Console.WriteLine($\"[constructor] Created {Name}\");\n    }\n\n    public void Introduce()\n    {\n        Console.WriteLine($\"Hi, I am {Name} (#{Id}), age {Age}.\");\n    }\n}\n\nclass Program\n{\n    static void Main()\n    {\n        Student s1 = new Student(\"Maria\", 1001, 19);\n        Student s2 = new Student(\"Ahmed\", 1002, 22);\n\n        s1.Introduce();\n        s2.Introduce();\n\n        // Student s3 = new Student();   // error: no constructor takes 0 arguments\n    }\n}", "ctor2": "using System;\n\nclass Student\n{\n    public string Name { get; set; }\n    public int Id { get; set; }\n    public int Age { get; set; }\n\n    public Student()\n    {\n        Name = \"New student\";\n        Id = 0;\n        Age = 18;\n    }\n\n    public Student(string name, int id)\n    {\n        Name = name;\n        Id = id;\n        Age = 18;\n    }\n\n    public Student(string name, int id, int age)\n    {\n        this.Name = name;\n        this.Id = id;\n        this.Age = age;\n    }\n\n    public void Introduce()\n    {\n        Console.WriteLine($\"{Name} (#{Id}), age {Age}\");\n    }\n}\n\nclass Program\n{\n    static void Main()\n    {\n        Student a = new Student();\n        Student b = new Student(\"Lin\", 1003);\n        Student c = new Student(\"Maria\", 1001, 19);\n\n        a.Introduce();\n        b.Introduce();\n        c.Introduce();\n    }\n}", "defaults": "using System;\n\nclass Student\n{\n    public string Name = \"\";\n    public int Id;\n    public int Age;\n    public double Gpa;\n    public bool IsEnrolled;\n}\n\nclass Program\n{\n    static void Main()\n    {\n        Student s = new Student();\n\n        Console.WriteLine($\"Name:       [{s.Name}]\");\n        Console.WriteLine($\"Id:         {s.Id}\");\n        Console.WriteLine($\"Age:        {s.Age}\");\n        Console.WriteLine($\"Gpa:        {s.Gpa}\");\n        Console.WriteLine($\"IsEnrolled: {s.IsEnrolled}\");\n\n        s.Name = \"Lin\";\n        s.Id = 1003;\n        s.Age = 20;\n        s.Gpa = 3.6;\n        s.IsEnrolled = true;\n        Console.WriteLine($\"Now: {s.Name} #{s.Id}, {s.Age}, GPA {s.Gpa}, enrolled = {s.IsEnrolled}\");\n    }\n}", "first": "using System;\n\nclass Student\n{\n    public string Name = \"\";\n    public int Id;\n    public int Age;\n}\n\nclass Program\n{\n    static void Main()\n    {\n        Student s1 = new Student();\n\n        s1.Name = \"Maria\";\n        s1.Id = 1001;\n        s1.Age = 19;\n\n        Console.WriteLine(\"Name: \" + s1.Name);\n        Console.WriteLine(\"ID:   \" + s1.Id);\n        Console.WriteLine(\"Age:  \" + s1.Age);\n    }\n}", "init": "using System;\n\nclass Student\n{\n    public string Name { get; set; } = \"\";\n    public int Id { get; set; }\n    public int Age { get; set; }\n\n    public void Introduce()\n    {\n        Console.WriteLine($\"{Name} (#{Id}), age {Age}\");\n    }\n}\n\nclass Program\n{\n    static void Main()\n    {\n        // Way 1: create, then set each property\n        Student s1 = new Student();\n        s1.Name = \"Maria\";\n        s1.Id = 1001;\n        s1.Age = 19;\n\n        // Way 2: object initializer - create AND set in one statement\n        Student s2 = new Student { Name = \"Ahmed\", Id = 1002, Age = 22 };\n\n        // Set only some properties - the rest keep their defaults\n        Student s3 = new Student { Name = \"Lin\", Id = 1003 };\n\n        // Spread over several lines - same thing, easier to read\n        Student s4 = new Student\n        {\n            Name = \"Sofia\",\n            Id = 1004,\n            Age = 25\n        };\n\n        s1.Introduce();\n        s2.Introduce();\n        s3.Introduce();\n        s4.Introduce();\n    }\n}", "library": "using System;\nusing System.Collections.Generic;\n\nclass Book\n{\n    public string Title { get; set; }\n    public string Author { get; set; }\n    public bool IsCheckedOut { get; set; }\n\n    public Book(string title, string author)\n    {\n        Title = title;\n        Author = author;\n        IsCheckedOut = false;\n    }\n\n    public void CheckOut()\n    {\n        if (IsCheckedOut)\n        {\n            Console.WriteLine($\"Sorry, \\\"{Title}\\\" is already checked out.\");\n            return;\n        }\n        IsCheckedOut = true;\n        Console.WriteLine($\"You checked out \\\"{Title}\\\".\");\n    }\n\n    public void Return()\n    {\n        IsCheckedOut = false;\n        Console.WriteLine($\"\\\"{Title}\\\" is back on the shelf.\");\n    }\n\n    public override string ToString()\n    {\n        string status = \"available\";\n        if (IsCheckedOut)\n        {\n            status = \"checked out\";\n        }\n        return $\"{Title} by {Author} [{status}]\";\n    }\n}\n\nclass Program\n{\n    static void Main()\n    {\n        List<Book> shelf = new List<Book>();\n        shelf.Add(new Book(\"Dune\", \"Frank Herbert\"));\n        shelf.Add(new Book(\"Beloved\", \"Toni Morrison\"));\n        shelf.Add(new Book(\"Clean Code\", \"Robert Martin\"));\n\n        shelf[0].CheckOut();\n        shelf[0].CheckOut();\n        shelf[2].CheckOut();\n        shelf[0].Return();\n\n        Console.WriteLine();\n        Console.WriteLine(\"Library catalog:\");\n        foreach (Book b in shelf)\n        {\n            Console.WriteLine(\" * \" + b);\n        }\n    }\n}", "list": "using System;\nusing System.Collections.Generic;\n\nclass Student\n{\n    public string Name { get; set; } = \"\";\n    public int Id { get; set; }\n    public int Age { get; set; }\n\n    public override string ToString()\n    {\n        return $\"{Name} (#{Id}), age {Age}\";\n    }\n}\n\nclass Program\n{\n    static void Main()\n    {\n        List<Student> students = new List<Student>();\n\n        students.Add(new Student { Name = \"Maria\", Id = 1001, Age = 19 });\n        students.Add(new Student { Name = \"Ahmed\", Id = 1002, Age = 22 });\n        students.Add(new Student { Name = \"Lin\", Id = 1003, Age = 20 });\n\n        Console.WriteLine($\"Roster has {students.Count} students:\");\n        foreach (Student s in students)\n        {\n            Console.WriteLine(\" - \" + s);\n        }\n\n        int total = 0;\n        foreach (Student s in students)\n        {\n            total = total + s.Age;\n        }\n        double average = (double)total / students.Count;\n        Console.WriteLine($\"Average age: {average:F1}\");\n    }\n}", "many": "using System;\n\nclass Student\n{\n    public string Name = \"\";\n    public int Id;\n    public int Age;\n}\n\nclass Program\n{\n    static void Main()\n    {\n        Student s1 = new Student();\n        s1.Name = \"Maria\";\n        s1.Id = 1001;\n        s1.Age = 19;\n\n        Student s2 = new Student();\n        s2.Name = \"Ahmed\";\n        s2.Id = 1002;\n        s2.Age = 22;\n\n        Student s3 = new Student();\n        s3.Name = \"Lin\";\n        s3.Id = 1003;\n        s3.Age = 20;\n\n        s2.Age = s2.Age + 1;\n\n        Console.WriteLine(s1.Name + \" is \" + s1.Age);\n        Console.WriteLine(s2.Name + \" is \" + s2.Age);\n        Console.WriteLine(s3.Name + \" is \" + s3.Age);\n    }\n}", "methods": "using System;\n\nclass Student\n{\n    public string Name = \"\";\n    public int Id;\n    public int Age;\n\n    public void Introduce()\n    {\n        Console.WriteLine($\"Hi, I am {Name}, student #{Id}.\");\n    }\n\n    public void HaveBirthday()\n    {\n        Age = Age + 1;\n        Console.WriteLine($\"Happy birthday, {Name}! You are now {Age}.\");\n    }\n\n    public int YearsUntil(int targetAge)\n    {\n        return targetAge - Age;\n    }\n}\n\nclass Program\n{\n    static void Main()\n    {\n        Student s1 = new Student();\n        s1.Name = \"Maria\";\n        s1.Id = 1001;\n        s1.Age = 19;\n\n        Student s2 = new Student();\n        s2.Name = \"Ahmed\";\n        s2.Id = 1002;\n        s2.Age = 22;\n\n        s1.Introduce();\n        s2.Introduce();\n        s1.HaveBirthday();\n\n        int wait = s2.YearsUntil(25);\n        Console.WriteLine($\"{s2.Name} turns 25 in {wait} years.\");\n        Console.WriteLine($\"{s1.Name} turns 21 in {s1.YearsUntil(21)} year(s).\");\n    }\n}", "props": "using System;\n\nclass Student\n{\n    private int age;\n\n    public string Name { get; set; } = \"\";\n    public int Id { get; set; }\n\n    public int Age\n    {\n        get\n        {\n            return age;\n        }\n        set\n        {\n            if (value >= 0 && value <= 120)\n            {\n                age = value;\n            }\n            else\n            {\n                Console.WriteLine($\"Rejected age {value}. Keeping {age}.\");\n            }\n        }\n    }\n}\n\nclass Program\n{\n    static void Main()\n    {\n        Student s = new Student();\n        s.Name = \"Maria\";\n        s.Id = 1001;\n        s.Age = 19;\n        Console.WriteLine($\"{s.Name}, age {s.Age}\");\n\n        s.Age = -5;\n        s.Age = 500;\n        Console.WriteLine($\"{s.Name}, age {s.Age}\");\n\n        s.Age = 20;\n        Console.WriteLine($\"{s.Name}, age {s.Age}\");\n    }\n}", "refs": "using System;\n\nclass Student\n{\n    public string Name { get; set; } = \"\";\n    public int Age { get; set; }\n}\n\nclass Program\n{\n    static void Main()\n    {\n        Student a = new Student { Name = \"Maria\", Age = 19 };\n        Student b = a;\n        b.Name = \"Maria Lopez\";\n        Console.WriteLine(a.Name);\n        Console.WriteLine(a == b);\n\n        Student c = new Student { Name = \"Maria Lopez\", Age = 19 };\n        Console.WriteLine(a == c);\n\n        b = c;\n        b.Age = 30;\n        Console.WriteLine($\"a: {a.Name}, {a.Age}\");\n        Console.WriteLine($\"c: {c.Name}, {c.Age}\");\n\n        int x = 5;\n        int y = x;\n        y = 99;\n        Console.WriteLine($\"x is still {x}, y is {y}\");\n    }\n}", "static": "using System;\n\nclass Student\n{\n    public static int Count = 0;\n\n    public string Name { get; set; }\n\n    public Student(string name)\n    {\n        Name = name;\n        Count = Count + 1;\n    }\n\n    public void Introduce()\n    {\n        Console.WriteLine($\"Hi, I am {Name}.\");\n    }\n}\n\nclass Program\n{\n    static void Main()\n    {\n        Console.WriteLine($\"Students so far: {Student.Count}\");\n\n        Student a = new Student(\"Maria\");\n        Student b = new Student(\"Ahmed\");\n        a.Introduce();\n        b.Introduce();\n\n        Console.WriteLine($\"Students so far: {Student.Count}\");\n\n        Console.WriteLine(Math.Max(3, 9));\n        Console.WriteLine(a.Name.Length);\n    }\n}", "tostring": "using System;\n\nclass Course\n{\n    public string Code { get; set; } = \"\";\n}\n\nclass Student\n{\n    public string Name { get; set; } = \"\";\n    public int Id { get; set; }\n    public int Age { get; set; }\n\n    public override string ToString()\n    {\n        return $\"{Name} (#{Id}), age {Age}\";\n    }\n}\n\nclass Program\n{\n    static void Main()\n    {\n        Course c = new Course { Code = \"MAC109\" };\n        Student s = new Student { Name = \"Maria\", Id = 1001, Age = 19 };\n\n        Console.WriteLine(c);\n        Console.WriteLine(s);\n        Console.WriteLine(\"Selected: \" + s);\n\n        string label = s.ToString();\n        Console.WriteLine(label.ToUpper());\n    }\n}", "p_menu": "using System;\nusing System.Collections.Generic;\n\nclass MenuItem\n{\n    public string Name { get; set; } = \"\";\n    public decimal Price { get; set; }\n\n    public override string ToString()\n    {\n        return $\"{Name,-12} ${Price:F2}\";\n    }\n}\n\nclass Program\n{\n    static void Main()\n    {\n        List<MenuItem> order = new List<MenuItem>();\n        order.Add(new MenuItem { Name = \"Tacos\", Price = 9.50m });\n        order.Add(new MenuItem { Name = \"Lemonade\", Price = 3.25m });\n        order.Add(new MenuItem { Name = \"Flan\", Price = 4.75m });\n\n        decimal total = 0;\n        foreach (MenuItem item in order)\n        {\n            Console.WriteLine(item);\n            total = total + item.Price;\n        }\n\n        Console.WriteLine($\"Items: {order.Count}\");\n        Console.WriteLine($\"Total: ${total:F2}\");\n    }\n}", "p_product": "using System;\n\nclass Product\n{\n    private int quantity;\n\n    public string Name { get; set; }\n    public decimal Price { get; set; }\n\n    public int Quantity\n    {\n        get\n        {\n            return quantity;\n        }\n    }\n\n    public Product(string name, decimal price, int quantity)\n    {\n        Name = name;\n        Price = price;\n        this.quantity = quantity;\n    }\n\n    public void Restock(int amount)\n    {\n        quantity = quantity + amount;\n    }\n\n    public void Sell(int amount)\n    {\n        if (amount > quantity)\n        {\n            Console.WriteLine($\"Only {quantity} {Name} left. Sale refused.\");\n            return;\n        }\n        quantity = quantity - amount;\n        Console.WriteLine($\"Sold {amount} {Name} for ${Price * amount:F2}.\");\n    }\n\n    public override string ToString()\n    {\n        return $\"{Name}: {Quantity} in stock at ${Price:F2}\";\n    }\n}\n\nclass Program\n{\n    static void Main()\n    {\n        Product p = new Product(\"Notebook\", 3.50m, 10);\n        Console.WriteLine(p);\n\n        p.Sell(4);\n        p.Sell(20);\n        p.Restock(15);\n\n        Console.WriteLine(p);\n    }\n}", "p_room": "using System;\n\nclass Room\n{\n    public int Number { get; set; }\n    public string Type { get; set; }\n    public decimal PricePerNight { get; set; }\n    public bool IsBooked { get; set; }\n\n    public Room(int number, string type, decimal pricePerNight)\n    {\n        Number = number;\n        Type = type;\n        PricePerNight = pricePerNight;\n        IsBooked = false;\n    }\n\n    public decimal TotalFor(int nights)\n    {\n        return PricePerNight * nights;\n    }\n\n    public void Book()\n    {\n        if (IsBooked)\n        {\n            Console.WriteLine($\"Room {Number} is already booked.\");\n            return;\n        }\n        IsBooked = true;\n        Console.WriteLine($\"Room {Number} is now booked.\");\n    }\n}\n\nclass Program\n{\n    static void Main()\n    {\n        Room r1 = new Room(101, \"Single\", 89.50m);\n        Room r2 = new Room(204, \"Suite\", 210m);\n\n        r1.Book();\n        r1.Book();\n        Console.WriteLine($\"3 nights in room {r2.Number} ({r2.Type}): ${r2.TotalFor(3):F2}\");\n        Console.WriteLine($\"Room {r1.Number} booked? {r1.IsBooked}\");\n        Console.WriteLine($\"Room {r2.Number} booked? {r2.IsBooked}\");\n    }\n}", "gui0": "using Avalonia;\nusing Avalonia.Controls;\nusing Avalonia.Media;\n\nnamespace MyStudioApp;\n\npublic class MainWindow : Window\n{\n    public MainWindow()\n    {\n        Title = \"Same class, different objects\";\n        Width = 420;\n        Height = 260;\n\n        Button btnSave = new Button();\n        btnSave.Content = \"Save\";\n        btnSave.Width = 120;\n\n        Button btnDelete = new Button { Content = \"Delete\", Width = 160 };\n        Button btnHelp = new Button { Content = \"Help\", Background = Brushes.Gold };\n\n        var lblInfo = new TextBlock\n        {\n            Text = \"Three Button objects, one Button class.\",\n            FontSize = 16\n        };\n\n        Content = new StackPanel\n        {\n            Margin = new Thickness(20),\n            Spacing = 10,\n            Children = { lblInfo, btnSave, btnDelete, btnHelp }\n        };\n    }\n}", "gui1": "using Avalonia;\nusing Avalonia.Controls;\nusing Avalonia.Interactivity;\nusing Avalonia.Media;\n\nnamespace MyStudioApp;\n\npublic class MainWindow : Window\n{\n    Student student = new Student(\"Maria\", 1001, 19);\n    TextBlock lblInfo = new TextBlock { FontSize = 20, Foreground = Brushes.DarkSlateBlue };\n\n    public MainWindow()\n    {\n        Title = \"One Student object\";\n        Width = 420;\n        Height = 220;\n\n        lblInfo.Text = student.ToString();\n\n        var btnBirthday = new Button { Content = \"Have a birthday\" };\n        btnBirthday.Click += BtnBirthday_Click;\n\n        Content = new StackPanel\n        {\n            Margin = new Thickness(20),\n            Spacing = 12,\n            Children = { lblInfo, btnBirthday }\n        };\n    }\n\n    void BtnBirthday_Click(object? sender, RoutedEventArgs e)\n    {\n        student.HaveBirthday();\n        lblInfo.Text = student.ToString();\n    }\n}", "gui2": "using System.Collections.ObjectModel;\nusing Avalonia;\nusing Avalonia.Controls;\nusing Avalonia.Interactivity;\nusing Avalonia.Media;\n\nnamespace MyStudioApp;\n\npublic class MainWindow : Window\n{\n    ObservableCollection<Student> students = new ObservableCollection<Student>();\n\n    TextBox txtName = new TextBox { Watermark = \"Name\" };\n    TextBox txtId = new TextBox { Watermark = \"Student ID\" };\n    TextBox txtAge = new TextBox { Watermark = \"Age\" };\n    ListBox lstStudents = new ListBox { Height = 140 };\n    TextBlock lblStatus = new TextBlock { Foreground = Brushes.SeaGreen };\n\n    public MainWindow()\n    {\n        Title = \"Student Roster\";\n        Width = 440;\n        Height = 420;\n\n        lstStudents.ItemsSource = students;\n\n        var btnAdd = new Button { Content = \"Add student\" };\n        btnAdd.Click += BtnAdd_Click;\n\n        Content = new StackPanel\n        {\n            Margin = new Thickness(20),\n            Spacing = 8,\n            Children = { txtName, txtId, txtAge, btnAdd, lstStudents, lblStatus }\n        };\n    }\n\n    void BtnAdd_Click(object? sender, RoutedEventArgs e)\n    {\n        int.TryParse(txtId.Text, out int id);\n        int.TryParse(txtAge.Text, out int age);\n\n        Student s = new Student(txtName.Text ?? \"\", id, age);\n        students.Add(s);\n\n        lblStatus.Text = $\"Added {s.Name}. Roster size: {students.Count}\";\n        txtName.Text = \"\";\n        txtId.Text = \"\";\n        txtAge.Text = \"\";\n    }\n}", "student": "namespace MyStudioApp;\n\npublic class Student\n{\n    public string Name { get; set; }\n    public int Id { get; set; }\n    public int Age { get; set; }\n\n    public Student(string name, int id, int age)\n    {\n        Name = name;\n        Id = id;\n        Age = age;\n    }\n\n    public void HaveBirthday()\n    {\n        Age = Age + 1;\n    }\n\n    public override string ToString()\n    {\n        return $\"{Name} (#{Id}), age {Age}\";\n    }\n}", "engine": "using System;\nusing Avalonia;\nusing Avalonia.Controls.ApplicationLifetimes;\nusing Avalonia.Themes.Fluent;\n\nnamespace MyStudioApp;\n\n// PART 1: The launcher. Starts Avalonia.\nclass Program\n{\n    [STAThread]\n    public static void Main(string[] args)\n    {\n        AppBuilder.Configure<App>()\n                  .UsePlatformDetect()\n                  .StartWithClassicDesktopLifetime(args);\n    }\n}\n\n// PART 2: The app. Loads the modern theme, opens your window.\npublic class App : Application\n{\n    public override void OnFrameworkInitializationCompleted()\n    {\n        Styles.Add(new FluentTheme());\n        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)\n        {\n            desktop.MainWindow = new MainWindow();   // <- opens YOUR file\n        }\n        base.OnFrameworkInitializationCompleted();\n    }\n}"};
+var OUT={"autoprop": ["Maria", "Maria (#1001)", "Maria Lopez (#1001)"], "bank": ["Deposited $50.00. Balance: $150.00", "Withdrew $30.00. Balance: $120.00", "Insufficient funds for $500.00.", "Deposit must be positive.", "Maria has $120.00"], "bugfixed": ["Maria, 19", "Ahmed Ali, 23"], "ctor": ["[constructor] Created Maria", "[constructor] Created Ahmed", "Hi, I am Maria (#1001), age 19.", "Hi, I am Ahmed (#1002), age 22."], "ctor2": ["New student (#0), age 18", "Lin (#1003), age 18", "Maria (#1001), age 19"], "defaults": ["Name:       []", "Id:         0", "Age:        0", "Gpa:        0", "IsEnrolled: False", "Now: Lin #1003, 20, GPA 3.6, enrolled = True"], "first": ["Name: Maria", "ID:   1001", "Age:  19"], "init": ["Maria (#1001), age 19", "Ahmed (#1002), age 22", "Lin (#1003), age 0", "Sofia (#1004), age 25"], "library": ["You checked out \"Dune\".", "Sorry, \"Dune\" is already checked out.", "You checked out \"Clean Code\".", "\"Dune\" is back on the shelf.", "", "Library catalog:", " * Dune by Frank Herbert [available]", " * Beloved by Toni Morrison [available]", " * Clean Code by Robert Martin [checked out]"], "list": ["Roster has 3 students:", " - Maria (#1001), age 19", " - Ahmed (#1002), age 22", " - Lin (#1003), age 20", "Average age: 20.3"], "many": ["Maria is 19", "Ahmed is 23", "Lin is 20"], "methods": ["Hi, I am Maria, student #1001.", "Hi, I am Ahmed, student #1002.", "Happy birthday, Maria! You are now 20.", "Ahmed turns 25 in 3 years.", "Maria turns 21 in 1 year(s)."], "props": ["Maria, age 19", "Rejected age -5. Keeping 19.", "Rejected age 500. Keeping 19.", "Maria, age 19", "Maria, age 20"], "refs": ["Maria Lopez", "True", "False", "a: Maria Lopez, 19", "c: Maria Lopez, 30", "x is still 5, y is 99"], "static": ["Students so far: 0", "Hi, I am Maria.", "Hi, I am Ahmed.", "Students so far: 2", "9", "5"], "tostring": ["Course", "Maria (#1001), age 19", "Selected: Maria (#1001), age 19", "MARIA (#1001), AGE 19"], "p_menu": ["Tacos        $9.50", "Lemonade     $3.25", "Flan         $4.75", "Items: 3", "Total: $17.50"], "p_product": ["Notebook: 10 in stock at $3.50", "Sold 4 Notebook for $14.00.", "Only 6 Notebook left. Sale refused.", "Notebook: 21 in stock at $3.50"], "p_room": ["Room 101 is now booked.", "Room 101 is already booked.", "3 nights in room 204 (Suite): $630.00", "Room 101 booked? True", "Room 204 booked? False"]};
+/* ===== Generic explanations (used by every example unless overridden) ===== */
+var GEN={
+  'using System;':'The toolbox line: gives this file <b>Console</b>, <b>Math</b> and the other basic tools.',
+  'using System.Collections.Generic;':'Toolbox for collections: it holds <b>List&lt;T&gt;</b>, a growable list of objects.',
+  'using System.Collections.ObjectModel;':'Toolbox for <b>ObservableCollection&lt;T&gt;</b>: a list that <b>tells the screen</b> whenever an item is added or removed.',
+  'using Avalonia;':'Avalonia basics, including <b>Thickness</b> (used for Margin).',
+  'using Avalonia.Controls;':'The controls toolbox: <b>Window</b>, <b>Button</b>, <b>TextBlock</b>, <b>TextBox</b>, <b>ListBox</b>, <b>StackPanel</b>. Every one of them is a <b>class</b>.',
+  'using Avalonia.Media;':'Colors (<b>Brushes</b>) and font styles.',
+  'using Avalonia.Interactivity;':'Events toolbox: holds <b>RoutedEventArgs</b>, used by click handlers.',
+  'namespace MyStudioApp;':'Your project’s name tag. Every file in the project uses the same namespace, so MainWindow.cs can see <b>Student</b> from Student.cs.',
+  'class Program':'The familiar container for <b>Main</b>. Notice: Program is a class too! A file can hold several classes; here <b>Program</b> uses the class defined above it.',
+  'static void Main()':'The starting point. Execution begins here, never inside Student. A class on its own does nothing until Main (or a window) creates objects from it.',
+  '{':'Opens a block. Every { needs its }.',
+  '}':'Closes a block.',
+  '};':'Closes the object initializer. The <b>;</b> ends the whole <b>new</b> statement.',
+  'get':'The <b>get</b> part runs when someone <b>reads</b> the property.',
+  'set':'The <b>set</b> part runs when someone <b>assigns</b> to the property. The new value arrives in a hidden variable named <b>value</b>.',
+  'else':'Otherwise (the condition was false)…',
+  'return;':'Leave the method immediately. Nothing below runs.',
+  'public string Name { get; set; } = "";':'An <b>auto-property</b>: a named value the object carries, with a hidden storage spot C# creates for you. <b>get</b> = can be read, <b>set</b> = can be changed. <b>= ""</b> gives it a starting value so it’s never empty-null.',
+  'public int Id { get; set; }':'An int auto-property for the student number. Numbers start at <b>0</b> automatically.',
+  'public int Age { get; set; }':'An int auto-property for the age.',
+  'public string Name { get; set; }':'An auto-property with no starting value here, because the <b>constructor</b> below always sets it.',
+  'public void Introduce()':'A method every object can run. Inside it, <b>Name</b>, <b>Id</b>, <b>Age</b> mean <i>this</i> object\u2019s values.',
+  'Content = new StackPanel':'A StackPanel object becomes this window\u2019s Content: the shelf that stacks the controls.',
+  'public override string ToString()':'<b>Overrides</b> (replaces) the built-in ToString method that every object inherits. Whenever C# needs this object as text (WriteLine, + with a string, a <b>ListBox</b> in a GUI), it calls this method.',
+  'return $"{Name} (#{Id}), age {Age}";':'Builds the text that represents this student, e.g. <i>Maria (#1001), age 19</i>.'
+};
+
+var RULES=[
+  [/^class (\w+)$/,function(m){return '<b>A class named '+m[1]+'.</b> This is a <b>blueprint</b>: it describes what every '+m[1]+' object will <i>have</i> (data) and <i>do</i> (methods). Writing the class creates <b>no</b> objects yet. Class names start with a capital letter.';}],
+  [/^public class (\w+)$/,function(m){return '<b>The '+m[1]+' class</b>, marked <b>public</b> so other files (like MainWindow.cs) can use it. In a real project it lives in its own file named <b>'+m[1]+'.cs</b>.';}],
+  [/^\/\/ (.*error.*)$/,function(m){return '<b>Commented out on purpose.</b> Remove the <b>//</b> in VS Code and you get a red squiggle: '+m[1].replace(/^.*error: /,'')+'. Try it!';}],
+  [/^\/\//,function(){return 'A comment: a note for humans. The compiler skips it.';}],
+  [/^Console\.WriteLine\(\);$/,function(){return 'Prints an empty line, for spacing.';}],
+  [/^Console\.WriteLine\((.*)\);$/,function(m){return 'Output: prints <code>'+m[1].replace(/</g,'&lt;')+'</code> and moves to a new line.';}],
+  [/^public (string|int|double|bool) (\w+)( = .*)?;$/,function(m){return 'A <b>public field</b>: a variable that lives <i>inside</i> every '+'object. Type <b>'+m[1]+'</b>, name <b>'+m[2]+'</b>.'+(m[3]?' Starts as <b>'+m[3].slice(3)+'</b>.':' No starting value, so it gets the type’s default.')+' <b>public</b> means code outside the class (like Main) may read and change it.';}],
+  [/^(\w+)\.(\w+) = (.*);$/,function(m){return '<b>The dot sets data on one object.</b> Read: "<b>'+m[1]+'</b>’s '+m[2]+' gets '+m[3].replace(/</g,'&lt;')+'." Only this object changes; any other objects keep their own values.';}],
+  [/^(\w+)\.(\w+)\(\);$/,function(m){return '<b>Calling a method on an object.</b> Run '+m[2]+' using <b>'+m[1]+'</b>’s own data. Same method, different object, different result.';}],
+  [/^Student (\w+) = new Student\(\);$/,function(m){return '<b>Instantiation!</b> <b>new Student()</b> builds a brand-new Student object in memory, and the variable <b>'+m[1]+'</b> now refers to it. Read it right to left: "make a new Student, call it '+m[1]+'". The <b>()</b> means: run the constructor.';}]
+];
+
+/* ===== Per-example explanations: EXN[key][trimmed line] ===== */
+var EXN={
+ first:{
+  'class Student':'<b>The blueprint.</b> Everything between the braces describes what every Student <i>has</i>. Writing this class creates <b>zero</b> students. It’s a cookie cutter, not a cookie.',
+  'public string Name = "";':'A <b>field</b>: every Student object gets its own Name variable. <b>= ""</b> means it starts as empty text.',
+  'public int Id;':'Every Student gets its own <b>Id</b>, an int. No starting value, so it starts at <b>0</b>.',
+  'public int Age;':'Every Student gets its own <b>Age</b>. Three fields = three pieces of data per student.',
+  'Student s1 = new Student();':'<b>Instantiation: the most important line today.</b> <b>new Student()</b> builds one real Student object from the blueprint. <b>Student s1</b> declares a variable whose type is your own class. Now <b>s1</b> refers to that object.',
+  's1.Name = "Maria";':'<b>The dot</b> means "look inside this object". s1’s Name gets "Maria". You’ve done this before: <code>lblResult.Text = "Hi";</code> is exactly the same shape.',
+  's1.Id = 1001;':'s1’s Id gets 1001 (a number: no quotes).',
+  's1.Age = 19;':'s1’s Age gets 19. The object is now fully filled in.',
+  'Console.WriteLine("Name: " + s1.Name);':'<b>Reading</b> a field with the dot: s1.Name gives "Maria".'
+ },
+ many:{
+  'Student s1 = new Student();':'Object #1 built from the blueprint.',
+  'Student s2 = new Student();':'<b>Another</b> new: object #2. Completely separate from s1, with its own Name, Id and Age.',
+  'Student s3 = new Student();':'Object #3. One class, three objects. That’s the whole point of a blueprint.',
+  's2.Age = s2.Age + 1;':'Changes <b>only</b> Ahmed: read s2’s Age (22), add 1, store 23 back into s2’s Age. s1 and s3 are untouched.',
+  'Console.WriteLine(s1.Name + " is " + s1.Age);':'Prints Maria’s data: <b>Maria is 19</b>.',
+  'Console.WriteLine(s2.Name + " is " + s2.Age);':'Prints <b>Ahmed is 23</b>: the birthday only happened to s2.',
+  'Console.WriteLine(s3.Name + " is " + s3.Age);':'Prints <b>Lin is 20</b>.'
+ },
+ defaults:{
+  'public double Gpa;':'A double field. Default: <b>0</b>.',
+  'public bool IsEnrolled;':'A bool field. Default: <b>false</b>.',
+  'Student s = new Student();':'A fresh object, nothing set yet. What’s inside? Every field holds its type’s <b>default value</b>.',
+  'Console.WriteLine($"Name:       [{s.Name}]");':'Prints <b>[]</b>: Name is the empty string we gave it with <code>= ""</code>. (The brackets make the emptiness visible.)',
+  'Console.WriteLine($"Id:         {s.Id}");':'int default: <b>0</b>.',
+  'Console.WriteLine($"Age:        {s.Age}");':'int default: <b>0</b>.',
+  'Console.WriteLine($"Gpa:        {s.Gpa}");':'double default: <b>0</b>.',
+  'Console.WriteLine($"IsEnrolled: {s.IsEnrolled}");':'bool default: <b>False</b>.',
+  's.Name = "Lin";':'Now we fill it in, one field at a time.',
+  's.Id = 1003;':'Set the Id.',
+  's.Age = 20;':'Set the Age.',
+  's.Gpa = 3.6;':'Set the GPA.',
+  's.IsEnrolled = true;':'Set the bool.',
+  'Console.WriteLine($"Now: {s.Name} #{s.Id}, {s.Age}, GPA {s.Gpa}, enrolled = {s.IsEnrolled}");':'Same object, now with real data.'
+ },
+ methods:{
+  'public void Introduce()':'<b>A method inside the class</b>: something every Student can <i>do</i>. No <b>static</b>: it belongs to an object, so you call it on one student (<code>s1.Introduce()</code>).',
+  'Console.WriteLine($"Hi, I am {Name}, student #{Id}.");':'Inside the class, <b>Name</b> and <b>Id</b> mean <i>this object’s</i> Name and Id. Called on s1 it prints Maria; called on s2 it prints Ahmed.',
+  'public void HaveBirthday()':'A method that <b>changes</b> the object’s own data.',
+  'Age = Age + 1;':'Adds one to <b>this</b> student’s Age only.',
+  'Console.WriteLine($"Happy birthday, {Name}! You are now {Age}.");':'Reports the new age.',
+  'public int YearsUntil(int targetAge)':'A method that <b>takes a parameter</b> (targetAge) and <b>returns an int</b>. It uses both the parameter and the object’s own Age.',
+  'return targetAge - Age;':'Sends the answer back to whoever called it.',
+  's1.Introduce();':'Runs Introduce with <b>s1</b>’s data: "Hi, I am Maria, student #1001."',
+  's2.Introduce();':'The same method, run with <b>s2</b>’s data: "Hi, I am Ahmed…"',
+  's1.HaveBirthday();':'Maria turns 20. Ahmed is unaffected.',
+  'int wait = s2.YearsUntil(25);':'Ask Ahmed’s object a question: years until 25? 25 − 22 = <b>3</b>, stored in wait.',
+  'Console.WriteLine($"{s2.Name} turns 25 in {wait} years.");':'Prints the answer.',
+  'Console.WriteLine($"{s1.Name} turns 21 in {s1.YearsUntil(21)} year(s).");':'A method call right inside the braces: Maria is 20 now, so 21 − 20 = <b>1</b>.'
+ },
+ autoprop:{
+  'public string Name { get; set; } = "";':'<b>A property</b> instead of a field. For the code that <i>uses</i> the class, nothing changes: still <code>s.Name = "Maria"</code>. <b>{ get; set; }</b> = readable and writable. This is the style professionals use, and the style every GUI control uses (Text, Content, Width… are all properties).',
+  'public string Label':'A property with <b>only a get</b>: <b>read-only</b>, and <b>computed</b> each time someone reads it.',
+  'return Name + " (#" + Id + ")";':'Builds the label from the current Name and Id. Nothing is stored; it’s recalculated on every read.',
+  'Console.WriteLine(s.Label);':'Reading Label runs its get: <b>Maria (#1001)</b>.',
+  's.Name = "Maria Lopez";':'Change the Name…',
+  '// s.Label = "Hacked";   // error: Label has no set':'<b>Read-only in action.</b> Uncomment it: <i>Property or indexer ‘Student.Label’ cannot be assigned to: it is read only</i>.'
+ },
+ props:{
+  'private int age;':'A <b>private field</b>: the real storage for the age. <b>private</b> = only code <i>inside</i> Student can touch it. From Main, <code>s.age</code> is an error.',
+  'public int Age':'<b>A full property</b> that guards the private field. Outside code uses Age; the property decides what’s allowed.',
+  'return age;':'Reading Age hands back the private field.',
+  'if (value >= 0 && value <= 120)':'<b>The guard.</b> Only accept realistic ages. <b>value</b> is whatever was on the right side of <code>s.Age = …</code>.',
+  'age = value;':'Accepted: store it in the private field.',
+  'Console.WriteLine($"Rejected age {value}. Keeping {age}.");':'Rejected: print a message and keep the old age.',
+  's.Age = 19;':'Runs the <b>set</b> with value = 19: accepted.',
+  's.Age = -5;':'Runs the set with value = −5: <b>rejected</b>. The object protects itself.',
+  's.Age = 500;':'Rejected too.',
+  's.Age = 20;':'Accepted.',
+  'Console.WriteLine($"{s.Name}, age {s.Age}");':'Reading Age runs the <b>get</b>.'
+ },
+ ctor:{
+  'public Student(string name, int id, int age)':'<b>The constructor.</b> Same name as the class, <b>no return type</b>. It runs automatically every time someone writes <code>new Student(…)</code>, and its parameters are the values passed in. Its job: make the object ready to use.',
+  'Name = name;':'Copy the parameter <b>name</b> (lowercase) into the property <b>Name</b> (capital). Different names, so no confusion.',
+  'Id = id;':'Same for the Id.',
+  'Age = age;':'Same for the Age.',
+  'Console.WriteLine($"[constructor] Created {Name}");':'Proof the constructor runs on each <b>new</b>. (Real classes don’t usually print; it’s here so you can see it happen.)',
+  'Console.WriteLine($"Hi, I am {Name} (#{Id}), age {Age}.");':'Uses this object’s data.',
+  'Student s1 = new Student("Maria", 1001, 19);':'<b>Create and fill in one line.</b> The three values go to the constructor’s parameters in order: name, id, age.',
+  'Student s2 = new Student("Ahmed", 1002, 22);':'Second object, second constructor run.',
+  '// Student s3 = new Student();   // error: no constructor takes 0 arguments':'<b>Uncomment it to see.</b> Once you write a constructor with parameters, the free empty one disappears. Every Student <i>must</i> now get a name, id and age: the class enforces it.'
+ },
+ ctor2:{
+  'public Student()':'<b>Constructor #1: no parameters.</b> Fills in sensible defaults.',
+  'Name = "New student";':'Default name.',
+  'Id = 0;':'Default id.',
+  'Age = 18;':'Default age.',
+  'public Student(string name, int id)':'<b>Constructor #2: two parameters.</b> Several constructors with different parameter lists = <b>overloading</b>. C# picks the one that matches what you pass.',
+  'Name = name;':'Copy the parameter into the property.',
+  'Id = id;':'Copy the id.',
+  'public Student(string name, int id, int age)':'<b>Constructor #3: three parameters.</b>',
+  'this.Name = name;':'<b>this</b> means "the object being built right now". <code>this.Name</code> is the same as plain <code>Name</code> here; you’ll see both styles in real code. It becomes necessary when a parameter has exactly the same name as a property.',
+  'this.Id = id;':'Same with this.',
+  'this.Age = age;':'Same with this.',
+  'Console.WriteLine($"{Name} (#{Id}), age {Age}");':'Prints this object’s data.',
+  'Student a = new Student();':'No arguments: C# chooses <b>constructor #1</b>.',
+  'Student b = new Student("Lin", 1003);':'Two arguments: <b>constructor #2</b> (age defaults to 18).',
+  'Student c = new Student("Maria", 1001, 19);':'Three arguments: <b>constructor #3</b>.'
+ },
+ init:{
+  '// Way 1: create, then set each property':'Way 1: the long way.',
+  'Student s1 = new Student();':'Create an empty Student…',
+  '// Way 2: object initializer - create AND set in one statement':'Way 2: the <b>object initializer</b>.',
+  'Student s2 = new Student { Name = "Ahmed", Id = 1002, Age = 22 };':'<b>Object initializer.</b> <b>new Student</b> builds the object, then <b>{ … }</b> sets properties right away. Commas between them, no semicolons inside. <b>This is the shape of every GUI control:</b> <code>new Button { Content = "Save", Width = 120 }</code>.',
+  '// Set only some properties - the rest keep their defaults':'You don’t have to set everything.',
+  'Student s3 = new Student { Name = "Lin", Id = 1003 };':'Age isn’t listed, so it stays at its default: <b>0</b>.',
+  '// Spread over several lines - same thing, easier to read':'Long initializers read better one property per line.',
+  'Student s4 = new Student':'Start of a multi-line initializer…',
+  'Name = "Sofia",':'One property per line, each followed by a comma…',
+  'Id = 1004,':'…',
+  'Age = 25':'…the last one needs no comma. Compare with <code>Content = new StackPanel { Margin = …, Children = { … } };</code> in your window.',
+  'Console.WriteLine($"{Name} (#{Id}), age {Age}");':'Prints this object’s data.'
+ },
+ refs:{
+  'Student a = new Student { Name = "Maria", Age = 19 };':'<b>One object</b> is built (call it object #1). The variable <b>a</b> does not <i>contain</i> the student; it holds a <b>reference</b>: an arrow pointing to where the object lives in memory. Press <b>Step</b> on the memory panel to watch.',
+  'Student b = a;':'<b>No new object!</b> b gets a copy of the <b>arrow</b>, not a copy of the student. Now a and b point to the <b>same</b> object #1.',
+  'b.Name = "Maria Lopez";':'Change the object through b…',
+  'Console.WriteLine(a.Name);':'…and a sees it too: <b>Maria Lopez</b>. Two names, one object. (Like two people with the same Google Doc link.)',
+  'Console.WriteLine(a == b);':'For objects, <b>==</b> asks "same object?" Yes: <b>True</b>.',
+  'Student c = new Student { Name = "Maria Lopez", Age = 19 };':'<b>new</b> again: object #2. Same data as #1, but a <b>different object</b>.',
+  'Console.WriteLine(a == c);':'<b>False</b>! Same values, different objects. == compares the arrows, not the data.',
+  'b = c;':'Move b’s arrow to object #2. Object #1 is still there; only a points to it now.',
+  'b.Age = 30;':'Changes object #2 (the one b and c share)…',
+  'Console.WriteLine($"a: {a.Name}, {a.Age}");':'…so a (object #1) still says <b>19</b>…',
+  'Console.WriteLine($"c: {c.Name}, {c.Age}");':'…and c says <b>30</b>.',
+  'int x = 5;':'Now compare with a plain <b>int</b>. Simple types like int, double, bool are <b>value types</b>: the variable holds the value itself.',
+  'int y = x;':'y gets a <b>copy</b> of the number 5. Two independent boxes.',
+  'y = 99;':'Changing y…',
+  'Console.WriteLine($"x is still {x}, y is {y}");':'…doesn’t affect x: <b>x is still 5, y is 99</b>. Values are copied; objects are shared.'
+ },
+ bank:{
+  'class BankAccount':'<b>Banking domain</b> blueprint. A great example of <b>encapsulation</b>: the class protects its own money.',
+  'private decimal balance;':'<b>private</b>: nobody outside the class can touch the balance directly. All changes must go through Deposit and Withdraw, which check the rules.',
+  'public string Owner { get; set; }':'A normal property: anyone may read or change the owner’s name.',
+  'public decimal Balance':'A <b>read-only property</b> (only a get): the world can <i>see</i> the balance but never <i>set</i> it.',
+  'return balance;':'Hands back the private field.',
+  'public BankAccount(string owner, decimal openingDeposit)':'Constructor: every account needs an owner and an opening deposit.',
+  'Owner = owner;':'Store the owner.',
+  'balance = openingDeposit;':'Inside the class, the private field is allowed.',
+  'public void Deposit(decimal amount)':'The only way to add money.',
+  'if (amount <= 0)':'Rule: deposits must be positive.',
+  'Console.WriteLine("Deposit must be positive.");':'Reject with a message…',
+  'balance = balance + amount;':'Rule passed: update the balance.',
+  'Console.WriteLine($"Deposited ${amount:F2}. Balance: ${balance:F2}");':'Report with 2 decimals (:F2, Week 2).',
+  'public void Withdraw(decimal amount)':'The only way to take money out.',
+  'if (amount > balance)':'Rule: you can’t take more than you have.',
+  'Console.WriteLine($"Insufficient funds for ${amount:F2}.");':'Reject.',
+  'balance = balance - amount;':'Rule passed: subtract.',
+  'Console.WriteLine($"Withdrew ${amount:F2}. Balance: ${balance:F2}");':'Report.',
+  'BankAccount acct = new BankAccount("Maria", 100m);':'Instantiate an account with $100. The <b>m</b> makes 100 a decimal literal.',
+  'acct.Deposit(50m);':'Allowed: 150.',
+  'acct.Withdraw(30m);':'Allowed: 120.',
+  'acct.Withdraw(500m);':'Blocked by the rule. The object protected itself.',
+  'acct.Deposit(-20m);':'Blocked too.',
+  '// acct.balance = 1000000m;   // error: balance is private':'Uncomment: <i>‘BankAccount.balance’ is inaccessible due to its protection level</i>. Nobody can cheat.',
+  '// acct.Balance = 1000000m;   // error: Balance has no set':'Uncomment: <i>Balance cannot be assigned to, it is read only</i>.',
+  'Console.WriteLine($"{acct.Owner} has ${acct.Balance:F2}");':'Reading the public, read-only Balance is fine: <b>$120.00</b>.'
+ },
+ tostring:{
+  'class Course':'A tiny class <b>without</b> a ToString override, for comparison.',
+  'public string Code { get; set; } = "";':'One property.',
+  'Course c = new Course { Code = "MAC109" };':'A Course object.',
+  'Student s = new Student { Name = "Maria", Id = 1001, Age = 19 };':'A Student object.',
+  'Console.WriteLine(c);':'No override, so C# prints the default ToString: just the <b>class name</b>, <i>Course</i>. Not helpful! (In a GUI ListBox you’d see "MyStudioApp.Course" on every row.)',
+  'Console.WriteLine(s);':'Student has an override, so WriteLine calls it: <b>Maria (#1001), age 19</b>.',
+  'Console.WriteLine("Selected: " + s);':'Gluing an object to a string also calls ToString automatically.',
+  'string label = s.ToString();':'You can call it yourself too. The result is an ordinary string…',
+  'Console.WriteLine(label.ToUpper());':'…so string methods work on it.'
+ },
+ list:{
+  'List<Student> students = new List<Student>();':'<b>A List of Student objects.</b> <code>List&lt;Student&gt;</code> reads "list of Students". It’s also an object, created with <b>new</b>, and it starts empty.',
+  'students.Add(new Student { Name = "Maria", Id = 1001, Age = 19 });':'Create a Student <b>and</b> add it in one line. The object has no variable name of its own; the list holds the reference.',
+  'students.Add(new Student { Name = "Ahmed", Id = 1002, Age = 22 });':'Second student into the list.',
+  'students.Add(new Student { Name = "Lin", Id = 1003, Age = 20 });':'Third. Your GUI’s roster works exactly like this.',
+  'Console.WriteLine($"Roster has {students.Count} students:");':'<b>Count</b> is a property of the List object: 3.',
+  'foreach (Student s in students)':'<b>foreach</b> visits each object in the list, one at a time; <b>s</b> refers to the current one.',
+  'Console.WriteLine(" - " + s);':'Gluing calls our ToString override for each student.',
+  'int total = 0;':'An accumulator for the ages.',
+  'total = total + s.Age;':'Read each object’s Age property and add it up.',
+  'double average = (double)total / students.Count;':'Cast to double before dividing (Week 2), or 61 / 3 would give 20.',
+  'Console.WriteLine($"Average age: {average:F1}");':'<b>20.3</b>, formatted with one decimal.'
+ },
+ static:{
+  'public static int Count = 0;':'<b>static</b> = belongs to the <b>class itself</b>, not to any one object. There is exactly <b>one</b> Count shared by all students. You read it as <code>Student.Count</code>.',
+  'public Student(string name)':'Constructor with one parameter.',
+  'Name = name;':'Store this object’s own name (an instance property).',
+  'Count = Count + 1;':'Every new student bumps the one shared counter.',
+  'public void Introduce()':'<b>Instance</b> method (no static): needs an object.',
+  'Console.WriteLine($"Hi, I am {Name}.");':'Uses this object’s Name.',
+  'Console.WriteLine($"Students so far: {Student.Count}");':'Static members are reached through the <b>class name</b>. 0 at first, 2 after two <b>new</b>s.',
+  'Student a = new Student("Maria");':'Count becomes 1.',
+  'Student b = new Student("Ahmed");':'Count becomes 2.',
+  'a.Introduce();':'Instance method: called on an object.',
+  'b.Introduce();':'Same method, other object.',
+  'Console.WriteLine(Math.Max(3, 9));':'You’ve used static methods all along! <b>Math.Max</b> is called on the <b>class</b> Math; there’s no Math object. Same for <code>Console.WriteLine</code>, <code>int.Parse</code>, and <code>static void Main</code>.',
+  'Console.WriteLine(a.Name.Length);':'<b>Length</b> is an instance property: it needs a specific string object (a.Name, "Maria"): <b>5</b>.'
+ },
+ library:{
+  'class Book':'<b>Library domain</b>: a Book blueprint combining everything from today.',
+  'public string Title { get; set; }':'Property: the title.',
+  'public string Author { get; set; }':'Property: the author.',
+  'public bool IsCheckedOut { get; set; }':'Property: is it out of the library?',
+  'public Book(string title, string author)':'Constructor: every book needs a title and author.',
+  'Title = title;':'Store the title.',
+  'Author = author;':'Store the author.',
+  'IsCheckedOut = false;':'New books start on the shelf.',
+  'public void CheckOut()':'Method: borrow this book.',
+  'if (IsCheckedOut)':'Rule: you can’t borrow a book that’s already out.',
+  'Console.WriteLine($"Sorry, \\"{Title}\\" is already checked out.");':'<b>\\"</b> puts real quote marks inside the text (Week 2 escape sequences).',
+  'IsCheckedOut = true;':'Mark it as out.',
+  'Console.WriteLine($"You checked out \\"{Title}\\".");':'Confirm.',
+  'public void Return()':'Method: bring it back.',
+  'Console.WriteLine($"\\"{Title}\\" is back on the shelf.");':'Confirm.',
+  'string status = "available";':'Start by assuming it’s available…',
+  'status = "checked out";':'…and change the word if it’s out.',
+  'return $"{Title} by {Author} [{status}]";':'How a Book looks as text.',
+  'List<Book> shelf = new List<Book>();':'A list of Book objects.',
+  'shelf.Add(new Book("Dune", "Frank Herbert"));':'Constructor call inside Add: book at position 0.',
+  'shelf.Add(new Book("Beloved", "Toni Morrison"));':'Position 1.',
+  'shelf.Add(new Book("Clean Code", "Robert Martin"));':'Position 2.',
+  'shelf[0].CheckOut();':'<b>shelf[0]</b> is the first Book object; call its method. The second time, the rule blocks it.',
+  'shelf[2].CheckOut();':'Check out Clean Code.',
+  'shelf[0].Return();':'Return Dune.',
+  'Console.WriteLine("Library catalog:");':'Header.',
+  'foreach (Book b in shelf)':'Visit each Book object.',
+  'Console.WriteLine(" * " + b);':'Each book prints through its ToString.'
+ },
+ gui0:{
+  'public class MainWindow : Window':'<b>Your window is a class too!</b> <code>: Window</code> means MainWindow <b>inherits</b> from Avalonia’s Window class. When Program.cs runs <code>new MainWindow()</code>, it’s <b>instantiating your class</b>.',
+  'public MainWindow()':'<b>The constructor</b> of your window class. Same rule as Student: same name as the class, no return type, runs once on <b>new</b>.',
+  'Title = "Same class, different objects";':'Setting a property of <b>this</b> window object (like <code>this.Title</code>).',
+  'Width = 420;':'Another property of this window object.',
+  'Height = 260;':'And another.',
+  'Button btnSave = new Button();':'<b>Instantiation!</b> Exactly like <code>Student s1 = new Student();</code>. <b>Button</b> is a class written by the Avalonia team; <b>btnSave</b> refers to one Button object.',
+  'btnSave.Content = "Save";':'Set a property with the dot, like <code>s1.Name = "Maria";</code>.',
+  'btnSave.Width = 120;':'Another property of that one button.',
+  'Button btnDelete = new Button { Content = "Delete", Width = 160 };':'<b>Object initializer</b>, exactly like <code>new Student { Name = "Ahmed", Age = 22 }</code>. A second, independent Button object.',
+  'Button btnHelp = new Button { Content = "Help", Background = Brushes.Gold };':'A third Button object with its own property values. <b>One class, three objects.</b>',
+  'var lblInfo = new TextBlock':'A TextBlock object (<b>var</b> lets C# infer the type).',
+  'Text = "Three Button objects, one Button class.",':'Initializer property.',
+  'FontSize = 16':'Initializer property (last one: no comma).',
+  'Content = new StackPanel':'Another object (a StackPanel), handed to this window’s Content property.',
+  'Margin = new Thickness(20),':'Even the margin is an object: <b>new Thickness(20)</b> calls Thickness’s <b>constructor</b> with one argument.',
+  'Spacing = 10,':'Gap between children.',
+  'Children = { lblInfo, btnSave, btnDelete, btnHelp }':'The shelf holds <b>references</b> to the four objects created above.'
+ },
+ gui1:{
+  'public class MainWindow : Window':'Your window class.',
+  'Student student = new Student("Maria", 1001, 19);':'<b>Your own class inside a GUI.</b> A field holding one Student object, created with the constructor from Student.cs. It’s a field so the click handler can reach it later.',
+  'TextBlock lblInfo = new TextBlock { FontSize = 20, Foreground = Brushes.DarkSlateBlue };':'A label object (a field) to show the student.',
+  'public MainWindow()':'The window’s constructor: runs once at startup.',
+  'Title = "One Student object";':'Window title.',
+  'Width = 420;':'Window width.',
+  'Height = 220;':'Window height.',
+  'lblInfo.Text = student.ToString();':'<b>Object → screen.</b> Ask the Student object for its text (our ToString override) and put it on the label.',
+  'var btnBirthday = new Button { Content = "Have a birthday" };':'A Button object.',
+  'btnBirthday.Click += BtnBirthday_Click;':'Wire the click to the method below.',
+  'Margin = new Thickness(20),':'Margin object.',
+  'Spacing = 12,':'Gap.',
+  'Children = { lblInfo, btnBirthday }':'Label above, button below.',
+  'void BtnBirthday_Click(object? sender, RoutedEventArgs e)':'The click handler: runs on every click. (<b>sender</b> is the Button object that was clicked.)',
+  'student.HaveBirthday();':'<b>Call a method on your object</b>: its Age goes up by one. The data lives in the object, not in the label.',
+  'lblInfo.Text = student.ToString();':'Refresh the screen from the object. Pattern: <b>change the object, then redisplay it</b>.'
+ },
+ gui2:{
+  'public class MainWindow : Window':'Your window class.',
+  'ObservableCollection<Student> students = new ObservableCollection<Student>();':'<b>A collection of Student objects that the screen can watch.</b> Works like List&lt;Student&gt;, but when you Add, any ListBox showing it updates automatically. This is the roster in your Milestone app.',
+  'TextBox txtName = new TextBox { Watermark = "Name" };':'Input box for the name (a field).',
+  'TextBox txtId = new TextBox { Watermark = "Student ID" };':'Input box for the id.',
+  'TextBox txtAge = new TextBox { Watermark = "Age" };':'Input box for the age.',
+  'ListBox lstStudents = new ListBox { Height = 140 };':'<b>ListBox</b>: a control that shows a list of objects, one row each.',
+  'TextBlock lblStatus = new TextBlock { Foreground = Brushes.SeaGreen };':'A status label.',
+  'public MainWindow()':'Window constructor.',
+  'Title = "Student Roster";':'Title.',
+  'Width = 440;':'Width.',
+  'Height = 420;':'Height.',
+  'lstStudents.ItemsSource = students;':'<b>Connect the ListBox to the collection.</b> From now on the ListBox shows every Student in <b>students</b>. For each row it calls <b>ToString()</b>, which is why our override matters!',
+  'var btnAdd = new Button { Content = "Add student" };':'The Add button.',
+  'btnAdd.Click += BtnAdd_Click;':'Wire it.',
+  'Margin = new Thickness(20),':'Margin.',
+  'Spacing = 8,':'Gap.',
+  'Children = { txtName, txtId, txtAge, btnAdd, lstStudents, lblStatus }':'Form on top, list below.',
+  'void BtnAdd_Click(object? sender, RoutedEventArgs e)':'Runs on every click of Add.',
+  'int.TryParse(txtId.Text, out int id);':'Week 2 skill: TextBox text → int, safely (bad input gives 0).',
+  'int.TryParse(txtAge.Text, out int age);':'Same for the age.',
+  'Student s = new Student(txtName.Text ?? "", id, age);':'<b>Instantiation from user input!</b> Each click builds a <b>new</b> Student object using the constructor. <b>?? ""</b> means "if the TextBox text is null, use empty text", which keeps VS Code’s nullable warning away.',
+  'students.Add(s);':'Add the object to the collection, and the ListBox shows a new row instantly.',
+  'lblStatus.Text = $"Added {s.Name}. Roster size: {students.Count}";':'Read properties of the new object and of the collection.',
+  'txtName.Text = "";':'Clear the form for the next student.',
+  'txtId.Text = "";':'Clear.',
+  'txtAge.Text = "";':'Clear.'
+ },
+ student:{
+  'public Student(string name, int id, int age)':'Constructor: the window creates students with <code>new Student(name, id, age)</code>.',
+  'Name = name;':'Store the name.',
+  'Id = id;':'Store the id.',
+  'Age = age;':'Store the age.',
+  'public void HaveBirthday()':'Method that changes the object’s own Age. No Console here: GUI classes report through the window, not the terminal.',
+  'Age = Age + 1;':'One year older.'
+ }
+};
+
+function noteFor(key,line){
+  var t=line.trim();
+  if(t==='')return 'A blank line: breathing room for human eyes.';
+  if(EXN[key]&&EXN[key][t])return EXN[key][t];
+  if(GEN[t])return GEN[t];
+  for(var i=0;i<RULES.length;i++){var m=t.match(RULES[i][0]);if(m)return RULES[i][1](m);}
+  return null;
+}
+EXN.bugfixed={
+ 'public string Name = "";':'<b>Fix 3:</b> added <b>public</b>. Without it, members of a class are <b>private</b> by default, so Main couldn’t touch Name.',
+ 'public int Age;':'Already public.',
+ 'public Student(string name, int age)':'The only constructor needs a name and an age.',
+ 'Name = name;':'Store the name.',
+ 'Age = age;':'Store the age.',
+ 'Student s1 = new Student("Maria", 19);':'<b>Fix 1:</b> pass the two arguments the constructor requires.',
+ 'Student s2 = new Student("Ahmed", 22);':'<b>Fix 2:</b> the missing <b>new</b>. Without it C# thinks you’re calling a method named Student.',
+ 's2.Name = "Ahmed Ali";':'Allowed now that Name is public.',
+ 's2.Age = 23;':'<b>Fix 4:</b> set the Age of a <b>specific object</b> (s2), not of the class. Student.Age makes no sense: which student?',
+ 'Console.WriteLine(s1.Name + ", " + s1.Age);':'Prints Maria’s data.',
+ 'Console.WriteLine(s2.Name + ", " + s2.Age);':'Prints Ahmed’s updated data.'
+};
+EXN.p_room={
+ 'class Room':'<b>Hotel domain</b> blueprint.',
+ 'public string Type { get; set; }':'Room type, e.g. "Single" or "Suite".',
+ 'public decimal PricePerNight { get; set; }':'decimal for money.',
+ 'public bool IsBooked { get; set; }':'Booked or free?',
+ 'public Room(int number, string type, decimal pricePerNight)':'Constructor with three parameters.',
+ 'Number = number;':'Store the room number.',
+ 'Type = type;':'Store the type.',
+ 'PricePerNight = pricePerNight;':'Store the price.',
+ 'IsBooked = false;':'New rooms start free.',
+ 'public int Number { get; set; }':'The room number.',
+ 'public decimal TotalFor(int nights)':'A method that returns a value computed from the object’s data and a parameter.',
+ 'return PricePerNight * nights;':'Price × nights.',
+ 'public void Book()':'Method that changes the object.',
+ 'if (IsBooked)':'Rule: can’t book twice.',
+ 'Console.WriteLine($"Room {Number} is already booked.");':'Rejected.',
+ 'IsBooked = true;':'Mark as booked.',
+ 'Console.WriteLine($"Room {Number} is now booked.");':'Confirm.',
+ 'Room r1 = new Room(101, "Single", 89.50m);':'Instantiate room 101.',
+ 'Room r2 = new Room(204, "Suite", 210m);':'Instantiate room 204.',
+ 'r1.Book();':'Book r1 (the second call is refused).',
+ 'Console.WriteLine($"3 nights in room {r2.Number} ({r2.Type}): ${r2.TotalFor(3):F2}");':'Call a returning method inside a $-string.'
+};
+EXN.p_product={
+ 'class Product':'<b>Inventory domain</b> blueprint with a protected quantity.',
+ 'private int quantity;':'Private storage: only Sell and Restock may change it.',
+ 'public string Name { get; set; }':'Product name.',
+ 'public decimal Price { get; set; }':'Unit price.',
+ 'public int Quantity':'Read-only property: visible, not settable from outside.',
+ 'return quantity;':'Return the private field.',
+ 'public Product(string name, decimal price, int quantity)':'Constructor. The parameter is also called quantity…',
+ 'Name = name;':'Store the name.',
+ 'Price = price;':'Store the price.',
+ 'this.quantity = quantity;':'…so <b>this.quantity</b> (the field) is needed to tell it apart from the parameter <b>quantity</b>. This is when <b>this</b> is required.',
+ 'public void Restock(int amount)':'Add stock.',
+ 'quantity = quantity + amount;':'Increase.',
+ 'public void Sell(int amount)':'Remove stock, with a rule.',
+ 'if (amount > quantity)':'Can’t sell more than we have.',
+ 'Console.WriteLine($"Only {quantity} {Name} left. Sale refused.");':'Refused.',
+ 'quantity = quantity - amount;':'Decrease.',
+ 'Console.WriteLine($"Sold {amount} {Name} for ${Price * amount:F2}.");':'Confirm with the sale total.',
+ 'return $"{Name}: {Quantity} in stock at ${Price:F2}";':'Text form of a product.',
+ 'Product p = new Product("Notebook", 3.50m, 10);':'Instantiate.',
+ 'Console.WriteLine(p);':'Calls ToString.',
+ 'p.Sell(4);':'10 → 6.',
+ 'p.Sell(20);':'Refused.',
+ 'p.Restock(15);':'6 → 21.'
+};
+EXN.p_menu={
+ 'class MenuItem':'<b>Restaurant domain</b> blueprint.',
+ 'public decimal Price { get; set; }':'decimal price.',
+ 'return $"{Name,-12} ${Price:F2}";':'<b>{Name,-12}</b> pads the name to 12 characters, left-aligned, so the prices line up in a column. (A bonus formatting trick.)',
+ 'List<MenuItem> order = new List<MenuItem>();':'An order is a list of MenuItem objects.',
+ 'order.Add(new MenuItem { Name = "Tacos", Price = 9.50m });':'Initializer inside Add.',
+ 'order.Add(new MenuItem { Name = "Lemonade", Price = 3.25m });':'Second item.',
+ 'order.Add(new MenuItem { Name = "Flan", Price = 4.75m });':'Third item.',
+ 'decimal total = 0;':'Accumulator.',
+ 'foreach (MenuItem item in order)':'Visit each item object.',
+ 'Console.WriteLine(item);':'Print it (ToString).',
+ 'total = total + item.Price;':'Add its price.',
+ 'Console.WriteLine($"Items: {order.Count}");':'List Count property.',
+ 'Console.WriteLine($"Total: ${total:F2}");':'$17.50.'
+};
+EXN.engine={
+ 'using Avalonia.Controls.ApplicationLifetimes;':'Engine part: how a desktop app starts and stops.',
+ 'using Avalonia.Themes.Fluent;':'Engine part: the modern Fluent look.',
+ '// PART 1: The launcher. Starts Avalonia.':'The engine, part 1. Same file every week: copy once, never touch.',
+ 'class Program':'The launcher class. Yes, even the engine is made of classes.',
+ '[STAThread]':'A tag desktop GUI apps need on Main. Copy it, don’t worry about it.',
+ 'public static void Main(string[] args)':'The starting point, as always. <b>static</b>: .NET calls it on the class, before any object exists.',
+ 'AppBuilder.Configure<App>()':'"Build an Avalonia app using the <b>App</b> class below"…',
+ '.UsePlatformDetect()':'…"use the right drawing system for Windows, macOS or Linux"…',
+ '.StartWithClassicDesktopLifetime(args);':'…"start a normal desktop app". One long statement ending with a single <b>;</b>.',
+ '// PART 2: The app. Loads the modern theme, opens your window.':'The engine, part 2.',
+ 'public class App : Application':'App <b>is an</b> Application (inheritance, like MainWindow : Window).',
+ 'public override void OnFrameworkInitializationCompleted()':'Avalonia calls this when it’s ready.',
+ 'Styles.Add(new FluentTheme());':'Instantiates a FluentTheme object and adds it to the app’s Styles.',
+ 'if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)':'"If this is a normal desktop app…" (it always is, for us).',
+ 'desktop.MainWindow = new MainWindow();   // <- opens YOUR file':'<b>Instantiation of your class!</b> <code>new MainWindow()</code> builds one object from your MainWindow class, which runs your constructor, and the engine shows it.',
+ 'base.OnFrameworkInitializationCompleted();':'Lets Avalonia finish its own startup.'
+};
+
+(function(){
+"use strict";
+var KW=/^(using|class|static|void|int|double|decimal|string|bool|var|new|return|public|private|override|base|namespace|if|is|else|out|true|false|object|this|foreach|in|get|set|value)$/;
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function hl(line){
+  var out='',i=0,n=line.length;
+  while(i<n){
+    var ch=line[i];
+    if(ch==='/'&&line[i+1]==='/'){out+='<span class="c">'+esc(line.slice(i))+'</span>';break;}
+    if(ch==='"'||(ch==='$'&&line[i+1]==='"')){var j=i+(ch==='$'?2:1);while(j<n&&line[j]!=='"'){if(line[j]==='\\')j++;j++;}j++;out+='<span class="s">'+esc(line.slice(i,j))+'</span>';i=j;continue;}
+    if(/[A-Za-z_]/.test(ch)){
+      var j2=i;while(j2<n&&/[A-Za-z0-9_]/.test(line[j2]))j2++;
+      var w=line.slice(i,j2),rest=line.slice(j2);
+      var cls=KW.test(w)?'k':/new\s+$/.test(line.slice(0,i))?'t':/^\s*[(<]/.test(rest)?'m':/^[A-Z]/.test(w)?'t':'p';
+      out+='<span class="'+cls+'">'+esc(w)+'</span>';i=j2;continue;
+    }
+    if(/[0-9]/.test(ch)){var j3=i;while(j3<n&&/[0-9.m]/.test(line[j3]))j3++;out+='<span class="n">'+line.slice(i,j3)+'</span>';i=j3;continue;}
+    out+=esc(ch);i++;
+  }
+  return out;
+}
+function copyText(txt,btn){
+  function ok(){btn.textContent='Copied ✓';setTimeout(function(){btn.textContent='Copy';},1600);}
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(ok,ok);}
+  else{var ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');}catch(e){}document.body.removeChild(ta);ok();}
+}
+
+/* ============ code viewer: files[] = [{key,name}] ============ */
+function codeView(host,files,o){
+  o=o||{};
+  var win=document.createElement('div');win.className='codewin';
+  var bar=document.createElement('div');bar.className='bar';
+  bar.innerHTML='<span class="dots"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i></span>';
+  var ftabs=document.createElement('span');ftabs.className='ftabs';bar.appendChild(ftabs);
+  if(o.tag){var tg=document.createElement('span');tg.className='tag';tg.textContent=o.tag;bar.appendChild(tg);}
+  var btns=document.createElement('span');btns.className='btns';bar.appendChild(btns);
+  var copy=document.createElement('button');copy.type='button';copy.textContent='Copy';btns.appendChild(copy);
+  var run=null;if(o.run){run=document.createElement('button');run.type='button';run.className='run';run.textContent='▶ Run';btns.appendChild(run);}
+  win.appendChild(bar);var pre=document.createElement('pre');win.appendChild(pre);
+  var panel=document.createElement('div');panel.className='explain-panel';
+  var expl=document.createElement('div');expl.className='expl idle';
+  expl.innerHTML='<div class="lbl"><span>Explanation</span><span class="pinbadge">📌 pinned · click again to unpin</span></div><div class="codeq"></div><div class="why"></div>';
+  panel.appendChild(expl);
+  var codeq=expl.querySelector('.codeq'),why=expl.querySelector('.why'),lbl=expl.querySelector('.lbl span');
+  var IDLE='Hover any line of the code to read what it does. Click a line to pin it.';
+  why.innerHTML=IDLE;
+  var term=null;
+  if(o.run){term=document.createElement('div');term.className='term';term.innerHTML='<div class="thead">▶ RUN → OUTPUT</div><div class="placeholder">Press ▶ Run. Predict the output first!</div>';panel.appendChild(term);}
+  if(o.extra)panel.appendChild(o.extra);
+  var cur=null,pinned=null,rows=[],lines=[];
+  function show(i){expl.classList.remove('idle');lbl.textContent=cur.name+' · line '+(i+1);codeq.textContent=lines[i].trim()||'(blank line)';why.innerHTML=noteFor(cur.key,lines[i])||'';}
+  function idle(){if(pinned!==null){show(pinned);return;}expl.classList.add('idle');lbl.textContent='Explanation';why.innerHTML=IDLE;}
+  function load(f){
+    cur=f;pinned=null;expl.classList.remove('pinned');idle();
+    lines=CODE[f.key].split('\n');pre.innerHTML='';rows=[];
+    lines.forEach(function(L,i){
+      var row=document.createElement('span');row.className='cl explain';row.tabIndex=0;row.setAttribute('role','button');
+      row.setAttribute('aria-label','Line '+(i+1)+': '+(L.trim()||'blank'));
+      row.innerHTML='<span class="ln">'+(i+1)+'</span><span class="src">'+(hl(L)||' ')+'</span>';
+      row.addEventListener('mouseenter',function(){if(pinned===null){rows.forEach(function(r){r.classList.remove('hot');});row.classList.add('hot');show(i);}});
+      row.addEventListener('mouseleave',function(){if(pinned===null){row.classList.remove('hot');idle();}});
+      row.addEventListener('focus',function(){if(pinned===null)show(i);});
+      row.addEventListener('click',function(){
+        if(pinned===i){pinned=null;row.classList.remove('pinned');expl.classList.remove('pinned');show(i);return;}
+        rows.forEach(function(r){r.classList.remove('pinned','hot');});pinned=i;row.classList.add('pinned');expl.classList.add('pinned');show(i);
+      });
+      row.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();row.click();}});
+      pre.appendChild(row);rows.push(row);
+    });
+    ftabs.querySelectorAll('.ftab,.fname').forEach(function(b){b.classList.toggle('on',b.dataset.k===f.key);});
+  }
+  files.forEach(function(f,i){
+    var b=document.createElement(files.length>1?'button':'span');
+    if(files.length>1){b.type='button';b.className='ftab';b.addEventListener('click',function(){load(f);});}else b.className='fname';
+    b.dataset.k=f.key;b.textContent=f.name;ftabs.appendChild(b);
+  });
+  copy.addEventListener('click',function(){copyText(CODE[cur.key],copy);});
+  if(run){run.addEventListener('click',function(){
+    var outLines=OUT[o.run];term.innerHTML='<div class="thead">▶ RUN → OUTPUT</div>';run.disabled=true;
+    outLines.forEach(function(t,k){setTimeout(function(){var d=document.createElement('div');d.className='tline';d.textContent=t;term.appendChild(d);
+      if(k===outLines.length-1){var e=document.createElement('div');e.className='tdone';e.textContent='✔ program finished';term.appendChild(e);run.disabled=false;run.textContent='↻ Run again';}},140*(k+1));});
+  });}
+  load(files[0]);
+  host.innerHTML='';host.appendChild(win);host.appendChild(panel);
+  return {rowAt:function(i){return rows[i];},lines:function(){return lines;},clearStep:function(){rows.forEach(function(r){r.classList.remove('step');});}};
+}
+
+/* ============ window preview ============ */
+function renderWin(spec,host){
+  var wrap=document.createElement('div');wrap.className='wv-wrap';
+  var win=document.createElement('div');win.className='wv';win.style.width=spec.w+'px';
+  win.innerHTML='<div class="wv-title"><span>🪟</span><span class="wv-tt">'+esc(spec.title)+'</span><span class="wv-btns"><i>—</i><i>▢</i><i>✕</i></span></div>';
+  var body=document.createElement('div');body.className='wv-body';body.style.height=spec.h+'px';
+  var st=document.createElement('div');st.className='wv-stack';st.style.padding=spec.margin+'px';st.style.gap=spec.spacing+'px';
+  var ctx={};
+  spec.items.forEach(function(it){
+    var el;
+    if(it.t==='text'){el=document.createElement('div');el.className='wv-text';el.textContent=it.text;el.style.fontSize=(it.size||14)+'px';if(it.color)el.style.color=it.color;}
+    if(it.t==='button'){el=document.createElement('button');el.type='button';el.className='wv-btn';el.textContent=it.text;if(it.width)el.style.width=it.width+'px';if(it.bg)el.style.background=it.bg;}
+    if(it.t==='box'){el=document.createElement('input');el.className='wv-box';el.placeholder=it.ph;el.spellcheck=false;el.addEventListener('keydown',function(e){e.stopPropagation();});}
+    if(it.t==='list'){el=document.createElement('div');el.className='wv-list';el.style.height=it.height+'px';}
+    if(it.id)ctx[it.id]=el;st.appendChild(el);
+  });
+  body.appendChild(st);win.appendChild(body);wrap.appendChild(win);host.appendChild(wrap);
+  if(spec.wire)spec.wire(ctx);
+  function fit(){var avail=host.clientWidth||spec.w;var sc=Math.min(1,(avail-4)/(spec.w+2));win.style.transform='scale('+sc+')';wrap.style.height=((spec.h+34)*sc+4)+'px';}
+  fit();if(window.ResizeObserver)new ResizeObserver(fit).observe(host);
+}
+function previewBox(spec,cap){
+  var box=document.createElement('div');box.className='prevbox';
+  box.innerHTML='<div class="prevcap-top">▶ RUN → YOUR WINDOW (live preview)</div>';
+  var h=document.createElement('div');box.appendChild(h);
+  var c=document.createElement('div');c.className='prevcap';c.innerHTML=cap;box.appendChild(c);
+  setTimeout(function(){renderWin(spec,h);},0);return box;
+}
+function tryInt(t){t=String(t==null?'':t).trim();if(!/^[+-]?\d+$/.test(t))return 0;var v=Number(t);return (v>2147483647||v<-2147483648)?0:v;}
+var GUI={
+  gui0:{spec:{title:'Same class, different objects',w:420,h:260,margin:20,spacing:10,items:[
+      {t:'text',text:'Three Button objects, one Button class.',size:16},{t:'button',text:'Save',width:120},{t:'button',text:'Delete',width:160},{t:'button',text:'Help',bg:'#ffd700'}]},
+    cap:'Three objects from one class, each with its own Content, Width and Background. (No events wired, so clicks do nothing.)'},
+  gui1:{spec:{title:'One Student object',w:420,h:220,margin:20,spacing:12,items:[
+      {t:'text',text:'Maria (#1001), age 19',size:20,color:'darkslateblue',id:'lbl'},{t:'button',text:'Have a birthday',id:'btn'}],
+      wire:function(c){var age=19;c.btn.addEventListener('click',function(){age=age+1;c.lbl.textContent='Maria (#1001), age '+age;});}},
+    cap:'<b>Click the button:</b> the click handler calls <code>student.HaveBirthday()</code>, then shows <code>student.ToString()</code>.'},
+  gui2:{spec:{title:'Student Roster',w:440,h:420,margin:20,spacing:8,items:[
+      {t:'box',ph:'Name',id:'n'},{t:'box',ph:'Student ID',id:'i'},{t:'box',ph:'Age',id:'a'},{t:'button',text:'Add student',id:'add'},{t:'list',height:140,id:'list'},{t:'text',text:'',color:'seagreen',id:'st'}],
+      wire:function(c){var count=0;c.add.addEventListener('click',function(){
+        var id=tryInt(c.i.value),age=tryInt(c.a.value),name=c.n.value;count++;
+        var row=document.createElement('div');row.textContent=name+' (#'+id+'), age '+age;
+        row.addEventListener('click',function(){c.list.querySelectorAll('div').forEach(function(d){d.classList.remove('sel');});row.classList.add('sel');});
+        c.list.appendChild(row);c.st.textContent='Added '+name+'. Roster size: '+count;c.n.value='';c.i.value='';c.a.value='';});}},
+    cap:'<b>Try it:</b> type a name, an ID and an age, then click <b>Add student</b>. Each click is one <code>new Student(…)</code>; each row is that object’s <code>ToString()</code>.'}
+};
+
+/* ============ slides ============ */
+var tpl=document.getElementById('slides'),stage=document.getElementById('stage'),strip=document.getElementById('tabstrip');
+var secs=tpl.content.querySelectorAll('section'),slides=[],tabs=[],visited={};
+secs.forEach(function(sec,i){
+  var s=sec.cloneNode(true);s.classList.add('slide');stage.appendChild(s);slides.push(s);
+  var t=document.createElement('button');t.className='tab';t.type='button';t.innerHTML='<span class="dot"></span>'+sec.dataset.tab;
+  t.addEventListener('click',function(){go(i);});strip.appendChild(t);tabs.push(t);
+});
+var curS=0,prevBtn=document.getElementById('prevBtn'),nextBtn=document.getElementById('nextBtn');
+function go(i){
+  if(i<0||i>=slides.length)return;
+  slides[curS].classList.remove('active');tabs[curS].classList.remove('active');
+  if(visited[curS])tabs[curS].classList.add('done');visited[curS]=true;curS=i;
+  slides[curS].classList.add('active');tabs[curS].classList.add('active');
+  tabs[curS].scrollIntoView({inline:'nearest',block:'nearest'});slides[curS].scrollTop=0;
+  prevBtn.disabled=curS===0;nextBtn.disabled=curS===slides.length-1;
+  document.getElementById('progressBar').style.width=(curS/(slides.length-1)*100)+'%';
+  document.getElementById('where').textContent=(curS+1)+' / '+slides.length+' · '+secs[curS].dataset.tab;
+  window.dispatchEvent(new Event('resize'));
+}
+prevBtn.addEventListener('click',function(){go(curS-1);});nextBtn.addEventListener('click',function(){go(curS+1);});
+document.addEventListener('keydown',function(e){var tg=e.target.tagName;if(tg==='INPUT'||tg==='TEXTAREA'||tg==='SELECT')return;
+  if(e.key==='ArrowRight')go(curS+1);if(e.key==='ArrowLeft')go(curS-1);});
+
+/* mount console examples */
+var views={};
+stage.querySelectorAll('.ex[data-ex]').forEach(function(h){var k=h.dataset.ex;views[k]=codeView(h,[{key:k,name:'Program.cs'}],{run:k,tag:k==='bugfixed'?'fixed · compiles':'complete program'});});
+/* mount GUI examples */
+stage.querySelectorAll('.ex[data-gui]').forEach(function(h){var k=h.dataset.gui;
+  var files=[{key:k,name:'MainWindow.cs'}];if(k!=='gui0')files.push({key:'student',name:'Student.cs'});files.push({key:'engine',name:'Program.cs'});
+  codeView(h,files,{tag:'complete files',extra:previewBox(GUI[k].spec,GUI[k].cap)});});
+
+/* flip cards */
+stage.querySelectorAll('.flip').forEach(function(f){function t(){f.classList.toggle('flipped');}f.addEventListener('click',t);f.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();t();}});});
+
+/* anatomy zones */
+var Z=[
+  ['class keyword','The keyword <b>class</b> starts a blueprint. Everything until the matching <b>}</b> belongs to it.'],
+  ['The class name','<b>Student</b> is the name of your new <b>type</b>. Convention: capital first letter. Once the class exists, <b>Student</b> is a type just like int or string, so you can declare <code>Student s1</code>.'],
+  ['The class body','The braces hold the <b>members</b>: data (fields, properties) and behavior (methods, constructors).'],
+  ['Access modifier','<b>public</b> = code outside the class may use this member. Leave it out and the member is <b>private</b> (inside-only). Forgetting it is a classic bug!'],
+  ['Fields','Each line is a variable that <b>every object gets its own copy of</b>: one Name, one Id, one Age per student.'],
+  ['Your class used as a type','The variable s1 has type <b>Student</b>. It can refer to one Student object.'],
+  ['Instantiation','<b>new Student()</b> builds a real object from the blueprint and calls its constructor (the <b>()</b>). Without new, there is no object.'],
+  ['The dot','The dot means "look inside this object": <code>s1.Name</code> is <i>s1’s</i> Name. Same dot as <code>txtName.Text</code>.']
+];
+var zones=stage.querySelectorAll('.zone');
+zones.forEach(function(z){z.addEventListener('click',function(){zones.forEach(function(x){x.classList.toggle('on',x.dataset.z===z.dataset.z);});var d=Z[+z.dataset.z];document.getElementById('zLbl').textContent=d[0];document.getElementById('zText').innerHTML=d[1];});});
+
+/* ============ object factory ============ */
+(function(){
+  var objs=[],colors=['#22c58b','#2ac3de','#ffb020','#c77dff','#ff7a90','#7aa2f7','#9ece6a'];
+  var host=document.getElementById('fObjs'),log=document.getElementById('fLog'),gen=document.getElementById('fGen');
+  function val(id){return document.getElementById(id).value;}
+  function preview(){
+    var v=val('fVar').trim()||'s?',n=val('fName');
+    gen.innerHTML=hl('Student '+v+' = new Student { Name = "'+n.replace(/"/g,'\\"')+'", Id = '+tryInt(val('fId'))+', Age = '+tryInt(val('fAge'))+' };');
+  }
+  ['fVar','fName','fId','fAge'].forEach(function(id){document.getElementById(id).addEventListener('input',preview);});preview();
+  function say(t){var p=log.querySelector('.placeholder');if(p)p.remove();var d=document.createElement('div');d.className='tline';d.textContent=t;log.appendChild(d);}
+  function render(){
+    host.innerHTML='';document.getElementById('fCount').textContent=objs.length;
+    if(!objs.length){host.innerHTML='<span style="color:var(--muted)">Nothing here yet. The class alone builds nothing. Press <b>new</b>!</span>';return;}
+    objs.forEach(function(o){
+      var el=document.createElement('div');el.className='obj';el.style.setProperty('--c',o.c);if(!o.born)el.style.animation='none';o.born=false;
+      el.innerHTML='<div class="oh"><span>Student object #'+o.n+'</span><span class="vn">'+esc(o.v)+'</span></div>'+
+        '<div class="fld"><span>Name</span><b>"'+esc(o.Name)+'"</b></div><div class="fld"><span>Id</span><b>'+o.Id+'</b></div><div class="fld'+(o.flash?' flash':'')+'"><span>Age</span><b>'+o.Age+'</b></div>'+
+        '<div class="ob"><button type="button" data-m="i">'+esc(o.v)+'.Introduce()</button><button type="button" data-m="b">'+esc(o.v)+'.HaveBirthday()</button></div>';
+      o.flash=false;
+      el.querySelector('[data-m=i]').addEventListener('click',function(){say('Hi, I am '+o.Name+', student #'+o.Id+'.');});
+      el.querySelector('[data-m=b]').addEventListener('click',function(){o.Age++;o.flash=true;say('Happy birthday, '+o.Name+'! You are now '+o.Age+'.');render();});
+      host.appendChild(el);
+    });
+  }
+  var count=0;
+  document.getElementById('fNew').addEventListener('click',function(){
+    count++;var v=(val('fVar').trim()||('s'+count)).replace(/[^A-Za-z0-9_]/g,'')||('s'+count);
+    objs.push({n:count,v:v,Name:val('fName'),Id:tryInt(val('fId')),Age:tryInt(val('fAge')),c:colors[(count-1)%colors.length],born:true});
+    say('// '+gen.textContent);render();
+    var nx=count+1;document.getElementById('fVar').value='s'+nx;var names=['Ahmed','Lin','Sofia','Kwame','Priya','Diego','Fatima','Noah'];
+    document.getElementById('fName').value=names[(nx-2)%names.length];document.getElementById('fId').value=1000+nx;document.getElementById('fAge').value=18+(nx*3)%8;preview();
+  });
+  document.getElementById('fReset').addEventListener('click',function(){objs=[];count=0;log.innerHTML='<div class="placeholder">Method calls print here.</div>';
+    document.getElementById('fVar').value='s1';document.getElementById('fName').value='Maria';document.getElementById('fId').value='1001';document.getElementById('fAge').value='19';preview();render();});
+})();
+
+/* ============ memory stepper ============ */
+(function(){
+  var C1='#22c58b',C2='#2ac3de';
+  var STEPS=[
+    {line:'Student a = new Student { Name = "Maria", Age = 19 };',vars:{a:1},objs:{1:{Name:'"Maria"',Age:'19'}},ch:{1:['Name','Age']},note:'<b>new</b> builds object #1 on the heap. The variable <b>a</b> holds an arrow (reference) to it.'},
+    {line:'Student b = a;',vars:{b:1},note:'No <b>new</b>, so no new object. <b>b</b> gets a copy of the <b>arrow</b>: a and b now point to the same object #1.'},
+    {line:'b.Name = "Maria Lopez";',objs:{1:{Name:'"Maria Lopez"'}},ch:{1:['Name']},note:'Following b’s arrow leads to object #1, so #1 changes.'},
+    {line:'Console.WriteLine(a.Name);',out:'Maria Lopez',note:'a follows its arrow to the same object #1: <b>Maria Lopez</b>.'},
+    {line:'Console.WriteLine(a == b);',out:'True',note:'For objects, == compares arrows: same object, so <b>True</b>.'},
+    {line:'Student c = new Student { Name = "Maria Lopez", Age = 19 };',vars:{c:2},objs:{2:{Name:'"Maria Lopez"',Age:'19'}},ch:{2:['Name','Age']},note:'<b>new</b> again: object #2. Same values as #1, but a separate object.'},
+    {line:'Console.WriteLine(a == c);',out:'False',note:'Different arrows, so <b>False</b>, even though the data looks identical.'},
+    {line:'b = c;',vars:{b:2},note:'b’s arrow moves to object #2. Object #1 is untouched; only a points to it now.'},
+    {line:'b.Age = 30;',objs:{2:{Age:'30'}},ch:{2:['Age']},note:'Changes object #2 (shared by b and c).'},
+    {line:'Console.WriteLine($"a: {a.Name}, {a.Age}");',out:'a: Maria Lopez, 19',note:'a still points to #1: age <b>19</b>.'},
+    {line:'Console.WriteLine($"c: {c.Name}, {c.Age}");',out:'c: Maria Lopez, 30',note:'c points to #2: age <b>30</b>.'},
+    {line:'int x = 5;',ints:{x:'5'},note:'An <b>int</b> is a value type: the variable holds the number itself. No arrow, no heap object.'},
+    {line:'int y = x;',ints:{y:'5'},note:'y gets a <b>copy</b> of the value 5.'},
+    {line:'y = 99;',ints:{y:'99'},note:'Only y changes.'},
+    {line:'Console.WriteLine($"x is still {x}, y is {y}");',out:'x is still 5, y is 99',note:'Values are copied; objects are shared.'}
+  ];
+  var pos=-1,view=views.refs;
+  var lines=CODE.refs.split('\n').map(function(l){return l.trim();});
+  STEPS.forEach(function(s){s.idx=lines.indexOf(s.line);});
+  function state(upto){
+    var st={vars:{},objs:{},ints:{},out:[],order:[]};
+    for(var i=0;i<=upto;i++){var s=STEPS[i];
+      if(s.vars)for(var v in s.vars){if(!(v in st.vars))st.order.push(v);st.vars[v]=s.vars[v];}
+      if(s.ints)for(var v2 in s.ints){if(!(v2 in st.ints))st.order.push(v2);st.ints[v2]=s.ints[v2];}
+      if(s.objs)for(var o in s.objs){st.objs[o]=st.objs[o]||{};for(var f in s.objs[o])st.objs[o][f]=s.objs[o][f];}
+      if(s.out)st.out.push(s.out);}
+    return st;
+  }
+  function draw(){
+    var V=document.getElementById('mVars'),O=document.getElementById('mObjs'),N=document.getElementById('mNote'),T=document.getElementById('mOut');
+    view.clearStep();
+    document.getElementById('mBack').disabled=pos<0;document.getElementById('mStep').disabled=pos>=STEPS.length-1;
+    document.getElementById('mPos').textContent=pos<0?'before line 13':'step '+(pos+1)+' / '+STEPS.length+' · line '+(STEPS[pos].idx+1);
+    if(pos<0){V.innerHTML='<span style="color:var(--muted)">(empty)</span>';O.innerHTML='<span style="color:var(--muted)">(empty)</span>';N.innerHTML='Press <b>Step ▶</b> to run line 13.';T.innerHTML='';return;}
+    var st=state(pos),s=STEPS[pos];
+    var r=view.rowAt(s.idx);if(r){r.classList.add('step');var pre=r.parentNode;pre.scrollTop=Math.max(0,r.offsetTop-120);}
+    V.innerHTML='';st.order.forEach(function(v){var d=document.createElement('div');d.className='var';
+      if(v in st.vars){var id=st.vars[v];d.innerHTML='<span>Student '+v+'</span><span class="ref" style="background:'+(id===1?C1:C2)+'">→ #'+id+'</span>';}
+      else d.innerHTML='<span>int '+v+'</span><span class="val">'+st.ints[v]+'</span>';
+      V.appendChild(d);});
+    O.innerHTML='';Object.keys(st.objs).forEach(function(id){var ob=st.objs[id],c=id==='1'?C1:C2;
+      var who=st.order.filter(function(v){return st.vars[v]===+id;});
+      var ch=(s.ch&&s.ch[id])||[];
+      var d=document.createElement('div');d.className='mobj';d.style.setProperty('--c',c);
+      d.innerHTML='<div class="oh">Student object #'+id+'</div>'+['Name','Age'].map(function(f){return '<div class="fld'+(ch.indexOf(f)>=0?' ch':'')+'"><span>'+f+'</span><b>'+esc(ob[f])+'</b></div>';}).join('')+
+        '<div class="who">'+(who.length?'pointed to by: '+who.join(', '):'no variable points here')+'</div>';
+      O.appendChild(d);});
+    N.innerHTML=s.note;
+    T.innerHTML=st.out.map(function(t){return '<div class="tline">'+esc(t)+'</div>';}).join('')||'<div class="placeholder">nothing printed yet</div>';
+  }
+  document.getElementById('mStep').addEventListener('click',function(){if(pos<STEPS.length-1){pos++;draw();}});
+  document.getElementById('mBack').addEventListener('click',function(){if(pos>=0){pos--;draw();}});
+  document.getElementById('mReset').addEventListener('click',function(){pos=-1;draw();});
+  draw();
+  window.__STEPS=STEPS;
+})();
+
+/* ============ bug hunt ============ */
+(function(){
+  var BUG={
+    5:[false,'Compiles… but notice: no <b>public</b>. Members are <b>private by default</b>, so this line is the <i>cause</i> of the error on line 21.'],
+    19:[true,'<b>Bug:</b> <i>Student does not contain a constructor that takes 0 arguments.</i> The only constructor needs a name and an age. Fix: <code>new Student("Maria", 19)</code>.'],
+    20:[true,'<b>Bug:</b> missing <b>new</b>. Without it, C# thinks <code>Student(…)</code> is a method call and complains that Student is a type. Fix: <code>new Student("Ahmed", 22)</code>.'],
+    21:[true,'<b>Bug:</b> <i>Student.Name is inaccessible due to its protection level.</i> Name is private (line 5 has no public). Fix: <code>public string Name = "";</code>'],
+    22:[true,'<b>Bug:</b> <i>An object reference is required.</i> Age belongs to <b>each object</b>, not to the class: <i>which</i> student’s age? Fix: <code>s2.Age = 23;</code>']
+  };
+  var L=CODE.bug.split('\n'),pre=document.getElementById('bugCode'),ex=document.getElementById('bugExpl'),found=0;
+  var q=ex.querySelector('.codeq'),w=ex.querySelector('.why');
+  L.forEach(function(line,i){
+    var info=BUG[i+1]||[false,'Correct: '+(noteFor('bugfixed',line)||'this line is fine.')];
+    var d=document.createElement('span');d.className='cl explain bugline';d.tabIndex=0;
+    d.innerHTML='<span class="ln">'+(i+1)+'</span><span class="src">'+(hl(line)||' ')+'</span>';
+    d.addEventListener('mouseenter',function(){ex.classList.remove('idle');q.textContent=line.trim()||'(blank line)';w.innerHTML=d.dataset.done?info[1]:'Line '+(i+1)+'. Broken or fine? <b>Click to decide.</b>';});
+    d.addEventListener('click',function(){if(d.dataset.done)return;d.dataset.done='1';var t=document.createElement('span');
+      if(info[0]){d.classList.add('found');found++;document.getElementById('bugScore').textContent='Found: '+found+' / 4'+(found===4?'  🎉 Object detective!':'');t.className='buglabel err';t.textContent='✗ bug';}
+      else{d.classList.add('wrongpick');t.className='buglabel ok';t.textContent='✓ compiles';}
+      d.querySelector('.src').appendChild(t);w.innerHTML=info[1];});
+    d.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();d.click();}});
+    pre.appendChild(d);
+  });
+})();
+
+/* ============ quiz ============ */
+(function(){
+  var Q=[
+    {q:'What is the best description of a <b>class</b>?',o:['One specific student','A blueprint that describes what objects of that kind have and do','A variable that holds text','A method that runs first'],a:1,w:'A class is the blueprint; objects are the real things built from it.'},
+    {q:'Which line <b>instantiates</b> an object?',o:['<code>class Student { }</code>','<code>Student s1;</code>','<code>Student s1 = new Student();</code>','<code>s1.Name = "Maria";</code>'],a:2,w:'<code>new</code> builds the object. <code>Student s1;</code> only declares a variable that doesn’t point to any object yet.'},
+    {q:'You create <code>s1</code> and <code>s2</code> with two <code>new</code>s, then run <code>s2.Age = 30;</code>. What happens to s1.Age?',o:['It becomes 30 too','Nothing: s1 is a separate object','It becomes 0','Compile error'],a:1,w:'Each new builds an independent object with its own data.'},
+    {q:'How do you recognize a <b>constructor</b>?',o:['It starts with void','It has the same name as the class and no return type','It is always static','It must be called Init'],a:1,w:'Same name as the class, no return type (not even void). It runs automatically on <code>new</code>.'},
+    {q:'A class has only <code>public Student(string name, int age)</code>. Which line compiles?',o:['<code>new Student()</code>','<code>new Student("Lin")</code>','<code>new Student("Lin", 20)</code>','<code>Student("Lin", 20)</code>'],a:2,w:'You must pass exactly what the constructor asks for, and you need the <code>new</code> keyword.'},
+    {q:'What does <code>new Student { Name = "Ahmed", Age = 22 }</code> do?',o:['Defines a new class','Calls the constructor, then sets two properties','Calls a method named Student','Compares two students'],a:1,w:'That’s an object initializer: the same shape as <code>new Button { Content = "Save" }</code>.'},
+    {q:'<code>Student b = a; b.Name = "X";</code> What is <code>a.Name</code> now?',o:['Unchanged','"X"','null','Compile error'],a:1,w:'<code>b = a</code> copies the reference. a and b point to the same object.'},
+    {q:'<code>a</code> and <code>c</code> were created by two separate <code>new</code>s with identical data. What is <code>a == c</code>?',o:['True','False','It depends on the data','Compile error'],a:1,w:'For class objects, == asks "same object?". Two news = two objects.'},
+    {q:'A field written as <code>string Name;</code> (no public) is…',o:['public by default','private by default: only code inside the class can use it','static by default','read-only'],a:1,w:'Members are private unless you say otherwise. That’s a very common cause of "inaccessible due to its protection level".'},
+    {q:'Why give <code>BankAccount</code> a <b>private</b> balance with public Deposit/Withdraw methods?',o:['It makes the program faster','So all changes go through methods that enforce the rules (encapsulation)','Because decimals must be private','To save memory'],a:1,w:'Encapsulation: the object protects its own data and can never get into an impossible state.'},
+    {q:'Your ListBox shows "MyStudioApp.Student" on every row. What’s missing?',o:['A constructor','A <code>ToString()</code> override in Student','<code>using System;</code>','A static field'],a:1,w:'ListBox (and WriteLine) call ToString(). Without an override you get the class name.'},
+    {q:'In MainWindow.cs, which line is an instantiation of <b>your own</b> class?',o:['<code>Title = "Roster";</code>','<code>btnAdd.Click += BtnAdd_Click;</code>','<code>Student s = new Student(name, id, age);</code>','<code>lstStudents.ItemsSource = students;</code>'],a:2,w:'<code>new Student(…)</code> builds an object from your Student class. (Program.cs’s <code>new MainWindow()</code> is another one!)'}
+  ];
+  var host=document.getElementById('quizHost'),score=0,done=0;
+  Q.forEach(function(x,i){
+    var box=document.createElement('div');box.className='q';
+    var h=document.createElement('h3');h.innerHTML=(i+1)+'. '+x.q;box.appendChild(h);
+    var why=document.createElement('p');why.className='why';why.innerHTML=x.w;
+    x.o.forEach(function(op,oi){var b=document.createElement('button');b.type='button';b.className='opt';b.innerHTML=op;
+      b.addEventListener('click',function(){if(box.dataset.done)return;box.dataset.done='1';done++;
+        box.querySelectorAll('.opt').forEach(function(y,yi){y.disabled=true;if(yi===x.a)y.classList.add('right');});
+        if(oi===x.a)score++;else b.classList.add('wrong');why.classList.add('show');
+        document.getElementById('quizScore').textContent='Score: '+score+' / '+Q.length+(done===Q.length?(score===Q.length?'  🏆 Perfect!':'  · review the explanations, then try the practice.'):'');});
+      box.appendChild(b);});
+    box.appendChild(why);host.appendChild(box);
+  });
+})();
+
+/* ============ practice ============ */
+(function(){
+  var P=[
+    {key:'p_room',title:'Hotel Room (Hotel domain)',task:'Write a <code>Room</code> class and use it from Main.',reqs:['Properties: <code>Number</code> (int), <code>Type</code> (string), <code>PricePerNight</code> (decimal), <code>IsBooked</code> (bool)','A constructor taking number, type and price; new rooms start not booked','<code>TotalFor(int nights)</code> returns the price for that many nights','<code>Book()</code> refuses if the room is already booked','In Main: create rooms 101 and 204, book 101 twice, price 3 nights in 204']},
+    {key:'p_product',title:'Product with protected stock (Inventory domain)',task:'Write a <code>Product</code> class whose quantity can only change through methods.',reqs:['A <b>private</b> quantity field and a read-only <code>Quantity</code> property','<code>Restock(int amount)</code> and <code>Sell(int amount)</code> (refuse selling more than in stock)','Override <code>ToString()</code>','In Main: 10 notebooks at $3.50, sell 4, try to sell 20, restock 15']},
+    {key:'p_menu',title:'Restaurant order (Restaurant domain)',task:'Write a <code>MenuItem</code> class and keep an order in a <code>List&lt;MenuItem&gt;</code>.',reqs:['Properties <code>Name</code> and <code>Price</code>; override <code>ToString()</code>','Create three items with object initializers and add them to the list','Print each item, the number of items and the total']}
+  ];
+  var host=document.getElementById('pracHost');
+  P.forEach(function(p,i){
+    var c=document.createElement('div');c.className='prac';
+    c.innerHTML='<div class="prac-head"><span class="prac-n">'+(i+1)+'</span><div><h3>'+p.title+'</h3><p>'+p.task+'</p><ul>'+p.reqs.map(function(r){return '<li>'+r+'</li>';}).join('')+'</ul></div></div>'+
+      '<div class="term"><div class="thead">EXPECTED OUTPUT</div>'+OUT[p.key].map(function(t){return '<div class="tline">'+(esc(t)||' ')+'</div>';}).join('')+'</div>';
+    var d=document.createElement('details');d.className='sol';d.innerHTML='<summary><b>Solution</b>: complete program with line-by-line explanations</summary><div class="ex"></div>';
+    var built=false;d.addEventListener('toggle',function(){if(d.open&&!built){built=true;codeView(d.querySelector('.ex'),[{key:p.key,name:'Program.cs'}],{run:p.key,tag:'solution'});}});
+    c.appendChild(d);host.appendChild(c);
+  });
+})();
+
+slides[0].classList.add('active');tabs[0].classList.add('active');prevBtn.disabled=true;
+document.getElementById('where').textContent='1 / '+slides.length+' · '+secs[0].dataset.tab;
+})();
+</script>
+</body>
+</html>
