@@ -1,0 +1,1318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Classes & Objects in C#</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: a blueprint sheet. Single dark look. Cyan ink = class (the plan), amber = object (the built thing).
+   One reading column for concepts; every example splits into code (left) and a sticky explanation panel (right). */
+:root {
+  color-scheme: dark;
+  --bg: #0e1a2b;
+  --grid: rgba(120, 190, 255, 0.055);
+  --surface: #14253b;
+  --surface-2: #1a3050;
+  --code-bg: #0a1422;
+  --line: #2b466b;
+  --fg: #edf3fa;
+  --muted: #a9bcd3;
+  --class: #6fd3ff;      /* blueprint ink: the class */
+  --object: #ffc55c;     /* the built thing: the object */
+  --good: #7fe0a3;
+  --bad: #ff8f8f;
+  --kw: #c9a4ff;
+  --str: #a8e28f;
+  --num: #ffab7a;
+  --com: #7d93ad;
+  --fn: #ffe08a;
+  --win-bg: #eef2f6;     /* mock GUI window (light, like a real desktop window) */
+  --win-fg: #18222e;
+  --win-bar: #d5dde6;
+  --win-btn: #c3cedb;
+  --font-display: "Bricolage Grotesque", "Trebuchet MS", system-ui, sans-serif;
+  --font-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --font-code: "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace;
+}
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body {
+  margin: 0;
+  background-color: var(--bg);
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 28px 28px;
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: 21px;
+  line-height: 1.6;
+}
+.page {
+  max-width: 1480px;
+  margin: 0 auto;
+  padding-block: 44px 80px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex;
+  flex-direction: column;
+  gap: 76px;
+}
+h1, h2, h3 { font-family: var(--font-display); line-height: 1.15; margin: 0; text-wrap: balance; }
+h1 { font-size: clamp(2.4rem, 6vw, 4rem); font-weight: 700; letter-spacing: -0.02em; }
+h2 { font-size: clamp(1.6rem, 3.4vw, 2.3rem); font-weight: 700; }
+h3 { font-size: 1.3rem; font-weight: 700; }
+p { margin: 0; }
+code, pre { font-family: var(--font-code); }
+p code, li code, td code, dd code, .explain-text code {
+  background: var(--code-bg); border: 1px solid var(--line); border-radius: 4px;
+  padding: 0.05em 0.35em; font-size: 0.86em; white-space: nowrap;
+}
+.c-class { color: var(--class); font-weight: 700; }
+.c-object { color: var(--object); font-weight: 700; }
+.eyebrow { font-family: var(--font-code); font-size: 0.8rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+.prose { max-width: 68ch; display: flex; flex-direction: column; gap: 14px; }
+p.prose { display: block; }
+section { display: flex; flex-direction: column; gap: 24px; }
+.sec-head { display: flex; flex-direction: column; gap: 8px; }
+
+/* topic tabs */
+.page { gap: 36px; }
+.topics {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+  display: flex; flex-wrap: wrap; gap: 8px; padding-block: 12px;
+  background: var(--bg); border-bottom: 1px solid var(--line);
+}
+.topic {
+  font: 400 0.9rem var(--font-body); cursor: pointer; color: var(--fg); white-space: nowrap;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 8px 14px;
+}
+.topic:hover { border-color: var(--class); }
+.topic[aria-selected="true"] { background: var(--class); border-color: var(--class); color: #04202e; font-weight: 700; }
+.topic .n { font-family: var(--font-code); font-size: 0.8em; opacity: 0.75; margin-right: 6px; }
+.pager { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding-top: 28px; border-top: 1px solid var(--line); }
+.pager .btn { font-family: var(--font-body); }
+.pager .spacer { flex: 1; }
+.example { scroll-margin-top: calc(var(--tabs-h, 64px) + 16px); }
+@media (max-width: 900px) { .topics { flex-wrap: nowrap; overflow-x: auto; } }
+
+/* header */
+header { display: flex; flex-direction: column; gap: 16px; }
+header .lede { font-size: 1.2rem; max-width: 62ch; }
+.goals { display: flex; flex-wrap: wrap; gap: 8px; padding: 0; margin: 0; list-style: none; }
+.goals li { border: 1px dashed var(--line); padding: 4px 12px; font-size: 0.9rem; color: var(--muted); }
+
+/* blueprint vs built */
+.duo { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; max-width: 1100px; }
+.duo > div { padding: 22px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.duo .is-class { border: 2px dashed var(--class); }
+.duo .is-object { border: 2px solid var(--object); background: var(--surface); }
+.tablewrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; max-width: 1000px; }
+th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-family: var(--font-code); font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; }
+th:first-child { color: var(--class); } th:last-child { color: var(--object); }
+
+/* definitions */
+.defs { display: grid; grid-template-columns: repeat(auto-fit, minmax(330px, 1fr)); gap: 0 36px; margin: 0; }
+.defs > div { padding: 18px 0; border-top: 1px solid var(--line); display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.defs dt { font-family: var(--font-display); font-size: 1.35rem; font-weight: 700; color: var(--class); }
+.defs dt.obj { color: var(--object); }
+.defs dd { margin: 0; }
+.defs dd.life { color: var(--muted); font-size: 0.95rem; }
+.defs pre { margin: 4px 0 0; background: var(--code-bg); border: 1px solid var(--line); padding: 10px 12px; font-size: 0.82rem; line-height: 1.6; overflow-x: auto; }
+
+/* factory */
+.factory { display: grid; grid-template-columns: minmax(0, 340px) minmax(0, 1fr); gap: 20px; align-items: start; }
+.blueprint { border: 2px dashed var(--class); padding: 18px; display: flex; flex-direction: column; gap: 12px; }
+.blueprint pre { margin: 0; font-size: 0.9rem; line-height: 1.55; color: var(--class); overflow-x: auto; }
+.btn {
+  font: 700 1rem var(--font-code); cursor: pointer; border-radius: 6px; padding: 10px 16px;
+  background: var(--object); color: #1b1300; border: 0;
+}
+.btn:hover { filter: brightness(1.1); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn.ghost { background: transparent; color: var(--fg); border: 1px solid var(--line); font-weight: 400; }
+.btn-row { display: flex; flex-wrap: wrap; gap: 8px; }
+:focus-visible { outline: 2px solid var(--object); outline-offset: 2px; }
+.garage { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.garage-head { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; color: var(--muted); font-size: 0.95rem; }
+.cars { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+.car { border: 2px solid var(--object); background: var(--surface); padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.car.fresh { animation: pop 0.35s ease-out; }
+@keyframes pop { from { transform: scale(0.9); opacity: 0.3; } to { transform: none; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .car.fresh { animation: none; } }
+.car .name { font-family: var(--font-code); color: var(--object); font-weight: 600; }
+.car dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 0 10px; font-size: 0.92rem; }
+.car dt { color: var(--muted); } .car dd { margin: 0; }
+.swatch { display: inline-block; width: 0.75em; height: 0.75em; border-radius: 50%; border: 1px solid var(--fg); margin-right: 6px; }
+.madeby { font-family: var(--font-code); font-size: 0.72rem; color: var(--muted); overflow-wrap: anywhere; }
+
+/* anatomy */
+.anatomy { display: flex; flex-direction: column; gap: 14px; }
+.anatomy-line { display: flex; flex-wrap: wrap; gap: 8px; background: var(--code-bg); border: 1px solid var(--line); padding: 20px; }
+.part {
+  font: 600 clamp(1.1rem, 3.4vw, 1.9rem) var(--font-code); color: var(--fg); cursor: pointer;
+  background: transparent; border: 0; border-bottom: 3px solid var(--line); padding: 4px 6px;
+}
+.part:hover, .part.on { border-bottom-color: var(--object); background: var(--surface-2); }
+.anatomy-exp { border-left: 3px solid var(--object); padding: 4px 0 4px 16px; min-height: 4.8em; max-width: 68ch; }
+.anatomy-exp strong { font-family: var(--font-code); color: var(--object); }
+
+/* example index */
+.index { display: flex; flex-wrap: wrap; gap: 8px; }
+.index a {
+  font-size: 0.9rem; color: var(--fg); text-decoration: none;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 6px 12px;
+}
+.index a:hover { border-color: var(--class); color: var(--class); }
+.index a.gui { border-color: var(--object); }
+
+/* examples */
+.examples { display: flex; flex-direction: column; gap: 64px; }
+.example { display: flex; flex-direction: column; gap: 16px; scroll-margin-top: 16px; }
+.ex-intro { display: flex; flex-direction: column; gap: 8px; max-width: 76ch; }
+.ex-intro .num { font-family: var(--font-code); font-size: 0.8rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--object); }
+.ex-intro h3 { font-size: 1.55rem; }
+.ex-intro .life { color: var(--muted); }
+.ex-grid { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.65fr); gap: 20px; align-items: start; }
+.ex-left { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.codebox { background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.codebar { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 8px 12px; border-bottom: 1px solid var(--line); background: var(--surface); }
+.codebar .file { font-family: var(--font-code); font-size: 0.82rem; color: var(--muted); }
+.copy { font: 600 0.82rem var(--font-code); cursor: pointer; background: transparent; color: var(--class); border: 1px solid var(--class); border-radius: 5px; padding: 6px 14px; }
+.copy:hover { background: var(--class); color: #04202e; }
+.codescroll { overflow-x: auto; padding: 10px 0; }
+.codelines { display: inline-block; min-width: 100%; font-family: var(--font-code); font-size: 0.84rem; line-height: 1.75; }
+.ln { display: flex; white-space: pre; padding-right: 16px; border-left: 4px solid transparent; }
+.ln .no { flex: none; width: 3.2em; text-align: right; padding-right: 1em; color: var(--com); user-select: none; font-variant-numeric: tabular-nums; }
+.ln.has { cursor: help; }
+.ln.has:hover, .ln.on { background: var(--surface-2); border-left-color: var(--object); }
+.ln:focus-visible { outline-offset: -2px; }
+.t-kw { color: var(--kw); } .t-str { color: var(--str); } .t-num { color: var(--num); }
+.t-com { color: var(--com); font-style: italic; } .t-type { color: var(--class); } .t-fn { color: var(--fn); }
+.terminal { background: #05090f; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.terminal .bar, .guiout .bar { padding: 7px 12px; border-bottom: 1px solid var(--line); font-family: var(--font-code); font-size: 0.76rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--good); }
+.terminal pre { margin: 0; padding: 14px 16px; font-size: 0.88rem; line-height: 1.65; color: var(--fg); overflow-x: auto; }
+.explain {
+  position: sticky; top: calc(env(safe-area-inset-top, 0px) + var(--tabs-h, 64px) + 16px);
+  background: var(--surface); border: 2px solid var(--object); border-radius: 8px;
+  padding: 20px; display: flex; flex-direction: column; gap: 12px; min-width: 0;
+}
+.explain .tag { font-family: var(--font-code); font-size: 0.8rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--object); }
+.explain .theline { font-family: var(--font-code); font-size: 0.8rem; background: var(--code-bg); border: 1px solid var(--line); border-radius: 5px; padding: 8px 10px; overflow-x: auto; white-space: pre; }
+.explain-text { font-size: 1.05rem; }
+.explain .hint { color: var(--muted); font-size: 0.9rem; }
+.notice { border-left: 3px solid var(--class); padding-left: 14px; color: var(--muted); max-width: 76ch; font-size: 0.95rem; }
+
+/* mock GUI window */
+.guiout { background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.guistage { padding: 24px 16px; display: flex; justify-content: center; }
+.win { width: 100%; max-width: 380px; background: var(--win-bg); color: var(--win-fg); border-radius: 9px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); font-family: system-ui, "Segoe UI", sans-serif; font-size: 16px; }
+.win-bar { background: var(--win-bar); padding: 8px 12px; display: flex; align-items: center; gap: 6px; font-size: 14px; }
+.win-bar i { width: 11px; height: 11px; border-radius: 50%; background: var(--win-btn); display: inline-block; }
+.win-bar span { margin-left: 8px; font-weight: 600; }
+.win-body { padding: 14px; display: flex; flex-direction: column; align-items: stretch; gap: 8px; min-height: 120px; }
+.win-body .w-btn { align-self: flex-start; font: inherit; color: var(--win-fg); background: var(--win-btn); border: 0; border-radius: 4px; padding: 6px 14px; cursor: pointer; }
+.win-body .w-btn:hover { filter: brightness(0.94); }
+.win-body input { font: inherit; color: var(--win-fg); background: #fff; border: 1px solid #9aa9ba; border-radius: 4px; padding: 6px 8px; width: 100%; }
+.win-note { text-align: center; color: var(--muted); font-size: 0.82rem; padding: 0 16px 14px; }
+
+/* mistakes */
+.mistakes { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
+.mistake { border-top: 3px solid var(--bad); background: var(--surface); padding: 18px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.mistake pre { margin: 0; font-size: 0.8rem; background: var(--code-bg); padding: 10px; overflow-x: auto; line-height: 1.6; }
+.mistake .x { color: var(--bad); } .mistake .ok { color: var(--good); }
+
+/* quiz */
+.quiz { display: flex; flex-direction: column; gap: 24px; max-width: 900px; }
+.q { display: flex; flex-direction: column; gap: 10px; }
+.q .qtext { font-weight: 700; }
+.q pre { margin: 0; font-size: 0.86rem; background: var(--code-bg); border: 1px solid var(--line); padding: 10px 12px; overflow-x: auto; line-height: 1.6; }
+.opts { display: flex; flex-direction: column; gap: 8px; }
+.opt { text-align: left; font: 400 1rem var(--font-body); color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 10px 14px; cursor: pointer; }
+.opt:hover { border-color: var(--class); }
+.opt.right { border-color: var(--good); background: rgba(127, 224, 163, 0.14); }
+.opt.wrong { border-color: var(--bad); background: rgba(255, 143, 143, 0.12); }
+.fb { min-height: 1.6em; font-size: 0.95rem; }
+.fb.right { color: var(--good); } .fb.wrong { color: var(--bad); }
+.score { font-family: var(--font-code); color: var(--object); }
+
+@media (max-width: 900px) {
+  body { font-size: 18px; }
+  .factory { grid-template-columns: minmax(0, 1fr); }
+  .ex-grid { grid-template-columns: minmax(0, 1fr); }
+  .defs { grid-template-columns: minmax(0, 1fr); }
+  .mistakes { grid-template-columns: minmax(0, 1fr); }
+  .explain { top: auto; bottom: calc(env(safe-area-inset-bottom, 0px) + 8px); max-height: 46vh; overflow-y: auto; }
+}
+</style>
+</head>
+<body>
+
+<div class="page">
+
+<header>
+  <p class="eyebrow">MAC109 · Introduction to Visual C# Programming</p>
+  <h1><span class="c-class">Classes</span> &amp; <span class="c-object">Objects</span> in C#</h1>
+  <p class="lede">A class is a plan. An object is the real thing built from that plan. Today you will learn the vocabulary, practice with ten complete programs from everyday life, and then see that every window and button in your GUI is an object too.</p>
+  <ul class="goals">
+    <li>Define class, object, instantiation, constructor</li>
+    <li>Write your own class</li>
+    <li>Create objects with <code>new</code></li>
+    <li>Give objects data and actions</li>
+    <li>See objects inside your GUI</li>
+  </ul>
+</header>
+
+<section>
+  <div class="sec-head">
+    <p class="eyebrow">Part 1 · The big idea</p>
+    <h2>A plan, and the things built from it</h2>
+  </div>
+  <div class="prose">
+    <p>An architect draws <strong>one</strong> blueprint for a house. Builders can use it to build <strong>many</strong> houses. Every house has the same rooms, but each one has its own address, its own paint color and its own family inside.</p>
+    <p>C# works the same way. You write the plan once. Then you build as many real things from it as you need.</p>
+  </div>
+  <div class="duo">
+    <div class="is-class">
+      <p class="eyebrow">The plan</p>
+      <h3 class="c-class">Class</h3>
+      <p>Describes what every object of this kind <strong>has</strong> (data) and what it can <strong>do</strong> (actions). You cannot drive a blueprint of a car.</p>
+    </div>
+    <div class="is-object">
+      <p class="eyebrow">The real thing</p>
+      <h3 class="c-object">Object</h3>
+      <p>One real item built from the class, living in the computer's memory with its <strong>own values</strong>. You can build as many as you want from one class.</p>
+    </div>
+  </div>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Class (one plan)</th><th>Objects (many real things)</th></tr></thead>
+      <tbody>
+        <tr><td>Blueprint of a house</td><td>The house at 12 Oak Street, the house at 31-10 Thomson Ave</td></tr>
+        <tr><td>Cookie cutter</td><td>Each cookie on the tray</td></tr>
+        <tr><td>Car design</td><td>Your red 2022 Toyota, your neighbor's blue Honda</td></tr>
+        <tr><td>Blank registration form</td><td>The form Maria filled in, the form James filled in</td></tr>
+        <tr><td>Recipe for pizza</td><td>The pizza on your table tonight</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <p class="eyebrow">Part 2 · Definitions</p>
+    <h2>The words you must know</h2>
+    <p class="prose">Read each definition, then the real-life version, then the C# line. You will meet every one of these words again in the examples.</p>
+  </div>
+  <dl class="defs">
+    <div>
+      <dt>Class</dt>
+      <dd>A plan (template) that describes a kind of thing: what data it has and what actions it can do. A class is written once, by a programmer.</dd>
+      <dd class="life">Real life: the blueprint of a house. The design of a car.</dd>
+<pre>class Car
+{
+    public string Brand;
+}</pre>
+    </div>
+    <div>
+      <dt class="obj">Object</dt>
+      <dd>One real thing built from a class. It lives in the computer's memory and holds its own values. An object is also called an <strong>instance</strong> of its class.</dd>
+      <dd class="life">Real life: your own car, parked outside. It is one instance of the car design.</dd>
+<pre>myCar   // one Car object</pre>
+    </div>
+    <div>
+      <dt class="obj">Instantiation</dt>
+      <dd>The act of building an object from a class. It happens when the keyword <code>new</code> runs. "To instantiate a class" means "to create an object from it".</dd>
+      <dd class="life">Real life: the factory building one car from the design.</dd>
+<pre>Car myCar = new Car();</pre>
+    </div>
+    <div>
+      <dt>Constructor</dt>
+      <dd>A special method inside the class that runs automatically, one time, at the moment an object is built. Its job is to give the new object its starting values. It has the <strong>same name as the class</strong> and no return type.</dd>
+      <dd class="life">Real life: the set-up done at the factory before the car leaves: paint it, put in the seats.</dd>
+<pre>public Car(string brand)
+{
+    Brand = brand;
+}</pre>
+    </div>
+    <div>
+      <dt>Field</dt>
+      <dd>A variable that belongs to an object. Fields are the object's <strong>data</strong>: what it has or what it is like.</dd>
+      <dd class="life">Real life: a car has a brand, a color, a year.</dd>
+<pre>public string Color;</pre>
+    </div>
+    <div>
+      <dt>Method</dt>
+      <dd>A block of code that belongs to an object. Methods are the object's <strong>actions</strong>: what it can do.</dd>
+      <dd class="life">Real life: a car can start, stop and honk.</dd>
+<pre>public void Honk()
+{
+    Console.WriteLine("Beep!");
+}</pre>
+    </div>
+    <div>
+      <dt>The <code>new</code> keyword</dt>
+      <dd>The word that builds an object. Each time <code>new</code> runs, one more object exists in memory.</dd>
+      <dd class="life">Real life: pressing the "build" button at the factory.</dd>
+<pre>new Car()</pre>
+    </div>
+    <div>
+      <dt>The dot <code>.</code></dt>
+      <dd>Means "go inside this object". Use it to reach an object's fields and methods.</dd>
+      <dd class="life">Real life: "my car's color", "my car, honk!"</dd>
+<pre>myCar.Color = "Red";
+myCar.Honk();</pre>
+    </div>
+    <div>
+      <dt><code>public</code> and <code>private</code></dt>
+      <dd><code>public</code> members can be used by any code. <code>private</code> members can be used only by code inside the same class.</dd>
+      <dd class="life">Real life: the steering wheel is public. The engine's inside is private.</dd>
+<pre>public string Owner;
+private double balance;</pre>
+    </div>
+    <div>
+      <dt>Reference</dt>
+      <dd>What an object variable really holds: not the object itself, but a link to it. Two variables can link to the same object.</dd>
+      <dd class="life">Real life: a remote control is not the TV. Two remotes can control one TV.</dd>
+<pre>Car sameCar = myCar;</pre>
+    </div>
+  </dl>
+</section>
+
+<section>
+  <div class="sec-head">
+    <p class="eyebrow">Part 3 · Try it</p>
+    <h2>The car factory</h2>
+    <p class="prose">The plan on the left never changes. Press the button to instantiate a new car object from it. Notice that every car has the same three fields, but its own values.</p>
+  </div>
+  <div class="factory">
+    <div class="blueprint">
+      <p class="eyebrow">Class · the plan</p>
+<pre>class Car
+{
+    public string Brand;
+    public string Color;
+    public int Year;
+}</pre>
+      <div class="btn-row">
+        <button class="btn" id="build-car" type="button">new Car()</button>
+        <button class="btn ghost" id="reset-cars" type="button">Empty garage</button>
+      </div>
+    </div>
+    <div class="garage">
+      <div class="garage-head">
+        <span class="eyebrow">Objects · built in memory</span>
+        <span id="car-count"></span>
+      </div>
+      <div class="cars" id="cars"></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <p class="eyebrow">Part 4 · The most important line</p>
+    <h2>How to read the line that builds an object</h2>
+    <p class="prose">You will type this pattern hundreds of times, in console programs and in GUI programs. Point at each piece to see what it does.</p>
+  </div>
+  <div class="anatomy">
+    <div class="anatomy-line" id="anatomy-line"></div>
+    <p class="anatomy-exp" id="anatomy-exp"></p>
+  </div>
+</section>
+
+<section id="examples">
+  <div class="sec-head">
+    <p class="eyebrow">Part 5 · Ten complete programs</p>
+    <h2>Examples from real life</h2>
+    <p class="prose">Every example is a complete file. Press <strong>Copy code</strong>, paste it into <code>Program.cs</code> in VS Code, and run it. Move your mouse over any line (or tap it) and the explanation of that line appears in the panel on the right.</p>
+  </div>
+  <nav class="index" id="index" aria-label="Jump to an example"></nav>
+  <p class="notice">VS Code may underline a <code>string</code> field in yellow and say it "must contain a non-null value". That is only a warning and the program still runs. The examples with constructors show the proper fix: give every field a value when the object is built.</p>
+  <div class="examples" id="console-examples"></div>
+</section>
+
+<section id="gui">
+  <div class="sec-head">
+    <p class="eyebrow">Part 6 · From the console to your GUI</p>
+    <h2>Your window is made of objects</h2>
+  </div>
+  <div class="prose">
+    <p>Everything you just practiced is exactly how a GUI is built. A <code>Window</code>, a <code>Button</code>, a <code>TextBlock</code> and a <code>TextBox</code> are all <span class="c-class">classes</span>. The Avalonia team already wrote those plans for you. Your job is to <strong>instantiate</strong> them with <code>new</code>, set their data, and put them in the window.</p>
+    <p>Two buttons on the screen are two <span class="c-object">objects</span> built from the one <code>Button</code> class, the same way Rex and Bella are two objects built from the one <code>Dog</code> class.</p>
+  </div>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>In the console examples</th><th>In your GUI</th></tr></thead>
+      <tbody>
+        <tr><td><code>class Car</code>, a class you wrote</td><td><code>class Button</code>, a class Avalonia wrote for you</td></tr>
+        <tr><td><code>Car myCar = new Car();</code></td><td><code>Button okButton = new Button();</code></td></tr>
+        <tr><td><code>myCar.Color = "Red";</code> sets the object's data</td><td><code>okButton.Content = "OK";</code> sets the text on the button</td></tr>
+        <tr><td><code>dog1.Bark();</code> asks the object to do something</td><td><code>panel.Children.Add(okButton);</code> asks the panel to add a control</td></tr>
+        <tr><td><code>public Student(...)</code> constructor sets up a student</td><td><code>public MainWindow()</code> constructor sets up your whole window</td></tr>
+        <tr><td>Two dogs from one <code>Dog</code> class</td><td>Two buttons from one <code>Button</code> class</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="notice">The two GUI examples go in <code>MainWindow.cs</code> of your Avalonia project. <code>Program.cs</code> stays exactly as it is. In a GUI, an object's data is called a <strong>property</strong> (<code>Title</code>, <code>Text</code>, <code>Content</code>). You use a property just like a field: with the dot.</p>
+  <div class="examples" id="gui-examples"></div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <p class="eyebrow">Part 7 · Watch out</p>
+    <h2>Four mistakes everyone makes once</h2>
+  </div>
+  <div class="mistakes">
+    <div class="mistake">
+      <h3>Forgetting <code>new</code></h3>
+<pre><span class="x">Car myCar;
+myCar.Brand = "Toyota";   // error</span>
+<span class="ok">Car myCar = new Car();
+myCar.Brand = "Toyota";   // works</span></pre>
+      <p>Without <code>new</code> there is a name but no car. You have a key ring with no car attached to it.</p>
+    </div>
+    <div class="mistake">
+      <h3>Using the plan instead of the thing</h3>
+<pre><span class="x">Car.Brand = "Toyota";     // error</span>
+<span class="ok">myCar.Brand = "Toyota";   // works</span></pre>
+      <p><code>Car</code> is the blueprint. A blueprint has no brand. Only a real car object, like <code>myCar</code>, has one.</p>
+    </div>
+    <div class="mistake">
+      <h3>Forgetting <code>public</code></h3>
+<pre><span class="x">class Car { string Brand; }
+myCar.Brand = "Toyota";   // error</span>
+<span class="ok">class Car { public string Brand; }</span></pre>
+      <p>Without <code>public</code>, a field is private. Code outside the class, like <code>Main</code>, is not allowed to touch it.</p>
+    </div>
+    <div class="mistake">
+      <h3>Building a control but never adding it</h3>
+<pre><span class="x">Button okButton = new Button();
+okButton.Content = "OK";  // invisible</span>
+<span class="ok">panel.Children.Add(okButton);</span></pre>
+      <p>The button object exists in memory, but nobody put it in the window. A sofa still in the delivery truck is not in your living room.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <p class="eyebrow">Part 8 · Check yourself</p>
+    <h2>Quick check</h2>
+    <p class="score" id="score"></p>
+  </div>
+  <div class="quiz" id="quiz"></div>
+</section>
+
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var $ = function (id) { return document.getElementById(id); };
+  function esc(s) { return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+
+  /* ---------- tiny C# highlighter ---------- */
+  var KW = {using:1,class:1,public:1,private:1,static:1,void:1,string:1,int:1,double:1,bool:1,new:1,if:1,else:1,for:1,return:1,true:1,false:1,object:1};
+  var TYPES = {System:1,Console:1,Program:1,Car:1,Book:1,Dog:1,Lamp:1,Student:1,Pizza:1,Room:1,BankAccount:1,MenuItem:1,Television:1,
+    Avalonia:1,Controls:1,Interactivity:1,Window:1,MainWindow:1,Button:1,TextBlock:1,TextBox:1,StackPanel:1,RoutedEventArgs:1};
+  function hl(line) {
+    var re = /(\/\/.*$)|("(?:[^"\\]|\\.)*")|(\b\d+(?:\.\d+)?\b)|([A-Za-z_]\w*)|([\s\S])/g, out = "", m;
+    while ((m = re.exec(line))) {
+      if (m[1]) out += '<span class="t-com">' + esc(m[1]) + "</span>";
+      else if (m[2]) out += '<span class="t-str">' + esc(m[2]) + "</span>";
+      else if (m[3]) out += '<span class="t-num">' + m[3] + "</span>";
+      else if (m[4]) {
+        var w = m[4], next = line.charAt(m.index + w.length);
+        if (KW[w]) out += '<span class="t-kw">' + w + "</span>";
+        else if (TYPES[w]) out += '<span class="t-type">' + w + "</span>";
+        else if (next === "(") out += '<span class="t-fn">' + w + "</span>";
+        else out += w;
+      } else out += esc(m[5]);
+    }
+    return out;
+  }
+
+  /* ---------- car factory ---------- */
+  var BRANDS = ["Toyota", "Honda", "Ford", "Tesla", "Kia", "BMW"];
+  var COLORS = [["Red", "#d94141"], ["Blue", "#3f7fe0"], ["White", "#f4f4f4"], ["Black", "#16181c"], ["Silver", "#b9c0c8"], ["Green", "#3aa66a"]];
+  var YEARS = [2022, 2019, 2024, 2023, 2017, 2021];
+  var MAX = 6, cars = 0;
+  function addCar(animate) {
+    if (cars >= MAX) return;
+    var i = cars; cars++;
+    var d = document.createElement("div");
+    d.className = "car" + (animate ? " fresh" : "");
+    d.innerHTML = '<span class="name">car' + cars + '</span><dl>' +
+      "<dt>Brand</dt><dd>" + BRANDS[i] + "</dd>" +
+      '<dt>Color</dt><dd><span class="swatch" style="background:' + COLORS[i][1] + '"></span>' + COLORS[i][0] + "</dd>" +
+      "<dt>Year</dt><dd>" + YEARS[i] + "</dd></dl>" +
+      '<span class="madeby">Car car' + cars + " = new Car();</span>";
+    $("cars").appendChild(d);
+    updateCount();
+  }
+  function updateCount() {
+    $("car-count").textContent = cars >= MAX
+      ? "1 class, " + cars + " objects. The garage is full."
+      : "1 class, " + cars + (cars === 1 ? " object" : " objects");
+    $("build-car").disabled = cars >= MAX;
+  }
+  $("build-car").addEventListener("click", function () { addCar(true); });
+  $("reset-cars").addEventListener("click", function () { $("cars").innerHTML = ""; cars = 0; updateCount(); });
+  addCar(false); addCar(false);
+
+  /* ---------- anatomy ---------- */
+  var PARTS = [
+    ["Car", "The type", "This says what kind of object the variable is allowed to hold. Here it is the <span class=\"c-class\">Car</span> class, so this variable can only hold a car."],
+    ["myCar", "The variable name", "The name you choose for this particular car. You will use this name every time you want to talk to the object, for example <code>myCar.Brand</code>."],
+    ["=", "The assignment", "Connects the name on the left to the object built on the right. Read it as \"myCar now refers to...\""],
+    ["new", "The builder", "The keyword that does the instantiation. It asks the computer for space in memory and creates one brand-new <span class=\"c-object\">object</span> there. No <code>new</code>, no object."],
+    ["Car()", "The constructor call", "Says which class to build from, and the parentheses run the class's constructor, the set-up code for a new object. Later you will put starting values inside the parentheses."],
+    [";", "The end", "Every C# statement ends with a semicolon, like a period at the end of a sentence."]
+  ];
+  function showPart(i) {
+    var btns = $("anatomy-line").children;
+    for (var k = 0; k < btns.length; k++) btns[k].classList.toggle("on", k === i);
+    $("anatomy-exp").innerHTML = "<strong>" + esc(PARTS[i][0]) + "</strong> · " + PARTS[i][1] + "<br>" + PARTS[i][2];
+  }
+  PARTS.forEach(function (p, i) {
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "part"; b.textContent = p[0];
+    b.addEventListener("mouseenter", function () { showPart(i); });
+    b.addEventListener("focus", function () { showPart(i); });
+    b.addEventListener("click", function () { showPart(i); });
+    $("anatomy-line").appendChild(b);
+  });
+  showPart(3);
+
+  /* ---------- examples: each line is [code, explanation] ---------- */
+  var U = `Brings in the <code>System</code> library. It contains <code>Console</code>, the tool we use to print text on the screen.`;
+  var P = `A second class called <code>Program</code>. This is where the program starts running. Think of it as the place where the plan gets used.`;
+  var PO = `Opens the body of the <code>Program</code> class.`;
+  var M = `The <code>Main</code> method. C# always starts running here, at the first line inside its braces.`;
+  var MO = `Opens the body of <code>Main</code>.`;
+  var MC = `Closes <code>Main</code>. The program ends here.`;
+  var PC = `Closes the <code>Program</code> class.`;
+
+  var CONSOLE_EX = [
+    {
+      id: "ex1", name: "Car", title: "Your first class and your first object",
+      life: "Real life: a car maker has one design for a car. Your own car is one real car built from that design, with its own brand, color and year.",
+      notice: "Look for the two halves: the class Car (the plan) at the top, and the line with new (the instantiation) inside Main.",
+      out: "Brand: Toyota\nColor: Red\nYear:  2022",
+      lines: [
+        [`using System;`, U],
+        [``],
+        [`class Car`, `Starts the plan. The keyword <code>class</code> means "I am describing a new kind of thing", and <code>Car</code> is the name we give it. Class names start with a capital letter.`],
+        [`{`, `Opens the body of the <code>Car</code> class. Everything until the matching <code>}</code> is part of the plan.`],
+        [`    public string Brand;`, `A <strong>field</strong>: a piece of data every car will have. <code>string</code> means text. <code>public</code> means code outside the class is allowed to use it.`],
+        [`    public string Color;`, `A second field. Every car object will have its own color, stored as text.`],
+        [`    public int Year;`, `A third field. <code>int</code> means a whole number, perfect for a year like 2022.`],
+        [`}`, `Closes the <code>Car</code> class. The plan is finished. Notice that no car exists yet. We only described one.`],
+        [``],
+        [`class Program`, P],
+        [`{`, PO],
+        [`    static void Main()`, M],
+        [`    {`, MO],
+        [`        Car myCar = new Car();`, `<strong>Instantiation.</strong> <code>new Car()</code> builds one real car object in memory. <code>Car myCar</code> creates a variable named <code>myCar</code> that refers to it. Before this line: zero cars. After it: one car.`],
+        [``],
+        [`        myCar.Brand = "Toyota";`, `The dot means "go inside this object". We go inside <code>myCar</code> and store the text "Toyota" in its <code>Brand</code> field.`],
+        [`        myCar.Color = "Red";`, `Stores "Red" in the <code>Color</code> field of this car. Like choosing the paint for your own car.`],
+        [`        myCar.Year = 2022;`, `Stores the number 2022 in the <code>Year</code> field. No quotes, because it is a number and not text.`],
+        [``],
+        [`        Console.WriteLine("Brand: " + myCar.Brand);`, `Reads the brand back out of the object and prints it. The <code>+</code> glues the label "Brand: " to the value "Toyota".`],
+        [`        Console.WriteLine("Color: " + myCar.Color);`, `Prints the label followed by the color stored inside <code>myCar</code>.`],
+        [`        Console.WriteLine("Year:  " + myCar.Year);`, `Prints the year. C# turns the number 2022 into text automatically so it can be glued to the label.`],
+        [`    }`, MC],
+        [`}`, PC]
+      ]
+    },
+    {
+      id: "ex2", name: "Library books", title: "One class, several objects",
+      life: "Real life: a library has one catalog card design, but thousands of books. Every book has a title, an author and a number of pages.",
+      notice: "The class Book is written once. Then new is used twice, so two separate book objects exist, each with its own values.",
+      out: "Charlotte's Web by E. B. White\nThe Hobbit by J. R. R. Tolkien\nTotal pages to read: 502",
+      lines: [
+        [`using System;`, U],
+        [``],
+        [`class Book`, `Starts the plan for a book.`],
+        [`{`, `Opens the body of the <code>Book</code> class.`],
+        [`    public string Title;`, `Field: every book has a title, stored as text.`],
+        [`    public string Author;`, `Field: every book has an author, stored as text.`],
+        [`    public int Pages;`, `Field: every book has a number of pages, stored as a whole number.`],
+        [`}`, `Closes the <code>Book</code> class.`],
+        [``],
+        [`class Program`, P],
+        [`{`, PO],
+        [`    static void Main()`, M],
+        [`    {`, MO],
+        [`        Book book1 = new Book();`, `Instantiates the first book. One <code>Book</code> object now exists, and <code>book1</code> refers to it.`],
+        [`        book1.Title = "Charlotte's Web";`, `Fills in the title of the first book.`],
+        [`        book1.Author = "E. B. White";`, `Fills in the author of the first book.`],
+        [`        book1.Pages = 192;`, `Fills in the number of pages of the first book.`],
+        [``],
+        [`        Book book2 = new Book();`, `<code>new</code> runs a second time, so a <strong>second, separate</strong> book object is built from the same class.`],
+        [`        book2.Title = "The Hobbit";`, `Fills in the second book's title. This does not change <code>book1</code>.`],
+        [`        book2.Author = "J. R. R. Tolkien";`, `Fills in the second book's author.`],
+        [`        book2.Pages = 310;`, `Fills in the second book's pages.`],
+        [``],
+        [`        Console.WriteLine(book1.Title + " by " + book1.Author);`, `Reads two fields from the first object and prints them in one line.`],
+        [`        Console.WriteLine(book2.Title + " by " + book2.Author);`, `The same sentence, but with the second object's own values.`],
+        [``],
+        [`        int totalPages = book1.Pages + book2.Pages;`, `Takes the pages from each object and adds them: 192 + 310 = 502. Data inside objects can be used in calculations like any other variable.`],
+        [`        Console.WriteLine("Total pages to read: " + totalPages);`, `Prints the total.`],
+        [`    }`, MC],
+        [`}`, PC]
+      ]
+    },
+    {
+      id: "ex3", name: "Dog", title: "Objects can do things: methods",
+      life: "Real life: every dog has a name and an age (data), and every dog can bark and have a birthday (actions). Rex and Bella are two different dogs of the same kind.",
+      notice: "When Rex has a birthday, Bella's age does not change. Each object keeps its own data.",
+      out: "Rex says: Woof! Woof!\nBella says: Woof! Woof!\nRex is now 4 years old.\nBella is still 5.",
+      lines: [
+        [`using System;`, U],
+        [``],
+        [`class Dog`, `Starts the plan for a dog. It will describe what a dog has and what a dog can do.`],
+        [`{`, `Opens the body of the <code>Dog</code> class.`],
+        [`    public string Name;`, `Field: every dog has a name, stored as text.`],
+        [`    public int Age;`, `Field: every dog has an age, stored as a whole number.`],
+        [``],
+        [`    public void Bark()`, `A <strong>method</strong>: an action a dog can do. <code>void</code> means it does the action but gives nothing back. The empty <code>()</code> means it needs no extra information.`],
+        [`    {`, `Opens the body of <code>Bark</code>.`],
+        [`        Console.WriteLine(Name + " says: Woof! Woof!");`, `Prints the dog's own name followed by the bark. <code>Name</code> here means "the name of whichever dog is barking right now".`],
+        [`    }`, `Closes <code>Bark</code>.`],
+        [``],
+        [`    public void Birthday()`, `A second method. It changes the dog's data: a birthday makes the dog one year older.`],
+        [`    {`, `Opens the body of <code>Birthday</code>.`],
+        [`        Age = Age + 1;`, `Takes this dog's current age, adds 1, and stores the result back in <code>Age</code>. Only the dog that had the birthday changes.`],
+        [`        Console.WriteLine(Name + " is now " + Age + " years old.");`, `Prints the news, using this dog's name and its new age.`],
+        [`    }`, `Closes <code>Birthday</code>.`],
+        [`}`, `Closes the <code>Dog</code> class. The plan is finished.`],
+        [``],
+        [`class Program`, P],
+        [`{`, PO],
+        [`    static void Main()`, M],
+        [`    {`, MO],
+        [`        Dog dog1 = new Dog();`, `Instantiates the first dog and calls it <code>dog1</code>.`],
+        [`        dog1.Name = "Rex";`, `Gives the first dog its name.`],
+        [`        dog1.Age = 3;`, `Gives the first dog its age.`],
+        [``],
+        [`        Dog dog2 = new Dog();`, `Instantiates a second, separate dog from the same class. Now two dogs exist in memory.`],
+        [`        dog2.Name = "Bella";`, `Gives the second dog its own name. This does not touch Rex.`],
+        [`        dog2.Age = 5;`, `Gives the second dog its own age.`],
+        [``],
+        [`        dog1.Bark();`, `Calls the <code>Bark</code> method on <code>dog1</code>. Inside the method, <code>Name</code> is "Rex", so it prints Rex's bark.`],
+        [`        dog2.Bark();`, `The same method, called on a different object. Now <code>Name</code> is "Bella".`],
+        [``],
+        [`        dog1.Birthday();`, `Only Rex has a birthday. His age goes from 3 to 4.`],
+        [`        Console.WriteLine(dog2.Name + " is still " + dog2.Age + ".");`, `Proof that the objects are independent: Bella's age is still 5.`],
+        [`    }`, MC],
+        [`}`, PC]
+      ]
+    },
+    {
+      id: "ex4", name: "Lamp", title: "An object remembers its state",
+      life: "Real life: each lamp in your home is either on or off. Turning off the kitchen lamp does not turn off the bedroom lamp.",
+      notice: "The field IsOn is a bool: it can only be true or false. Each lamp object remembers its own answer.",
+      out: "The kitchen lamp is ON.\nThe bedroom lamp is ON.\nThe kitchen lamp is OFF.\nKitchen on? False\nBedroom on? True",
+      lines: [
+        [`using System;`, U],
+        [``],
+        [`class Lamp`, `Starts the plan for a lamp.`],
+        [`{`, `Opens the body of the <code>Lamp</code> class.`],
+        [`    public string Location;`, `Field: where the lamp is, stored as text.`],
+        [`    public bool IsOn;`, `Field: is the lamp on? A <code>bool</code> holds only <code>true</code> or <code>false</code>. A new lamp starts as <code>false</code> (off).`],
+        [``],
+        [`    public void TurnOn()`, `A method: the action of switching the lamp on.`],
+        [`    {`, `Opens the body of <code>TurnOn</code>.`],
+        [`        IsOn = true;`, `Changes this lamp's state to on. The object will remember it.`],
+        [`        Console.WriteLine("The " + Location + " lamp is ON.");`, `Prints a message using this lamp's own location.`],
+        [`    }`, `Closes <code>TurnOn</code>.`],
+        [``],
+        [`    public void TurnOff()`, `A method: the action of switching the lamp off.`],
+        [`    {`, `Opens the body of <code>TurnOff</code>.`],
+        [`        IsOn = false;`, `Changes this lamp's state to off.`],
+        [`        Console.WriteLine("The " + Location + " lamp is OFF.");`, `Prints a message using this lamp's own location.`],
+        [`    }`, `Closes <code>TurnOff</code>.`],
+        [`}`, `Closes the <code>Lamp</code> class.`],
+        [``],
+        [`class Program`, P],
+        [`{`, PO],
+        [`    static void Main()`, M],
+        [`    {`, MO],
+        [`        Lamp kitchenLamp = new Lamp();`, `Instantiates the first lamp. Good variable names say what the object is.`],
+        [`        kitchenLamp.Location = "kitchen";`, `Tells the first lamp where it is.`],
+        [``],
+        [`        Lamp bedroomLamp = new Lamp();`, `Instantiates a second lamp from the same class.`],
+        [`        bedroomLamp.Location = "bedroom";`, `Tells the second lamp where it is.`],
+        [``],
+        [`        kitchenLamp.TurnOn();`, `Switches on the kitchen lamp only.`],
+        [`        bedroomLamp.TurnOn();`, `Switches on the bedroom lamp only.`],
+        [`        kitchenLamp.TurnOff();`, `Switches the kitchen lamp off again. The bedroom lamp is not affected.`],
+        [``],
+        [`        Console.WriteLine("Kitchen on? " + kitchenLamp.IsOn);`, `Asks the kitchen lamp for its state. It was turned off last, so it prints False.`],
+        [`        Console.WriteLine("Bedroom on? " + bedroomLamp.IsOn);`, `Asks the bedroom lamp. Nobody turned it off, so it prints True.`],
+        [`    }`, MC],
+        [`}`, PC]
+      ]
+    },
+    {
+      id: "ex5", name: "Student", title: "Constructors: set up the object while building it",
+      life: "Real life: when you register at a college, you must give your name, ID and age right away. Nobody gets registered as a blank form to fill in later.",
+      notice: "Compare with the Car example: there we needed three extra lines to fill the fields. Here one line instantiates the student and fills everything.",
+      out: "Hi, I am Maria (ID 1001), age 19.\nHi, I am James (ID 1002), age 22.",
+      lines: [
+        [`using System;`, U],
+        [``],
+        [`class Student`, `Starts the plan for a student.`],
+        [`{`, `Opens the body of the <code>Student</code> class.`],
+        [`    public string Name;`, `Field: the student's name.`],
+        [`    public int Id;`, `Field: the student's ID number.`],
+        [`    public int Age;`, `Field: the student's age.`],
+        [``],
+        [`    public Student(string name, int id, int age)`, `The <strong>constructor</strong>. You can recognize it two ways: it has the same name as the class, and it has no return type (no <code>void</code>). It runs automatically when <code>new Student(...)</code> is used. The three items in parentheses are the information it demands.`],
+        [`    {`, `Opens the body of the constructor.`],
+        [`        Name = name;`, `Copies the value that was handed in (<code>name</code>, lowercase) into the object's field (<code>Name</code>, capital). Lowercase is the delivery, capital is the storage.`],
+        [`        Id = id;`, `Stores the ID that was handed in.`],
+        [`        Age = age;`, `Stores the age that was handed in. After this line the student is completely set up.`],
+        [`    }`, `Closes the constructor.`],
+        [``],
+        [`    public void Introduce()`, `A method: an action the student can do. This one prints a short introduction.`],
+        [`    {`, `Opens the body of <code>Introduce</code>.`],
+        [`        Console.WriteLine("Hi, I am " + Name + " (ID " + Id + "), age " + Age + ".");`, `Builds one sentence from fixed text and this student's own three fields, then prints it.`],
+        [`    }`, `Closes <code>Introduce</code>.`],
+        [`}`, `Closes the <code>Student</code> class.`],
+        [``],
+        [`class Program`, P],
+        [`{`, PO],
+        [`    static void Main()`, M],
+        [`    {`, MO],
+        [`        Student s1 = new Student("Maria", 1001, 19);`, `Instantiates a student and sets it up in one step. The three values travel into the constructor in order: "Maria" becomes <code>name</code>, 1001 becomes <code>id</code>, 19 becomes <code>age</code>.`],
+        [`        Student s2 = new Student("James", 1002, 22);`, `Instantiates a second student with different values. The same constructor runs again, for a new object.`],
+        [``],
+        [`        s1.Introduce();`, `Asks the first student to introduce herself. The method uses Maria's fields.`],
+        [`        s2.Introduce();`, `Asks the second student. Same method, James's fields.`],
+        [`    }`, MC],
+        [`}`, PC]
+      ]
+    },
+    {
+      id: "ex6", name: "Pizza", title: "Two constructors: the usual, or made to order",
+      life: "Real life: at a pizza place you can say \"the usual\" and get a medium cheese, or you can order exactly the size and topping you want.",
+      notice: "A class can have more than one constructor. C# picks the right one by looking at what you put inside the parentheses after new.",
+      out: "Medium Cheese pizza - $12.5\nLarge Pepperoni pizza - $18.75\nTotal: $31.25",
+      lines: [
+        [`using System;`, U],
+        [``],
+        [`class Pizza`, `Starts the plan for a pizza order.`],
+        [`{`, `Opens the body of the <code>Pizza</code> class.`],
+        [`    public string Size;`, `Field: the size, as text.`],
+        [`    public string Topping;`, `Field: the topping, as text.`],
+        [`    public double Price;`, `Field: the price. <code>double</code> is a number that can have a decimal point, like 12.5.`],
+        [``],
+        [`    public Pizza()`, `Constructor number 1. Empty parentheses: it needs no information. This is "the usual". It is called a <strong>default constructor</strong>.`],
+        [`    {`, `Opens the body of the first constructor.`],
+        [`        Size = "Medium";`, `Every "usual" pizza starts as a medium.`],
+        [`        Topping = "Cheese";`, `Every "usual" pizza has cheese.`],
+        [`        Price = 12.5;`, `Every "usual" pizza costs 12.5 dollars.`],
+        [`    }`, `Closes the first constructor.`],
+        [``],
+        [`    public Pizza(string size, string topping, double price)`, `Constructor number 2. Same name, but it asks for three values. This is the custom order. Having two constructors with different parentheses is called <strong>overloading</strong>.`],
+        [`    {`, `Opens the body of the second constructor.`],
+        [`        Size = size;`, `Stores the size the customer asked for.`],
+        [`        Topping = topping;`, `Stores the topping the customer asked for.`],
+        [`        Price = price;`, `Stores the price for this custom pizza.`],
+        [`    }`, `Closes the second constructor.`],
+        [``],
+        [`    public void PrintReceipt()`, `A method that prints one line of the receipt for this pizza.`],
+        [`    {`, `Opens the body of <code>PrintReceipt</code>.`],
+        [`        Console.WriteLine(Size + " " + Topping + " pizza - $" + Price);`, `Glues this pizza's size, topping and price into one line. The <code>" "</code> in the middle is just a space between two words.`],
+        [`    }`, `Closes <code>PrintReceipt</code>.`],
+        [`}`, `Closes the <code>Pizza</code> class.`],
+        [``],
+        [`class Program`, P],
+        [`{`, PO],
+        [`    static void Main()`, M],
+        [`    {`, MO],
+        [`        Pizza usual = new Pizza();`, `Nothing in the parentheses, so C# runs constructor number 1. We get a medium cheese pizza without typing any details.`],
+        [`        Pizza custom = new Pizza("Large", "Pepperoni", 18.75);`, `Three values in the parentheses, so C# runs constructor number 2 and uses exactly what we ordered.`],
+        [``],
+        [`        usual.PrintReceipt();`, `Prints the receipt line for the usual pizza.`],
+        [`        custom.PrintReceipt();`, `Prints the receipt line for the custom pizza.`],
+        [``],
+        [`        double total = usual.Price + custom.Price;`, `Reads the price out of each object and adds them: 12.5 + 18.75 = 31.25.`],
+        [`        Console.WriteLine("Total: $" + total);`, `Prints the total for the whole order.`],
+        [`    }`, MC],
+        [`}`, PC]
+      ]
+    },
+    {
+      id: "ex7", name: "Room", title: "A method that gives back an answer",
+      life: "Real life: you want new flooring. Every room has a length and a width, and every room can tell you its area if you ask.",
+      notice: "Until now our methods were void: they did something and gave nothing back. GetArea returns a number that Main can print or use in a calculation.",
+      out: "Living room: 20 square meters\nKitchen: 7.5 square meters\nFlooring needed: 27.5 square meters",
+      lines: [
+        [`using System;`, U],
+        [``],
+        [`class Room`, `Starts the plan for a room.`],
+        [`{`, `Opens the body of the <code>Room</code> class.`],
+        [`    public string Name;`, `Field: the name of the room.`],
+        [`    public double Length;`, `Field: the length in meters. <code>double</code> allows decimals like 2.5.`],
+        [`    public double Width;`, `Field: the width in meters.`],
+        [``],
+        [`    public Room(string name, double length, double width)`, `The constructor. To build a room you must give its name, length and width.`],
+        [`    {`, `Opens the body of the constructor.`],
+        [`        Name = name;`, `Stores the name in the object.`],
+        [`        Length = length;`, `Stores the length in the object.`],
+        [`        Width = width;`, `Stores the width in the object.`],
+        [`    }`, `Closes the constructor.`],
+        [``],
+        [`    public double GetArea()`, `A method that <strong>returns a value</strong>. Instead of <code>void</code> it says <code>double</code>: "when you call me, I will hand you back a decimal number".`],
+        [`    {`, `Opens the body of <code>GetArea</code>.`],
+        [`        return Length * Width;`, `Multiplies this room's own length by its own width, and <code>return</code> hands the answer back to whoever asked.`],
+        [`    }`, `Closes <code>GetArea</code>.`],
+        [`}`, `Closes the <code>Room</code> class.`],
+        [``],
+        [`class Program`, P],
+        [`{`, PO],
+        [`    static void Main()`, M],
+        [`    {`, MO],
+        [`        Room living = new Room("Living room", 5, 4);`, `Instantiates a room that is 5 meters by 4 meters.`],
+        [`        Room kitchen = new Room("Kitchen", 3, 2.5);`, `Instantiates a second room, 3 meters by 2.5 meters.`],
+        [``],
+        [`        Console.WriteLine(living.Name + ": " + living.GetArea() + " square meters");`, `Calls <code>GetArea()</code> on the living room. The method returns 5 * 4 = 20, and that number is placed right into the sentence.`],
+        [`        Console.WriteLine(kitchen.Name + ": " + kitchen.GetArea() + " square meters");`, `The same method on the kitchen object returns 3 * 2.5 = 7.5.`],
+        [``],
+        [`        double total = living.GetArea() + kitchen.GetArea();`, `Asks both rooms for their area and adds the two answers: 20 + 7.5 = 27.5.`],
+        [`        Console.WriteLine("Flooring needed: " + total + " square meters");`, `Prints how much flooring to buy.`],
+        [`    }`, MC],
+        [`}`, PC]
+      ]
+    },
+    {
+      id: "ex8", name: "Bank account", title: "Protecting data with private",
+      life: "Real life: you cannot walk into a bank and write a new balance on your account. You must go through the teller: deposit or withdraw. The bank's rules are checked every time.",
+      notice: "The balance field is private. Main can never change it directly. It has to ask the object, and the object checks the rules.",
+      out: "Sara's balance: $100\nDeposited $50\nWithdrew $30\nSorry, not enough money to withdraw $500\nSara's balance: $120",
+      lines: [
+        [`using System;`, U],
+        [``],
+        [`class BankAccount`, `Starts the plan for a bank account.`],
+        [`{`, `Opens the body of the <code>BankAccount</code> class.`],
+        [`    public string Owner;`, `Field: the owner's name. It is <code>public</code>, so anyone may read it.`],
+        [`    private double balance;`, `Field: the money in the account. <code>private</code> means only code <strong>inside this class</strong> may touch it. This is the vault. Private fields usually start with a lowercase letter.`],
+        [``],
+        [`    public BankAccount(string owner, double firstDeposit)`, `The constructor. To open an account you must give a name and a first deposit.`],
+        [`    {`, `Opens the body of the constructor.`],
+        [`        Owner = owner;`, `Stores the owner's name in the object.`],
+        [`        balance = firstDeposit;`, `Puts the first deposit in the vault. The constructor is inside the class, so it is allowed to touch <code>balance</code>.`],
+        [`    }`, `Closes the constructor.`],
+        [``],
+        [`    public void Deposit(double amount)`, `A public method: the teller window for adding money. <code>amount</code> is how much the customer hands over.`],
+        [`    {`, `Opens the body of <code>Deposit</code>.`],
+        [`        balance = balance + amount;`, `Adds the amount to the money already in the account.`],
+        [`        Console.WriteLine("Deposited $" + amount);`, `Prints a confirmation, like a deposit slip.`],
+        [`    }`, `Closes <code>Deposit</code>.`],
+        [``],
+        [`    public void Withdraw(double amount)`, `A public method: the teller window for taking money out.`],
+        [`    {`, `Opens the body of <code>Withdraw</code>.`],
+        [`        if (amount > balance)`, `The bank's rule. Before giving money, check: is the customer asking for more than the account has?`],
+        [`        {`, `Opens the "not enough money" branch.`],
+        [`            Console.WriteLine("Sorry, not enough money to withdraw $" + amount);`, `Refuses politely. The balance is <strong>not</strong> changed.`],
+        [`        }`, `Closes the "not enough money" branch.`],
+        [`        else`, `Otherwise: there is enough money.`],
+        [`        {`, `Opens the "enough money" branch.`],
+        [`            balance = balance - amount;`, `Takes the amount out of the account.`],
+        [`            Console.WriteLine("Withdrew $" + amount);`, `Prints a confirmation.`],
+        [`        }`, `Closes the "enough money" branch.`],
+        [`    }`, `Closes <code>Withdraw</code>.`],
+        [``],
+        [`    public void ShowBalance()`, `A public method that lets people <strong>see</strong> the balance without being able to change it.`],
+        [`    {`, `Opens the body of <code>ShowBalance</code>.`],
+        [`        Console.WriteLine(Owner + "'s balance: $" + balance);`, `Prints the owner's name and the current balance.`],
+        [`    }`, `Closes <code>ShowBalance</code>.`],
+        [`}`, `Closes the <code>BankAccount</code> class.`],
+        [``],
+        [`class Program`, P],
+        [`{`, PO],
+        [`    static void Main()`, M],
+        [`    {`, MO],
+        [`        BankAccount account = new BankAccount("Sara", 100);`, `Opens an account for Sara with 100 dollars. The constructor stores both values.`],
+        [``],
+        [`        account.ShowBalance();`, `Prints the starting balance: 100.`],
+        [`        account.Deposit(50);`, `Adds 50. The balance is now 150.`],
+        [`        account.Withdraw(30);`, `30 is less than 150, so the withdrawal is allowed. The balance is now 120.`],
+        [`        account.Withdraw(500);`, `500 is more than 120, so the object refuses and the balance stays 120. Try typing <code>account.balance = 1000000;</code> here: C# will not even let the program run.`],
+        [`        account.ShowBalance();`, `Prints the final balance: 120.`],
+        [`    }`, MC],
+        [`}`, PC]
+      ]
+    },
+    {
+      id: "ex9", name: "Restaurant order", title: "Many objects in one list",
+      life: "Real life: a restaurant order is a list of items. Each item has a name and a price, and the cashier goes down the list to add up the bill.",
+      notice: "An array can hold objects, not only numbers. The loop visits each object and asks for its Name and Price.",
+      out: "Burger - $8.5\nFries - $3.25\nLemonade - $2.75\nTotal: $14.5",
+      lines: [
+        [`using System;`, U],
+        [``],
+        [`class MenuItem`, `Starts the plan for one item on a menu.`],
+        [`{`, `Opens the body of the <code>MenuItem</code> class.`],
+        [`    public string Name;`, `Field: the name of the item.`],
+        [`    public double Price;`, `Field: the price of the item.`],
+        [``],
+        [`    public MenuItem(string name, double price)`, `The constructor. Every menu item must be built with a name and a price.`],
+        [`    {`, `Opens the body of the constructor.`],
+        [`        Name = name;`, `Stores the name in the object.`],
+        [`        Price = price;`, `Stores the price in the object.`],
+        [`    }`, `Closes the constructor.`],
+        [`}`, `Closes the <code>MenuItem</code> class.`],
+        [``],
+        [`class Program`, P],
+        [`{`, PO],
+        [`    static void Main()`, M],
+        [`    {`, MO],
+        [`        MenuItem[] order = new MenuItem[3];`, `Creates an <strong>array</strong> with room for 3 menu items. Think of a tray with 3 empty places. The square brackets mean "a list of". No menu item exists yet, only the empty tray.`],
+        [`        order[0] = new MenuItem("Burger", 8.5);`, `Instantiates a burger object and puts it in the first place of the tray. Places are counted from 0.`],
+        [`        order[1] = new MenuItem("Fries", 3.25);`, `Instantiates a fries object and puts it in the second place.`],
+        [`        order[2] = new MenuItem("Lemonade", 2.75);`, `Instantiates a lemonade object and puts it in the third place. Three <code>new</code>, three objects.`],
+        [``],
+        [`        double total = 0;`, `A variable for the bill. It starts at zero.`],
+        [``],
+        [`        for (int i = 0; i < order.Length; i++)`, `A loop that visits every place in the tray. <code>i</code> goes 0, 1, 2. <code>order.Length</code> is 3, the size of the array.`],
+        [`        {`, `Opens the body of the loop.`],
+        [`            Console.WriteLine(order[i].Name + " - $" + order[i].Price);`, `<code>order[i]</code> is the object at place <code>i</code>. The dot then reaches inside it for its name and price.`],
+        [`            total = total + order[i].Price;`, `Adds this item's price to the bill.`],
+        [`        }`, `Closes the loop. It goes back up for the next item.`],
+        [``],
+        [`        Console.WriteLine("Total: $" + total);`, `After the loop: 8.5 + 3.25 + 2.75 = 14.5.`],
+        [`    }`, MC],
+        [`}`, PC]
+      ]
+    },
+    {
+      id: "ex10", name: "TV remotes", title: "A variable is a remote control, not the TV",
+      life: "Real life: two remote controls can point at the same TV. If your brother changes the channel with his remote, you see the new channel too. There is still only one TV.",
+      notice: "Count how many times the word new appears in Main. That is exactly how many TV objects exist: two, even though there are three variables.",
+      out: "remote1 sees channel 7\nremote2 sees channel 7\nBedroom TV is on channel 1",
+      lines: [
+        [`using System;`, U],
+        [``],
+        [`class Television`, `Starts the plan for a television.`],
+        [`{`, `Opens the body of the <code>Television</code> class.`],
+        [`    public int Channel;`, `Field: the channel the TV is showing right now.`],
+        [``],
+        [`    public Television()`, `The constructor. It runs each time a new TV is built.`],
+        [`    {`, `Opens the body of the constructor.`],
+        [`        Channel = 1;`, `Every new TV starts on channel 1.`],
+        [`    }`, `Closes the constructor.`],
+        [`}`, `Closes the <code>Television</code> class.`],
+        [``],
+        [`class Program`, P],
+        [`{`, PO],
+        [`    static void Main()`, M],
+        [`    {`, MO],
+        [`        Television remote1 = new Television();`, `<code>new</code> builds one TV object. The variable <code>remote1</code> is the remote control that points at it. That link is called a <strong>reference</strong>.`],
+        [`        Television remote2 = remote1;`, `Look closely: there is <strong>no <code>new</code></strong> on this line, so no second TV is built. <code>remote2</code> becomes a second remote pointing at the <strong>same</strong> TV.`],
+        [``],
+        [`        remote2.Channel = 7;`, `Uses the second remote to change the channel. There is only one TV, so that TV is now on channel 7.`],
+        [``],
+        [`        Console.WriteLine("remote1 sees channel " + remote1.Channel);`, `We ask through the first remote. It points at the same TV, so the answer is 7, even though we never used <code>remote1</code> to change anything.`],
+        [`        Console.WriteLine("remote2 sees channel " + remote2.Channel);`, `Asking through the second remote gives the same answer: 7.`],
+        [``],
+        [`        Television bedroomTv = new Television();`, `Here <code>new</code> appears again, so a second, completely separate TV is built. Its constructor puts it on channel 1.`],
+        [`        Console.WriteLine("Bedroom TV is on channel " + bedroomTv.Channel);`, `The bedroom TV was never changed, so it is still on channel 1. Different object, different data.`],
+        [`    }`, MC],
+        [`}`, PC]
+      ]
+    }
+  ];
+
+  var GUI_EX = [
+    {
+      id: "gui1", name: "GUI: Welcome window", title: "Every control on the screen is an object", file: "MainWindow.cs", gui: "welcome",
+      life: "Real life: furnishing a room. You get a sofa, a table and a lamp (build the objects), then you place them in the room (add them to the window).",
+      notice: "Count the word new: one TextBlock, two Buttons, one StackPanel. Four objects. The two buttons come from the same Button class but show different text.",
+      lines: [
+        [`using Avalonia.Controls;`, `Brings in Avalonia's library of controls. The classes <code>Window</code>, <code>Button</code>, <code>TextBlock</code> and <code>StackPanel</code> live there, already written for you.`],
+        [``],
+        [`class MainWindow : Window`, `Your own class, <code>MainWindow</code>. The part <code>: Window</code> means "my window is a kind of Window": it starts with everything a normal window has, like a title bar and a size.`],
+        [`{`, `Opens the body of the <code>MainWindow</code> class.`],
+        [`    public MainWindow()`, `The <strong>constructor</strong> of your window. Same name as the class, no return type, exactly like <code>public Student(...)</code>. It runs once, when the window object is built, so this is where you build everything inside the window.`],
+        [`    {`, `Opens the body of the constructor.`],
+        [`        Title = "Welcome";`, `Sets the window's own <code>Title</code>. This is the text in the title bar.`],
+        [`        Width = 320;`, `Sets how wide the window is.`],
+        [`        Height = 180;`, `Sets how tall the window is.`],
+        [``],
+        [`        TextBlock greeting = new TextBlock();`, `<strong>Instantiation</strong>, same pattern as <code>Car myCar = new Car();</code>. <code>TextBlock</code> is the class (a plan for a piece of text on screen). <code>greeting</code> is the object.`],
+        [`        greeting.Text = "Hello, MAC109!";`, `Uses the dot to set this object's data, just like <code>myCar.Color = "Red";</code>. <code>Text</code> is what the text block shows.`],
+        [``],
+        [`        Button okButton = new Button();`, `Instantiates a button from the <code>Button</code> class. One button object now exists in memory.`],
+        [`        okButton.Content = "OK";`, `Sets what is written on this button.`],
+        [``],
+        [`        Button cancelButton = new Button();`, `<code>new</code> again: a <strong>second, separate</strong> button object from the same class, like the two dogs Rex and Bella.`],
+        [`        cancelButton.Content = "Cancel";`, `This button has its own text. Changing it does not change the OK button.`],
+        [``],
+        [`        StackPanel panel = new StackPanel();`, `Instantiates a <code>StackPanel</code>: an invisible container that stacks controls from top to bottom, like a shelf.`],
+        [`        panel.Children.Add(greeting);`, `Calls a method to put the text on the shelf. Until a control is added, it exists in memory but nobody can see it.`],
+        [`        panel.Children.Add(okButton);`, `Puts the OK button under the text.`],
+        [`        panel.Children.Add(cancelButton);`, `Puts the Cancel button under the OK button.`],
+        [``],
+        [`        Content = panel;`, `Puts the whole shelf inside the window. <code>Content</code> is the window's property for "what is inside me".`],
+        [`    }`, `Closes the constructor. The window is ready to appear.`],
+        [`}`, `Closes the <code>MainWindow</code> class.`]
+      ]
+    },
+    {
+      id: "gui2", name: "GUI: Student form", title: "Your own class inside a GUI", file: "MainWindow.cs", gui: "student",
+      life: "Real life: the registration desk. Someone types a name into the form, the clerk presses a button, and a new student record is created.",
+      notice: "Two kinds of objects work together: GUI objects from Avalonia's classes (TextBox, Button, TextBlock) and a Student object from the class you wrote. The Student is instantiated each time the button is clicked.",
+      lines: [
+        [`using Avalonia.Controls;`, `Brings in Avalonia's control classes: <code>Window</code>, <code>TextBox</code>, <code>Button</code>, <code>TextBlock</code>, <code>StackPanel</code>.`],
+        [`using Avalonia.Interactivity;`, `Brings in <code>RoutedEventArgs</code>, which is needed for the button click at the bottom of the file.`],
+        [``],
+        [`class Student`, `The same <code>Student</code> class from Example 5, without the console part. A class you wrote can be used in a GUI too.`],
+        [`{`, `Opens the body of the <code>Student</code> class.`],
+        [`    public string Name;`, `Field: the student's name.`],
+        [`    public int Id;`, `Field: the student's ID number.`],
+        [`    public int Age;`, `Field: the student's age.`],
+        [``],
+        [`    public Student(string name, int id, int age)`, `The constructor: a student must be built with a name, an ID and an age.`],
+        [`    {`, `Opens the body of the constructor.`],
+        [`        Name = name;`, `Stores the name in the object.`],
+        [`        Id = id;`, `Stores the ID in the object.`],
+        [`        Age = age;`, `Stores the age in the object.`],
+        [`    }`, `Closes the constructor.`],
+        [`}`, `Closes the <code>Student</code> class.`],
+        [``],
+        [`class MainWindow : Window`, `Your window class. <code>: Window</code> means it is a kind of Window.`],
+        [`{`, `Opens the body of the <code>MainWindow</code> class.`],
+        [`    TextBox nameBox;`, `A field of the window: the box where the user types a name. It is declared here, outside the constructor, so that the click method at the bottom can also reach it.`],
+        [`    TextBlock resultText;`, `A second field of the window: the text that will show the result.`],
+        [``],
+        [`    public MainWindow()`, `The constructor of the window. It runs once and builds everything inside the window.`],
+        [`    {`, `Opens the body of the constructor.`],
+        [`        Title = "Student Form";`, `Sets the text in the title bar.`],
+        [`        Width = 360;`, `Sets the window's width.`],
+        [`        Height = 220;`, `Sets the window's height.`],
+        [``],
+        [`        nameBox = new TextBox();`, `Instantiates the text box object and stores it in the field <code>nameBox</code>.`],
+        [``],
+        [`        Button addButton = new Button();`, `Instantiates a button object.`],
+        [`        addButton.Content = "Add Student";`, `Sets the text written on the button.`],
+        [`        addButton.Click += AddButton_Click;`, `Connects the button to a method. Read it as: "when this button is clicked, run <code>AddButton_Click</code>".`],
+        [``],
+        [`        resultText = new TextBlock();`, `Instantiates the text block object and stores it in the field <code>resultText</code>.`],
+        [`        resultText.Text = "No student yet.";`, `The message shown before anyone clicks.`],
+        [``],
+        [`        StackPanel panel = new StackPanel();`, `Instantiates the container that stacks controls top to bottom.`],
+        [`        panel.Children.Add(nameBox);`, `Adds the text box first, so it appears at the top.`],
+        [`        panel.Children.Add(addButton);`, `Adds the button under the text box.`],
+        [`        panel.Children.Add(resultText);`, `Adds the result text under the button.`],
+        [``],
+        [`        Content = panel;`, `Puts the panel, with its three controls, inside the window.`],
+        [`    }`, `Closes the constructor.`],
+        [``],
+        [`    void AddButton_Click(object? sender, RoutedEventArgs e)`, `The method that runs each time the button is clicked. The two items in parentheses are information Avalonia sends about the click. We do not need them here, but they must be written.`],
+        [`    {`, `Opens the body of the click method.`],
+        [`        Student s = new Student(nameBox.Text, 1001, 19);`, `<strong>Instantiation on a click.</strong> <code>nameBox.Text</code> reads what the user typed, and the constructor builds a new <code>Student</code> object with it. Every click builds a new student.`],
+        [`        resultText.Text = "Added: " + s.Name + " (ID " + s.Id + ")";`, `Reads data out of the student object and shows it in the window, the same way <code>Console.WriteLine</code> showed it in the console.`],
+        [`    }`, `Closes the click method.`],
+        [`}`, `Closes the <code>MainWindow</code> class.`]
+      ]
+    }
+  ];
+
+  /* ---------- mock GUI windows ---------- */
+  function mockWindow(kind) {
+    var w = document.createElement("div"); w.className = "guiout";
+    var bar = '<div class="bar">Output · the window you see when you run it</div>';
+    if (kind === "welcome") {
+      w.innerHTML = bar + '<div class="guistage"><div class="win"><div class="win-bar"><i></i><i></i><i></i><span>Welcome</span></div>' +
+        '<div class="win-body"><div>Hello, MAC109!</div><button type="button" class="w-btn">OK</button><button type="button" class="w-btn">Cancel</button></div></div></div>' +
+        '<p class="win-note">Preview. The buttons do nothing yet, because the code does not connect them to a method.</p>';
+    } else {
+      w.innerHTML = bar + '<div class="guistage"><div class="win"><div class="win-bar"><i></i><i></i><i></i><span>Student Form</span></div>' +
+        '<div class="win-body"><input id="mock-name" type="text" aria-label="Student name" value="Maria"><button type="button" class="w-btn" id="mock-add">Add Student</button><div id="mock-result">No student yet.</div></div></div></div>' +
+        '<p class="win-note">Live preview. Type a name and press Add Student.</p>';
+      w.querySelector("#mock-add").addEventListener("click", function () {
+        w.querySelector("#mock-result").textContent = "Added: " + w.querySelector("#mock-name").value + " (ID 1001)";
+      });
+    }
+    return w;
+  }
+
+  /* ---------- build one example block ---------- */
+  function copyText(text, btn) {
+    function done() { btn.textContent = "Copied"; setTimeout(function () { btn.textContent = "Copy code"; }, 1800); }
+    function fallback() {
+      var ta = document.createElement("textarea");
+      ta.value = text; ta.setAttribute("readonly", ""); ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta); ta.select();
+      var ok = false; try { ok = document.execCommand("copy"); } catch (e) {}
+      document.body.removeChild(ta);
+      if (ok) done(); else btn.textContent = "Select the code and press Ctrl+C";
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, fallback);
+    else fallback();
+  }
+  function buildExample(ex, label, host) {
+    var art = document.createElement("article"); art.className = "example"; art.id = ex.id;
+    art.innerHTML =
+      '<div class="ex-intro"><span class="num">' + label + " · " + esc(ex.name) + "</span><h3>" + esc(ex.title) + '</h3><p class="life">' + ex.life + "</p><p>" + ex.notice + "</p></div>" +
+      '<div class="ex-grid"><div class="ex-left"><div class="codebox"><div class="codebar"><span class="file">' + (ex.file || "Program.cs") + '</span><button class="copy" type="button">Copy code</button></div>' +
+      '<div class="codescroll"><div class="codelines"></div></div></div></div><aside class="explain" aria-live="polite"></aside></div>';
+    var box = art.querySelector(".codelines"), panel = art.querySelector(".explain"), left = art.querySelector(".ex-left");
+    panel.innerHTML = '<span class="tag">Explanation</span><p class="explain-text">Move your mouse over a line of code, or tap it. The meaning of that line appears here.</p><p class="hint">Tip: read the program from the top, one line at a time, before you run it.</p>';
+    function show(i) {
+      var rows = box.children;
+      for (var k = 0; k < rows.length; k++) rows[k].classList.toggle("on", k === i);
+      panel.innerHTML = '<span class="tag">Line ' + (i + 1) + '</span><div class="theline">' + hl(ex.lines[i][0].replace(/^\s+/, "")) + '</div><p class="explain-text">' + ex.lines[i][1] + "</p>";
+    }
+    ex.lines.forEach(function (ln, i) {
+      var d = document.createElement("div");
+      d.className = "ln" + (ln[1] ? " has" : "");
+      d.innerHTML = '<span class="no">' + (i + 1) + "</span><span>" + (ln[0] ? hl(ln[0]) : " ") + "</span>";
+      if (ln[1]) {
+        d.tabIndex = 0;
+        d.addEventListener("mouseenter", function () { show(i); });
+        d.addEventListener("focus", function () { show(i); });
+        d.addEventListener("click", function () { show(i); });
+      }
+      box.appendChild(d);
+    });
+    if (ex.gui) left.appendChild(mockWindow(ex.gui));
+    else {
+      var t = document.createElement("div"); t.className = "terminal";
+      t.innerHTML = '<div class="bar">Output · what you see when you run it</div><pre></pre>';
+      t.querySelector("pre").textContent = ex.out;
+      left.appendChild(t);
+    }
+    art.querySelector(".copy").addEventListener("click", function () {
+      copyText(ex.lines.map(function (l) { return l[0]; }).join("\n") + "\n", this);
+    });
+    host.appendChild(art);
+    var a = document.createElement("a");
+    a.href = "#" + ex.id; a.textContent = (ex.gui ? "" : label.replace("Example ", "") + " · ") + ex.name;
+    if (ex.gui) a.className = "gui";
+    $("index").appendChild(a);
+  }
+  CONSOLE_EX.forEach(function (ex, i) { buildExample(ex, "Example " + (i + 1), $("console-examples")); });
+  GUI_EX.forEach(function (ex, i) { buildExample(ex, "GUI example " + (i + 1), $("gui-examples")); });
+
+  /* ---------- quiz ---------- */
+  var QUIZ = [
+    { q: "In this line, which word is the class?", code: "Dog dog1 = new Dog();", opts: ["dog1", "Dog", "new"], a: 1,
+      why: "Dog is the plan. dog1 is the name of the object built from it." },
+    { q: "What is instantiation?", opts: ["Writing a class", "Building an object from a class with new", "Printing an object on the screen"], a: 1,
+      why: "To instantiate a class means to create one object from it." },
+    { q: "A college has one Student class and 30 students in a room. How many classes and objects is that?", opts: ["30 classes, 1 object", "30 classes, 30 objects", "1 class, 30 objects"], a: 2,
+      why: "One plan, many things built from it." },
+    { q: "How do you recognize a constructor?", opts: ["It has the same name as the class and no return type", "It is always called Main", "It always starts with the word void"], a: 0,
+      why: "For example, public Student(...) inside class Student." },
+    { q: "When does a constructor run?", opts: ["At the moment an object is built with new", "Every time any method is called", "Only when the program ends"], a: 0,
+      why: "The constructor is the set-up code for a brand-new object. It runs once per object." },
+    { q: "What does this print?", code: "Television a = new Television();\nTelevision b = a;\nb.Channel = 9;\nConsole.WriteLine(a.Channel);", opts: ["1", "9", "Nothing, it is an error"], a: 1,
+      why: "There is only one new, so only one TV. a and b are two remotes for the same TV." },
+    { q: "In your GUI code, what is Button in this line?", code: "Button okButton = new Button();", opts: ["An object you created", "A class that Avalonia wrote for you", "A method"], a: 1,
+      why: "Button is the plan. okButton is the object you instantiated from it." },
+    { q: "A window shows three buttons. How many Button classes and Button objects are there?", opts: ["3 classes, 3 objects", "1 class, 3 objects", "1 class, 1 object"], a: 1,
+      why: "One Button class, instantiated three times." }
+  ];
+  var answered = {}, correct = 0;
+  function updateScore() {
+    var n = Object.keys(answered).length;
+    $("score").textContent = n === 0 ? QUIZ.length + " questions. Your first answer to each one counts." : "Score: " + correct + " / " + QUIZ.length + (n === QUIZ.length ? (correct === QUIZ.length ? ". Perfect." : ". Review the examples for the ones you missed.") : "");
+  }
+  QUIZ.forEach(function (item, qi) {
+    var d = document.createElement("div"); d.className = "q";
+    var h = '<p class="qtext">' + (qi + 1) + ". " + esc(item.q) + "</p>";
+    if (item.code) h += "<pre>" + item.code.split("\n").map(hl).join("\n") + "</pre>";
+    h += '<div class="opts"></div><p class="fb"></p>';
+    d.innerHTML = h;
+    var opts = d.querySelector(".opts"), fb = d.querySelector(".fb");
+    item.opts.forEach(function (o, oi) {
+      var b = document.createElement("button");
+      b.type = "button"; b.className = "opt"; b.textContent = o;
+      b.addEventListener("click", function () {
+        var ok = oi === item.a;
+        if (!(qi in answered)) { answered[qi] = true; if (ok) correct++; updateScore(); }
+        b.classList.add(ok ? "right" : "wrong");
+        fb.className = "fb " + (ok ? "right" : "wrong");
+        fb.textContent = ok ? "Correct. " + item.why : "Not yet. Try another answer.";
+      });
+      opts.appendChild(b);
+    });
+    $("quiz").appendChild(d);
+  });
+  updateScore();
+
+  /* ---------- topic tabs: one topic on screen at a time ---------- */
+  var TOPICS = [
+    ["idea", "The big idea"], ["definitions", "Definitions"], ["factory", "Car factory"], ["new-line", "The new line"],
+    ["examples", "10 examples"], ["gui", "GUI connection"], ["mistakes", "Common mistakes"], ["quiz", "Quick check"]
+  ];
+  var page = document.querySelector(".page"), headerEl = page.querySelector("header");
+  var sections = Array.prototype.slice.call(page.querySelectorAll(":scope > section"));
+  var nav = document.createElement("nav");
+  nav.className = "topics"; nav.setAttribute("role", "tablist"); nav.setAttribute("aria-label", "Lecture topics");
+  page.insertBefore(nav, sections[0]);
+  var activeIdx = -1;
+  function activate(idx, scrollTop) {
+    if (idx !== activeIdx) {
+      activeIdx = idx;
+      sections.forEach(function (s, i) { s.hidden = i !== idx; });
+      headerEl.hidden = idx !== 0;
+      Array.prototype.forEach.call(nav.children, function (b, i) { b.setAttribute("aria-selected", i === idx ? "true" : "false"); });
+      var cur = nav.children[idx];
+      if (cur && nav.scrollWidth > nav.clientWidth) nav.scrollLeft = cur.offsetLeft - 16;
+    }
+    if (scrollTop) window.scrollTo(0, 0);
+  }
+  function openTopic(idx) {
+    activate(idx, true);
+    try { if (location.hash !== "#" + TOPICS[idx][0]) location.hash = TOPICS[idx][0]; } catch (e) {}
+  }
+  sections.forEach(function (s, i) {
+    s.id = TOPICS[i][0];
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "topic"; b.setAttribute("role", "tab");
+    b.innerHTML = '<span class="n">' + (i + 1) + "</span>" + TOPICS[i][1];
+    b.addEventListener("click", function () { openTopic(i); });
+    nav.appendChild(b);
+    var pager = document.createElement("div"); pager.className = "pager";
+    var h = "";
+    h += i > 0 ? '<button type="button" class="btn ghost" data-go="' + (i - 1) + '">← ' + TOPICS[i - 1][1] + "</button>" : '<span class="spacer"></span>';
+    if (i < sections.length - 1) h += '<button type="button" class="btn" data-go="' + (i + 1) + '">Next: ' + TOPICS[i + 1][1] + " →</button>";
+    pager.innerHTML = h;
+    pager.addEventListener("click", function (e) {
+      var t = e.target.closest("[data-go]");
+      if (t) openTopic(parseInt(t.getAttribute("data-go"), 10));
+    });
+    s.appendChild(pager);
+  });
+  function fromHash(initial) {
+    var id = (location.hash || "").replace("#", "");
+    var el = id ? document.getElementById(id) : null;
+    var idx = -1;
+    if (el) sections.forEach(function (s, i) { if (s === el || s.contains(el)) idx = i; });
+    if (idx < 0) { activate(0, !initial); return; }
+    var isTab = sections[idx] === el;
+    activate(idx, isTab && !initial);
+    if (!isTab) el.scrollIntoView();
+  }
+  function measure() { document.documentElement.style.setProperty("--tabs-h", nav.offsetHeight + "px"); }
+  window.addEventListener("hashchange", function () { fromHash(false); });
+  window.addEventListener("resize", measure);
+  fromHash(true); measure();
+})();
+</script>
+</body>
+</html>
