@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Classes & Objects Teaching Script</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: a teleprompter. One reading column of script beats, each tagged by kind in a left margin.
+   Same blueprint world as the lecture: cyan = class / screen actions, amber = spoken words. Single dark look. */
+:root {
+  color-scheme: dark;
+  --bg: #0e1a2b;
+  --grid: rgba(120, 190, 255, 0.05);
+  --surface: #14253b;
+  --surface-2: #1a3050;
+  --code-bg: #0a1422;
+  --line: #2b466b;
+  --fg: #edf3fa;
+  --muted: #a9bcd3;
+  --say: #ffc55c;
+  --do: #6fd3ff;
+  --ask: #c9a4ff;
+  --board: #7fe0a3;
+  --try: #ff9f7a;
+  --scale: 1;
+  --font-display: "Bricolage Grotesque", "Trebuchet MS", system-ui, sans-serif;
+  --font-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --font-code: "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace;
+}
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  margin: 0;
+  background-color: var(--bg);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 28px 28px;
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: 20px;
+  line-height: 1.6;
+}
+.page {
+  max-width: 1100px; margin: 0 auto;
+  padding-block: 36px 80px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 28px;
+}
+h1, h2, h3 { font-family: var(--font-display); line-height: 1.15; margin: 0; text-wrap: balance; }
+h1 { font-size: clamp(2rem, 5vw, 3rem); letter-spacing: -0.02em; }
+h2 { font-size: clamp(1.6rem, 3.6vw, 2.2rem); }
+p { margin: 0; }
+code { font-family: var(--font-code); background: var(--code-bg); border: 1px solid var(--line); border-radius: 4px; padding: 0.05em 0.35em; font-size: 0.86em; }
+.eyebrow { font-family: var(--font-code); font-size: 0.8rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+:focus-visible { outline: 2px solid var(--say); outline-offset: 2px; }
+
+header { display: flex; flex-direction: column; gap: 12px; }
+header .lede { max-width: 64ch; color: var(--muted); }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 18px; padding: 0; margin: 0; list-style: none; font-size: 0.9rem; }
+.legend b { font-family: var(--font-code); font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase; margin-right: 6px; }
+
+/* sticky bar: tools + topic tabs */
+.bar {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+  background: var(--bg); border-bottom: 1px solid var(--line);
+  display: flex; flex-direction: column; gap: 10px; padding-block: 10px;
+}
+.tools { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; font-size: 0.85rem; color: var(--muted); }
+.tools .grp { display: flex; align-items: center; gap: 6px; }
+.clock { font: 600 1.15rem var(--font-code); color: var(--fg); font-variant-numeric: tabular-nums; min-width: 4.2em; }
+.tbtn {
+  font: 400 0.85rem var(--font-body); cursor: pointer; color: var(--fg);
+  background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 5px 12px;
+}
+.tbtn:hover { border-color: var(--do); }
+.tools .push { margin-left: auto; }
+.tabs { display: flex; flex-wrap: wrap; gap: 6px; }
+.tab {
+  font: 400 0.85rem var(--font-body); cursor: pointer; color: var(--fg); white-space: nowrap;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 6px 12px;
+}
+.tab:hover { border-color: var(--do); }
+.tab[aria-selected="true"] { background: var(--do); border-color: var(--do); color: #04202e; font-weight: 700; }
+.tab .cnt { font-family: var(--font-code); font-size: 0.78em; opacity: 0.75; margin-left: 6px; font-variant-numeric: tabular-nums; }
+.tab.done .cnt { opacity: 1; }
+
+/* topic */
+.topic { display: flex; flex-direction: column; gap: 22px; font-size: calc(1em * var(--scale)); }
+.topic-head { display: flex; flex-direction: column; gap: 6px; }
+.topic-head .goal { color: var(--muted); max-width: 66ch; }
+.sub { margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--line); font-family: var(--font-display); font-size: 1.35em; font-weight: 700; }
+.sub small { display: block; font: 400 0.6em var(--font-code); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+
+/* beats */
+.beats { display: flex; flex-direction: column; gap: 14px; }
+.beat { display: grid; grid-template-columns: 5.2em minmax(0, 1fr) auto; gap: 14px; align-items: start; padding-left: 14px; border-left: 4px solid var(--k); }
+.beat .kind { font: 600 0.72em var(--font-code); letter-spacing: 0.12em; text-transform: uppercase; color: var(--k); padding-top: 0.45em; }
+.beat .body { display: flex; flex-direction: column; gap: 8px; min-width: 0; max-width: 68ch; }
+.beat.say { --k: var(--say); } .beat.do { --k: var(--do); } .beat.ask { --k: var(--ask); }
+.beat.board { --k: var(--board); } .beat.try { --k: var(--try); } .beat.note { --k: var(--muted); }
+.beat.say .body { font-size: 1.12em; }
+.beat.do .body, .beat.note .body, .beat.try .body { font-size: 0.95em; }
+.beat.note .body { color: var(--muted); font-style: italic; }
+.beat.board pre { margin: 0; font: 600 1em/1.6 var(--font-code); color: var(--board); background: var(--code-bg); border: 1px solid var(--line); padding: 12px 14px; overflow-x: auto; }
+.beat.ask .q { font-weight: 700; }
+.reveal { align-self: flex-start; font: 400 0.82em var(--font-body); cursor: pointer; color: var(--ask); background: transparent; border: 1px solid var(--ask); border-radius: 6px; padding: 4px 12px; }
+.reveal:hover { background: var(--surface-2); }
+.answer { background: var(--surface); border: 1px solid var(--line); padding: 10px 14px; font-size: 0.95em; }
+.answer b { font-family: var(--font-code); font-size: 0.78em; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ask); margin-right: 8px; }
+.beat input[type="checkbox"] { width: 1.3em; height: 1.3em; margin-top: 0.35em; accent-color: var(--board); cursor: pointer; }
+.beat.checked .body, .beat.checked .kind { opacity: 0.4; }
+
+.pager { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding-top: 24px; border-top: 1px solid var(--line); }
+.pbtn { font: 700 1rem var(--font-body); cursor: pointer; border-radius: 6px; padding: 10px 16px; background: var(--say); color: #1b1300; border: 0; }
+.pbtn.ghost { background: transparent; color: var(--fg); border: 1px solid var(--line); font-weight: 400; }
+.pager .spacer { flex: 1; }
+
+@media (max-width: 720px) {
+  body { font-size: 18px; }
+  .tabs { flex-wrap: nowrap; overflow-x: auto; }
+  .beat { grid-template-columns: minmax(0, 1fr) auto; }
+  .beat .kind { grid-column: 1 / -1; padding-top: 0; }
+}
+</style>
+</head>
+<body>
+
+<div class="page">
+  <header id="intro">
+    <p class="eyebrow">MAC109 · Instructor script</p>
+    <h1>Classes &amp; Objects: what to say in class</h1>
+    <p class="lede">A spoken script that follows the eight tabs of the lecture page, in order. Read the amber lines aloud, do the blue lines on the projected lecture, and tick each line as you go so you never lose your place.</p>
+    <ul class="legend">
+      <li><b style="color:var(--say)">Say</b>words to speak</li>
+      <li><b style="color:var(--do)">Do</b>action on the lecture page</li>
+      <li><b style="color:var(--ask)">Ask</b>question for the class</li>
+      <li><b style="color:var(--board)">Board</b>write this down</li>
+      <li><b style="color:var(--try)">Try</b>students change the code</li>
+      <li><b style="color:var(--muted)">Note</b>for you only</li>
+    </ul>
+  </header>
+
+  <div class="bar">
+    <div class="tools">
+      <div class="grp"><span>Class timer</span><span class="clock" id="clock">00:00</span>
+        <button class="tbtn" id="clock-toggle" type="button">Start</button>
+        <button class="tbtn" id="clock-reset" type="button">Reset</button></div>
+      <div class="grp"><span>Text size</span>
+        <button class="tbtn" id="font-down" type="button" aria-label="Smaller text">A−</button>
+        <button class="tbtn" id="font-up" type="button" aria-label="Larger text">A+</button></div>
+      <div class="grp"><span id="total-progress"></span></div>
+      <button class="tbtn push" id="clear-checks" type="button">Clear all ticks</button>
+    </div>
+    <div class="tabs" id="tabs" role="tablist" aria-label="Lecture topics"></div>
+  </div>
+
+  <main class="topic" id="topic"></main>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var $ = function (id) { return document.getElementById(id); };
+  function S(t) { return { k: "say", t: t }; }
+  function D(t) { return { k: "do", t: t }; }
+  function A(q, a) { return { k: "ask", t: q, a: a }; }
+  function B(t) { return { k: "board", t: t }; }
+  function T(t) { return { k: "try", t: t }; }
+  function N(t) { return { k: "note", t: t }; }
+  function H(t, small) { return { k: "sub", t: t, s: small }; }
+
+  var TOPICS = [
+    {
+      id: "idea", title: "The big idea", min: 10,
+      goal: "Students leave this tab able to say: a class is the plan, an object is the real thing built from it.",
+      beats: [
+        N(`Have the lecture page open on tab 1, "The big idea". No code yet in this part. It is all pictures and talking.`),
+        S(`Good morning everyone. Until today, our programs used simple pieces of data: a number, a word, true or false. Today we learn how to describe a <strong>whole thing</strong>, like a car, a student, or a bank account. This is the most important idea in C#. It is also how every window and every button in your app is made.`),
+        A(`Before any code. Imagine I want to build fifty houses on one street, all with the same design. What do I need first, before I buy a single brick?`, `A plan. A blueprint. Wait for someone to say it, then repeat the word "blueprint".`),
+        S(`Exactly. An architect draws <strong>one</strong> blueprint. The builders use it to build <strong>many</strong> houses. Every house has the same rooms. But each house has its own address, its own paint color, and its own family inside.`),
+        S(`In C#, the blueprint is called a <strong>class</strong>. Each real house built from it is called an <strong>object</strong>.`),
+        B(`class   =  the plan        (one)\nobject  =  the real thing  (many)`),
+        D(`Point at the two boxes. The dashed blue box is Class. The solid yellow box is Object.`),
+        S(`Notice the colors. On this page, blue always means class, and yellow always means object. A dashed line, like a drawing. A solid line, like a real thing.`),
+        A(`Can you live inside a blueprint? Can you drive the drawing of a car?`, `No. Let them laugh. Then make the point: a class by itself does nothing. It only describes. Objects are the things we actually use.`),
+        D(`Go to the table. Read each row aloud: left side first ("one plan"), then right side ("many real things").`),
+        A(`Now your turn. Give me an example from this room or from your life: one plan, many real things.`, `Accept anything that fits: one chair design and thirty chairs, one phone model and everyone's phones, one ID card template and each student's card. For every answer, ask back: "Which part is the class? Which are the objects?"`),
+        S(`Good. You already understand the idea. Now we need the exact words programmers use for it. Let's go to the definitions.`),
+        D(`Click "Next: Definitions".`)
+      ]
+    },
+    {
+      id: "definitions", title: "Definitions", min: 15,
+      goal: "Four words must stick today: class, object, instantiation, constructor. The other six are previews.",
+      beats: [
+        S(`Here are the ten words of today. Do not try to memorize them now. You will meet every one again in the examples. I want you to really know four of them before you leave: class, object, instantiation, and constructor.`),
+        H("Class"),
+        D(`Point at the Class card. Read the definition, then the real-life line, then the code.`),
+        S(`A class is a plan that describes a kind of thing. It says two things: what data the thing <strong>has</strong>, and what actions it can <strong>do</strong>. A programmer writes the class one time.`),
+        H("Object"),
+        S(`An object is one real thing built from a class. It lives in the computer's memory, and it holds its own values. There is a second word for object: <strong>instance</strong>. If you hear "an instance of Car", it means "one Car object". Same thing.`),
+        H("Instantiation"),
+        S(`Instantiation is a long word for a simple act: <strong>building an object from a class</strong>. Say it with me: in-stan-ti-a-tion. It happens when C# runs the keyword <code>new</code>. "To instantiate a class" means "to create an object from it".`),
+        B(`Car myCar = new Car();     <-- instantiation`),
+        A(`Which small word in that line does the building?`, `<code>new</code>. Underline it on the board.`),
+        H("Constructor"),
+        S(`A constructor is a special method inside the class. It runs automatically, one time, at the exact moment an object is built. Its job is to give the new object its starting values.`),
+        S(`Think of the factory. Before a car leaves the factory, somebody paints it and puts in the seats. That set-up work is the constructor.`),
+        S(`You can recognize a constructor in two ways. One: it has the <strong>same name as the class</strong>. Two: it has <strong>no return type</strong>, not even void.`),
+        B(`class Car\n{\n    public Car(string brand)   <-- same name, no void\n    {\n        Brand = brand;\n    }\n}`),
+        H("Field and method"),
+        S(`Two more words that go together. A <strong>field</strong> is data: what the object has. A <strong>method</strong> is an action: what the object does. A car <strong>has</strong> a color, so color is a field. A car <strong>can</strong> honk, so honk is a method. Has means field. Does means method.`),
+        A(`Think of a phone. Give me two fields and two methods.`, `Fields: brand, battery level, phone number, color. Methods: Call, SendText, TakePhoto, Ring. If someone gives a field as a method, ask: "Is that something it has, or something it does?"`),
+        H("The last four", "previews"),
+        S(`The last four cards are previews. <code>new</code> builds. The dot goes inside an object. Public and private say who is allowed to touch. And reference, I will explain with TV remotes in the last example. Do not worry about them now.`),
+        A(`Quick check, everybody together. Which word means "building an object from a class"? And which thing runs automatically when the object is built?`, `Instantiation. The constructor. If the room is quiet, point back at the two cards.`),
+        D(`Click "Next: Car factory".`)
+      ]
+    },
+    {
+      id: "factory", title: "Car factory", min: 5,
+      goal: "Students see instantiation happen: the class never changes while the number of objects grows.",
+      beats: [
+        S(`Now let's watch instantiation happen. On the left is the class Car. Look at it carefully: Brand, Color, Year. Three fields. No values at all. It is only the plan.`),
+        D(`Point at the two cars already in the garage.`),
+        S(`On the right are two objects, car1 and car2. Same three fields. But each one has its own values: its own brand, its own color, its own year.`),
+        A(`I am going to press the button "new Car()". What will change: the class on the left, or the garage on the right?`, `The garage. The class never changes. Only the number of objects grows.`),
+        D(`Press "new Car()" three times, slowly. Each time, say "one more object".`),
+        S(`Look at the counter. One class, five objects. How many times did we write the class? Once. That is the power of a class: write the plan once, build as many as you need.`),
+        N(`If you like, invite a student to the front to press the button until the garage is full.`),
+        A(`Every card has a small line at the bottom, like "Car car3 = new Car();". What do you think that line is?`, `It is the line of C# code that built that object. This is the bridge to the next tab.`),
+        S(`That one line of code is the most important line of today. Let's take it apart.`),
+        D(`Click "Next: The new line".`)
+      ]
+    },
+    {
+      id: "newline", title: "The new line", min: 10,
+      goal: "Students can read and write the pattern  Type name = new Type();  for any class.",
+      beats: [
+        S(`You will type this pattern hundreds of times this semester, in console programs and in your GUI. So let's read it slowly, piece by piece, from left to right.`),
+        D(`Hover over <code>Car</code>.`),
+        S(`The first word is the <strong>type</strong>. It says what kind of object this variable is allowed to hold. Only a Car.`),
+        D(`Hover over <code>myCar</code>.`),
+        S(`The second word is the <strong>name</strong>. We choose it. This is how we will talk to this particular car later.`),
+        D(`Hover over <code>=</code>, then <code>new</code>.`),
+        S(`The equals sign connects the name to the object. And here is <code>new</code>, the builder. This word is where the object is actually created in memory. No new, no object.`),
+        D(`Hover over <code>Car()</code>, then the semicolon.`),
+        S(`After new, we say which class to build from. The parentheses run the constructor, the set-up code. And the semicolon ends the sentence.`),
+        S(`Now the whole line in plain English: "Make a variable named myCar that can hold a Car. Build a new Car object. Connect them."`),
+        B(`Type  name  =  new  Type();`),
+        A(`Use the pattern. Tell me the line that creates a Dog object named rex.`, `<code>Dog rex = new Dog();</code> Write it on the board as they say it.`),
+        A(`And a Button object named okButton?`, `<code>Button okButton = new Button();</code> Tell them: "Remember this one. You will see it again in the GUI tab."`),
+        A(`Why does the word Car appear two times in the line?`, `On the left it is the type of the variable. On the right it says which class to build, and calls its constructor.`),
+        N(`Common confusion: students think myCar is the class. Stress the habit: a capital first letter is the class, a lowercase first letter is the object's variable.`),
+        D(`Click "Next: 10 examples".`)
+      ]
+    },
+    {
+      id: "examples", title: "10 examples", min: 60,
+      goal: "About six minutes per example. Same routine every time: story, predict, run, explain key lines, students change something.",
+      beats: [
+        N(`Routine for every example. 1: read the real-life sentence. 2: ask students to predict the output before they scroll down to it. 3: students press Copy code, paste into Program.cs, and run. 4: hover over the key lines listed here. 5: give the Try task. Line numbers below match the lecture page.`),
+        S(`Now we practice. Ten small programs, all from real life. For each one, you will copy it, run it, and then change something. Reading code is good. Changing code is how you learn.`),
+
+        H("Example 1 · Car", "first class, first object"),
+        S(`First program. It has two halves. The top half is the class Car: the plan. The bottom half is Program and Main: the place where we use the plan.`),
+        D(`Hover over lines 3 to 8, one at a time.`),
+        S(`At line 8 the plan is finished. How many cars exist right now? Zero. We only described a car.`),
+        D(`Hover over line 14.`),
+        S(`Here it is. <code>new Car()</code>. Now one car exists in memory, and its name is myCar.`),
+        D(`Hover over lines 16 to 18.`),
+        S(`The dot means "go inside". myCar dot Brand: go inside my car and find the brand. We put "Toyota" there.`),
+        A(`Why is Toyota written with quotes, but 2022 without quotes?`, `"Toyota" is text, a string. 2022 is a number, an int. Look at the field types on lines 5 to 7.`),
+        T(`Change the three values to your dream car. Then add a fourth field, <code>public double Price;</code>, give it a value, and print it.`),
+
+        H("Example 2 · Library books", "one class, several objects"),
+        S(`Same idea as the car, but now we use new two times. One class, two objects.`),
+        D(`Hover over line 14, then line 19.`),
+        A(`After line 19 runs, how many Book objects exist? And how many Book classes?`, `Two objects. One class.`),
+        A(`If I change book2's title, does book1 change?`, `No. They are separate objects. Each one keeps its own values.`),
+        D(`Hover over line 27.`),
+        S(`Data inside objects is normal data. We can add it, compare it, print it. Here we add the pages of two books.`),
+        T(`Add a third object, book3, with your favorite book. Include its pages in the total.`),
+
+        H("Example 3 · Dog", "methods"),
+        S(`Until now our objects only had data. Now we give them actions. An action that belongs to an object is called a method.`),
+        D(`Hover over lines 8 to 11.`),
+        S(`This is the method Bark. Inside it we use Name. Which name? The name of <strong>whichever dog is barking</strong> at that moment.`),
+        A(`Before you run it. Line 32 says dog1.Bark(). What exactly will appear on the screen?`, `Rex says: Woof! Woof!`),
+        D(`Hover over line 35, then line 36.`),
+        A(`Rex had a birthday. How old is Bella now? Why?`, `Still 5. Birthday changed only Rex's Age. Each object has its own copy of the fields.`),
+        T(`Add a method <code>Sit()</code> that prints the dog's name followed by " sits down." Call it on both dogs.`),
+
+        H("Example 4 · Lamp", "an object remembers its state"),
+        S(`An object remembers things. A lamp remembers if it is on or off. For a yes-or-no value we use bool: true or false.`),
+        A(`We build a new lamp and we never set IsOn. Is it true or false?`, `False. A bool starts as false. A new lamp starts off.`),
+        D(`Hover over lines 31 to 33.`),
+        A(`Predict the last two lines of output. Kitchen on? Bedroom on?`, `Kitchen: False, because it was turned off last. Bedroom: True, nobody turned it off.`),
+        T(`Add a third lamp for the bathroom. Turn it on. Print its state.`),
+
+        H("Example 5 · Student", "the constructor"),
+        N(`This is the key example of the day, and the same Student class (Name, Id, Age) as the Milestone app. Say so. Take your time here.`),
+        S(`Look back at the Car example. One line to build the car, then three more lines to fill it. What if we forget one of them? We get a student with no name. That is a bug waiting to happen.`),
+        S(`The constructor fixes this. With a constructor, you <strong>cannot</strong> build the object without giving its values.`),
+        D(`Hover over line 9.`),
+        S(`How do we know this is a constructor? Same name as the class: Student. And no return type: no void, nothing.`),
+        D(`Hover over lines 11 to 13.`),
+        S(`Look at the capital letters. Lowercase <code>name</code> is the delivery: the value arriving in the parentheses. Capital <code>Name</code> is the storage: the field inside the object. We move the delivery into the storage.`),
+        D(`Hover over line 26.`),
+        S(`"Maria" travels into name. 1001 travels into id. 19 travels into age. The order matters: first, second, third.`),
+        A(`What happens if I write new Student() with empty parentheses?`, `An error. The constructor demands three values. Show it live: delete the three values, let them see the red underline, then undo.`),
+        T(`Create a third student, s3, with your own name, any ID and your age. Ask s3 to introduce itself.`),
+        N(`Good moment for a 10-minute break.`),
+
+        H("Example 6 · Pizza", "two constructors"),
+        S(`A class can have more than one constructor. Think about ordering pizza. You can say "the usual", or you can say exactly what you want.`),
+        D(`Hover over line 9, then line 16.`),
+        S(`Two constructors. Same name. Different parentheses. The first asks for nothing. The second asks for three values. This is called overloading.`),
+        A(`Line 33 says new Pizza() with nothing inside. Which constructor runs? And line 34?`, `Line 33 runs the first one (line 9). Line 34 runs the second one (line 16). C# chooses by looking at what is inside the parentheses.`),
+        A(`Predict the total.`, `12.5 + 18.75 = 31.25`),
+        T(`Order a third pizza with your own size, topping and price. Add it to the total.`),
+
+        H("Example 7 · Room", "a method that returns a value"),
+        S(`Until now our methods were void. They did something and gave nothing back. GetArea is different: it gives back an answer.`),
+        D(`Hover over line 16, then line 18.`),
+        S(`Instead of void, it says double. That is a promise: "When you call me, I will hand you back a decimal number." And <code>return</code> is the moment it hands the answer back.`),
+        A(`The living room is 5 by 4. What does living.GetArea() give back?`, `20`),
+        D(`Hover over line 32.`),
+        S(`Because the method gives back a number, we can use it in a calculation, exactly like a variable.`),
+        T(`Add a method <code>GetPerimeter()</code> that returns 2 * (Length + Width). Print it for the living room. The answer should be 18.`),
+
+        H("Example 8 · Bank account", "private"),
+        S(`An important question. Should anybody be able to change your bank balance just by typing a new number? No. You go to the teller, and the teller checks the rules.`),
+        D(`Hover over line 6.`),
+        S(`This is the first time we see <code>private</code>. It means only code <strong>inside this class</strong> can touch balance. This is the vault.`),
+        D(`Hover over lines 20 to 31.`),
+        S(`Withdraw is the teller. Every single time, it checks the rule: is there enough money?`),
+        A(`Line 48 tries to withdraw 500. The balance is 120. What happens?`, `The object refuses and prints the "Sorry" message. The balance stays 120.`),
+        D(`Live demo. Inside Main, type <code>account.balance = 1000000;</code> and show the red underline. Then delete the line.`),
+        A(`Why is it good that C# stops us?`, `The rules cannot be skipped. The data inside the object always stays correct.`),
+        T(`Add a rule to Deposit: if the amount is zero or less, print "Invalid amount" and do not change the balance. Test it with Deposit(-20).`),
+
+        H("Example 9 · Restaurant order", "many objects in an array"),
+        N(`If arrays and loops are not solid yet, run this one as a demo and skip the Try task.`),
+        S(`Real programs have many objects: thirty students, two hundred books. We do not make thirty variables. We keep the objects in a list. An array can hold objects, not only numbers.`),
+        D(`Hover over line 19, then lines 20 to 22.`),
+        S(`Line 19 makes a tray with three empty places. No menu item exists yet. Then three times new: three objects, one in each place.`),
+        D(`Hover over lines 26 to 30.`),
+        S(`<code>order[i]</code> is the object in place i. Then the dot reaches inside it for the name and the price.`),
+        A(`How many times does the loop run? How does it know?`, `Three times. order.Length is 3.`),
+        T(`Change the array to 4 places and add a dessert. Check that the total is correct.`),
+
+        H("Example 10 · TV remotes", "references"),
+        S(`Last console example, and it has a surprise. Do not run it yet. First we predict.`),
+        D(`Hover over line 17, then line 18.`),
+        A(`Look at line 18. There is no new. After line 18, how many TVs exist?`, `One. Two variables, but one TV. Two remote controls for the same television.`),
+        A(`Line 20 changes the channel using remote2. What does remote1 see?`, `Channel 7. It is the same TV. Now let them run it and check.`),
+        S(`This is the last word from our definitions: reference. A variable does not contain the object. It holds a link to it, like a remote control. If you want to count the objects in a program, count the word new.`),
+        A(`In Main: how many times does new appear? How many TV objects? How many variables?`, `Two new. Two objects. Three variables.`),
+        T(`After the last line, add <code>bedroomTv.Channel = 4;</code> and print remote1.Channel again. It is still 7: a different TV.`),
+        D(`Click "Next: GUI connection".`)
+      ]
+    },
+    {
+      id: "gui", title: "GUI connection", min: 20,
+      goal: "Students see that building a GUI is the same three moves: instantiate with new, set data with the dot, call methods.",
+      beats: [
+        S(`Now, why does all of this matter for our course? Because <strong>everything in your window is an object</strong>. A Window. A Button. A TextBlock. A TextBox. All of these are classes.`),
+        A(`Who wrote the class Button? Did you write it?`, `No. The Avalonia team wrote it. It comes with the library, ready to use.`),
+        S(`Right. Somebody already wrote the plans. Your job is exactly what you did all morning: instantiate with new, set the data with the dot, and call methods.`),
+        D(`Go to the comparison table. Read it row by row: left side, then right side. Slow down on row 2.`),
+        S(`Look at the second row. On the left, Car myCar equals new Car. On the right, Button okButton equals new Button. It is the <strong>same line</strong>. Only the class changed.`),
+        A(`A window shows three buttons. How many Button classes are there? How many Button objects?`, `One class. Three objects. Like the two dogs from one Dog class.`),
+        S(`One new word. In a GUI, an object's data is called a <strong>property</strong>: Title, Text, Content. You use a property just like a field, with the dot.`),
+
+        H("GUI example 1 · Welcome window", "every control is an object"),
+        N(`These two examples go in MainWindow.cs of the Avalonia project. Program.cs is not touched. Check before class that the class line matches your starter project.`),
+        D(`Hover over line 3.`),
+        S(`Our class MainWindow. The colon Window means: "my window is a kind of Window". It already has a title bar and a size, for free.`),
+        D(`Hover over line 5.`),
+        A(`Look at line 5. Same name as the class. No return type. What is it?`, `A constructor. It runs one time, when the window is built. That is why all our GUI-building code lives inside it.`),
+        D(`Hover over lines 11 and 12, then 14 to 18.`),
+        S(`Line 11: new TextBlock. Instantiation. Line 12: dot Text. Setting its data. Then two buttons from the same Button class, each with its own text. Rex and Bella again.`),
+        A(`Count the word new in this file. How many objects did we build?`, `Four: one TextBlock, two Buttons, one StackPanel.`),
+        D(`Hover over lines 21 to 23, then line 25.`),
+        S(`Add is a method. Building a control is not enough. You must also put it in the window. A sofa that is still in the delivery truck is not in your living room.`),
+
+        H("GUI example 2 · Student form", "your own class inside a GUI"),
+        S(`Now both worlds together. Avalonia's classes for the screen, and our own Student class for the data.`),
+        D(`In the live preview, type a student's name from the room and press "Add Student". Do it twice with two names.`),
+        D(`Hover over line 48.`),
+        S(`This is the heart of it. Every click runs new Student. Every click builds a brand-new Student object from what the user typed.`),
+        A(`Where does the student's name come from?`, `From <code>nameBox.Text</code>: the Text property of the TextBox object.`),
+        D(`Hover over lines 20 and 21.`),
+        S(`Why are these two declared up here, outside the constructor? Because the click method at the bottom also needs to reach them.`),
+        S(`This is exactly what your Milestone app does. A form on the screen, a click, and a new Student object. Today you learned what is really happening behind that click.`),
+        T(`If time allows, in the Avalonia project: change the button's text, then add a second TextBlock under the first one.`),
+        D(`Click "Next: Common mistakes".`)
+      ]
+    },
+    {
+      id: "mistakes", title: "Common mistakes", min: 5,
+      goal: "Students know where to look when the red underline appears.",
+      beats: [
+        S(`Four mistakes. Everybody makes each one of them once. When you see a red underline in the lab, come back to this tab.`),
+        D(`Point at card 1.`),
+        S(`Mistake one: forgetting new. You have a name, but no object. A key ring with no car attached.`),
+        D(`Point at card 2.`),
+        S(`Mistake two: using the class instead of the object. Car dot Brand. But Car is the blueprint, and a blueprint has no brand. Only a real car has one.`),
+        D(`Point at card 3.`),
+        S(`Mistake three: forgetting public. Without it, the field is private, and Main is not allowed to touch it.`),
+        D(`Point at card 4.`),
+        S(`Mistake four, the GUI one: you build a button, but you never add it to the panel. The object exists, but nobody can see it.`),
+        B(`Dog rex;\nrex.Bark();`),
+        A(`What is wrong with these two lines on the board?`, `No new. There is no Dog object. Fix: <code>Dog rex = new Dog();</code>`),
+        A(`"Professor, my button does not appear in the window." What are the first two things to check?`, `Did you add it to the panel with Children.Add? And is the panel set as the window's Content?`),
+        D(`Click "Next: Quick check".`)
+      ]
+    },
+    {
+      id: "quiz", title: "Quick check", min: 10,
+      goal: "Confirm the four key words landed, and close the lecture.",
+      beats: [
+        N(`Two ways to run it. As a class: read each question, students vote with one, two or three fingers, then click the majority answer. Or individually on their own laptops, then review together.`),
+        S(`Eight quick questions. No grade. This is for you, to see what you understood and what you should read again.`),
+        D(`Go through the eight questions. When many students are wrong, ask one student who was right to explain, before you click.`),
+        N(`Questions 6 (the TV) and 8 (three buttons) are the ones most often missed. If so, reopen Example 10 or the GUI table for one minute.`),
+        A(`Last question, and I want it in one sentence, in your own words: what is the difference between a class and an object?`, `A class is the plan. An object is a real thing built from that plan, with its own values. Ask two or three students.`),
+        S(`Let me close with five short sentences. A class is the plan. An object is the real thing. <code>new</code> builds it. The constructor sets it up. The dot goes inside.`),
+        S(`In the lab you will use exactly this to build your app. Every control on your screen will begin with the word new.`)
+      ]
+    }
+  ];
+
+  /* ---------- state ---------- */
+  var done = {}, current = 0, scale = 1;
+  function load() {
+    try {
+      var d = JSON.parse(localStorage.getItem("cso-script-done") || "[]");
+      d.forEach(function (id) { done[id] = true; });
+      var t = parseInt(localStorage.getItem("cso-script-tab"), 10);
+      if (t >= 0 && t < TOPICS.length) current = t;
+      var s = parseFloat(localStorage.getItem("cso-script-scale"));
+      if (s >= 0.8 && s <= 1.6) scale = s;
+    } catch (e) {}
+  }
+  function save() {
+    try {
+      localStorage.setItem("cso-script-done", JSON.stringify(Object.keys(done)));
+      localStorage.setItem("cso-script-tab", String(current));
+      localStorage.setItem("cso-script-scale", String(scale));
+    } catch (e) {}
+  }
+  function beatIds(ti) {
+    var ids = [];
+    TOPICS[ti].beats.forEach(function (b, i) { if (b.k !== "sub") ids.push(TOPICS[ti].id + "-" + i); });
+    return ids;
+  }
+  function refreshCounts() {
+    var all = 0, allDone = 0;
+    TOPICS.forEach(function (t, ti) {
+      var ids = beatIds(ti), n = ids.filter(function (id) { return done[id]; }).length;
+      all += ids.length; allDone += n;
+      var tab = $("tabs").children[ti];
+      tab.querySelector(".cnt").textContent = n === ids.length ? "✓" : n + "/" + ids.length;
+      tab.classList.toggle("done", n === ids.length);
+    });
+    $("total-progress").textContent = allDone + " of " + all + " lines done";
+  }
+
+  /* ---------- render ---------- */
+  var LABEL = { say: "Say", do: "Do", ask: "Ask", board: "Board", try: "Try", note: "Note" };
+  function render(scrollTop) {
+    var t = TOPICS[current], host = $("topic");
+    $("intro").hidden = current !== 0;
+    Array.prototype.forEach.call($("tabs").children, function (b, i) { b.setAttribute("aria-selected", i === current ? "true" : "false"); });
+    host.innerHTML = "";
+    var head = document.createElement("div"); head.className = "topic-head";
+    head.innerHTML = '<p class="eyebrow">Tab ' + (current + 1) + " of " + TOPICS.length + " · about " + t.min + ' minutes</p><h2>' + t.title + '</h2><p class="goal">' + t.goal + "</p>";
+    host.appendChild(head);
+    var list = document.createElement("div"); list.className = "beats"; host.appendChild(list);
+    t.beats.forEach(function (b, i) {
+      if (b.k === "sub") {
+        var h = document.createElement("h3"); h.className = "sub";
+        h.innerHTML = (b.s ? "<small>" + b.s + "</small>" : "") + b.t;
+        list.appendChild(h); return;
+      }
+      var id = t.id + "-" + i;
+      var row = document.createElement("div"); row.className = "beat " + b.k + (done[id] ? " checked" : "");
+      var body;
+      if (b.k === "board") body = "<pre>" + b.t.replace(/&/g, "&amp;").replace(/</g, "&lt;") + "</pre>";
+      else if (b.k === "ask") body = '<p class="q">' + b.t + '</p><button type="button" class="reveal">Show expected answer</button><div class="answer" hidden><b>Expect</b>' + b.a + "</div>";
+      else body = "<p>" + b.t + "</p>";
+      row.innerHTML = '<span class="kind">' + LABEL[b.k] + '</span><div class="body">' + body + '</div><input type="checkbox" id="chk-' + id + '" aria-label="Mark this line as done"' + (done[id] ? " checked" : "") + ">";
+      row.querySelector("input").addEventListener("change", function () {
+        if (this.checked) done[id] = true; else delete done[id];
+        row.classList.toggle("checked", this.checked);
+        refreshCounts(); save();
+      });
+      var rv = row.querySelector(".reveal");
+      if (rv) rv.addEventListener("click", function () {
+        var a = row.querySelector(".answer"); a.hidden = !a.hidden;
+        rv.textContent = a.hidden ? "Show expected answer" : "Hide expected answer";
+      });
+      list.appendChild(row);
+    });
+    var pager = document.createElement("div"); pager.className = "pager";
+    pager.innerHTML = (current > 0 ? '<button type="button" class="pbtn ghost" data-go="' + (current - 1) + '">← ' + TOPICS[current - 1].title + "</button>" : '<span class="spacer"></span>') +
+      (current < TOPICS.length - 1 ? '<button type="button" class="pbtn" data-go="' + (current + 1) + '">Next: ' + TOPICS[current + 1].title + " →</button>" : "");
+    pager.addEventListener("click", function (e) {
+      var g = e.target.closest("[data-go]");
+      if (g) { current = parseInt(g.getAttribute("data-go"), 10); save(); render(true); }
+    });
+    host.appendChild(pager);
+    if (scrollTop) window.scrollTo(0, 0);
+  }
+
+  /* ---------- tabs ---------- */
+  load();
+  TOPICS.forEach(function (t, i) {
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "tab"; b.setAttribute("role", "tab");
+    b.innerHTML = (i + 1) + " · " + t.title + '<span class="cnt"></span>';
+    b.addEventListener("click", function () { current = i; save(); render(true); });
+    $("tabs").appendChild(b);
+  });
+  function applyScale() { document.documentElement.style.setProperty("--scale", String(scale)); }
+  applyScale(); refreshCounts(); render(false);
+
+  /* ---------- tools ---------- */
+  $("font-up").addEventListener("click", function () { scale = Math.min(1.6, Math.round((scale + 0.1) * 10) / 10); applyScale(); save(); });
+  $("font-down").addEventListener("click", function () { scale = Math.max(0.8, Math.round((scale - 0.1) * 10) / 10); applyScale(); save(); });
+
+  var armed = false, armTimer = null;
+  $("clear-checks").addEventListener("click", function () {
+    var btn = this;
+    if (!armed) {
+      armed = true; btn.textContent = "Press again to clear";
+      armTimer = setTimeout(function () { armed = false; btn.textContent = "Clear all ticks"; }, 3000);
+      return;
+    }
+    clearTimeout(armTimer); armed = false; btn.textContent = "Clear all ticks";
+    done = {}; save(); refreshCounts(); render(false);
+  });
+
+  var elapsed = 0, startedAt = null, tick = null;
+  function showClock() {
+    var ms = elapsed + (startedAt ? Date.now() - startedAt : 0), s = Math.floor(ms / 1000);
+    var h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+    $("clock").textContent = (h ? h + ":" : "") + (m < 10 ? "0" : "") + m + ":" + (sec < 10 ? "0" : "") + sec;
+  }
+  $("clock-toggle").addEventListener("click", function () {
+    if (startedAt) { elapsed += Date.now() - startedAt; startedAt = null; clearInterval(tick); this.textContent = "Resume"; }
+    else { startedAt = Date.now(); tick = setInterval(showClock, 500); this.textContent = "Pause"; }
+    showClock();
+  });
+  $("clock-reset").addEventListener("click", function () {
+    elapsed = 0; startedAt = null; clearInterval(tick); $("clock-toggle").textContent = "Start"; showClock();
+  });
+})();
+</script>
+</body>
+</html>
